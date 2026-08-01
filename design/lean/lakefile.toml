@@ -1,0 +1,9 @@
+name = "HazardVocab"
+defaultTargets = ["HazardVocab"]
+
+# No Mathlib. These proofs are small and self-contained; adding Mathlib
+# costs minutes per build for lemmas we do not need. If a later proof
+# genuinely requires it, add it then and say why in an ADR.
+
+[[lean_lib]]
+name = "HazardVocab"

@@ -1,0 +1,13 @@
+.DS_Store
+.venv
+
+
+build/
+.lake/
+*.pyc
+__pycache__/
+.venv/
+.claude/settings.local.json
+.role-O
+# alloy exec output directories
+/parts/
