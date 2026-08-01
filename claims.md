@@ -206,6 +206,36 @@ answered today and that the canonical layer answers.
 - **Evidence:** —
 - **Updated:** —
 
+### C6 — The vocabulary is LLM-legible
+A model given only `vocab/` and a raw source payload, with no other
+context, produces a conformant canonical instance.
+
+- **Status:** `asserted`
+- **Falsifier:** it does not, or does so only with hand-holding —
+  follow-up questions, corrections, or supplied examples beyond what
+  `vocab/` contains.
+- **Cheapest test:** a fresh session with no `CLAUDE.md`, no ADRs, and
+  no conversation history. Hand it `vocab/core/part2-observation.yaml`
+  and one raw Open-Meteo response. Ask for a conformant instance.
+  Validate against `build/shapes.ttl`. Record the pass rate over ~10
+  payloads drawn from different sources.
+- **Note — this doubles as a schema-clarity test.** Where a model
+  guesses wrong is usually where a human would too: a missing
+  `description`, an implicit default, an ambiguous slot name, or an
+  external URI whose semantics do not match the local use. The failures
+  localise the ambiguity, which makes this the cheapest schema review
+  available and the only claim in the register that produces a number
+  you can track as the vocabulary grows.
+- **Note — untestable until `vocab/core/` has content.** Like C2 and
+  C5, no gate will touch this claim in the normal course of work. It is
+  a claims-sweep item, not a gate item.
+- **Watch:** a passing result proves legibility of what `vocab/` says,
+  not that `vocab/` says the right thing. C6 and C5 are independent —
+  a perfectly legible vocabulary that models the wrong domain would
+  pass this and fail that.
+- **Evidence:** —
+- **Updated:** —
+
 ---
 
 ## Entity core
@@ -368,3 +398,32 @@ does not declare.
   This deviates from the two register rules above ("new claims enter as
   `asserted`", "only the falsifier session changes a status"). Recorded
   here so the deviation is visible rather than silent.
+
+### C18 — The lint rules detect what they claim to detect
+`make lint` fires on content that violates C1, C4, or the vacuous-theorem
+rule, and does not fire on content that complies.
+
+- **Status:** `asserted`
+- **Falsifier:** a file violating C1, C4, or the vacuity rule that the
+  lint does not catch (recall failure); or a compliant file that makes
+  it fire (precision failure).
+- **Cheapest test:** two throwaway files per rule — one violating, one
+  compliant — run `make lint`, confirm it fails on the first and passes
+  on the second, delete both. Under an hour for all three rules.
+- **Note — recall has never been exercised.** Every firing of these
+  rules to date has been a false positive, because `vocab/core/` is
+  empty and `design/lean/` contains no violating theorem. No rule has
+  ever been observed catching a real violation. A guard that has only
+  ever been wrong is not yet a guard.
+- **Watch — three precision failures observed and fixed:** `epa`
+  matching *separate* and *department* (unanchored pattern, fixed with
+  `\b` boundaries); the vacuity rule matching its own documentation in
+  `design/lean/README.md` (fixed by scoping to `--include='*.lean'`);
+  C1 and C4 scanning non-source files (fixed by scoping to
+  `*.yaml`/`*.yml`). Common root cause: over-broad grep. Expect a
+  fourth when `vocab/` gains README or documentation files.
+- **Consequence if falsified on recall:** C1, C4, and the vacuity rule
+  are unenforced, and any `tested` status resting on a clean `make lint`
+  is unsupported.
+- **Evidence:** —
+- **Updated:** —

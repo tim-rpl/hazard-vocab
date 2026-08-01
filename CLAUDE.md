@@ -58,8 +58,9 @@ H works in four stages, gated:
 | **design** | The approach, and what it forecloses | The implementation |
 | **implement** | The artifact | Scope beyond the plan |
 
-At the end of every stage, post to `review-inbox.md` in the message
-format given there, then **stop and wait for O**. Do not begin the next
+At the end of every stage, post to `review-inbox.md` in the format
+defined in `.claude/rules/gate-messages.md`, then **stop and wait for
+O**. Do not begin the next
 stage until O has replied. Address every `blocked` finding first.
 
 ## Who writes what

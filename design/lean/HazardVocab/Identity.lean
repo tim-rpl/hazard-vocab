@@ -92,6 +92,17 @@ Holds for whichever resolution strategy ADR-001 selects. Under option B
 (authority only), the partition is the quotient by `authorityMatch`
 together with singleton classes for unidentified records. -/
 
-theorem identity_partitions : True := by trivial  -- restate once ADR-001 is decided
+/-- Whichever strategy ADR-001 selects, the resulting relation is an
+    equivalence on the records it relates, and canonical entities are
+    its quotient. Restate concretely once the ADR is decided — but do
+    NOT restate the conclusion as `True`; see the honesty note in
+    Merge.lean. -/
+theorem identity_partitions
+    (rel : Record → Record → Prop)
+    (hsymm : ∀ a b, rel a b → rel b a)
+    (htrans : ∀ a b c, rel a b → rel b c → rel a c)
+    (a b c : Record) :
+    rel a b → rel b c → (rel a c ∧ rel c a) := by
+  sorry
 
 end HazardVocab.Identity

@@ -18,11 +18,15 @@ check:
 
 lint:
 	@echo "C1: no jurisdiction-specific content in core"
-	@! grep -rniE '\b(nwcg|irwin|nifc|fema|ornl|airnow|noaa|usgs|epa|landfire|nhd|iroc|wfigs|wfdss|inspire-eu)\b' vocab/core/ \
+	@! grep -rniE '\b(nwcg|irwin|nifc|fema|ornl|airnow|noaa|usgs|epa|landfire|nhd|iroc|wfigs|wfdss|inspire-eu)\b' --include='*.yaml' --include='*.yml' vocab/core/ \
 		|| (echo "FAIL: agency reference in vocab/core/ (see claims.md C1)"; exit 1)
 	@echo "C4: no LinkML-only constructs"
-	@! grep -rnE 'structured_pattern|classification_rules' vocab/ \
+	@! grep -rnE 'structured_pattern|classification_rules' --include='*.yaml' --include='*.yml' vocab/ \
 		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
+	@echo "L: no vacuous theorems in design/lean"
+	@! grep -rnE --include='*.lean' ':[[:space:]]*True[[:space:]]*:=' design/lean/ \
+		|| (echo "FAIL: theorem concluding True proves nothing and emits no warning."; \
+		    echo "      State the real proposition and use sorry instead."; exit 1)
 	@echo "lint ok"
 
 lean:

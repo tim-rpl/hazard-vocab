@@ -113,8 +113,42 @@ output.
 
 **Lean `sorry` means unproved**, no matter how plausible the statement.
 
+### An artifact can be empty
+
+Running a formal artifact is necessary and not sufficient. Both formal
+tools in this project have already produced clean results while
+asserting nothing:
+
+- An Alloy assertion was trivially true because no fact constrained the
+  field it quantified over. It returned UNSAT and meant nothing.
+- Lean theorems concluded `True`. They elaborated with **no warning at
+  all** — no `sorry`, no lint — and stated no proposition.
+
+The second is the more dangerous shape, because the absence of a `sorry`
+reads as proof. `make lint` now fails on the literal `: True :=`
+pattern, but a conclusion can be weakened by other means and the lint
+will not catch it.
+
+**So: read what each theorem or assertion *states*, not just whether it
+passed.** For every formal artifact an assertion depends on, answer
+three questions before recording anything:
+
+1. What proposition does it state? Write it out in your own words.
+2. Could it hold vacuously — because a hypothesis is unsatisfiable, a
+   quantifier ranges over an empty set, or the conclusion is trivial?
+3. Does it state the thing the assertion needs, or something adjacent
+   and weaker?
+
+If any answer is unclear, the assertion is **not** `survived`. Record
+that the artifact was run, what it actually established, and the gap.
+
 **A passing lint or validation proves only what it inspects.** See C17:
 `make check` currently fails toward "pass" on unmodelled fields.
+
+The common thread across C17, the Alloy case, and the Lean case is one
+failure direction: **an instrument that reports success when it has
+inspected nothing.** Treat a clean result from any tool as a claim about
+that tool's coverage until you have checked what it looked at.
 
 ---
 
@@ -243,8 +277,8 @@ one.
 
 ## §9 — Output
 
-1. A `[O → H]` message appended to `review-inbox.md`, in the format at
-   the top of that file.
+1. A `[O → H]` message appended to `review-inbox.md`, in the format
+   defined in `.claude/rules/gate-messages.md`.
 2. Updated Status, Evidence, and Updated fields in `claims.md` for
    anything whose state changed.
 3. In the message: which assertions you falsified, which experiments you
