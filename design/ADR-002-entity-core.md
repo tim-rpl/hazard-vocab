@@ -110,6 +110,22 @@ collapsing forecast into observation.
 "Intent and Action" — plans, orders, assignments, and the actions taken
 against them.
 
+**Prior art.** The observed/modelled versus intended/mandated split is
+the *alethic* versus *deontic* distinction, and OMG's SBVR (Semantics
+of Business Vocabulary and Business Rules) treats it as structural.
+LegalRuleML carries deontic operators too. Both were arrived at
+independently in a different domain, which is weak evidence the cut is
+real.
+
+**The consequence neither we nor the standards work here has
+accounted for: a mandate can be violated; an observation cannot.**
+SBVR is explicit that a deontic statement is not falsified by a
+counterexample the way an alethic one is. A closure order that someone
+drives past is still in force. The Part 0 `authority` relation and
+Part 5 orders inherit this property, and nothing in the model currently
+represents compliance, violation, or enforcement against an intended or
+mandated statement. Add it to `docs/coverage.md` as a gap.
+
 **Mandate becomes a Part 0 relation:**
 
 ```

@@ -76,7 +76,20 @@ One writer per file. Anyone else who wants a change requests it through
 | `design/lean/`, `design/alloy/` | H | O may read and run |
 | `claims.md` | O (status, evidence, updated) | H proposes new claims in gate messages |
 | `review-inbox.md` | both, append-only | own message formats |
-| `CLAUDE.md`, `FALSIFIER.md`, `Makefile`, `.claude/` | human | governance config |
+| `README.md` | human | H proposes corrections in the gate |
+| `CLAUDE.md`, `FALSIFIER.md`, `Makefile`, `scripts/`, `.claude/` | human | governance config and tooling |
+| anything not listed | human | ask in the gate before editing |
+
+`README.md` is the human's because it carries commitments — status,
+licence, and how the method is described — not only descriptions. When
+it goes stale, H reports the staleness as a finding rather than fixing
+it.
+
+The three READMEs under `vocab/profiles/`, `codelists/`, and
+`fixtures/` ARE H's. They document H's own directories.
+
+**Default deny.** If a file is not in this table, it is the human's.
+H asks in the gate rather than assuming.
 
 **A `covered` status in `docs/coverage.md` is an assertion H is
 making.** O may falsify it — "you marked X covered, here is a case it
@@ -97,6 +110,23 @@ source table in this repository or in a prompt.
 It also records defects and the correctness rules that came out of
 them. Those are design input, not trivia — read them before modelling
 the category they belong to.
+
+## The conventions are bets, not settled law
+
+Every convention in this repository — the epistemic-kind segmentation,
+the entity core, role-not-subtype, the four modalities, declarative
+capture — was decided analytically before any vocabulary existed. None
+has yet met the material.
+
+**If authoring vocabulary feels like fighting a convention rather than
+being guided by it, that is a finding.** Report it in the gate. Do not
+work around it silently, and do not treat a convention as load-bearing
+because it is written down.
+
+The Part 2 / Part 3 split is the one most likely to break first: it
+contradicts ISO 19156, which treats a simulation result as an
+`Observation` with a simulation-typed procedure. See ADR-003, which is
+open.
 
 ## Before implementing
 
