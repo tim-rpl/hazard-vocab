@@ -62,6 +62,41 @@ At the end of every stage, post to `review-inbox.md` in the message
 format given there, then **stop and wait for O**. Do not begin the next
 stage until O has replied. Address every `blocked` finding first.
 
+## Who writes what
+
+One writer per file. Anyone else who wants a change requests it through
+`review-inbox.md`.
+
+| File | Writer | Others |
+|---|---|---|
+| `vocab/`, `codelists/`, `transform/` | H | hook blocks O |
+| `docs/coverage.md` | H | O falsifies statuses; H applies |
+| `design/ADR-*` | H, at design gates | O cannot read them |
+| `design/lean/`, `design/alloy/` | H | O may read and run |
+| `claims.md` | O (status, evidence, updated) | H proposes new claims in gate messages |
+| `review-inbox.md` | both, append-only | own message formats |
+| `CLAUDE.md`, `FALSIFIER.md`, `Makefile`, `.claude/` | human | governance config |
+
+**A `covered` status in `docs/coverage.md` is an assertion H is
+making.** O may falsify it — "you marked X covered, here is a case it
+does not handle" — and reports that in `[O → H]`. H applies the
+correction. O never edits the file.
+
+The same holds for `claims.md` in reverse: H may propose a new claim or
+a restatement, but only O changes a status.
+
+## Source of truth for source data
+
+`docs/sources/HDC-data-source-register.html` is the authoritative
+inventory of what the reference implementation reads: 29 external
+services in 11 categories, with per-source verification status, item
+IDs, endpoints, and refresh behaviour. It supersedes any earlier
+source table in this repository or in a prompt.
+
+It also records defects and the correctness rules that came out of
+them. Those are design input, not trivia — read them before modelling
+the category they belong to.
+
 ## Before implementing
 
 Check `claims.md` and `docs/coverage.md`. Do not build on a claim with status `asserted`
@@ -96,8 +131,7 @@ make alloy    # run Alloy structural checks
 
 - External vocabularies are referenced by URI, never transcribed.
   Bind to SOSA, PROV-O, QUDT, CF (via NERC NVS2 collection P07),
-  INSPIRE. - Prefixes are declared once and shared, not repeated per part.
-  Target: `vocab/prefixes.yaml`. Not yet authored — see ADR-003.
+  INSPIRE. Prefixes live in `vocab/prefixes.yaml`.
 - Code lists are SKOS concept schemes, versioned independently of the
   schema. LinkML enums reference them via `PermissibleValue.meaning`.
 - One ADR per structural decision, in `design/`. Numbered, dated,

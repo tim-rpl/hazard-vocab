@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>High Desert Command — Data Source Register</title>
+<meta name="description" content="Every external data source High Desert Command reads, by category, with cadence, access terms and verification status.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14170F;
+  --ink-soft:#41453A;
+  --ink-faint:#6E7263;
+  --stock:#E8E4D8;
+  --stock-hi:#F1EEE5;
+  --contour:#B9AE93;
+  --forest:#2F4A34;
+  --signal:#B3300F;
+  --slate:#3B5566;
+  --ok:#38A169;
+  --warn:#D69E2E;
+  --alert:#E53E3E;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;background:var(--stock);color:var(--ink);
+  font-family:"Newsreader",Georgia,serif;font-size:17px;line-height:1.6;
+  font-optical-sizing:auto;
+}
+.wrap{max-width:1220px;margin:0 auto;padding:0 26px}
+
+/* ── masthead ── */
+.top{background:var(--ink);color:var(--stock-hi);padding:42px 0 0}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--warn);margin:0 0 16px
+}
+h1{
+  font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+  font-size:clamp(34px,7vw,88px);line-height:.94;letter-spacing:.012em;margin:0
+}
+h1 span{display:block;color:var(--signal);font-size:.42em;letter-spacing:.1em;margin-top:.14em}
+.top .sub{font-size:clamp(17px,1.9vw,21px);font-weight:300;color:#D9D5C6;max-width:62ch;margin:24px 0 0}
+.top .sub b{color:#fff;font-weight:600}
+
+/* ── the count strip: the signature element ── */
+.countstrip{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  margin:32px 0 0;border-top:1px solid rgba(185,174,147,.35)
+}
+.countstrip div{padding:15px 14px 20px 0;border-right:1px solid rgba(185,174,147,.22)}
+.countstrip div:last-child{border-right:0}
+.countstrip .n{font-family:"Anton",sans-serif;font-size:clamp(24px,3vw,38px);line-height:1;color:#fff}
+.countstrip .n.green{color:#8FD6A8}
+.countstrip .n.red{color:#F09B84}
+.countstrip .l{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8E9382;margin-top:8px;display:block;line-height:1.55}
+.top .legendline{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:#8E9382;
+  padding:16px 0 26px;line-height:1.8;letter-spacing:.04em
+}
+
+/* ── sections ── */
+section{padding:54px 0 8px;border-top:1px solid var(--contour)}
+section.dark{background:var(--ink);color:var(--stock-hi);border-top:0}
+section.dark h2{color:#fff}
+section.dark p,section.dark li{color:#D9D5C6}
+section.dark strong{color:#fff}
+.cat{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--signal);text-transform:uppercase;display:block;margin-bottom:10px
+}
+section.dark .cat{color:var(--warn)}
+h2{
+  font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+  font-size:clamp(25px,3.9vw,44px);line-height:1.02;margin:0 0 14px;letter-spacing:.01em
+}
+h3{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:600;margin:34px 0 12px;color:var(--forest)
+}
+section.dark h3{color:var(--warn)}
+p{max-width:76ch;margin:0 0 14px}
+.lede{font-size:clamp(17px,1.8vw,20px);line-height:1.5;font-weight:300;max-width:70ch;color:var(--ink-soft)}
+section.dark .lede{color:#D9D5C6}
+ul{max-width:76ch;padding-left:19px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.84em;background:rgba(20,23,15,.07);padding:1px 5px;border-radius:2px;word-break:break-word}
+section.dark code{background:rgba(255,255,255,.13);color:#F3D9A8}
+
+/* ── source table ── */
+.tw{overflow-x:auto;border:2px solid var(--ink);background:var(--stock-hi);margin:20px 0 6px}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:14px}
+th{
+  background:var(--ink);color:var(--stock-hi);text-align:left;padding:11px 13px;
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:500
+}
+td{padding:11px 13px;border-top:1px solid var(--contour);vertical-align:top;line-height:1.45;color:var(--ink)}
+tbody tr:hover{background:rgba(214,158,46,.11)}
+td.src{width:23%;font-weight:600}
+td.src .org{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:400;margin-top:3px}
+td.use{width:31%}
+td.det{width:29%;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-soft);line-height:1.55}
+td.st{width:17%;white-space:nowrap}
+
+/* ── the table sits on a LIGHT panel inside a DARK section:
+      every inherited colour must be re-asserted or it vanishes ── */
+.tw{color:var(--ink)}
+section.dark .tw strong,section.dark .tw b{color:var(--ink)}
+section.dark .tw p,section.dark .tw li{color:var(--ink)}
+section.dark .tw code,section.dark .tw .mono{background:rgba(20,23,15,.07);color:var(--ink-soft)}
+section.dark .tw em{color:var(--ink-soft)}
+
+/* ── links ── */
+a{color:inherit;text-decoration:none}
+td.src a{
+  color:var(--ink);border-bottom:1.5px solid rgba(179,48,15,.42);
+  padding-bottom:1px;transition:color .12s,border-color .12s
+}
+td.src a:hover{color:var(--signal);border-bottom-color:var(--signal)}
+td.src a::after{
+  content:"\2197";font-family:"IBM Plex Mono",monospace;font-size:.72em;
+  vertical-align:super;margin-left:3px;color:var(--ink-faint);border:0
+}
+td.src a:hover::after{color:var(--signal)}
+a.idl{
+  border-bottom:1px dotted var(--ink-faint);color:var(--ink-soft)
+}
+a.idl:hover{color:var(--signal);border-bottom-color:var(--signal)}
+.legendline a{color:var(--warn);border-bottom:1px solid rgba(214,158,46,.45)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+section.dark a:focus-visible{outline-color:var(--warn)}
+
+/* ── badges ── */
+.b{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.1em;
+   text-transform:uppercase;padding:3px 7px;border-radius:2px;font-weight:600;color:#fff;margin:0 3px 3px 0}
+.b-key{background:var(--ok)}
+.b-keyed{background:var(--signal)}
+.b-live{background:var(--slate)}
+.b-doc{background:#7A6A44}
+.b-unv{background:var(--signal)}
+.b-sun{background:var(--alert)}
+.b-fall{background:var(--ink-faint)}
+
+/* ── notes ── */
+.note{border-left:4px solid var(--warn);background:rgba(214,158,46,.11);padding:16px 20px;margin:22px 0;max-width:88ch}
+.note p{margin:0;max-width:none;font-size:15px}
+.note p+p{margin-top:9px}
+.note .fl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8A6100;display:block;margin-bottom:6px}
+section.dark .note{background:rgba(214,158,46,.14)}
+section.dark .note p{color:#EFE9DA}
+section.dark .note .fl{color:var(--warn)}
+
+.pull{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:clamp(21px,3.1vw,38px);
+  line-height:1.08;max-width:22ch;margin:30px 0;color:var(--signal)}
+section.dark .pull{color:var(--warn)}
+
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:30px}
+.cols p,.cols ul{max-width:none}
+
+footer{background:var(--ink);color:#8E9382;padding:32px 0 56px}
+footer p{font-family:"IBM Plex Mono",monospace;font-size:11px;max-width:94ch;line-height:1.75}
+
+@media (max-width:760px){
+  body{font-size:16px}
+  section{padding:40px 0 6px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">High Desert Command · DM3 Consulting · Build v89 · August 2026</p>
+    <h1>Data Source<span>Register</span></h1>
+    <p class="sub">Every external service the app reads, what it is used for, how often it refreshes, and <b>how confidently each one has been verified.</b> Nothing here is mirrored or re-published — the browser reads each authoritative source directly, so what a user sees is what the publishing agency currently serves.</p>
+
+    <div class="countstrip">
+      <div><span class="n">29</span><span class="l">External services read</span></div>
+      <div><span class="n green">29</span><span class="l">Requiring no API key</span></div>
+      <div><span class="n red">0</span><span class="l">Credentials in the codebase</span></div>
+      <div><span class="n">0</span><span class="l">Paid or metered vendors</span></div>
+      <div><span class="n">1</span><span class="l">Third-party code library</span></div>
+      <div><span class="n">3</span><span class="l">Sources not yet confirmed live</span></div>
+    </div>
+
+    <p class="legendline">
+      LINKS &nbsp;Every source name below opens that publisher's own page for the data in a new tab. ArcGIS item IDs are clickable too.<br>
+      COUNT &nbsp;29 = every external service the browser contacts at runtime, including three evacuation fallbacks that mirror one state layer, and the ArcGIS directory used to resolve service addresses. The code library is inlined and contacted by nobody.<br>
+      ACCESS &nbsp;<span class="b b-key">Keyless</span> no credential of any kind &nbsp; <span class="b b-keyed">Keyed</span> would require a credential — none are used today<br>
+      VERIFICATION &nbsp;<span class="b b-live">Confirmed live</span> observed returning data in the running app &nbsp; <span class="b b-doc">Documented</span> endpoint and schema confirmed against the publisher's own documentation &nbsp; <span class="b b-unv">Unverified</span> not yet observed returning data<br>
+      OTHER &nbsp;<span class="b b-fall">Fallback</span> used only when the primary fails &nbsp; <span class="b b-sun">Sunsetting</span> publisher has announced retirement
+    </p>
+  </div>
+</header>
+
+<!-- ── 1 FIRE ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 01</span>
+    <h2>Fire — active and historical</h2>
+    <p class="lede">All fire geometry originates with the federal interagency system. The app treats the incident <em>locations</em> feed as the complete set of active fires, and treats perimeters as a best-effort overlay on top of it — because perimeter services drop out under load far more often than the locations service does.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://data-nifc.opendata.arcgis.com/pages/wfigs-page" target="_blank" rel="noopener">WFIGS Incident Locations</a><span class="org">NIFC · National Interagency Fire Center</span></td>
+          <td class="use">Every active wildfire as a point — name, discovery date, acreage, containment, county of origin. Drives the fire list, the threat board and the smoke model's source list.</td>
+          <td class="det">ArcGIS org <span class="mono">T4QMspbfLg3qTGWY</span><br>Refresh: on load + auto-refresh<br>Treated as the authoritative complete set</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://data-nifc.opendata.arcgis.com/datasets/nifc::wfigs-current-interagency-fire-perimeters/about" target="_blank" rel="noopener">WFIGS Fire Perimeters</a><span class="org">NIFC · multiple parallel services</span></td>
+          <td class="use">Mapped fire outlines. Every available perimeter service is queried in parallel and merged rather than trusting one, then de-duplicated by name plus rounded centroid.</td>
+          <td class="det">Paged queries · server-side geometry generalisation · one coarser retry on failure<br>36-hour last-known cache on total failure</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://data-nifc.opendata.arcgis.com/datasets/nifc::wfigs-interagency-fire-perimeters/about" target="_blank" rel="noopener">InterAgency Fire Perimeter History</a><span class="org">NIFC</span></td>
+          <td class="use">Historical burn perimeters — the burn-scar layers 2015–2024, the Great Burns layer, the century view, the burned-twice detector and the Old Ground comparison.</td>
+          <td class="det">Ordered by <span class="mono">FIRE_YEAR DESC</span> — without it the result skews to 2016–19<br>Refresh: on demand</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a><span class="org">Global news event database</span></td>
+          <td class="use">The Dispatches feed — geolocated fire news across Oregon, filtered to four wildfire themes.</td>
+          <td class="det">Geo-filtered, clipped to Oregon<br><strong>Reliability not independently confirmed</strong> — an InciWeb or NIFC-derived feed is the documented replacement</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-unv">Unverified</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">Derived, not sourced</span>
+      <p>Estimated fire footprints and projected smoke plumes are <strong>computed in the browser</strong>, not fetched. Both are always labelled as estimates in the interface. An estimated footprint is suppressed geometrically the moment a real perimeter covers the same ground, and acreages of neighbouring fires are never summed, because that is an agency determination rather than an arithmetic one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 2 EVACUATION ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Category 02</span>
+    <h2>Evacuation</h2>
+    <p class="lede">This is the one category where being wrong is dangerous, and where the public data is weakest. The loader therefore <strong>merges every source it can reach</strong> rather than accepting the first one that answers.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/home/item.html?id=dd2bee51e3004dc4b1004df34fbd9e29" target="_blank" rel="noopener">Evacuation Areas Public</a><span class="org">Oregon Dept. of Emergency Management</span></td>
+          <td class="use">The statewide live evacuation layer — Level 1 / 2 / 3 zones in Oregon's own vocabulary and colours. The primary source, queried first.</td>
+          <td class="det">AGOL item <a class="idl mono" href="https://www.arcgis.com/home/item.html?id=dd2bee51e3004dc4b1004df34fbd9e29" target="_blank" rel="noopener">dd2bee51e3004dc4b1004df34fbd9e29</a><br>Item ID stored, <strong>not</strong> a service URL — resolved to a live endpoint on every load so a republish cannot strand the app<br>Paged; ingests county evacuation-software integrations</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://data.oregon.gov/d/n3nj-5dkb" target="_blank" rel="noopener">Socrata export</a><span class="org">data.oregon.gov</span></td>
+          <td class="use">A periodic export of the same state layer. Retained only as a fallback and merge source.</td>
+          <td class="det">Dataset <span class="mono">n3nj-5dkb</span> · GeoJSON<br>Lags the live layer — this is why it was demoted from primary</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-fall">Fallback</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/home/item.html?id=dd2bee51e3004dc4b1004df34fbd9e29" target="_blank" rel="noopener">ArcGIS Hub export</a><span class="org">Oregon OEM</span></td>
+          <td class="use">Second export fallback of the same layer.</td>
+          <td class="det">GeoJSON snapshot · also lags the live layer</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-fall">Fallback</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/" target="_blank" rel="noopener">Discovered county services</a><span class="org">Any public ArcGIS Online publisher</span></td>
+          <td class="use">Counties that publish their own evacuation layer. Found at runtime by searching the public ArcGIS directory, then merged with the state layer.</td>
+          <td class="det">Up to 6 discovered services, each paged, clipped to an Oregon bounding box<br>Level parsed across differing county schemas (ready/set/go, numeric, status text)</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/" target="_blank" rel="noopener">ArcGIS sharing directory</a><span class="org">Esri · arcgis.com</span></td>
+          <td class="use">Infrastructure rather than content: resolves a stored item ID to its current service URL, and performs the service discovery above. Used identically for evacuation, structures and air-quality layers.</td>
+          <td class="det">Public sharing API · CORS-open<br>No account or organisation membership involved</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">The honest residual — stated in the product, not just here</span>
+      <p>Oregon's statewide layer is populated by local input. A county that publishes only to its own on-premises server, or only through a proprietary vendor app, cannot appear in it and therefore cannot appear here either. The app never fabricates a boundary to fill that gap.</p>
+      <p>Two rules follow from that. A zone whose level cannot be parsed is drawn grey and labelled <span class="mono">LEVEL UNREADABLE</span> rather than dropped. And an empty result states explicitly that this does not mean no orders are in force, directing the user to their county sheriff — <strong>emptiness is never presented as safety.</strong></p>
+      <p>This is also the single gap that a state sponsor could close outright, by opening the county feeds that are currently unreachable.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 3 AIR ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 03</span>
+    <h2>Air quality and smoke</h2>
+    <p class="lede">Three distinct tiers, deliberately kept separate and separately labelled everywhere they appear: what an <strong>instrument</strong> measured, what a <strong>model</strong> computes, and what a <strong>forecast</strong> projects. Conflating them is exactly the failure a compliance determination cannot survive.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/home/item.html?id=2d718d2733a74d1689d72b922c0ac4f4" target="_blank" rel="noopener">AirNow Current Monitor Data</a><span class="org">US EPA · public feature service</span></td>
+          <td class="use"><strong>Tier 1 — the reference standard.</strong> Real regulatory instruments: station name, current value, band, and the age of the reading. Distance from the point being asked about is always disclosed.</td>
+          <td class="det">EPA AGOL org <span class="mono">cJ9YHowT8TU7DUyn</span><br>Item <a class="idl mono" href="https://www.arcgis.com/home/item.html?id=2d718d2733a74d1689d72b922c0ac4f4" target="_blank" rel="noopener">2d718d2733a74d1689d72b922c0ac4f4</a><br>Layer <span class="mono">Air_Now_Current_Site_Data</span> · hourly · max 1000 records</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-doc">Documented</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.arcgis.com/home/item.html?id=47d857fe6dae45c08fd7f8bbfb6c5a57" target="_blank" rel="noopener">AirNow Latest PM2.5 Contours</a><span class="org">US EPA</span></td>
+          <td class="use">The statewide air-quality surface — hourly interpolated PM2.5 AQI contours, drawn beneath smoke and structures. The category for "unknown" renders transparent rather than being guessed.</td>
+          <td class="det">Item <a class="idl mono" href="https://www.arcgis.com/home/item.html?id=47d857fe6dae45c08fd7f8bbfb6c5a57" target="_blank" rel="noopener">47d857fe6dae45c08fd7f8bbfb6c5a57</a><br>Hourly · does not animate like radar, and the panel says so</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-doc">Documented</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener">Open-Meteo Air Quality</a><span class="org">Open-Meteo</span></td>
+          <td class="use"><strong>Tiers 2 and 3 — model and forecast.</strong> Modelled AQI at any arbitrary point, plus the 48-hour PM2.5 series that drives both states' regulatory threshold timelines.</td>
+          <td class="det">Fields <span class="mono">pm2_5</span> and <span class="mono">us_aqi</span><br>Both statutory triggers are tested against <span class="mono">pm2_5</span>, never the composite index</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">Why both triggers run on the same series — a real defect, found and fixed</span>
+      <p>Until build v84 the Oregon trigger was tested against the composite <span class="mono">us_aqi</span> value while Washington's ran on PM2.5. Ozone alone can push a composite index past 101 with no smoke present, which produced an impossible result: a longer Oregon exceedance window than Washington's, when Washington's lower threshold must always give the longer window.</p>
+      <p>Both rules are PM2.5-specific — Oregon's OAR 437-002-1081 sets 35.5 µg/m³, which is what AQI 101 means <em>for PM2.5</em>, and Washington's WAC 296-820 sets 20.5 µg/m³. Testing both on one series makes the correct ordering structural rather than coincidental. The regression test feeds 48 hours of composite AQI 160 with PM2.5 at 8 and asserts that <strong>both</strong> exceedance lists come back empty.</p>
+      <p>It is recorded here because a register that lists only what a source provides, and never how it was misused, is not much use to an engineer inheriting the system.</p>
+    </div>
+
+    <p>One further note on access: EPA's keyed AirNow API exists and is documented as the fallback, but is deliberately not used. A key would ship visible in a client-side application. The public feature services above carry the same instrument data without that exposure.</p>
+  </div>
+</section>
+
+<!-- ── 4 WEATHER ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Category 04</span>
+    <h2>Weather, wind and the atmosphere</h2>
+    <p class="lede">Wind is the input the entire smoke model rests on. The vertical structure of the atmosphere — added in build v86 — is what determines whether that smoke lifts or sits on a town all morning.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener">Open-Meteo Forecast</a><span class="org">Open-Meteo</span></td>
+          <td class="use">The wind field — an 88-point grid across the state driving plume direction, the animated wind streaks and the 48-hour weather forecast.</td>
+          <td class="det">One request returns the entire grid<br>A false-calm guard prevents opposing grid corners from interpolating a real wind to zero</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://open-meteo.com/en/docs/gfs-api" target="_blank" rel="noopener">Open-Meteo GFS / HRRR</a><span class="org">Open-Meteo · NOAA models</span></td>
+          <td class="use"><strong>"Will the smoke lift?"</strong> — mixing depth, a measured temperature inversion, fog-versus-smoke discrimination, and the hour the lid is forecast to break.</td>
+          <td class="det">The <span class="mono">/v1/gfs</span> endpoint — over Oregon this resolves to <strong>HRRR at 3 km</strong><br><span class="mono">boundary_layer_height · visibility · temperature_2m · dew_point_2m · relative_humidity_2m · cloud_cover_low · weather_code</span><br>Pressure levels <span class="mono">925 / 850 hPa</span> temperature <em>and</em> geopotential height<br>Localised to America/Los_Angeles so "lifts around 11 AM" is local time</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-doc">Documented</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://www.weather.gov/documentation/services-web-api" target="_blank" rel="noopener">National Weather Service</a><span class="org">NOAA · api.weather.gov</span></td>
+          <td class="use">Red Flag Warnings, Fire Weather Watches and all active NWS alerts for the state. Dense Fog Advisories arrive through the same feed.</td>
+          <td class="det">Official government alert feed<br>Refresh: on load + auto-refresh</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">NEXRAD radar mosaic</a><span class="org">Iowa State Mesonet</span></td>
+          <td class="use">Precipitation radar overlay.</td>
+          <td class="det">Raster tile service</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://nasa-gibs.github.io/gibs-api-docs/" target="_blank" rel="noopener">GIBS snow cover</a><span class="org">NASA</span></td>
+          <td class="use">Snow extent — a Field Day layer, and context for fire season timing.</td>
+          <td class="det">Raster tile service</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <h3 style="color:var(--warn)">Why the geopotential heights matter</h3>
+    <p>The inversion is <strong>measured, not inferred</strong>. Central Oregon sits at 850–1300 m above sea level, which means the 925 hPa pressure level — roughly 800 m — is routinely <em>underground</em> at Bend. Fetching the geopotential height alongside the temperature at each level lets the app discard any level below the site's own elevation before comparing temperatures. Without that, the app would confidently report an inversion using a reading from beneath the ground the user is standing on.</p>
+    <p>Cold-air pooling comes from the terrain model rather than any weather grid, because a 3 km forecast cell cannot distinguish a ridge top from the valley floor a mile away, and those two places behave completely differently. The app samples elevation rings at 2 / 4.5 / 8 km on 24 bearings and uses the <em>median</em> rise — one peak on one bearing is a mountain to look at, not a basin to sit in.</p>
+  </div>
+</section>
+
+<!-- ── 5 TERRAIN ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 05</span>
+    <h2>Terrain, imagery and basemaps</h2>
+    <p class="lede">The elevation model is not decoration. It powers 3D terrain, the per-fire story view, the Skyline viewshed and — through that same engine — the 5-3-1 landmark card the Oregon OSHA rule asks employers to build by hand.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">Terrarium elevation tiles</a><span class="org">AWS open data</span></td>
+          <td class="use">The digital elevation model. Drives 3D terrain, the fire story view, Skyline, the 5-3-1 landmark card and the cold-air-pooling index.</td>
+          <td class="det">Terrarium-encoded raster-DEM tiles<br>Sampled directly in-browser for viewshed maths</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://s2maps.eu/" target="_blank" rel="noopener">Sentinel-2 cloudless</a><span class="org">EOX</span></td>
+          <td class="use">The cloud-free satellite basemap.</td>
+          <td class="det">Raster tiles · derived from ESA Sentinel-2</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://livingatlas.arcgis.com/" target="_blank" rel="noopener">World Imagery</a><span class="org">Esri</span></td>
+          <td class="use">High-resolution imagery past street-level zoom, where Sentinel-2 runs out of detail.</td>
+          <td class="det">Raster tiles<br>A public-domain swap to USGS NAIP is documented inline for a state deployment</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://livingatlas.arcgis.com/" target="_blank" rel="noopener">World Transportation</a><span class="org">Esri</span></td>
+          <td class="use">The road reference layer.</td>
+          <td class="det"><strong>Raster, not vector</strong> — labels are baked into the tile image and cannot be resized, recoloured or re-cased<br>The documented fix is a vector road source (Census TIGERweb or OpenStreetMap)</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">The one accessibility ceiling the app cannot design its way around</span>
+      <p>Because the road layer is raster, its labels are pixels rather than text. Every other label in the application responds to the four text sizes, the high-contrast mode and the Easy Colors palette. Road labels cannot, and no amount of styling changes that. It is the clearest current argument for moving to a vector road source, and it is named here rather than left for a reviewer to discover.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 6 WATER ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Category 06</span>
+    <h2>Water</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://www.usgs.gov/national-hydrography/national-hydrography-dataset" target="_blank" rel="noopener">National Hydrography Dataset</a><span class="org">USGS</span></td>
+          <td class="use">Rivers, creeks and water bodies — the water layer, and context for fire behaviour and access.</td>
+          <td class="det">Public feature service</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener">Water Services</a><span class="org">USGS · waterdata</span></td>
+          <td class="use">Live streamflow readings at gauging stations.</td>
+          <td class="det">Current endpoint in use<br><strong>The legacy instantaneous-values service retires Q1 2027</strong> — a known, bounded, already-scheduled migration</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span><span class="b b-sun">Sunsetting</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p>No flood product is derived from these. Streamflow is presented as a reading, not as a flood forecast — that would require the NOAA flood services, which the app does not currently read.</p>
+  </div>
+</section>
+
+<!-- ── 7 STRUCTURES ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 07</span>
+    <h2>What is at risk</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://gis-fema.hub.arcgis.com/datasets/fedmaps::usa-structures/about" target="_blank" rel="noopener">USA Structures</a><span class="org">FEMA / Oak Ridge National Laboratory</span></td>
+          <td class="use">Built structure footprints in the path of a fire, bucketed by occupancy type — residential, care, other, unknown. Unknown is drawn grey and never dropped.</td>
+          <td class="det">AGOL item <a class="idl mono" href="https://www.arcgis.com/home/item.html?id=0ec8512ad21e4bb987d7e848d14e7e24" target="_blank" rel="noopener">0ec8512ad21e4bb987d7e848d14e7e24</a> · layer 0 · checked annually<br>Zoom-gated at z13 · viewport-bounded · capped at 4000 records per view · cached per view<br>Occupancy field spellings probed across schemas with a full-field retry</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-unv">Unverified</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">Two things to be explicit about</span>
+      <p><strong>Occupancy is modelled, not surveyed</strong>, and the interface says so. It also states that an empty area does not mean a safe area — the dataset's coverage is not a census.</p>
+      <p><strong>Address fields are not requested at all</strong> unless a user explicitly switches addresses on, which is off by default. When off, no address data enters the request, let alone the rendered map.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 8 AIRCRAFT ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Category 08</span>
+    <h2>Aircraft</h2>
+    <p class="lede">Three independent ADS-B networks in a fallback chain. If the first is down, the next is tried without any user action — the only category in the app with redundancy at the provider level, because these feeds are the least reliable of any used.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://adsb.lol/" target="_blank" rel="noopener">adsb.lol</a><span class="org">Community ADS-B network</span></td>
+          <td class="use">Primary aircraft positions — air tankers, air attack, helicopters. Drives Bomber mode, payload and crew detail, and lock-on tracking.</td>
+          <td class="det">First in the fallback chain</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://airplanes.live/" target="_blank" rel="noopener">airplanes.live</a><span class="org">Community ADS-B network</span></td>
+          <td class="use">Second source, identical use.</td>
+          <td class="det">Tried automatically if the primary fails</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-fall">Fallback</span></td>
+        </tr>
+        <tr>
+          <td class="src"><a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a><span class="org">Research ADS-B network</span></td>
+          <td class="use">Third source, identical use.</td>
+          <td class="det">Final fallback</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-fall">Fallback</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="note">
+      <span class="fl">A feed problem that became a correctness rule</span>
+      <p>These feeds do not guarantee an aircraft identifier. Rows arrive with the ICAO hex field blank, and until build v89 that produced a silent wrong answer: every aircraft without an identifier collapsed onto the same record, so the map could follow one plane while the panel described another.</p>
+      <p>The rule that came out of it: an identity is built from the first field that actually exists — ICAO hex, then alternative ICAO fields, then registration, then callsign, then a position-derived fallback — and <strong>if none of those yield anything, the aircraft is not rendered at all.</strong> The app will not guess an identity and will not show a card it cannot stand behind.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 9 PLACES ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 09</span>
+    <h2>Places and geocoding</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>What it provides</th><th>Endpoint / detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://nominatim.org/" target="_blank" rel="noopener">Nominatim</a><span class="org">OpenStreetMap Foundation</span></td>
+          <td class="use">Address and town lookup for "Check a location", and reverse lookup to name the place under a dropped spot report pin.</td>
+          <td class="det">One request per search, Oregon-bounded<br>Rate-limit-respectful by design — never called on map movement</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-live">Confirmed live</span></td>
+        </tr>
+        <tr>
+          <td class="src">Wildfire camera layer<span class="org">Regional camera networks</span></td>
+          <td class="use">Fixed wildfire-detection camera locations.</td>
+          <td class="det">Present as a layer; <strong>not</strong> a full ALERTWest / ALERTCalifornia network integration<br>Scope stated accurately rather than overclaimed</td>
+          <td class="st"><span class="b b-key">Keyless</span><span class="b b-unv">Unverified</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ── 10 CURATED ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Category 10</span>
+    <h2>Curated content — written, not fetched</h2>
+    <p class="lede">One file, <code>places.js</code>, holds everything a machine feed cannot supply: the interpretation. It is deliberately separated from application logic so a subject-matter expert can edit it without touching a line of code.</p>
+
+    <div class="cols">
+      <div>
+        <h3 style="color:var(--warn)">What it contains</h3>
+        <ul>
+          <li><strong>27 burn-scar narratives</strong> — what happened on specific ground, in specific years.</li>
+          <li><strong>10 year narratives</strong> — the character of each fire season.</li>
+          <li><strong>15 great burns</strong> — the century-scale landmark fires.</li>
+          <li><strong>Named landscapes, waters, viewpoints</strong> and the Field Day categories: fishing, elk, deer, snow, roads.</li>
+          <li>The opening map centre and default locations.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--warn)">The rule that governs it</h3>
+        <p>Honest data, never fabricated. Directions, access notes and place descriptions are researched and written, never invented to fill a gap. Where content does not exist for a region, the app has less to say about that region — it does not manufacture something plausible.</p>
+        <p>Current coverage is Central-Oregon-weighted. Statewide enrichment is a curation effort, not an engineering one, and is named as outstanding rather than implied to be complete.</p>
+      </div>
+    </div>
+
+    <p class="pull">The feeds supply what is happening. This file supplies what it means.</p>
+  </div>
+</section>
+
+<!-- ── 11 CODE ── -->
+<section>
+  <div class="wrap">
+    <span class="cat">Category 11</span>
+    <h2>Third-party code</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Library</th><th>What it does</th><th>Detail</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="src"><a href="https://maplibre.org/" target="_blank" rel="noopener">MapLibre GL JS 5.24</a><span class="org">BSD licensed · open source</span></td>
+          <td class="use">The WebGL map engine — vector rendering, 3D terrain, pitch and bearing.</td>
+          <td class="det"><strong>Fully inlined into the deployed file</strong> rather than loaded from a CDN<br>Consequence: zero third-party runtime dependencies, and the app cannot be broken by someone else's outage or by a network that blocks CDNs</td>
+          <td class="st"><span class="b b-key">No key</span><span class="b b-live">In production</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p>That is the complete dependency list. There is no framework, no bundler, no package manager and no transitive dependency tree — which means there is no supply chain to audit beyond this single library, and no scheduled patching treadmill.</p>
+  </div>
+</section>
+
+<!-- ── SUMMARY ── -->
+<section class="dark">
+  <div class="wrap">
+    <span class="cat">Summary</span>
+    <h2>What this list implies</h2>
+
+    <div class="cols">
+      <div>
+        <h3 style="color:var(--warn)">Operationally</h3>
+        <ul>
+          <li><strong>No credential exists anywhere in the codebase.</strong> Nothing to rotate, leak, meter or expense, and no bill that grows when public attention spikes during an emergency.</li>
+          <li><strong>Nothing is mirrored.</strong> Every reading comes from the publishing agency at the moment it is displayed. There is no intermediate copy to fall out of date.</li>
+          <li><strong>Failure is loud.</strong> Feeds are expected to fail under load, so the app names the failure — "live service not answering: too many requests" — draws the last-known official outlines under a <span class="mono">LAST KNOWN</span> status with the save time stated, and refuses any cache older than 36 hours.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--warn)">Structurally</h3>
+        <ul>
+          <li><strong>Every browser talks directly to each agency.</strong> That is the design's strength and its scaling limit: ten thousand people opening the map is ten thousand queries against the same government services. The edge cache and pre-baked snapshots that fix this are designed and costed but not yet built.</li>
+          <li><strong>One planned feature breaks the keyless property.</strong> Road closures, via the state transportation APIs, require a free registered key. The answer is to hold it server-side in the edge cache — which is an argument for building that layer, not against the data.</li>
+          <li><strong>Three sources are not yet confirmed live.</strong> They are listed as unverified rather than quietly presented as working.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="fl">How verification status is assigned — and why some of it is honest rather than flattering</span>
+      <p>The development environment blocks outbound access to every live data host. Endpoints, item IDs and field schemas are therefore confirmed against each publisher's own documentation and tested against payload-shaped fixtures, but the first real contact with several services happens in the browser.</p>
+      <p><strong>Confirmed live</strong> means observed returning data in the running application. <strong>Documented</strong> means the endpoint and schema were verified against the publisher's documentation and the code handles the shape correctly, but it has not yet been watched working end to end. <strong>Unverified</strong> means neither. Sources in the second and third categories carry defensive handling — field-name probing, full-field retries, and a visible failure state rather than a silent blank.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Scope.</strong> This register covers build v89 of High Desert Command, August 2026. It lists external data sources only; computed products — projected smoke plumes, estimated fire footprints, terrain viewsheds, the 5-3-1 landmark card, threshold timelines and the inversion assessment — are derived in the browser from the sources above and are labelled as models wherever they appear in the application.</p>
+    <p><strong>Standing.</strong> High Desert Command is not affiliated with any government agency and is not an official source of emergency information. Evacuation levels are enacted and enforced by county sheriffs. Air-quality features are a determination assistant and record-keeping aid, not certified exposure monitoring; official regulatory monitors remain the reference standard. Prepared by DM3 Consulting.</p>
+  </div>
+</footer>
+
+</body>
+</html>
