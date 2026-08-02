@@ -1,0 +1,18 @@
+# DELIBERATELY VIOLATING — the schema's `id:` claims a jurisdiction
+# namespace as its own, so every term under it was exempted. Eighth
+# counterexample to claims.md C18, and the third escape from a
+# self-reference exemption derived from inside the file.
+# See [O -> H] plan gate block verification 4, BV19.
+id: https://w3id.org/nwcg/irwin/core
+name: lint_fixture_id_claims_foreign
+prefixes:
+  linkml: https://w3id.org/linkml/
+  irwin:  https://w3id.org/nwcg/irwin/
+default_range: string
+imports: [linkml:types]
+slots:
+  incidentIdentifier:
+    description: Identifier issued for an incident under some scheme.
+    examples:
+      - value: "2026-OR-ABC-000123"
+    slot_uri: irwin:IrwinID

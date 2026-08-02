@@ -363,15 +363,46 @@ theorem retracting_merge_loses_distinction :
   obtain ⟨⟨x, _, hx, _, _, _⟩, _⟩ := h (fun _ => True) (fun _ => False) hd
   exact hx
 
-/-! **What this does not achieve, stated rather than left to a fourth
-round.** `PreservesDistinction` ties the three subjects together and
-excludes a retracting merge. It does **not** establish that the
-relations are the ones an implementation actually uses for correction
-and supersession — nothing at this level of abstraction can, because
-`corrects` and `supersedes` are parameters. The remaining gap is not a
-missing theorem; it is that C13 is discharged by an implementation
-exhibiting this condition **for its own merge and its own two
-relations**, and `transform/` is still one `.gitkeep`. -/
+/-- **BV20 — the third tie collapses exactly as the second did.**
+    `Monotone merge` implies `PreservesDistinction merge c s` for every
+    pair of relations: monotonicity carries every witness in `a` into
+    `merge a b`, and `DistinguishesIn`'s witnesses are all it needs. -/
+theorem preserves_is_implied_by_monotone_for_any_pair {F : Type}
+    (merge : FactSet F → FactSet F → FactSet F)
+    (hm : Monotone merge) (c s : F → F → Prop) :
+    PreservesDistinction merge c s := by
+  rintro a b ⟨⟨x, y, hx, hy, hc, hs⟩, ⟨u, v, hu, hv, hs', hc'⟩⟩
+  exact ⟨⟨x, y, hm a b x hx, hm a b y hy, hc, hs⟩,
+         ⟨u, v, hm a b u hu, hm a b v hv, hs', hc'⟩⟩
+
+/-! ### C13 cannot be closed at this abstraction. Stopping.
+
+Three attempts at a tie, all collapsing the same way:
+
+| Attempt | How it failed |
+|---|---|
+| `Distinguishes ∧ Monotone` | disjoint variables — two conditions, not two halves of one |
+| `RecordedNotDeleted` | implied by `Monotone` for **every** `rel`; the `rel` hypothesis discarded |
+| `PreservesDistinction` | implied by `Monotone` for **every pair**, above |
+
+The pattern is not three coincidences. **`corrects` and `supersedes`
+are parameters here.** Any condition written over them is a condition
+about *all* relations, and a merge that preserves everything preserves
+them too — so any tie phrased as "the merge does not lose the
+distinction" is discharged by monotonicity alone, whatever form it
+takes. A fourth attempt would be the same shape a fourth time.
+
+What C13 needs is not available at this abstraction: it needs the
+*implemented* correction and supersession relations, and an
+implementation exhibiting the condition **for its own merge**.
+`transform/` is one `.gitkeep`. Until it is not, C13 stays `falsified`
+and this file's contribution is the diagnosis rather than the tie.
+
+`Distinguishes`, `DistinguishesIn` and `AdequateC13` are kept as the
+*statement* of what an implementation must exhibit —
+`collapsed_implementation_fails` shows one relation cannot do both jobs,
+which is the part that does not depend on the relations being anyone's
+in particular. -/
 
 /-- Monotonicity does not give distinguishability. Union is monotone and
     still fails the condition when one relation does both jobs. -/

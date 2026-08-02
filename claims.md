@@ -869,7 +869,18 @@ answered today and that the canonical layer answers.
 
   C5 also remains **unfalsifiable as stated** — the sweep finding above
   is untouched by this experiment.
-- **Updated:** 2026-08-02
+
+  **Carrier note, 2026-08-02 (plan-gate block verification 4).** Plan 01
+  gains **P18**, *"decide how cross-slot constraints reach `make
+  check`"*. It is a **decision** item, not a producing one: its three
+  options are hand-written SHACL beside the generated file (breaks
+  invariant 1), a generator emitting them from LinkML `annotations:`,
+  and out of scope. So the carrier is now scheduled to be *decided* and
+  is still not scheduled to be *built*, and one of the three outcomes
+  removes it. `sh:equals` now occurs twice in `docs/plan/` — P18's row
+  and the sentence recording this gap — and in no item's definition of
+  done, because P18 has no definition of done (BV17). Status untouched
+  in either direction.
 
 ### C6 — The vocabulary is LLM-legible
 A model given only `vocab/` and a raw source payload, with no other
@@ -1250,6 +1261,49 @@ The model can express "the earlier fact was wrong" separately from
   the direction BR-5 overreached on and the overreach is corrected, but
   what the two theorems jointly establish is weaker than independence —
   it is that the conjuncts share no subject.
+
+  **BV2 round 4, 2026-08-02 (plan-gate block verification 4). The third
+  tie collapses the same way the second did.** `RecordedNotDeleted` is
+  retained in the file as a refutation, correctly, and `AdequateC13` is
+  restated as `Distinguishes corrects supersedes ∧ PreservesDistinction
+  merge corrects supersedes`, where `PreservesDistinction` requires the
+  witnesses to be facts present in a set and to survive merging. PA40
+  argues that this ties the three subjects because all three appear in
+  it. They appear in it; they are not tied by it.
+
+  ```lean
+  theorem preserves_is_implied_by_monotone_for_any_relations {F : Type}
+      (merge : FactSet F → FactSet F → FactSet F)
+      (hm : Monotone merge) (c s : F → F → Prop) :
+      PreservesDistinction merge c s := by
+    rintro a b ⟨⟨x, y, hx, hy, hc, hs⟩, ⟨u, v, hu, hv, hs', hc'⟩⟩
+    exact ⟨⟨x, y, hm a b x hx, hm a b y hy, hc, hs⟩,
+           ⟨u, v, hm a b u hu, hm a b v hv, hs', hc'⟩⟩
+  ```
+
+  **`Monotone merge` implies `PreservesDistinction merge c s` for every
+  pair of relations.** The witnesses satisfying `DistinguishesIn a` are
+  carried into `merge a b` by monotonicity alone; `c` and `s` are never
+  inspected. BV2's scenario therefore satisfies the new `AdequateC13`
+  verbatim, using H's own unrelated `Bool` relations and
+  `union_merge_monotone`. Both elaborate against the committed
+  `Merge.lean` under `lake env lean`, no `sorry`, no error, with a
+  `(0:Nat) = 1` control confirming the harness errors.
+
+  `retracting_merge_loses_distinction` does bite, and by the
+  contrapositive of the theorem above it entails
+  `retracting_merge_not_monotone`, which `Merge.lean:211` already
+  proves. It exhibits a **non-monotone merge** — a fact about `merge`.
+  So for every merge this design contemplates, conjunct 2 is free and
+  `AdequateC13` remains `Distinguishes ∧ (a property of merge alone)`,
+  which is BV2's original objection at round 1.
+
+  **The file's recorded limit is the useful half and it is accurate:**
+  nothing at this abstraction can discharge C13, because `corrects` and
+  `supersedes` are parameters. C13 is discharged by an implementation
+  exhibiting the condition for its own merge and its own relations, and
+  `transform/` is one `.gitkeep`. That was equally true of attempts one
+  and two.
 - **Updated:** 2026-08-02
 - **Note:** L5 is not wrong, but it is incomplete. Do not withdraw it —
   add correction as a second, distinct relation.
@@ -1603,6 +1657,44 @@ rule, and does not fire on content that complies.
   demonstrates the narrowing was correct does not demonstrate that
   nothing else fell through it. `lint-selftest`'s 6/6 counts recall per
   *rule*, not per *exemption*.
+
+  **Round 6, 2026-08-02 — the round-5 hole is closed and an eighth
+  counterexample sits one field over. Status unchanged.**
+
+  The `default_prefix` route is fixed: it is now honoured only when it
+  agrees with `id:`, `scripts/lint-fixtures/default-prefix-escape.yaml`
+  is committed as the recall fixture, a sixth rule `documented` has
+  landed (see C20), and `lint-selftest` reports **26 rule/fixture pairs,
+  7/7 rules with demonstrated recall** (the 23 / 22 / 20 figures above
+  are superseded, not wrong when written). Verified by running, and the
+  shipped fixture fires on the c1 URI as it should.
+
+  **`id:` is the primary source of the exemption set and is as
+  unconstrained as `default_prefix` was.** A schema declaring the
+  jurisdiction's own namespace as its identity passes every rule:
+
+  ```yaml
+  id: https://w3id.org/nwcg/irwin/core
+  default_prefix: irwin
+  prefixes: {irwin: https://w3id.org/nwcg/irwin/}
+  slots:
+    incidentIdentifier:
+      description: Identifier issued for an incident under some scheme.
+      examples: [{value: "2026-OR-ABC-000123"}]
+      slot_uri: irwin:IrwinID
+  ```
+
+  **All six rules `ok`, exit 0.** C18's falsifier is *a
+  jurisdiction-specific scheme that passes all the rules*; this is one,
+  and a `vocab/core/` file with that `id:` is exactly what invariant 2
+  forbids.
+
+  The general form, since this is the second consecutive round of it:
+  **a self-reference exemption sourced from the document under
+  inspection can be claimed by any document.** The file declares what
+  counts as its own namespace. Constraining one field that feeds the
+  exemption set leaves the other, and the fix for a recall hole was
+  again tested only in the direction it closed.
 - **Updated:** 2026-08-02
 - **Cheapest test — superseded 2026-08-02.** *"Two throwaway files per
   rule — one violating, one compliant — run `make lint`, confirm it
@@ -1640,7 +1732,7 @@ rule, and does not fire on content that complies.
 Every class and slot in `vocab/` carries a `description` and an
 `examples` entry, and `make lint` fails when one does not.
 
-- **Status:** `falsified`
+- **Status:** `scoped-down`
 - **Falsifier:** a schema file with a class or a slot lacking either a
   `description` or an `examples` entry that `make lint` accepts.
 - **Evidence:** 2026-08-02 — **falsified on the enforcement half at the
@@ -1673,6 +1765,38 @@ Every class and slot in `vocab/` carries a `description` and an
   The claim is filed as two halves because they can fail separately: the
   documentation half is untestable while `vocab/` is empty, and the
   enforcement half is falsified now.
+
+  **Enforcement half repaired, 2026-08-02 (plan-gate block verification
+  4). Scoped down.** `scripts/drift-lint.py` gained a sixth rule,
+  `documented`, checking every entry under `classes:` and `slots:` for a
+  non-placeholder `description` and a non-empty `examples`; `CLAUDE.md`
+  invariant 7 was rewritten by its owner to name that rule instead of
+  asserting enforcement in the abstract. Declared by H under the tooling
+  rule (PA38) and **verified by running**, not read:
+
+  | Probe | Result |
+  |---|---|
+  | the original counterexample — 8 classes, 12 slots, `TODO`, zero `examples` | **40 FAILs, exit 1** |
+  | descriptions real, class has `examples`, **slot has none** | fires on the slot alone |
+  | `examples` everywhere, one description `"TBD."` | fires on the description alone |
+  | fully documented | `ok` |
+
+  Probed in each direction separately rather than through the committed
+  fixture, which carries both faults at once — C18 round 5's lesson is
+  that a fixture demonstrating one direction demonstrates one direction.
+
+  **The narrower version that survives:** *`make lint` fails when a
+  class or a slot in an inspected schema file lacks a `description` or
+  an `examples` entry, or carries a placeholder description.*
+
+  **The full claim is not `tested`, and the difference is the word
+  "inspected".** The documentation half — that every class and slot in
+  `vocab/` *is* documented — remains untestable: `vocab/core/` is one
+  `.gitkeep`, and `make lint` prints *"no schema files found — these
+  rules inspected nothing."* The rule is demonstrated against
+  constructed probes, never against the material. Same caveat C18's
+  recall note carries: a guard that has never inspected the material is
+  not yet known to guard it. Re-examine when `vocab/core/` has content.
 - **Promotion note:** promoted by O under FALSIFIER §6 at the plan-gate
   block verification 3, 2026-08-02. It generalises beyond the gate — it
   is about the repository's guard set rather than about plan 01 — and no

@@ -539,6 +539,10 @@ condition.
 | **P10** | A check compares each `slot_uri`'s external range against the local **effective** range — via `linkml_runtime` `SchemaView.induced_slot`, **not raw YAML** (PA34) — and fails on disagreement; the `sosa:observedProperty` case from A34 fires; it survives a schema using `slot_usage` or a mixin | M |
 | **P11** | T3a's entry names a tiebreak, or records that none exists | S |
 | **P12** | — permanently open | — |
+| **P15** | **MET 2026-08-02.** A PM2.5-specific threshold and a composite `us_aqi` reading run through `gen-shacl` and pyshacl, result recorded against the prediction stated in advance — [`exp-01`](../experiments/exp-01-property-substitution.md) | S |
+| **P16** | **MET before it was filed** (BV13). All three BV8 namespaces pass `drift-lint.py`, and `bound-vocabularies.yaml` / `redirect-service.yaml` still behave | S |
+| **P17** | A design-gate record answers both: whether `crs` is a slot or PA29's `asWKT` substitute applies, **and** which class carries `sourceVerificationTier`, `operatingMode`, `modelVersion`, `profileConformance`. A1's Part 0 class count is confirmed at 14 or recorded as moved to 15 | S |
+| **P18** | A design-gate record picks **one** of the three C5-carrier options and states why the other two were rejected. Picking none, or recording all three as open, does not meet it | S |
 
 Sizes are **ordinal, not estimates.** The measure gate's 5–7 sessions
 was measured against a surface that has moved four times; absolute

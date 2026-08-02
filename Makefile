@@ -25,6 +25,10 @@ lint:
 	@$(BIN)python scripts/lean-lint.py design/lean
 	@echo "C1 + C19: jurisdiction and declarative-drift rules"
 	@$(BIN)python scripts/drift-lint.py vocab/core/
+	@echo "P: the wave view is derived from the item table"
+	@if [ -f docs/plan/derive-waves.py ]; then \
+		$(BIN)python docs/plan/derive-waves.py --check; \
+	else echo "  skip — docs/plan/derive-waves.py not present"; fi
 	@echo "lint ok"
 
 lint-selftest:

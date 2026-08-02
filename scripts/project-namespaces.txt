@@ -1,0 +1,21 @@
+# Namespaces this project owns. One URI prefix per line.
+#
+# WHY THIS FILE EXISTS. The jurisdiction rule needs to know which
+# namespace is "ours" so a schema can declare its own terms without
+# tripping the guard. Three attempts derived that from inside the
+# schema and all three were escapable, because a self-declared field
+# cannot constrain itself:
+#
+#   BV8  — no namespace passed at all (precision failure)
+#   BV14 — `default_prefix` nominated any namespace as self (recall)
+#   BV19 — `id:` nominated any namespace as self (recall)
+#
+# The file declares what counts as its own namespace. That is
+# unfixable from inside the file. So the declaration lives here, where
+# a schema author cannot edit it as part of authoring a schema.
+#
+# If this file is missing or empty, NO namespace is treated as the
+# project's own and every schema's own terms will fire. That is
+# deliberate: the guard fails loud rather than open.
+
+https://w3id.org/hazard-vocab/

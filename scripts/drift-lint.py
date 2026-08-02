@@ -105,6 +105,20 @@ ACRONYM = re.compile(r"^[A-Z][A-Z0-9]+$")
 # So: single-authority hosts match on host; shared infrastructure
 # matches on host plus path prefix.
 
+# The project's own namespaces, declared OUTSIDE any schema. See
+# scripts/project-namespaces.txt for why this is not derived from `id:`
+# or `default_prefix`.
+def _project_namespaces() -> list[str]:
+    f = pathlib.Path(__file__).parent / "project-namespaces.txt"
+    if not f.exists():
+        return []
+    return [ln.strip().rstrip("/#") for ln in f.read_text().split("\n")
+            if ln.strip() and not ln.lstrip().startswith("#")]
+
+
+PROJECT_NAMESPACES = _project_namespaces()
+
+
 SINGLE_AUTHORITY_HOSTS = {
     "w3.org", "www.w3.org",
     "opengis.net", "www.opengis.net",
