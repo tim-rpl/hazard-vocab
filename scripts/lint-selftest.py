@@ -44,6 +44,9 @@ CASES = [
     ("jurisdiction",      "generic-acronyms",    False, "precision — CRS, UTC, EPSG are not jurisdictions"),
     ("jurisdiction",      "bound-vocabularies",  False, "precision — F11, every vocabulary CLAUDE.md binds"),
     ("jurisdiction",      "own-namespace",       False, "precision — BV8, the project's own id: and default_prefix"),
+    ("jurisdiction",      "default-prefix-escape", True, "recall — BV14, default_prefix nominating a foreign namespace"),
+    ("documented",        "undocumented",        True,  "recall — C20, placeholder descriptions and no examples"),
+    ("documented",        "own-namespace",       False, "precision — a documented file with examples"),
 ]
 
 

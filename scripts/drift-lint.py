@@ -275,6 +275,18 @@ def rule_jurisdiction(path, doc):
     # firing on original content rather than on borrowed content — all
     # five earlier counterexamples were borrowed. See [O -> H] plan gate,
     # BV8.
+    # SELF IS DERIVED FROM `id:` ALONE.
+    #
+    # The first version also seeded it from whatever `default_prefix`
+    # resolved to. `default_prefix` is unconstrained, so one line —
+    # `default_prefix: irwin` — exempted `https://w3id.org/nwcg/irwin/`
+    # and reopened the c1 counterexample this rule had closed. Seventh
+    # counterexample to claims.md C18 and the first one a repair
+    # introduced. See [O -> H] plan gate block verification 3, BV14.
+    #
+    # `default_prefix` is now honoured only when it agrees with `id:` —
+    # i.e. when it names the schema's own namespace rather than any
+    # namespace the author cares to nominate.
     own = []
     if doc.get("id"):
         base = str(doc["id"]).rstrip("/#")
@@ -282,7 +294,10 @@ def rule_jurisdiction(path, doc):
         own.append(base + "/")
     dp = doc.get("default_prefix")
     if dp and isinstance(doc.get("prefixes"), dict) and dp in doc["prefixes"]:
-        own.append(str(doc["prefixes"][dp]).rstrip("/#"))
+        dp_uri = str(doc["prefixes"][dp]).rstrip("/#")
+        if own and any(dp_uri.startswith(o.rstrip("/#")) or
+                       o.rstrip("/#").startswith(dp_uri) for o in own):
+            own.append(dp_uri)
 
     def is_self(uri: str) -> bool:
         u = str(uri).rstrip("/#")
@@ -358,12 +373,50 @@ def rule_jurisdiction(path, doc):
     return bad
 
 
+PLACEHOLDER = {"", "todo", "tbd", "fixme", "xxx", "tk", "n/a", "-", "..."}
+
+
+def rule_documented(path, doc):
+    """Invariant 7: every class and slot carries a `description` and at
+    least one `examples` entry.
+
+    `CLAUDE.md` invariant 7 said "Lint enforces it" and nothing did. A
+    schema with eight classes, twelve slots, every description the
+    literal string TODO and zero examples passed clean and generated its
+    shapes at exit 0. See claims.md C20.
+
+    This matters beyond documentation: C6 (LLM-legibility) rests on
+    invariant 7 and has no other guard.
+    """
+    bad = []
+
+    def check(kind, name, body):
+        if not isinstance(body, dict):
+            body = {}
+        d = str(body.get("description") or "").strip()
+        if d.lower().rstrip(".") in PLACEHOLDER:
+            bad.append(f"{path}: {kind} `{name}` has "
+                       f"{'no description' if not d else f'a placeholder description ({d!r})'}"
+                       f" — invariant 7")
+        if not body.get("examples"):
+            bad.append(f"{path}: {kind} `{name}` has no `examples` entry — "
+                       f"invariant 7. One example grounds a reader, human "
+                       f"or model, better than three sentences")
+
+    for n, c in (doc.get("classes") or {}).items():
+        check("class", n, c)
+    for n, sl in (doc.get("slots") or {}).items():
+        check("slot", n, sl)
+    return bad
+
+
 RULES = {
     "inline-attributes": rule_inline_attributes,
     "is-a-depth": rule_is_a_depth,
     "exact-mappings": rule_exact_mappings,
     "role-named": rule_role_named,
     "jurisdiction": rule_jurisdiction,
+    "documented": rule_documented,
 }
 
 

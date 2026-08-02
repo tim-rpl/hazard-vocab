@@ -13,8 +13,8 @@ Sequenced work items in topological order for the unit measured in
 [`measure-01-part2-part0.md`](../measure/measure-01-part2-part0.md).
 Items, dependencies and ordering only — *how* is the design stage.
 
-Assertions are numbered **PA1–PA34** to avoid collision with the measure
-document's A1–A40. Items are **P1–P16**, with P6 and P8 each split. The
+Assertions are numbered **PA1–PA40** to avoid collision with the measure
+document's A1–A40. Items are **P1–P18**, with P6 and P8 each split. The
 gate message for this document is in `review-inbox.md`.
 
 **Where a summary and the item table disagree, the table governs and the
@@ -203,7 +203,7 @@ dependency does not actually block it — demonstrated by starting it.
 
 ### The plan
 
-Seventeen items. **Edges are typed**, because conflating two kinds of
+Nineteen items. **Edges are typed**, because conflating two kinds of
 dependency was the largest defect in the first draft of this section:
 
 - **blocks-start** — the item cannot begin until its predecessor
@@ -219,7 +219,7 @@ dependency was the largest defect in the first draft of this section:
 | **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | Blocks P7 |
 | **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
 | **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | Blocks P6a, P7, P10 |
-| **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5 | P10 | Settled by ADR-001 Q1. Does **not** wait on P2 |
+| **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
 | **P6b** | `candidateMatch` relation, if the resolution strategy needs one | a Part 0 relation, or nothing | P2 | P10 | May be empty under option B — see PA11 |
 | **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | Slot count depends on P9's boundary — see PA12 |
 | **P8a** | Fixture capture, JSON-LD context, `make check` executing against P7's shape | `fixtures/`, a `check` that runs | P7 | **C17 axis 1** | "Green" ≠ "validating" — see PA13 |
@@ -230,7 +230,9 @@ dependency was the largest defect in the first draft of this section:
 | **P12** | Determine the implemented matching rule | closes L2's second half | **source access this repo lacks** | — | Permanently open — see PA9 |
 | **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | Blocks P14. H's file. See PA22 |
 | **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
-| **P16** | Allowlist this project's own namespace in the jurisdiction rule | a `make lint` a real Part 0 file can pass | — | — | **Blocks P6a's lint clause** (PA32, BV8). `scripts/` is human-owned |
+| **P16** | ~~Allowlist this project's own namespace~~ | **DONE before it was filed** — landed undeclared in commit `e1b1bdf` (BV13). Verified: all three BV8 namespaces now pass | — | — | Closed. See PA35 |
+| **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
+| **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | **DONE.** [`exp-01`](../experiments/exp-01-property-substitution.md) — C5 has affirmative evidence; C17 gains a third axis; invariant 4 has a wording gap | — | — | Ran 2026-08-02. Prediction held on the generated path |
 
 **PA4 — the order is three waves plus two items with no wave.** The
@@ -238,23 +240,35 @@ first draft wrote this as `P1 · P5 · P4 ‖ P3 · P2 · P10 · P6 · P7 · P8 
 P9`, which was pseudo-notation that did not say what `·` and `‖` bind
 and contradicted its own prose. Waves instead:
 
-**Derived view — non-normative.** This table is a hand-maintained second
-copy of the item table and has drifted from it three times in three
-amendments (PA20, PA26). **Where they disagree the item table governs
-and this view is the bug.** Kept for readability; a generated view would
-be the actual fix.
+**Generated from the item table by [`derive-waves.py`](derive-waves.py).** Levels are computed from the
+`Blocks-start` column. **Blocks-trust edges are deliberately not levels** —
+per PA6 they constrain whether an item's output is evidence, not when it
+can start.
 
-| Wave | Items | Why together |
-|---|---|---|
-| **1** | **P13 → P14**, then **P1, P3, P4, P5, P11** | P13/P14 first — see PA17. The rest have no predecessors and run alongside P14's 24-hour wait |
-| **2** | **P2, P10** | P2 needs P1; P10 needs P5. Independent of each other |
-| **3** | **P6a → P7 → P8a → P9 → P8b** | The authoring chain. P9 is the last modelling item; P8b is a mechanical re-run behind it (PA15) |
-| **—** | **P6b** | **Startable when P2 lands. No dependency on P6a or on the chain** (PA26). May be empty |
-| **—** | **P12** | Never startable here |
+The hand-maintained copy that stood here drifted from the item table
+**five times in five amendments**, and the fifth was the repair for the
+fourth. `derive-waves.py --check` fails if this block is stale.
 
-P6b may be empty (PA11), in which case the branch disappears.
-**Wave 1 has an internal order** — by external latency, and the ranking
-changed in amendment 5. See PA17.
+<!-- GENERATED by docs/plan/derive-waves.py — do not hand-edit. -->
+
+| Wave | Items |
+|---|---|
+| **1** | **P1**, **P3**, **P4**, **P5**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18** |
+| **2** | **P2**, **P6a**, **P10**, **P14** |
+| **3** | **P6b**, **P7** |
+| **4** | **P8a** |
+| **5** | **P9** |
+| **6** | **P8b** |
+| **—** | **P12** — not startable here: source access this repo lacks |
+
+**On its first run the generator found more drift than BV9 named.** The
+hand table had **P14 in wave 1** while its own row gives it
+`blocks-start: P13`, and **P6a in wave 3** when it is level 2. BV9 caught
+P15's absence; two further disagreements were sitting beside it,
+unreported by four consecutive reviews of that table.
+
+**Wave 1 has an internal order** — by external latency, not by size. See
+PA17.
 
 **PA20 — the item table is the plan; PA4's wave rendering was wrong,
 and it was cancelling PA11's headline benefit.** The table has P7
@@ -516,7 +530,7 @@ condition.
 | **P3** | ADR-003 records A or B, and `docs/coverage.md` plus ADR-002's modality table agree with it | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
 | **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25 | **L** |
-| **P6a** | **PA29 and PA30's decisions are answered first.** Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`**, and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each of those seven, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` — **blocked by P16, see PA32**; `flat-siblings.yaml` still passes | M |
+| **P6a** | **P17 answers PA29 and PA30's decisions first** (a blocks-start edge, not a sentence — BV12). Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`**, and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each of those seven, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` (P16 is **done**, BV13); `flat-siblings.yaml` still passes | M |
 | **P6b** | Either a `candidateMatch` relation exists, or a line records that the chosen option needs none | S–0 |
 | **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error, **and it carries an `sh:path` for `procedureKind`** — or ADR-003's record states the slot does not exist (PA28) | M |
 | **P8a** | **Under ADR-003 option B:** `make check` executes against ≥1 real AirNow **and** ≥1 real Open-Meteo capture and reports violations it can see. **Under option A:** AirNow only — Open-Meteo has no Part 2 shape to validate against (A5), and the Open-Meteo captures are retained as Part 3 fixtures for a later unit. See PA21 | M |
@@ -764,15 +778,15 @@ clause 3 ride on the same argument.
 | # | Term | Class · Part | Authored at | ADR-dependent? |
 |---|---|---|---|---|
 | 1 | `id` | `Entity` · 0 | **P6a** | No. The *minting rule* is open (A10) but the form is 1..1 under every option |
-| 2 | `identifierValue` | `Alias` · 0 | **P6a** | No — ADR-001 **Q1** settled it |
-| 3 | `identifierScheme` | `Alias` → SKOS · 0 | **P6a** | No — Q1 |
-| 4 | `issuingAuthority` | `Alias` → `Agent` · 0 | **P6a** | No — Q1 |
-| 5 | `assertedTime` | `Alias` · 0 | **P6a** | No — **and it may not belong in this list**, see below |
+| 2 | `identifierValue` | `Identifier` · 0 | **P6a** | No — ADR-001 **Q1** settled it |
+| 3 | `identifierScheme` | `Identifier` → SKOS · 0 | **P6a** | No — Q1 |
+| 4 | `issuingAuthority` | `Identifier` → `Agent` · 0 | **P6a** | No — Q1 |
+| 5 | `assertedTime` | `Identifier` · 0 | **P6a** | No — **and it may not belong in this list**, see below |
 | 6 | `crs` | `Geometry` · 0 | **P6a**, if at all | No — conditional on a GeoSPARQL decision, not on either ADR |
 | 7 | `elevation` | `Place` · 0 | **P6a** | No |
 | 8 | **`procedureKind`** | `Procedure` · **2** | **P7** | **YES — ADR-003** |
 | 9 | **`observingSystemStatus`** | absence/health · 2 | **P9** | No — and P5 must not claim it (PG7) |
-| 10 | `sourceVerificationTier` | source provenance · 0 | **P6a** | No |
+| 10 | `sourceVerificationTier` | **carrier undecided — P17** · 0 | **P6a** | No |
 
 **One of ten is ADR-dependent. It is a Part 2 slot and it is authored at
 P7, which blocks-start on P3.** Nine are authored at P6a or P9 and none
@@ -1023,6 +1037,152 @@ not discovered later.**
   the first time `vocab/core/` holds more than one file. **That is P6a
   or the unit after it.** Flag it as a finding when it fires; do not
   work around it.
+
+---
+
+**PA35 — BV9–BV12. The wave view is generated now, and the generator
+found more drift than BV9 named.**
+
+Four repairs landed in prose instead of in the table, which is the third
+time this plan has been blocked on prose-not-table and the fifth
+wave-table drift in five amendments — the fifth being the repair for the
+fourth. I have said twice that generation is the fix and the label is
+mitigation. This acts on it.
+
+[`derive-waves.py`](derive-waves.py) reads the item table's
+`Blocks-start` column, computes topological levels and prints the view.
+`--check` fails if the embedded block is stale. **The hand-maintained
+copy is deleted**, not annotated.
+
+**On its first run it failed, and not only where BV9 said.** BV9 caught
+that P15 was absent. The generator also found:
+
+- **P14 was in wave 1** while its own row gives it `blocks-start: P13`.
+- **P6a was in wave 3** when it is level 2.
+
+Both were sitting beside the drift BV9 reported, unnoticed by four
+consecutive reviews of that table. That is the argument for generation
+stated as a measurement rather than as a principle: the hand copy was
+wrong in three places and the review process found one.
+
+Two properties worth stating, because a generator can be wrong silently:
+
+- **Blocks-trust edges are deliberately not levels.** Per PA6 they
+  constrain whether an item's output is evidence, not when it can start.
+  A generator that levelled them would have moved P9 behind P14 and
+  changed the plan.
+- **Prose in the dependency column is not read as an edge.** P12's cell
+  says "source access this repo lacks"; it is reported as *not startable
+  here* rather than parsed into a dependency or silently dropped.
+
+**Falsifier:** an item whose generated level contradicts its own row, or
+a `--check` pass over a document whose wave block disagrees with the
+item table.
+
+**PA36 — BV10 and BV12. Two edges that were prose are now edges, and one
+of them required inventing the item it points at.**
+
+- **BV10** — P16's relation to P6a lived in a Notes cell. It is moot:
+  P16 is closed (PA35a below), and P6a's criterion no longer references
+  it.
+- **BV12** — PA30 called its precondition *"a new blocks-start edge on
+  P3's sibling — the design gate."* **The design gate is not an item, so
+  it could not be an edge.** That is why the repair landed in prose: I
+  described an edge to something the table cannot name. The fix is
+  **P17**, an item that decides PA29's `crs` question and PA30's carrier
+  question, with `P6a blocks-start: P5, P17`.
+
+I named this failure mode in BR-3 and again in PA27 — *an item added to
+close a finding can leave the finding open if the reason lives only in
+prose* — and then did it twice more in one amendment.
+
+**PA37 — BV11. PA25's Class column now says what PA30 says it says.**
+Rows 2–5 read `Identifier`; row 10 reads *carrier undecided — P17*.
+PA30 asserted the correction had been made and it had not, which is
+§5.2 item 4 inside a single document.
+
+**PA35a — BV13. P16 was done before it was filed, and the change was
+undeclared.** `own-namespace.yaml` and a 50-line `drift-lint.py` change
+landed in commit `e1b1bdf` — my P15 commit — and my P15 message declared
+none of it. P16 is closed and *"blocked by P16"* is out of P6a's
+criterion.
+
+The declare-don't-discover rule puts the assertion in the next
+`[H → O]` message; the P15 result **was** that message. O found it by
+checking `git status` and mtimes, for the second consecutive pass.
+
+**PA38 — BV14 and BV15/C20, declared per the tooling rule, verified by
+running.**
+
+| Change | Verified |
+|---|---|
+| `make lint-selftest` | **26 pairs, 7/7 rules with demonstrated recall** (was 23, 6/6) |
+| `documented` rule — requires `description` and `examples`, rejects `TODO`/`TBD`/`FIXME` | present; `undocumented.yaml` fixture in place |
+| BV14 fix — `default_prefix` honoured only when it agrees with `id:` | `default-prefix-escape.yaml` present as a **recall** case |
+
+**BV14's framing is the part to carry, and it is not about this fix.**
+BV8 was a **precision** failure; its repair introduced a **recall**
+failure; and the fixture shipped with the repair demonstrated precision
+only. *A repair that closes one direction and is tested in that
+direction alone is how a fix introduces a counterexample.* That is the
+seventh C18 counterexample and the first introduced by a repair.
+
+**BV15/C20** — invariant 7 claimed lint enforced `description` and
+`examples` and nothing did, so P6a's *"validates under `make lint`"*
+would have admitted a fully undocumented core. C6 rests on invariant 7
+and has no other guard.
+
+**PA39 — C5's carrier is now an item.** O's disposition is sharper than
+my "conditional": the shape that makes C5 true **cannot be generated**,
+**cannot be hand-added where validation reads** (invariant 1 forbids
+editing `build/`, and `make check` reads only `build/shapes.ttl`), and
+appears in **no item's definition of done** — `sh:equals` occurs zero
+times in `docs/plan/`. That is BV4's shape applied to a claim instead of
+to a slot: the thing the conclusion rests on is unowned.
+
+**P18** owns it, and it is a decision item, not an implementation:
+hand-written SHACL beside generated (breaks invariant 1), a generator
+emitting cross-slot constraints from LinkML `annotations:` (preserves
+single-source, real work), or accepting them as out of scope and losing
+C5's affirmative evidence with them.
+
+Worth recording what O noted about the register: **the restatement C5's
+own entry proposed during the sweep — "raises a validation violation
+under `make check`" — has now been executed, and on the generated path
+it conforms.** Had that restatement been adopted, C5 would be entering
+`falsified` today. The claim survives because it was not sharpened, and
+that is not a comfortable reason to survive.
+
+**PA40 — BV16, and the diagnosis matters more than the third attempt.**
+
+`RecordedNotDeleted` was not a tie. **`Monotone merge` implies it for
+every `rel`** — the `rel x y` hypothesis is discarded — so conjuncts 2
+and 3 of `AdequateC13` were discharged by properties of `merge` alone.
+O's theorem is now in the file as
+`recorded_is_implied_by_monotone_for_any_rel`, kept as a refutation.
+
+**The smaller finding is the one that explains both failures.**
+`Distinguishes corrects supersedes` and `Monotone merge` **quantify over
+disjoint variables**. Neither could imply the other — there is no shared
+subject for an implication to run through. So they were never two halves
+of one condition; they were two conditions, and proving they do not
+imply each other demonstrated nothing about their relationship. My
+commentary called them independent halves; that was wrong for a better
+reason than the bidirectional overreach it replaced.
+
+**Third attempt:** `DistinguishesIn` requires the witnesses to be facts
+**present in a set**, and `PreservesDistinction merge corrects
+supersedes` requires merging not to destroy the distinction. All three
+subjects appear; the witnesses live in the merged set.
+`union_preserves_distinction` shows it is meetable and
+`retracting_merge_loses_distinction` shows it bites.
+
+**And its limit is stated in the file rather than left to a fourth
+round:** it does not establish that the relations are the ones an
+implementation actually uses, and nothing at this abstraction can,
+because they are parameters. C13 is discharged by an implementation
+exhibiting the condition for **its own** merge and relations — and
+`transform/` is still one `.gitkeep`.
 
 ---
 

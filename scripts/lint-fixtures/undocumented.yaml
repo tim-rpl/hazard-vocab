@@ -1,0 +1,15 @@
+# DELIBERATELY VIOLATING — placeholder descriptions and no examples.
+# CLAUDE.md invariant 7 claimed lint enforced this and nothing did.
+# See claims.md C20.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_undocumented
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+slots:
+  identifierValue:
+    description: TODO
+classes:
+  Asset:
+    description: TODO
+    slots: [identifierValue]

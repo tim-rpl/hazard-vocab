@@ -758,6 +758,23 @@ roughly a day of scripting.
   falsifier is a constraint that survives `gen-shacl` and has no
   analogue in Y, and it is executable without reference to anyone's
   estimate of a day.
+
+  **2026-08-02 — the watch list gains a stronger argument than
+  portability, verified by running it. Status unchanged; the entry is
+  still unfalsifiable as stated.** `rules` and `equals_expression` are
+  on this claim's falsifier as LinkML-only and non-portable. P15, and
+  O's independent reproduction, show they are also **non-functional**:
+  both are accepted by linkml 1.11.1 at exit 0 with empty stderr and
+  generate no cross-slot construct at all (C17 axis 3). Avoiding them
+  therefore costs nothing and does not depend on ever migrating, which
+  removes the only reason a project might have taken the trade
+  deliberately.
+
+  This does not move the status. It narrows the exposure the falsifier
+  was written to catch — and it does so by making two of the three named
+  constructs irrelevant rather than by testing the day-of-scripting
+  claim, which is still untested and still the part that carries the
+  assertion.
 - **Updated:** 2026-08-02
 
 ### C5 — The canonical layer unlocks something
@@ -814,6 +831,44 @@ answered today and that the canonical layer answers.
   conforms. That is one schema fragment and two instances, it can be run
   by anyone, and it fails today — which makes it the strongest available
   test of C5 and simultaneously a second measurement of C17.
+
+  **2026-08-02 — the restatement above was executed (P15,
+  [`exp-01`](docs/experiments/exp-01-property-substitution.md)), and O
+  reproduced it independently from scratch. First affirmative evidence
+  this claim has had. Status unchanged, for a reason the experiment
+  itself supplies.**
+
+  Reproduction, built fresh from the record's prose — one
+  `ExceedanceCheck` class carrying both sides of the comparison, two
+  instances, linkml 1.11.1 `gen-shacl` + pyshacl 0.40.1 from `.venv`:
+
+  | Shapes | Case A — composite `us_aqi` 160 vs a PM2.5 threshold of 35.5 µg/m³ | Case B — correct |
+  |---|---|---|
+  | `gen-shacl` output as generated | **Conforms: True** | Conforms: True |
+  | the same shapes + a hand-written `sh:equals` | **Conforms: False** | Conforms: True |
+
+  **The affirmative half is real.** *"Is this comparison well-typed?"* is
+  a question that is not answerable today and that SHACL answers, with a
+  usable message. That is a candidate satisfier for C5.
+
+  **The condition on it is load-bearing and currently has no carrier.**
+  `sh:equals` is not generable: `equals_expression` on the slot and a
+  class-level `rules:` block were **both accepted, exit 0, empty stderr,
+  and emitted zero cross-slot constructs** — reproduced here on all
+  three variants (7 `sh:path` each, `sh:equals`/`sh:sparql`/`sh:lessThan`
+  all 0). And the hand-written shape has nowhere to live: `make check`
+  validates against `build/shapes.ttl` alone, `make gen` regenerates
+  that file wholesale, invariant 1 forbids hand-editing anything under
+  `build/`, and `sh:equals` occurs **0 times** in `docs/plan/`. No item
+  produces a hand-maintained shapes file or a merge step.
+
+  So C5's strongest candidate answer is demonstrated and unreachable
+  through the pipeline as built. Recording it as satisfying C5 would
+  record a capability the project cannot currently exercise. It stays
+  `asserted`, and the gap is now named rather than implicit.
+
+  C5 also remains **unfalsifiable as stated** — the sweep finding above
+  is untouched by this experiment.
 - **Updated:** 2026-08-02
 
 ### C6 — The vocabulary is LLM-legible
@@ -1150,6 +1205,51 @@ The model can express "the earlier fact was wrong" separately from
   `Monotone merge`) is not stated as a theorem. Recorded because the
   §4 discipline is to read what an artifact states, not what its
   surrounding prose claims for it.
+
+  **BV2 round 3, 2026-08-02 (plan-gate block verification 3). The tie
+  still does not tie, and this time it is machine-checked.** BR-7
+  replaced the conjunction with `RecordedNotDeleted merge rel :=
+  ∀ a b x y, rel x y → a x → a y → merge a b x ∧ merge a b y`, asserting
+  that it "quantifies the relation over the merge, so `corrects` and
+  `supersedes` must be about the merged fact set rather than sitting
+  beside it." **That is false, and the refutation is three lines:**
+
+  ```lean
+  theorem recorded_is_implied_by_monotone_for_any_rel {F : Type}
+      (merge : FactSet F → FactSet F → FactSet F)
+      (hm : Monotone merge) (rel : F → F → Prop) :
+      RecordedNotDeleted merge rel :=
+    fun a b x y _ hx hy => ⟨hm a b x hx, hm a b y hy⟩
+  ```
+
+  `Monotone merge` implies `RecordedNotDeleted merge rel` for **every**
+  `rel`. The `rel x y` hypothesis is never used. So the predicate
+  constrains the merge and constrains the relation not at all, which is
+  the same defect one level down: the second and third conjuncts of
+  `AdequateC13` are discharged by the first property of `merge` alone.
+
+  **BV2's original scenario re-run against the new definition, and it
+  survives verbatim** — using H's own `Bool` relations from
+  `distinguishes_does_not_give_monotone`, which have nothing to do with
+  any fact set:
+
+  ```lean
+  theorem bv2_scenario_still_satisfies_adequate :
+      AdequateC13 (fun (a b : FactSet Bool) => fun f => a f ∨ b f)
+        (fun x _ : Bool => x = true) (fun x _ : Bool => x = false) := ...
+  ```
+
+  Both elaborate against the committed `Merge.lean` under
+  `lake env lean`, no `sorry`, no error, with a deliberately false
+  control (`(0:Nat) = 1`) confirming the elaboration is real.
+
+  Smaller, same section: `Distinguishes corrects supersedes` and
+  `Monotone merge` quantify over disjoint variables, so neither *could*
+  imply the other and "neither half implies the other" is not a
+  property of the pair. `distinguishes_does_not_give_monotone` closes
+  the direction BR-5 overreached on and the overreach is corrected, but
+  what the two theorems jointly establish is weaker than independence —
+  it is that the conjuncts share no subject.
 - **Updated:** 2026-08-02
 - **Note:** L5 is not wrong, but it is incomplete. Do not withdraw it —
   add correction as a second, distinct relation.
@@ -1241,7 +1341,37 @@ does not declare.
   `make gen` or `make check` inspects the external term. Every external
   binding is exposed, and the error is invisible precisely where a
   binding is wrong.
-- **Updated:** 2026-08-01
+
+  **Third axis, added 2026-08-02 by P15 and reproduced independently by
+  O. It is the sharpest of the three. LinkML accepts a constraint
+  expression and emits no shape for it.**
+
+  | Source construct | `gen-shacl` | `sh:path` | cross-slot constructs emitted |
+  |---|---|---|---|
+  | baseline, no constraint | exit 0 | 7 | 0 |
+  | `equals_expression: "{thresholdProperty}"` on the slot | **exit 0**, empty stderr | 7 | **0** |
+  | class-level `rules:` block, same postcondition | **exit 0**, empty stderr | 7 | **0** |
+
+  Checked for `sh:equals`, `sh:sparql`, `sh:disjoint` and `sh:lessThan`;
+  all zero in every variant. The gap is **not** expressive poverty in the
+  target language — SHACL Core carries `sh:equals`, and hand-adding it to
+  the generated shapes rejects the bad instance and passes the good one
+  (see C5).
+
+  All three axes fail toward "pass". Axes 1 and 2 leave an artifact that
+  can be inspected — a context that omits a key, a shape whose datatype
+  contradicts the bound term. **Axis 3 leaves none:** the author writes
+  the constraint, the generator accepts it without warning, and the
+  constraint is simply absent from the output. This is the case where
+  the work was done and the belief that it is in force is wrong.
+
+  **Incidental, confirmed by running it, and it lands on P8a.** LinkML
+  `float` generates `sh:datatype xsd:float`; an untyped JSON-LD numeric
+  expands to `xsd:double`. Every numeric in a fixture then raises
+  `DatatypeConstraintComponent` — *"Value is not Literal with datatype
+  xsd:float"*, pointing at the datatype rather than at the `@context`
+  that caused it. P8a authors that context by hand.
+- **Updated:** 2026-08-02
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
   failure direction for a falsification-driven project.
@@ -1434,6 +1564,45 @@ rule, and does not fire on content that complies.
   superseded rather than deleted — the precision failures they record
   actually happened, and an empty template stub is not history. No other
   entry in the register carries duplicate fields; C18 was the only one.
+
+  **Round 5, 2026-08-02 — a seventh counterexample, and it is the first
+  one this register has recorded that was *introduced by a fix*. Status
+  unchanged.**
+
+  The sixth counterexample (BV8, round 4) was a precision failure: the
+  `jurisdiction` rule ran `check_uri` over every `prefixes:` entry, so no
+  namespace this project could choose was admitted and the first Part 0
+  file the project authored for itself could not pass `make lint`. That
+  is now fixed in `scripts/drift-lint.py` by a self-reference exemption,
+  with `scripts/lint-fixtures/own-namespace.yaml` as a precision fixture;
+  `lint-selftest` reports **23 rule/fixture pairs, 6/6 rules with
+  demonstrated recall** (the 22 / 20 figures above are superseded, not
+  wrong when written). Verified by running all three BV8 namespaces —
+  `w3id.org/hazard-vocab/`, `hazard-vocab.org/ns/`, `example.org/hv/` —
+  which previously all fired and now all exit 0.
+
+  **The exemption keys on `default_prefix`, and that is a recall hole
+  that reopens closed counterexample c1.** The guard builds its
+  self-reference set from `id:` *and* from whatever namespace
+  `default_prefix` points at, then exempts any URI with that prefix. So
+  the F13 case, closed in round 2, passes again on a one-line change:
+
+  | File | `default_prefix` | `irwin: https://w3id.org/nwcg/irwin/` | Result |
+  |---|---|---|---|
+  | c1 replay | `hv` | on a slot's `slot_uri` | **exit 1** — fires, correct |
+  | identical content | **`irwin`** | same slot, same URI | **exit 0, all five rules `ok`** |
+
+  C18's falsifier is *"a jurisdiction-specific scheme that passes all
+  five rules."* It does. This is a **recall** failure — the worse
+  direction, and the one that fails silently — arriving as the direct
+  consequence of repairing a precision failure, with a fixture written
+  for the precision direction and none for the recall direction.
+
+  The general shape, since it is the second instance this week: a
+  precision fix narrows what a rule inspects, and a fixture that
+  demonstrates the narrowing was correct does not demonstrate that
+  nothing else fell through it. `lint-selftest`'s 6/6 counts recall per
+  *rule*, not per *exemption*.
 - **Updated:** 2026-08-02
 - **Cheapest test — superseded 2026-08-02.** *"Two throwaway files per
   rule — one violating, one compliant — run `make lint`, confirm it
@@ -1466,3 +1635,52 @@ rule, and does not fire on content that complies.
 - **Consequence if falsified on recall:** C1, C4, and the vacuity rule
   are unenforced, and any `tested` status resting on a clean `make lint`
   is unsupported.
+
+### C20 — Every class and slot is documented, and lint enforces it
+Every class and slot in `vocab/` carries a `description` and an
+`examples` entry, and `make lint` fails when one does not.
+
+- **Status:** `falsified`
+- **Falsifier:** a schema file with a class or a slot lacking either a
+  `description` or an `examples` entry that `make lint` accepts.
+- **Evidence:** 2026-08-02 — **falsified on the enforcement half at the
+  first attempt.** `CLAUDE.md` invariant 7 states *"Every class and slot
+  needs a `description` and an `examples` entry. Lint enforces it."*
+  Nothing enforces it.
+
+  `make lint` runs exactly three things: a `grep` for
+  `structured_pattern|classification_rules` (C4), `scripts/lean-lint.py`
+  over `design/lean` (the vacuity rule), and `scripts/drift-lint.py`
+  over `vocab/core/`. `drift-lint.py`'s five rules are
+  `inline-attributes`, `is-a-depth`, `exact-mappings`, `role-named` and
+  `jurisdiction`. **None inspects `description` or `examples`**;
+  `grep -rn examples scripts/*.py Makefile` returns one hit, inside a
+  comment.
+
+  Counterexample run: a Part 0 candidate declaring eight classes and
+  twelve slots, every `description` the literal string `TODO` and **not
+  one `examples` entry anywhere**, passes `drift-lint.py` clean — five
+  rules `ok`, exit 0 — and `gen-shacl` emits its shapes at exit 0.
+
+  **Consequence, and it is why this is worth a register entry rather
+  than a note.** P6a's definition of done includes *"the core validates
+  under `make lint`"*. That clause does not carry invariant 7, so the
+  first real Part 0 file can be declared done undocumented. The
+  invariant's own stated justification — *"Free documentation and
+  grounding for both humans and models"* — is what C6 (LLM-legibility)
+  rests on, and C6 has no other guard.
+
+  The claim is filed as two halves because they can fail separately: the
+  documentation half is untestable while `vocab/` is empty, and the
+  enforcement half is falsified now.
+- **Promotion note:** promoted by O under FALSIFIER §6 at the plan-gate
+  block verification 3, 2026-08-02. It generalises beyond the gate — it
+  is about the repository's guard set rather than about plan 01 — and no
+  existing entry covers it: C18's falsifier names C1, C4 and the vacuity
+  rule, and invariant 7 is none of the three. Entering directly as
+  `falsified` rather than `asserted` follows C17's recorded precedent
+  (the counterexample preceded the claim); the deviation from the
+  register's "new claims enter as `asserted`" rule is recorded here
+  rather than left silent. **`CLAUDE.md` is human-owned — invariant 7 is
+  reported, not edited.**
+- **Updated:** 2026-08-02

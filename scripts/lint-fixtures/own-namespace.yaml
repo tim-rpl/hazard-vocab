@@ -13,9 +13,13 @@ imports: [linkml:types]
 slots:
   identifierValue:
     description: The literal value of an identifier under some scheme.
+    examples:
+      - value: "2026-OR-ABC-000123"
     slot_uri: hv:identifierValue
 classes:
   Asset:
     description: A thing that can be assigned, exposed, or observed with.
+    examples:
+      - value: an air-quality monitoring site
     class_uri: hv:Asset
     slots: [identifierValue]

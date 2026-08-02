@@ -46,7 +46,13 @@ These are not preferences. Violating one is a bug.
 
 7. **Every class and slot needs a `description` and an `examples`
    entry.** Free documentation and grounding for both humans and
-   models. Lint enforces it.
+   models, and the only guard claims.md C6 has.
+
+   Enforced by `drift-lint.py`'s `documented` rule, which also rejects
+   placeholder descriptions (`TODO`, `TBD`, `FIXME`, and the like).
+   Before that rule existed this invariant said "Lint enforces it" and
+   nothing did — a schema with eight classes, twelve slots, `TODO`
+   throughout and zero examples passed clean. See claims.md C20.
 
 ## Roles and the ARC gate
 

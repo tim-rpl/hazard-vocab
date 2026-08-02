@@ -33,6 +33,10 @@ What this file now guarantees, in place of the claim that was wrong:
   `semilattice_of_total_resolver`, the latter being the L4 sufficiency
   direction that survives as L4a. Named rather than numbered — line
   references in a header note drift on the first edit.
+* Every refuted statement is retained as an explicit refutation rather
+  than deleted.
+* Do not "fix" a `sorry` by weakening a conclusion, and do not add one
+  to a statement you have not tried to refute first.
 
 **And a `sorry` count is not an honesty measure.** The first version of
 this note added `monotone_under_source_addition` "carries none — it is
@@ -61,10 +65,7 @@ second needs someone to attempt a refutation before writing the `sorry`.
 `sorry`, and reads as an honest theorem — and is caught only by reading
 the proof body. Nothing catches the third today; it is a review item,
 not a lint item.
-* Every refuted statement is retained as an explicit refutation rather
-  than deleted.
-* Do not "fix" a `sorry` by weakening a conclusion, and do not add one
-  to a statement you have not tried to refute first. -/
+-/
 
 variable {S : Type}
 
@@ -276,38 +277,101 @@ their relationship. `RecordedNotDeleted` is the tie — it quantifies the
 relation *over the merge*, so the relations must be about the merged
 fact set rather than sitting beside it.
 
-Independence is now machine-checked **in both directions**:
-`monotone_does_not_give_distinguishes` and
-`distinguishes_does_not_give_monotone`. An earlier commentary asserted
-"neither half implies the other" with only the first proved — a
-bidirectional claim on unidirectional evidence, which is the same defect
-in prose that this file exists to keep out of theorems. -/
+Two theorems record what the earlier attempts established, and the
+commentary around them has been wrong twice. First it asserted "neither
+half implies the other" with only one direction proved — a bidirectional
+claim on unidirectional evidence. Then, with both proved, it called them
+**independent halves of one condition**, which is also wrong and for a
+better reason: `Distinguishes corrects supersedes` and `Monotone merge`
+**quantify over disjoint variables**, so neither *could* imply the
+other. There is no shared subject for an implication to run through.
+Two conditions sharing no argument are not two halves of one condition;
+they are two conditions, and proving they do not imply each other
+demonstrates nothing about their relationship. -/
 
-/-- **The tie BV2 asked for.** A relation is *recorded rather than
-    enacted by deletion* when, for any two facts it relates, both
-    survive the merge. This is what makes `corrects` and `supersedes`
-    relations **about the merged fact set** rather than arbitrary
-    predicates that happen to sit beside it. -/
+/-- `RecordedNotDeleted` was the second attempt at a tie and it is not
+    one. **`Monotone merge` implies it for every `rel`** — the `rel x y`
+    hypothesis is discarded, which the `_` below makes visible. It says
+    something about the merge and nothing about the relation. Kept as a
+    refutation rather than deleted, per this file's convention. -/
 def RecordedNotDeleted {F : Type}
     (merge : FactSet F → FactSet F → FactSet F) (rel : F → F → Prop) : Prop :=
   ∀ (a b : FactSet F) (x y : F), rel x y → a x → a y → merge a b x ∧ merge a b y
 
-/-- The condition C13 actually requires. The first conjunct is about the
-    relations, the second and third **tie each of them to the merge** —
-    a conjunction of two independent obligations was BV2's objection to
-    the previous version, and it was right. -/
+theorem recorded_is_implied_by_monotone_for_any_rel {F : Type}
+    (merge : FactSet F → FactSet F → FactSet F)
+    (hm : Monotone merge) (rel : F → F → Prop) :
+    RecordedNotDeleted merge rel :=
+  fun a b x y _ hx hy => ⟨hm a b x hx, hm a b y hy⟩
+
+/-! ### The third attempt, and what it does and does not achieve
+
+The diagnosis that made the first two fail: `Distinguishes corrects
+supersedes` and `Monotone merge` **quantify over disjoint variables**.
+Neither could imply the other, because there is no shared subject for an
+implication to run through — so they were never two halves of one
+condition, they were two conditions. `RecordedNotDeleted` did not fix
+that; it merely moved `merge` into a predicate that ignores its other
+argument.
+
+A tie has to make them share a subject. This one does: it says
+distinguishability must be **witnessed inside a fact set**, and must
+**survive merging**. All three of `merge`, `corrects` and `supersedes`
+appear in it, and the witnesses are facts the merge operates on. -/
+
+/-- Distinguishability *witnessed in a given fact set* — the witnesses
+    must be facts actually present, not arbitrary inhabitants of `F`. -/
+def DistinguishesIn {F : Type} (s : FactSet F)
+    (corrects supersedes : F → F → Prop) : Prop :=
+  (∃ x y, s x ∧ s y ∧ corrects x y ∧ ¬ supersedes x y) ∧
+  (∃ x y, s x ∧ s y ∧ supersedes x y ∧ ¬ corrects x y)
+
+/-- **The tie.** Merging may not destroy the distinction. Shares all
+    three subjects, and the witnesses live in the merged set. -/
+def PreservesDistinction {F : Type}
+    (merge : FactSet F → FactSet F → FactSet F)
+    (corrects supersedes : F → F → Prop) : Prop :=
+  ∀ a b, DistinguishesIn a corrects supersedes →
+         DistinguishesIn (merge a b) corrects supersedes
+
+/-- The condition C13 requires. -/
 def AdequateC13 {F : Type}
     (merge : FactSet F → FactSet F → FactSet F)
     (corrects supersedes : F → F → Prop) : Prop :=
   Distinguishes corrects supersedes ∧
-  RecordedNotDeleted merge corrects ∧
-  RecordedNotDeleted merge supersedes
+  PreservesDistinction merge corrects supersedes
 
-/-- Non-vacuity: union satisfies the tie, so the condition is meetable
-    and `AdequateC13` is not unsatisfiable by construction. -/
-theorem union_records_not_deletes {F : Type} (rel : F → F → Prop) :
-    RecordedNotDeleted (fun (a b : FactSet F) => fun f => a f ∨ b f) rel :=
-  fun _ _ _ _ _ hx hy => ⟨Or.inl hx, Or.inl hy⟩
+/-- Non-vacuity: union preserves the distinction, so the condition is
+    meetable. -/
+theorem union_preserves_distinction {F : Type} (c s : F → F → Prop) :
+    PreservesDistinction (fun (a b : FactSet F) => fun f => a f ∨ b f) c s := by
+  rintro a b ⟨⟨x, y, hx, hy, hc, hs⟩, ⟨u, v, hu, hv, hs', hc'⟩⟩
+  exact ⟨⟨x, y, Or.inl hx, Or.inl hy, hc, hs⟩,
+         ⟨u, v, Or.inl hu, Or.inl hv, hs', hc'⟩⟩
+
+/-- And it bites: a merge that discards its first argument can lose the
+    distinction outright. This is what `RecordedNotDeleted` could not
+    say, because a discarded hypothesis cannot constrain anything. -/
+theorem retracting_merge_loses_distinction :
+    ¬ PreservesDistinction (fun (_ b : FactSet Bool) => b)
+        (fun x _ : Bool => x = true) (fun x _ : Bool => x = false) := by
+  intro h
+  have hd : DistinguishesIn (fun _ => True) (fun x _ : Bool => x = true)
+      (fun x _ : Bool => x = false) :=
+    ⟨⟨true, true, trivial, trivial, rfl, by simp⟩,
+     ⟨false, false, trivial, trivial, rfl, by simp⟩⟩
+  obtain ⟨⟨x, _, hx, _, _, _⟩, _⟩ := h (fun _ => True) (fun _ => False) hd
+  exact hx
+
+/-! **What this does not achieve, stated rather than left to a fourth
+round.** `PreservesDistinction` ties the three subjects together and
+excludes a retracting merge. It does **not** establish that the
+relations are the ones an implementation actually uses for correction
+and supersession — nothing at this level of abstraction can, because
+`corrects` and `supersedes` are parameters. The remaining gap is not a
+missing theorem; it is that C13 is discharged by an implementation
+exhibiting this condition **for its own merge and its own two
+relations**, and `transform/` is still one `.gitkeep`. -/
 
 /-- Monotonicity does not give distinguishability. Union is monotone and
     still fails the condition when one relation does both jobs. -/
@@ -318,9 +382,10 @@ theorem monotone_does_not_give_distinguishes {F : Type} (r : F → F → Prop) :
 
 /-- **The converse, which BR-5 asserted on one-directional evidence.**
     Distinguishability says nothing about the merge: two relations can
-    be perfectly distinguishable while the merge retracts. With the
-    above, "neither half implies the other" is now machine-checked in
-    both directions rather than in one. -/
+    be perfectly distinguishable while the merge retracts. True, and it
+    closes the direction BR-5 overreached on — but see the section note:
+    the two conditions share no variable, so non-implication was never
+    in doubt and is not evidence of a tie. -/
 theorem distinguishes_does_not_give_monotone :
     Distinguishes (fun x _ : Bool => x = true) (fun x _ : Bool => x = false) ∧
     ¬ Monotone (fun (_ b : FactSet Bool) => b) := by
