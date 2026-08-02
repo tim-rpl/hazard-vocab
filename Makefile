@@ -22,8 +22,7 @@ lint:
 	@! grep -rnE --include='*.yaml' --include='*.yml' 'structured_pattern|classification_rules' vocab/ \
 		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
 	@echo "L: no vacuous theorems in design/lean"
-	@! grep -rnE --include='*.lean' ':[[:space:]]*True[[:space:]]*:=' design/lean/ \
-		|| (echo "FAIL: theorem concluding True proves nothing and emits no warning."; exit 1)
+	@$(BIN)python scripts/lean-lint.py design/lean
 	@echo "C1 + C19: jurisdiction and declarative-drift rules"
 	@$(BIN)python scripts/drift-lint.py vocab/core/
 	@echo "lint ok"

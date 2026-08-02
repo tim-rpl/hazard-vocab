@@ -17,6 +17,8 @@ import sys
 HERE = pathlib.Path(__file__).parent
 FIX = HERE / "lint-fixtures"
 LINT = HERE / "drift-lint.py"
+LEAN_LINT = HERE / "lean-lint.py"
+LEAN_FIX = HERE / "lean-fixtures"
 
 # (rule, fixture, must_fire, why)
 CASES = [
@@ -41,6 +43,17 @@ CASES = [
     ("jurisdiction",      "flat-siblings",       False, "precision"),
     ("jurisdiction",      "generic-acronyms",    False, "precision — CRS, UTC, EPSG are not jurisdictions"),
     ("jurisdiction",      "bound-vocabularies",  False, "precision — F11, every vocabulary CLAUDE.md binds"),
+]
+
+
+# Lean vacuity rule. Separate binary, same discipline: a guard nobody
+# exercises is a guard that has only ever been observed being wrong.
+# (rule, fixture, must_fire, why)
+LEAN_CASES = [
+    ("lean-vacuity", "vacuous-theorem",          True,
+     "recall — a theorem concluding True"),
+    ("lean-vacuity", "comment-mentions-pattern", False,
+     "precision — BR-7, the pattern written out in a comment"),
 ]
 
 
@@ -82,6 +95,29 @@ def main() -> int:
             print(f" FAIL  case references `{m}.yaml`, which does not exist")
         failures.append(f"missing fixtures: {', '.join(missing)}")
 
+    for rule, fixture, must_fire, why in LEAN_CASES:
+        path = LEAN_FIX / f"{fixture}.lean"
+        if not path.exists():
+            failures.append(f"[{rule}] fixture missing: {path}")
+            continue
+        r = subprocess.run([sys.executable, str(LEAN_LINT), str(path)],
+                           capture_output=True, text=True)
+        fired = r.returncode != 0
+        ok = fired == must_fire
+        print(f"{'  ok  ' if ok else ' FAIL '} [{rule}] {fixture}.lean — {why}")
+        if not ok:
+            failures.append(
+                f"[{rule}] {fixture}.lean: expected "
+                f"{'a violation' if must_fire else 'no violation'}, "
+                f"got the opposite")
+
+    lean_on_disk = {p.stem for p in LEAN_FIX.glob("*.lean")}
+    lean_orphans = sorted(lean_on_disk - {f for _, f, _, _ in LEAN_CASES})
+    if lean_orphans:
+        for o in lean_orphans:
+            print(f" FAIL  fixture `{o}.lean` is referenced by no case")
+        failures.append(f"unreferenced lean fixtures: {', '.join(lean_orphans)}")
+
     rules = subprocess.run([sys.executable, str(LINT), "--rules"],
                            capture_output=True, text=True).stdout.split()
     with_recall = {r for r, _, f, _ in CASES if f}
@@ -95,8 +131,10 @@ def main() -> int:
         for f in failures:
             print(f"  {f}")
         return 1
-    print(f"\nlint-selftest ok — {len(CASES)} rule/fixture pairs, "
-          f"{len(with_recall)}/{len(rules)} rules with demonstrated recall")
+    total = len(CASES) + len(LEAN_CASES)
+    print(f"\nlint-selftest ok — {total} rule/fixture pairs, "
+          f"{len(with_recall) + 1}/{len(rules) + 1} rules with demonstrated "
+          f"recall (including lean-vacuity)")
     return 0
 
 

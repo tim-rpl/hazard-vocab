@@ -46,17 +46,21 @@ separate merges — `retracting_merge_not_monotone` and
 `union_merge_monotone`.
 
 The general lesson, since this is the fourth instance of the family: an
-artifact can fail by concluding `True` and so proving nothing, by
-carrying a `sorry` that can never close (the two removed here), or by
-proving a hypothesis from itself. The first is lint-catchable, the
-second needs a refutation attempt, and **the third looks like completed
-work and is caught only by reading the proof body.**
+artifact can fail in three ways, and they are not equally visible:
 
-(The literal pattern for the first is not written out above: the
-vacuity lint greps `*.lean` for it and fired on this very sentence when
-it was. That is a precision failure of the rule and is reported as a
-finding, not worked around silently — the workaround is only here so
-the build stays green while the rule is human-owned.)
+1. **By concluding `True`** — `theorem foo : True := by trivial`. It
+   elaborates without warning and proves nothing.
+2. **By carrying a `sorry` that can never close**, because the statement
+   is refutable. The two removed from this file were of this kind.
+3. **By proving a hypothesis from itself** — `theorem foo (h : P) : P :=
+   h`. This is what `monotone_under_source_addition` did.
+
+The first is mechanically catchable and `make lint` catches it. The
+second needs someone to attempt a refutation before writing the `sorry`.
+**The third looks like completed work** — it elaborates, carries no
+`sorry`, and reads as an honest theorem — and is caught only by reading
+the proof body. Nothing catches the third today; it is a review item,
+not a lint item.
 * Every refuted statement is retained as an explicit refutation rather
   than deleted.
 * Do not "fix" a `sorry` by weakening a conclusion, and do not add one
