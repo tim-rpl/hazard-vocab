@@ -11,6 +11,29 @@ Each rule reports independently. A failure in one does not prevent the
 others from running, which was F1: `make` aborts a recipe on the first
 failing line, so a four-line recipe reported one rule's health as four.
 
+KNOWN UPCOMING FAILURE — raw YAML does not resolve `imports:`.
+
+`yaml.safe_load` sees one file. Once vocab/core/ splits into
+part0-entities.yaml, part0-foundation.yaml, part2-observation.yaml with
+imports between them:
+
+  * `is-a-depth` computes depth PER FILE. A chain crossing a file
+    boundary is missed. This is F2 in a new dress — per-file counting
+    instead of transitive resolution, one level up — except it produces
+    FALSE NEGATIVES, which is the worse direction and fails silently.
+  * `role-named` and `jurisdiction` miss classes, slots and enums
+    inherited from an imported schema.
+  * `exact-mappings` misses mappings added by `slot_usage` or a mixin.
+
+The fix is linkml_runtime's SchemaView, which resolves imports, mixins,
+inheritance and slot_usage into an induced view. Deferred deliberately:
+there is nothing to resolve while vocab/ is empty, and a SchemaView
+rewrite tested against zero schemas would be the same mistake this file
+already records four times.
+
+**Recheck this the first time vocab/core/ contains more than one file.**
+Recorded as a prediction so it can be checked rather than discovered.
+
 Usage:
     drift-lint.py PATH...            lint files or directories
     drift-lint.py --rules            list rule ids

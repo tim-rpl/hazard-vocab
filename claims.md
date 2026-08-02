@@ -369,6 +369,24 @@ as a new fact with later validity, not as deletion.
   sweep had already recorded as establishing nothing. **Discharging its
   `sorry` was never the obligation; exhibiting `hmono` for a real merge
   is.**
+
+  **Resolved 2026-08-02 (plan-gate block response 2, BV1).** The empty
+  theorem is gone. `Monotone` is now a definition, and two statements
+  stand where it did — both verified by elaborating the file from source
+  with `lake env lean HazardVocab/Merge.lean` rather than by a `lake
+  build` replay, which reports only `sorry` at `Merge.lean:88` and
+  `:112`, i.e. `fold_order_irrelevant` and `semilattice_of_total_resolver`:
+
+  - `retracting_merge_not_monotone` — `merge a b := b` is refuted against
+    `Monotone` by a witness, not asserted.
+  - `union_merge_monotone` — union satisfies it, so the obligation is
+    satisfiable rather than impossible.
+
+  **Status stays `asserted`.** Neither theorem is about *this project's*
+  merge; `transform/` still contains one `.gitkeep`. What changed is that
+  the file now separates merges instead of restating its own hypothesis,
+  so L5's obligation is stated where an implementation can be measured
+  against it. The aggregation gap in the falsifier above is untouched.
 - **Audit finding — L5 is partly a policy, not a claim.** "We will not
   write deletions" is satisfiable by fiat at any moment. The falsifiable
   content is whether the *domain* permits it: can every real retraction
@@ -558,6 +576,18 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
 
   **This does not falsify T4a**, which is about the 23. It bounds it:
   T4a covers 23 of the 33 slots, and the plan's P5 covers all 33.
+
+  **The mismatch is closed on the plan's side, 2026-08-02** (plan-gate
+  block response 2, PA25). `docs/plan/plan-01-part2-part0.md` withdrew
+  PA19 and removed clause 3 from P5: P5's item row and its
+  definition-of-done now cover the 23 external identities only, and
+  state explicitly that the ten local terms are not declared there. So
+  P5 and T4a are about the same 23 slots and no longer disagree.
+
+  **T4a itself is still untested** — the 23 have not been re-derived
+  under the opposite ADR outcome. Nothing here is evidence for the
+  claim; it removes an inconsistency between the claim and the plan
+  resting on it.
 - **Updated:** 2026-08-02
 
 ### C1 — Parts are jurisdiction-neutral
@@ -1096,6 +1126,30 @@ The model can express "the earlier fact was wrong" separately from
   supersession relations are distinguishable **and both monotone under
   L5**. The artifact states the first half over any relations at all and
   says nothing about the second (FALSIFIER §4 question 3).
+
+  **BV2 answered in part, 2026-08-02 (plan-gate block response 2).**
+  `Merge.lean` gains
+  `AdequateC13 merge corrects supersedes := Distinguishes corrects
+  supersedes ∧ Monotone merge`, plus
+  `monotone_does_not_give_distinguishes` — both elaborate from source,
+  no `sorry`. The monotonicity half of BV2 is now stated.
+
+  **The tie to the merge is still absent, and the new theorem is the
+  proof of it.** `corrects` and `supersedes` remain arbitrary
+  `F → F → Prop`, unconstrained by `merge`; `AdequateC13` conjoins two
+  conditions rather than relating them. The scenario BV2 named — exhibit
+  `Distinguishes` for two relations having nothing to do with the merge,
+  pair it with any monotone merge, and read as having discharged C13 —
+  satisfies `AdequateC13` exactly as before. `monotone_does_not_give_
+  distinguishes` establishes that the two conjuncts are independent,
+  which is what a conjunction of unrelated obligations looks like when
+  it is checked.
+
+  The file's commentary states "neither half implies the other"; one
+  direction is machine-checked and the converse (`Distinguishes` without
+  `Monotone merge`) is not stated as a theorem. Recorded because the
+  §4 discipline is to read what an artifact states, not what its
+  surrounding prose claims for it.
 - **Updated:** 2026-08-02
 - **Note:** L5 is not wrong, but it is incomplete. Do not withdraw it —
   add correction as a second, distinct relation.
@@ -1324,6 +1378,52 @@ rule, and does not fire on content that complies.
   result now declares its own vacuity instead of reading as a pass.
   This is why C1's *"it currently passes over zero files"* is no longer
   silent.
+
+  **Round 4, 2026-08-02 — the vacuity rule now parses instead of
+  matching text, and a sixth counterexample is open. Status unchanged.**
+  Verified by running each case, not by reading H's tooling declaration:
+
+  | Case | `scripts/lean-lint.py` |
+  |---|---|
+  | *Control* — `theorem t : True := by trivial` | exit **1**, fires |
+  | `theorem t : (0:Nat) = 0 := rfl` (weakened conclusion) | exit **0**, uncaught |
+  | `theorem t (x : Nat) : x = x := rfl` (weakened conclusion) | exit **0**, uncaught |
+  | `theorem t {P : Prop} (h : P) : P := h` (hypothesis from itself) | exit **0**, uncaught |
+
+  Both documented gaps confirmed present. `make lint-selftest` now
+  reports **22 rule/fixture pairs, 6/6 rules with demonstrated recall** —
+  the 20 / 5-of-5 figures in the dated blocks above are superseded, not
+  wrong when written. `design/lean/HazardVocab/Merge.lean` now contains
+  the literal `True := by trivial` inside a comment and
+  `lean-lint.py design/lean` exits **0**: BR-7's precision failure is
+  closed by parsing, and the repository's own file is a live precision
+  case. The Watch below predicted a fourth precision failure "when
+  `vocab/` gains README or documentation files"; it arrived in
+  `design/lean/` instead, which is the right prediction with the wrong
+  location.
+
+  **F14 re-run 2026-08-02, exit 0, five rules `ok`.** Unchanged and open.
+
+  **Sixth counterexample — precision, and it is the first about this
+  project's own namespace rather than a borrowed one.** The jurisdiction
+  rule's `check_uri` is applied to every entry in `prefixes:`, against
+  `SINGLE_AUTHORITY_HOSTS` / `SHARED_ALLOWED_PREFIXES`
+  (`scripts/drift-lint.py`). A Part 0 core file must declare the
+  vocabulary's own namespace as its `default_prefix`, and no host it
+  could choose is admitted:
+
+  | Declared namespace | `drift-lint.py` |
+  |---|---|
+  | `https://w3id.org/hazard-vocab/` | exit **1** — shared redirect, path not allowlisted |
+  | `https://hazard-vocab.org/ns/` | exit **1** — host not a known generic vocabulary host |
+  | `https://example.org/hv/` | exit **1** — same |
+
+  That is a compliant file — jurisdiction-neutral core content, invariant
+  2 satisfied — making the rule fire, which is C18's precision half.
+  Root cause is the one F14 and the eight-vocabulary case share: a fixed
+  allowlist standing in for a judgement. Unlike those, this one is not
+  about a borrowed vocabulary — it fires on the first file this project
+  authors for itself.
 
   **Entry repaired 2026-08-02 (claims sweep).** The measure-gate
   evidence block above was inserted after the `Falsifier` field while

@@ -1,19 +1,20 @@
 # Plan 01 — Part 2 (Observation) + the Part 0 fragment it depends on
 
 **Stage:** plan · **Status:** block response filed, awaiting O
-**Opened:** 2026-08-01 · **Last amended:** 2026-08-02 (amendment 7)
+**Opened:** 2026-08-01 · **Last amended:** 2026-08-02 (amendment 8)
 
-> **Blocks A, B and C are answered in amendment 7** — PA25, PA26, PA27.
-> PA19 is **withdrawn**: its identity/form split was sound for the 23
-> bound terms and did not reach the ten local ones. The repair removes
-> clause 3 from P5 rather than narrowing it. Verification pending.
+> **Blocks B and C cleared. Block A answered a second time** —
+> amendment 7 removed P5's clause 3 and left nine of the ten local terms
+> owned by no definition of done (BV4). Amendment 8 names every one of
+> them **against `build/shapes.ttl`** so the criteria are checkable
+> rather than prose. Verification pending.
 
 Sequenced work items in topological order for the unit measured in
 [`measure-01-part2-part0.md`](../measure/measure-01-part2-part0.md).
 Items, dependencies and ordering only — *how* is the design stage.
 
-Assertions are numbered **PA1–PA27** to avoid collision with the measure
-document's A1–A40. Items are **P1–P15**, with P6 and P8 each split. The
+Assertions are numbered **PA1–PA34** to avoid collision with the measure
+document's A1–A40. Items are **P1–P16**, with P6 and P8 each split. The
 gate message for this document is in `review-inbox.md`.
 
 **Where a summary and the item table disagree, the table governs and the
@@ -33,6 +34,7 @@ wave view to non-normative rather than correcting it a fourth time.
 | 5 | 2026-08-02 | **Block response to O's `blocked` verdict.** **T4 falsified** by O in four minutes — the experiment was on H's own cheapest-test list, and `sosa:madeBySensor`'s cardinality differs by ADR-003 outcome because Open-Meteo publishes no instrument. **The abort condition it was supposed to fire did not fire, because it named the wrong item** (**PA19**): P5 is resolve-and-cache, form is authored at P7, and P7 already waits on P3. PA5's justification withdrawn and re-based on T4a; PA18's T4 clause withdrawn and replaced with the Part 0 case that would genuinely require re-derivation. **PG1** — the wave rendering put P6b on the path to P7 and was cancelling PA11's headline benefit; the item table governs (**PA20**). **PG6** — P8a and the unit done-criteria presupposed option B; both now conditional (**PA21**). **PG2** accepted, M2 dropped from P4. **PG3/PG4** — two new wave-1 items, **P13** (capture rules) and **P14** (the 24-snapshot series, the only uncompressible latency in the plan), and PA17's premise corrected (**PA22**). **PG5** — C12 and C15 scheduled into P6a rather than left silent (**PA23**). **PA6 kept**, per O's ruling. |
 | 6 | 2026-08-02 | **P15 and PA24 added from the claims sweep** — the §5.1 question 9 experiment, scheduled into wave 1 with its prediction attached. **Recorded late:** this amendment was made while responding to the claims sweep and no history row was written at the time, which is the omission this table exists to prevent. **It does not address O's second plan-gate verdict** — Blocks A (PA19 falsified), B (PG1, third rendering) and C (PG8, the missing P14→P9 edge) are **open and unanswered** as of this row. Nothing below has been revised for them. |
 | 7 | 2026-08-02 | **Blocks A, B and C answered.** **A** — O's `gen-shacl` experiment reproduced: a bare slot emits `sh:maxCount 1`, so P5's clause 3 was authoring form, and PA19's identity/form split did not reach the ten local terms. **PA19 withdrawn.** The ten-row table (**PA25**) shows one of ten is ADR-dependent — `procedureKind`, a Part 2 slot authored at P7, which already waits on P3 — so clause 3 is **removed from P5**, not narrowed. PA18's abort still does not fire, for a different reason than PA19 gave. A **third double-count** surfaced: `assertedTime` is in the ten *and* `prov:generatedAtTime` is in the 23. **B** — the wave view drifted a third time; it is now **non-normative** and P6b is shown on its own line (**PA26**). **C** — the P14→P9 edge is in the table as **blocks-trust** (**PA27**). Also: `observingSystemStatus` is P9's, not P5's (PG7). |
+| 8 | 2026-08-02 | **Block A answered a second time; B and C cleared.** **BV4** — removing clause 3 fixed the ADR-ordering defect and created a worse one: O's probe built P6a's file with **none** of its eight local terms and it passed every clause. Every one of the ten is now named in a definition of done **against `build/shapes.ttl`**, which makes the criteria mechanically checkable and makes that probe fail (**PA28**). The ADR-invariance clause, which was best satisfied by declaring no slots at all, is fixed with it. **BV5** — `crs` carries its condition and substitute to PG6's standard (**PA29**). **BV6/PG10** — `Alias` is not a class; A1's Part 0 fragment has **no carrier for statement-level slots** and is short by one, reported not acted on (**PA30**). **BV7** — the fourth drift was P15, absent from the wave view since amendment 6 and unseen by amendment 7, which re-read that table to fix a drift. **PA26's falsifier has fired** (**PA31**). **BV8** — the jurisdiction rule rejects every namespace this project could choose, so P6a's lint clause is unsatisfiable; new item **P16** (**PA32**). **PG9/PG11** closed — C13 and C14 deferred with reasons, `vocabulary.yaml` added to P6a (**PA33**). **PA34** records two design-gate items: P10 must use `SchemaView`, and `drift-lint.py`'s recall prediction fires the first time `vocab/core/` holds more than one file. |
 
 **Convention.** Per [`docs/README.md`](../README.md), corrections stay
 recorded rather than being edited away, and current state goes first.
@@ -201,7 +203,7 @@ dependency does not actually block it — demonstrated by starting it.
 
 ### The plan
 
-Twelve items. **Edges are typed**, because conflating two kinds of
+Seventeen items. **Edges are typed**, because conflating two kinds of
 dependency was the largest defect in the first draft of this section:
 
 - **blocks-start** — the item cannot begin until its predecessor
@@ -228,6 +230,7 @@ dependency was the largest defect in the first draft of this section:
 | **P12** | Determine the implemented matching rule | closes L2's second half | **source access this repo lacks** | — | Permanently open — see PA9 |
 | **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | Blocks P14. H's file. See PA22 |
 | **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
+| **P16** | Allowlist this project's own namespace in the jurisdiction rule | a `make lint` a real Part 0 file can pass | — | — | **Blocks P6a's lint clause** (PA32, BV8). `scripts/` is human-owned |
 | **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | evidence on **C5, C17 and the motivating defect at once** | — | — | ~30 min. No `vocab/` needed, neither ADR blocks it. **Prediction attached.** See PA24 |
 
 **PA4 — the order is three waves plus two items with no wave.** The
@@ -513,13 +516,13 @@ condition.
 | **P3** | ADR-003 records A or B, and `docs/coverage.md` plus ADR-002's modality table agree with it | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
 | **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25 | **L** |
-| **P6a** | **No Part 0 slot's cardinality or range differs by ADR-003 or ADR-001 outcome** (the PA19 residual — check first, it is cheap); the entity and alias core validates under `make lint`; `flat-siblings.yaml`'s shape passes as it does today; `operatingMode`, `modelVersion` and `profileConformance` are declared (PG5) | M |
+| **P6a** | **PA29 and PA30's decisions are answered first.** Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`**, and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each of those seven, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` — **blocked by P16, see PA32**; `flat-siblings.yaml` still passes | M |
 | **P6b** | Either a `candidateMatch` relation exists, or a line records that the chosen option needs none | S–0 |
-| **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error | M |
+| **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error, **and it carries an `sh:path` for `procedureKind`** — or ADR-003's record states the slot does not exist (PA28) | M |
 | **P8a** | **Under ADR-003 option B:** `make check` executes against ≥1 real AirNow **and** ≥1 real Open-Meteo capture and reports violations it can see. **Under option A:** AirNow only — Open-Meteo has no Part 2 shape to validate against (A5), and the Open-Meteo captures are retained as Part 3 fixtures for a later unit. See PA21 | M |
 | **P8b** | The context maps P9's slots; `make check` re-run and green | S |
-| **P9** | All three absence semantics and all three sentinel channels round-trip distinguishably (A16, F5, F6) | **L** |
-| **P10** | A check compares each `slot_uri`'s external range against the local `range` and fails on disagreement; the `sosa:observedProperty` case from A34 fires | M |
+| **P9** | All three absence semantics and all three sentinel channels round-trip distinguishably (A16, F5, F6), **and `build/shapes.ttl` carries an `sh:path` for `observingSystemStatus` and `absenceReason`** (PA28) | **L** |
+| **P10** | A check compares each `slot_uri`'s external range against the local **effective** range — via `linkml_runtime` `SchemaView.induced_slot`, **not raw YAML** (PA34) — and fails on disagreement; the `sosa:observedProperty` case from A34 fires; it survives a schema using `slot_usage` or a mixin | M |
 | **P11** | T3a's entry names a tiebreak, or records that none exists | S |
 | **P12** | — permanently open | — |
 
@@ -856,6 +859,170 @@ leave the finding open if the reason it was added lives only in prose.**
 
 **Falsifier for PA27:** a reading of P9's criterion satisfiable with
 fewer than 24 snapshots once the edge is in place.
+
+---
+
+**PA28 — Block A. Every one of the ten is now named in a definition of
+done, and the criteria are stated against generated output rather than
+against prose.**
+
+BV4 is accepted in full. Removing clause 3 fixed the ADR-ordering defect
+and created a worse one: **nine of the ten had no owner at all**, and
+your probe proves P6a was declarable done with none of its eight. My
+"the criteria already bite" was an assertion, and you checked it instead
+of arguing with it.
+
+The repair is not to put the terms back in prose. `sh:path` appears once
+per slot in `gen-shacl` output and an absent slot is absent — verified
+here — so **the criteria now name terms against `build/shapes.ttl`**,
+which makes them mechanically checkable and makes your probe's file fail
+rather than pass.
+
+| Item | Added to its definition of done |
+|---|---|
+| **P6a** | `build/shapes.ttl` contains an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`** — and for `crs` **or** the PA29 substitute |
+| **P7** | an `sh:path` for **`procedureKind`**, or ADR-003's record states it does not exist as a distinct slot |
+| **P9** | an `sh:path` for **`observingSystemStatus`** and **`absenceReason`** |
+
+**What clears the block, in your terms:** rebuild your probe file — the
+eight Part 0 classes, PG5's three slots, one bound slot, none of the
+eight local terms — and P6a's criterion now **fails**, because
+`shapes.ttl` will carry no `sh:path` for seven of them. The clause that
+was vacuously true is gone.
+
+**And the first clause is fixed too.** *"No Part 0 slot's cardinality or
+range differs by ADR outcome"* was satisfied best by declaring no slots
+— §4 question 2 applied to a definition of done, which is a check I had
+not thought to run on my own criteria. It now reads: *for each of the
+seven Part 0 terms named above, its cardinality and range are identical
+under both ADR-003 options.* Vacuity is no longer available to it.
+
+**Falsifier:** a file satisfying every clause of P6a while missing a
+term the clause names.
+
+**PA29 — BV5. `crs` carries its condition and its substitute, to PG6's
+standard.**
+
+PA25 said "P6a, if at all — conditional on a GeoSPARQL decision", and
+`GeoSPARQL` appears once in this plan, in that cell. P2 is ADR-001 Q2
+and P3 is ADR-003; neither is this decision, and no item makes it.
+
+Stated to the standard PG6 set:
+
+- **If a distinct `crs` slot is carried:** P6a's criterion requires an
+  `sh:path` for it.
+- **If it is not** — because GeoSPARQL puts the CRS inside the
+  `wktLiteral` (A26) — P6a's criterion instead requires that
+  **`asWKT`'s range is `geo:wktLiteral`**, so the CRS has a documented
+  carrier rather than silently none. **The surface is then 23/9 of 32**,
+  per A1's own arithmetic.
+- **The decision belongs to the design gate** and is now recorded as a
+  P6a precondition rather than as an unowned aside.
+
+**PA30 — BV6 and PG10 are one defect: A1's Part 0 fragment has no class
+for statement-level properties, and it is short by one.**
+
+Four slots have no home among A1's eight Part 0 classes — `Entity`,
+`Identifier`, `Asset`, `Place`, `Agent`, `Activity`, `TemporalExtent`,
+`Geometry`:
+
+| Slot | Source | Proposed carrier |
+|---|---|---|
+| `sourceVerificationTier` | A24 | statement-level |
+| `operatingMode` | C12 / PA23 | statement-level (`Statement`, PG10) |
+| `modelVersion` | C15 / PA23 | statement-level |
+| `profileConformance` | C15 / PA23 | statement-level |
+
+**You are right that PA25 invented a class.** `Alias` does not occur in
+the measure document; the only near hit is `AliasKind`, which A32 is at
+pains to call **a type distinction, not a class**. A1's Part 0 class for
+items 2–5 is **`Identifier`**, and PA25's Class column is corrected to
+say so.
+
+The larger consequence I am **reporting and not acting on**: ADR-002
+records `Statement` as "the sixth [entity], already covered by the
+provenance layer and needs no new class." Four slots now want to hang
+off it. If they land on `Statement`, **A1's class count moves 14 → 15**;
+if they land on `Activity`, ADR-002's provenance reading has to carry
+them. Either answer changes a measure-document number, and `measure-01`
+is not mine to edit at a plan gate — the same handling as PA23 and the
+`assertedTime` double-count.
+
+**Scheduled, so it is not silent:** the decision is a **P6a
+precondition**, alongside PA29's. P6a cannot start until both are
+answered, which is a new blocks-start edge on **P3**'s sibling — the
+design gate — not on P3 itself.
+
+**PA31 — BV7. The fourth drift was already in the file, and the label
+did not prevent it.** P15 was absent from the wave table from the moment
+amendment 6 added it, and **amendment 7 re-read that table specifically
+to fix a drift and did not see it.** P15 is now in wave 1.
+
+You are right that this is stronger evidence for generation-over-labelling
+than PA26's own argument, and for the reason you give: it is a drift the
+label did not prevent, not one it retroactively excused. **PA26's
+falsifier has fired.** Recorded as fired rather than explained away —
+the mitigation is worth less than PA26 claimed, and a generated view is
+the fix.
+
+**PA32 — BV8. P6a's lint clause is unsatisfiable as the tooling stands,
+and by PA14 that makes it an item.**
+
+The jurisdiction rule runs `check_uri` over every `prefixes:` entry, and
+a Part 0 core file must declare this vocabulary's own namespace. Your
+three-host table reproduces: no namespace this project can choose is
+admitted — `w3id.org/hazard-vocab/` fails as an unallowlisted shared-redirect
+path, and any self-hosted or example host fails as an unknown host.
+
+So *"the entity and alias core validates under `make lint`"* cannot be
+met by any real file. Same class as PG11, same disposition: **this
+unit's output depends on it, so it is an item** — **P16**, allowlist
+this project's own namespace. `scripts/` is human-owned; naming an item
+does not assign it.
+
+**The direction is the interesting part and it is yours:** this is the
+**precision** half of C18 firing on the first file the project authors
+*for itself*. All five earlier counterexamples were about content
+borrowed from elsewhere.
+
+**PA33 — PG9 and PG11 closed, the same way PG5 was.** Neither scheduled
+nor excluded is the one state a plan may not leave a known-falsified
+claim in, and PA23 set that standard while leaving two more in it.
+
+- **C13** — `falsified`, and BV2 keeps it there. **Deferred with a
+  reason:** the correction/supersession pair is Part 0 statement-level
+  content that lands on the same unowned carrier as PA30's four slots.
+  It cannot be scheduled before PA30's decision, and scheduling it into
+  this unit would repeat exactly the defect PA30 records. Design gate.
+- **C14** — releasability. **Deferred with a reason:** ADR-002 calls it
+  "a dimension, not a row", and A1 measures no slot for it. Out of this
+  unit's surface; it belongs to whichever unit authors the statement
+  layer.
+- **PG11 / `vocabulary.yaml`** — no item produced `make gen`'s entry
+  point. **Added to P6a's definition of done:** `make gen` runs to
+  completion, which requires `vocab/core/vocabulary.yaml` to exist and
+  import what P6a authors.
+
+**PA34 — two design-gate items from the owner, recorded here so they are
+not discovered later.**
+
+- **P10 must use `linkml_runtime`'s `SchemaView`, not YAML parsing.** It
+  compares a slot's *effective* range against the bound term's published
+  range, and effective means after `slot_usage`, mixins and inheritance
+  — none of which raw YAML shows. `SchemaView.induced_slot(slot, class)`
+  gives the resolved form. **Built on YAML parsing, P10 would work on
+  flat schemas and break silently on the first mixin**, which is the
+  failure direction that has cost this project the most. Recorded in
+  P10's definition of done.
+- **`drift-lint.py` carries a recall prediction in its docstring**: raw
+  YAML does not resolve `imports:`, so `is-a-depth` will compute depth
+  per file and miss chains crossing file boundaries, and `role-named`,
+  `jurisdiction` and `exact-mappings` degrade the same way against
+  inherited or `slot_usage`-added content. **False negatives — F2 in a
+  new dress and in the worse direction.** The trigger is stated: recheck
+  the first time `vocab/core/` holds more than one file. **That is P6a
+  or the unit after it.** Flag it as a finding when it fires; do not
+  work around it.
 
 ---
 
