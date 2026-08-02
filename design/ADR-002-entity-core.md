@@ -22,7 +22,7 @@ carefully separated only two.
 | Entity | Covers | Binds to |
 |---|---|---|
 | `Agent` | Person, Organization, Crew/Team, Automated System | `prov:Agent`, `org:Organization` |
-| `Asset` | Equipment, vehicles, aircraft, sensors, facilities, infrastructure | `sosa:Platform`, `sosa:Sensor` |
+| `Asset` | Equipment, vehicles, aircraft, sensors, facilities, infrastructure | **contested — see Decision B addendum** |
 | `Place` | Zones, jurisdictions, facilities, sampling locations | `sosa:FeatureOfInterest`, ISO 19112 |
 | `Activity` | Observation acts, assignments, hazard events, warning issuances | `prov:Activity` |
 | `Document` | IAPs, situation reports, delegation letters, orders as legal instruments | `prov:Entity`, `foaf:Document` |
@@ -50,6 +50,36 @@ Same for people: a person is not a "responder." A person *plays* a
 responder role in an assignment, may play an evacuee role in a
 protective action, and an observer role in a citizen report —
 sometimes simultaneously.
+
+### Addendum — the SOSA conflict, and a candidate resolution
+
+`sosa:Platform` and `sosa:Sensor` are role classes, which Decision B
+forbids. Verified findings from the measure pass:
+
+- `sosa:Sensor ⊑ ssn:System` is confirmed by axiom (as are `Actuator`
+  and `Sampler`). `sosa:Platform` is **not** a subclass of `ssn:System`.
+  So binding `Asset → ssn:System` types a monitor and fails on the site
+  that hosts it — the exact entity the conflict is about.
+- SOSA declares **no disjointness axioms anywhere**. One individual can
+  carry both types cleanly. So SOSA does not *deny* Platform ≡ Sensor;
+  the objection is narrower — a LinkML `exact_mappings` to both asserts
+  class equivalence, which is the false claim.
+- An OWL-inference escape exists (a hosted Platform is inferred to be a
+  System, because `hosts` has `allValuesFrom ssn:System` while the
+  prose permits platforms to host platforms). It works by exploiting an
+  ambiguity in the standard. Do not lean on it.
+
+**Candidate resolution — CIM `ObjectType`.** The ENTSO-E Object
+Registry profile carries an object's specialised type when the instance
+is serialised using a generalised class. Applied here: an AirNow site is
+an `Asset` with `ObjectType` = Platform; its monitor is an `Asset` with
+`ObjectType` = Sensor. One entity type, role as data, from a standard
+rather than from an inference. See ADR-001.
+
+This is a candidate, not a decision. Open question: does `ObjectType`
+itself violate C7? It is a *value* naming a role rather than a class
+playing one, which probably clears the rule — but rule by intuition is
+what produced this conflict, so decide it explicitly at the design gate.
 
 Two consequences:
 

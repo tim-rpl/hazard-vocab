@@ -17,6 +17,27 @@ writing.
 This must be settled before Part 2 vocabulary is authored, because it
 determines Part 2's shape and every consumer's query surface.
 
+## Two findings from the measure pass
+
+Both verified by fetch-and-grep. They move the argument in opposite
+directions and the second is the stronger.
+
+**OMS has no bindable RDF at that URI.** `http://www.opengis.net/ont/om`
+returns 288 bytes — a Prez profile stub — with zero occurrences of
+`resultQuality`. The ISO TC211 URI 404s. So option B does not align
+with a *vocabulary*; it aligns with a *document*. The interoperability
+argument stated above is weaker than it reads. (The term the model
+needs turned out to be `ssn-system:qualityOfObservation`, which is in
+neither of the places either party expected, and which declares no
+domain and no range.)
+
+**SOSA's own definition of `Sensor` covers device, agent including
+humans, and software including simulation.** That is the OMS position
+sitting inside the definition of a class we would bind to — in a
+vocabulary that *does* dereference. This argues for option B from
+inside the artifact rather than from the paper standard, and it is the
+strongest evidence currently available on this question.
+
 ## Options
 
 | Option | Shape | Cost |

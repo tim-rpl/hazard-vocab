@@ -47,8 +47,18 @@ symmetric but fails transitivity:
   actual normalizer and centroid rounding in use.
 - **Note:** This claim is asserted as *true*. Confirming it is the
   first task. It forces the identity design fork (see ADR-001).
-- **Evidence:** —
-- **Updated:** —
+- **Evidence:** 2026-08-01 — **unfalsifiable as stated.** "Rounded
+  centroid" admits two relations and L2's truth value flips between
+  them. (a) *Grid-cell equality* — round each centroid to a cell, then
+  compare cells: this is a conjunction of two equality relations, which
+  is transitive, and **L2 is false**. (b) *Tolerance proximity* —
+  `|centroid_a − centroid_b| < ε`: not transitive, and **L2 is true**.
+  No source access is needed to establish this; it does not depend on
+  the reference implementation. The entry must name which relation it is
+  about before either a proof or a counterexample can settle it.
+  Measure-gate finding, 2026-08-01, superseding A11's reason for
+  withholding.
+- **Updated:** 2026-08-01
 
 ### L3 — Identity partitions the record set
 Whichever resolution strategy is chosen, the resulting relation is an
@@ -86,6 +96,57 @@ resolver is a total order on `(authority, validTime, tiebreak)`.
   the same zone at the same time is the likely first counterexample.
 - **Evidence:** —
 - **Updated:** —
+
+### T3 — Profile composition preserves scheme precedence
+The composition of a hazard profile and a jurisdiction profile yields a
+total order over identifier schemes whenever each profile's own order is
+total and neither reorders the base.
+
+- **Status:** `falsified`
+- **Falsifier:** two add-only profiles whose composed order contains an
+  incomparable pair.
+- **Evidence:** 2026-08-01 — witness, no solver required:
+
+  > Base order over schemes: `ICAO`.
+  > Hazard profile, add-only, total, does not reorder the base:
+  > `ICAO < IRWIN`.
+  > Jurisdiction profile, add-only, total, does not reorder the base:
+  > `ICAO < AQSID`.
+  > Composition is conjunction. `IRWIN` and `AQSID` are related by
+  > neither profile, so they are **incomparable**. Not a total order.
+
+  Every antecedent holds and the consequent fails. The proposed test
+  (`order : seq Constraint` in the Alloy model, ~0.5 session) is not
+  needed; a two-line witness settles it, per FALSIFIER §8.
+- **Updated:** 2026-08-01
+- **Origin:** proposed by H in the 2026-08-01 measure gate, promoted to
+  the register by O under FALSIFIER §6 because it is about the artifact
+  rather than about that gate's work.
+- **Note on provenance:** filed directly as `falsified` rather than
+  entering as `asserted`, because the counterexample existed before the
+  claim was written. Same deviation from the register rules as C17, and
+  recorded for the same reason — so it is visible rather than silent.
+- **Consequence:** L4 makes merge-as-join conditional on conflict
+  resolution being a total order. Profile composition, as currently
+  designed, does not deliver one. L4 is not wrong; nothing establishes
+  its precondition. See T3a.
+
+### T3a — Profile composition preserves precedence, given a tiebreak
+The composition of two add-only profiles yields a total order over
+identifier schemes **if and only if** a tiebreak relation is defined
+over schemes introduced by different profiles.
+
+- **Status:** `scoped-down`
+- **Narrower than:** T3, which is false as stated. Both entries stay.
+- **Falsifier:** a composition rule that produces a total order over
+  independently-introduced schemes without any cross-profile tiebreak;
+  or a tiebreak that is itself partial.
+- **Cheapest test:** name the tiebreak, then check that composing two
+  add-only profiles under it is associative and commutative — otherwise
+  order of profile application decides precedence, and L4 fails a
+  different way.
+- **Evidence:** — *(not yet tested; the tiebreak does not exist yet)*
+- **Updated:** 2026-08-01
 
 ### L5 — Monotonicity
 Adding a source never retracts a canonical fact. Supersession is modeled
@@ -130,8 +191,17 @@ only add constraints, never relax them.
 - **Falsifier:** a profile that widens a cardinality, removes a
   required slot, or extends an enum's permissible values.
 - **Cheapest test:** Alloy, once two profiles exist.
-- **Evidence:** —
-- **Updated:** —
+- **Evidence:** — *(none. `make alloy` was run on 2026-08-01 and
+  returned UNSAT for `check_restrictionSound` and
+  `check_compositionPreservesSoundness`, with `demo_droppingBreaksSoundness`
+  SAT as intended. **This is deliberately not recorded as evidence.**
+  FALSIFIER §4 requires stating what an assertion proves and ruling out
+  vacuity before a UNSAT counts, and the role guard blocks O from
+  reading the Alloy model — while a measure-gate assertion alleges that
+  the model represents constraints as an unordered set, which is the
+  vacuity shape §4 warns about. An UNSAT that cannot be inspected is not
+  evidence.)*
+- **Updated:** 2026-08-01
 
 ### C1 — Parts are jurisdiction-neutral
 Parts 0–7 contain no agency-specific identifier, code list, or
@@ -140,8 +210,20 @@ authority. All such content is confined to `vocab/profiles/`.
 - **Status:** `asserted`
 - **Falsifier:** grep `vocab/core/` for agency names. Any hit falsifies.
 - **Cheapest test:** a CI lint rule. Write it early.
-- **Evidence:** —
-- **Updated:** —
+- **Evidence:** 2026-08-01 — the cheapest test exists and does not work
+  in two independent ways, so C1 has no usable guard. (1) `make lint`'s
+  C1 grep targets `vocab/core/`, which contains one `.gitkeep` and no
+  YAML. **It currently passes over zero files** — a clean result that
+  inspects nothing (FALSIFIER §4). (2) The pattern is a fixed list of
+  agency names. `AQSID` — an EPA AQS site identifier, and the exact
+  content A17 named as the first genuine recall test — **does not
+  match**. Run against an identical file in a scratchpad, `grep` exit 1,
+  lint passes. Naming the agency in the adjacent prose makes it fire;
+  the identifier scheme itself does not. C1's guard detects prose
+  mentioning agencies, not jurisdiction-specific content.
+  Status unchanged: C1 is a claim about our files, and there are no
+  files yet. The evidence is about the instrument, not the claim.
+- **Updated:** 2026-08-01
 
 ### C2 — Parts are hazard-neutral
 A second hazard type can be added by writing a Part 1 profile and
@@ -300,10 +382,38 @@ because the observing system is unavailable" distinctly from "reading
 is zero."
 
 - **Status:** `falsified`
-- **Evidence:** `docs/coverage.md` — observing-system health is a
-  named gap. Nothing represents feed state, monitor availability, or
-  fallback-tier position.
-- **Updated:** 2026-07-31
+- **Evidence:** 2026-08-01 — measured, replacing the earlier citation of
+  `docs/coverage.md` (our own file is not evidence). AirNow Oregon
+  subset, 103 sites, `ValidTime` 2026-08-02T04:00:00Z, one request.
+  **Three absence states occur independently in a single snapshot:**
+
+  | `Status` | `PM25_Measured` | `PM25` null | rows |
+  |---|---|---|---|
+  | Active | 1 | no | 74 |
+  | Inactive | 1 | yes | 24 |
+  | Active | 1 | yes | 3 |
+  | Active | 0 | yes | 1 |
+  | Inactive | 0 | yes | 1 |
+
+  Equipped-but-dark (24), live-but-no-datum-this-hour (3), and
+  not-equipped (2) are distinct facts, and one not-equipped site is
+  `Active` — a state no two-value absence flag can express. Marginal
+  distributions alone would not establish independence; this is the
+  cross-tabulation.
+
+  **Three in-band sentinel channels in the same record**, none of them
+  typed: `PM25` null; `PM25_AQI_SORT` = **-999** on exactly those 29
+  rows; and `PM25_AQI_LABEL`, which equals `str(PM25_AQI)` for every
+  present row and `'ND'` for every absent one — a stringified quantity
+  with an absence token in band. Declared `range: string`, `'206'` and
+  `'ND'` validate identically.
+
+  **A fourth channel in a different field:** `Elevation` = exactly 0 on
+  **26 of 103 rows (25%)**, where the next most frequent value occurs
+  twice, there are 73 distinct values, and the nonzero minimum is 4.0 m.
+  Missing-as-zero, in the field the geopotential-height comparison
+  consumes.
+- **Updated:** 2026-08-01
 - **Consequence:** ranked gap #2. Must be closed before the model is
   used operationally.
 
@@ -388,6 +498,25 @@ does not declare.
   the hand-authored context maps. Experiment run during the session-01
   measure pass on 2026-07-31; linkml 1.11.1 `gen-shacl`, pyshacl 0.40.1,
   rdflib 7.6.0.
+
+  **Second axis, same failure direction, added 2026-08-01 and reproduced
+  by O.** `gen-shacl` emits property shapes from the local `range`
+  without ever consulting the `slot_uri` it binds, so a local range that
+  *contradicts* the external term produces a passing shape. Run on a
+  throwaway schema, linkml 1.11.1: a slot declared `range: string` and
+  bound to `sosa:observedProperty` generated
+
+  ```
+  [ sh:datatype xsd:string ; sh:nodeKind sh:Literal ;
+    sh:maxCount 1 ; sh:path sosa:observedProperty ]
+  ```
+
+  where SOSA declares `schema:rangeIncludes sosa:ObservableProperty` and
+  SSN adds `owl:allValuesFrom sosa:ObservableProperty` with
+  `owl:cardinality 1`. **Exit 0, empty stderr, no warning.** Nothing in
+  `make gen` or `make check` inspects the external term. Every external
+  binding is exposed, and the error is invisible precisely where a
+  binding is wrong.
 - **Updated:** 2026-08-01
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
@@ -403,10 +532,51 @@ does not declare.
 `make lint` fires on content that violates C1, C4, or the vacuous-theorem
 rule, and does not fire on content that complies.
 
-- **Status:** `asserted`
+- **Status:** `falsified`
 - **Falsifier:** a file violating C1, C4, or the vacuity rule that the
   lint does not catch (recall failure); or a compliant file that makes
   it fire (precision failure).
+- **Evidence:** 2026-08-01 — **both halves falsified, by three
+  independent experiments.** Since this entry was written the lint
+  gained a fourth section (`C19: no OO drift in vocab/`) and a
+  `lint-selftest` target, so the "recall has never been exercised" note
+  below is superseded: recall has now been exercised and it fails.
+
+  **Precision failure — the false positive is the Part 0 shape the
+  measure gate scopes.** The `is_a` rule counts `is_a` declarations
+  *per file*, not chain depth, while its message says "depth >2". A file
+  with one abstract base and three depth-1 subclasses —
+
+  ```yaml
+  classes:
+    Entity:  {description: Base.}
+    Asset:   {is_a: Entity}
+    Place:   {is_a: Entity}
+    Agent:   {is_a: Entity}
+  ```
+
+  — fails with `FAIL: ... has 3 is_a declarations — depth >2 is drift
+  (C19)`. That file complies with invariant 5 and is the planned Part 0
+  fragment. `make lint` will reject the first Part 0 file authored, for
+  being correct.
+
+  **Recall failure 1 — the drift rule misses its own target case on file
+  position.** The `exact_mappings` awk tests its counter only on the
+  first non-list line after the block; at EOF that line never comes.
+  Two `exact_mappings` on one class, with the list ending the file,
+  gives `EXIT=0`. The identical content with one more class after it
+  fails. This is the Platform ≡ Sensor case the rule was written for.
+
+  **Recall failure 2 — C1's grep misses `AQSID`.** See C1's Evidence.
+
+  **The self-test does not detect any of this, and demonstrates one rule
+  of four.** `DRIFT_CHECKS` is four recipe lines; the first matches
+  `violating.yaml` and make aborts the recipe, so rules 2–4 never run
+  against the fixture. `lint-selftest` prints "ok — violation caught"
+  and exits 0. Decomposed into three variants, each stripping the
+  earlier violations, all four rules do fire individually — so the rules
+  work and the instrument reporting on them does not.
+- **Updated:** 2026-08-01
 - **Cheapest test:** two throwaway files per rule — one violating, one
   compliant — run `make lint`, confirm it fails on the first and passes
   on the second, delete both. Under an hour for all three rules.

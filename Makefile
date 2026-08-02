@@ -3,7 +3,8 @@
 VENV := $(CURDIR)/.venv
 BIN  := $(if $(wildcard $(VENV)/bin/python),$(VENV)/bin/,)
 
-.PHONY: all gen check lint lean alloy clean env role role-o role-h
+.PHONY: all gen check lint lint-selftest lean alloy clean env role role-o role-h
+
 
 all: gen lint check
 
@@ -17,17 +18,20 @@ check:
 	$(BIN)pyshacl -s build/shapes.ttl -df json-ld fixtures/**/*.jsonld
 
 lint:
-	@echo "C1: no jurisdiction-specific content in core"
-	@! grep -rniE '\b(nwcg|irwin|nifc|fema|ornl|airnow|noaa|usgs|epa|landfire|nhd|iroc|wfigs|wfdss|inspire-eu)\b' --include='*.yaml' --include='*.yml' vocab/core/ \
-		|| (echo "FAIL: agency reference in vocab/core/ (see claims.md C1)"; exit 1)
 	@echo "C4: no LinkML-only constructs"
-	@! grep -rnE 'structured_pattern|classification_rules' --include='*.yaml' --include='*.yml' vocab/ \
+	@! grep -rnE --include='*.yaml' --include='*.yml' 'structured_pattern|classification_rules' vocab/ \
 		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
 	@echo "L: no vacuous theorems in design/lean"
 	@! grep -rnE --include='*.lean' ':[[:space:]]*True[[:space:]]*:=' design/lean/ \
-		|| (echo "FAIL: theorem concluding True proves nothing and emits no warning."; \
-		    echo "      State the real proposition and use sorry instead."; exit 1)
+		|| (echo "FAIL: theorem concluding True proves nothing and emits no warning."; exit 1)
+	@echo "C1 + C19: jurisdiction and declarative-drift rules"
+	@$(BIN)python scripts/drift-lint.py vocab/core/
 	@echo "lint ok"
+
+lint-selftest:
+	@echo "Exercising each rule independently. See claims.md C18 and F1-F4."
+	@$(BIN)python scripts/lint-selftest.py
+
 
 lean:
 	cd design/lean && lake build
@@ -42,7 +46,8 @@ env:
 	@printf 'pyshacl: '; $(BIN)pyshacl --version 2>&1 | head -1 || echo 'not found'
 	@printf 'lean:    '; (cd design/lean && lake --version 2>/dev/null | head -1) || echo 'not found'
 	@printf 'alloy:   '; ls -d $$HOME/Applications/Alloy.app /Applications/Alloy.app 2>/dev/null | head -1 || echo 'not found'
-	@printf 'role:    '; if [ -f .role-O ]; then echo 'O  (overseer)'; else echo 'H  (builder)'; fi
+	@printf 'role:    '; if [ "$${HV_ROLE:-}" = "O" ]; then echo 'O  (overseer, via HV_ROLE)'; \
+		elif [ -f .role-O ]; then echo 'O  (overseer, via .role-O marker)'; else echo 'H  (builder)'; fi
 
 clean:
 	rm -rf build/
@@ -53,7 +58,7 @@ clean:
 	done; true
 
 role:
-	@if [ -f .role-O ]; then echo "O  (overseer)"; else echo "H  (builder)"; fi
+	@if [ "$${HV_ROLE:-}" = "O" ] || [ -f .role-O ]; then echo "O  (overseer)"; else echo "H  (builder)"; fi
 
 role-o:
 	@echo "NOTE: this is project-global. If an H session is open anywhere,"
