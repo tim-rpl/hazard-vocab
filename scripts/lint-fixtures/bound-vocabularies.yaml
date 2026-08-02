@@ -1,0 +1,33 @@
+# DELIBERATELY CLEAN — the external vocabularies CLAUDE.md commits to
+# binding, by acronym and by namespace. The jurisdiction rule must not
+# fire on any of them. See [O -> H] block verification, F11.
+id: https://example.org/lint-fixture-bound-vocabularies
+name: lint_fixture_bound_vocabularies
+prefixes:
+  linkml: https://w3id.org/linkml/
+  sosa:   http://www.w3.org/ns/sosa/
+  prov:   http://www.w3.org/ns/prov#
+  qudt:   http://qudt.org/schema/qudt/
+  dqv:    http://www.w3.org/ns/dqv#
+  adms:   http://www.w3.org/ns/adms#
+  dcat:   http://www.w3.org/ns/dcat#
+  dct:    http://purl.org/dc/terms/
+  nvs:    http://vocab.nerc.ac.uk/collection/P07/current/
+default_range: string
+imports: [linkml:types]
+enums:
+  BoundVocabularyEnum:
+    description: External vocabularies this project binds to.
+    permissible_values:
+      CF:   {description: CF Standard Names.}
+      NVS:  {description: NERC Vocabulary Server.}
+      DQV:  {description: W3C Data Quality Vocabulary.}
+      ADMS: {description: W3C Asset Description Metadata Schema.}
+      DCAT: {description: W3C Data Catalog Vocabulary.}
+      DCT:  {description: DCMI Terms.}
+      OMS:  {description: ISO 19156 Observations Measurements and Samples.}
+      UCUM: {description: Unified Code for Units of Measure.}
+slots:
+  observedProperty:
+    description: The property an observation is about.
+    slot_uri: sosa:observedProperty

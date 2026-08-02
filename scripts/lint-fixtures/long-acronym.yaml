@@ -1,0 +1,13 @@
+# DELIBERATELY VIOLATING — a jurisdiction-specific scheme name longer
+# than any bound the acronym heuristic guessed (8, then 12).
+# See [H -> O] plan gate, F13 case c3.
+id: https://example.org/lint-fixture-long-acronym
+name: lint_fixture_long_acronym
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+enums:
+  SchemeEnum:
+    description: Identifier schemes.
+    permissible_values:
+      NWCGIRWINIDENTIFIER: {description: Interagency incident identifier.}

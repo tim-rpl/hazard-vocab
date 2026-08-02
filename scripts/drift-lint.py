@@ -59,7 +59,53 @@ ROLE_NOUNS = {
 # The allowlist below is only for acronyms that are themselves
 # international and domain-neutral. Adding a national scheme to it
 # defeats the rule -- put the scheme in vocab/profiles/ instead.
-ACRONYM = re.compile(r"^[A-Z][A-Z0-9]{1,7}$")
+# No upper bound. It was 8, then 12, and `NWCGIRWINIDENTIFIER` (19)
+# cleared both — see [H -> O] plan gate, F13 case c3. Guessing a third
+# number is not a fix. Any all-caps identifier of two or more characters
+# is treated as an acronym; legitimate long all-caps terms are rare in a
+# vocabulary that otherwise uses camelCase and PascalCase, and the
+# allowlist below handles the ones that occur.
+ACRONYM = re.compile(r"^[A-Z][A-Z0-9]+$")
+
+# Namespaces that publish domain-neutral vocabularies. A prefix pointing
+# anywhere else is jurisdiction-specific until declared otherwise — an
+# agency namespace in a `prefixes:` block is the cheapest signal
+# available, and nothing inspected it until F12.
+#
+# HOST IS THE WRONG GRANULARITY FOR REDIRECT SERVICES. w3id.org and
+# purl.org are permanent-identifier redirects; anyone can register a
+# namespace under either, so allowlisting them by host admits every
+# scheme published there. `https://w3id.org/nwcg/irwin/` passed while
+# `https://w3id.org/linkml/` had to keep passing. See [H -> O] plan
+# gate, F13 cases c1 and c2.
+#
+# So: single-authority hosts match on host; shared infrastructure
+# matches on host plus path prefix.
+
+SINGLE_AUTHORITY_HOSTS = {
+    "w3.org", "www.w3.org",
+    "opengis.net", "www.opengis.net",
+    "qudt.org", "www.qudt.org",
+    "xmlns.com", "schema.org", "rdfs.org",
+    "vocab.nerc.ac.uk", "unitsofmeasure.org", "cfconventions.org",
+    "dublincore.org", "id.loc.gov",
+}
+
+# Hosts where registration is open to anyone. A namespace here is
+# generic only if its path prefix is explicitly allowlisted.
+SHARED_NAMESPACE_HOSTS = {
+    "w3id.org", "www.w3id.org",
+    "purl.org", "www.purl.org",
+    "purl.oclc.org", "purl.obolibrary.org",
+}
+
+# host/path prefixes on shared infrastructure that ARE generic.
+# Each entry admits exactly one namespace, not a host.
+SHARED_ALLOWED_PREFIXES = {
+    "w3id.org/linkml",        # LinkML metamodel
+    "purl.org/dc/terms",      # DCMI Terms
+    "purl.org/dc/elements",   # Dublin Core Elements
+}
 
 GENERIC_ACRONYMS = {
     # identity and encoding
@@ -73,6 +119,22 @@ GENERIC_ACRONYMS = {
     "JSON", "XML", "CSV", "SI", "QUDT", "PROV", "SOSA", "SSN",
     # measurement
     "MIN", "MAX", "AVG", "SUM", "STDDEV", "NA", "NIL",
+    # F11: every external vocabulary CLAUDE.md commits to binding.
+    # The original list was populated from a partial reading of the
+    # conventions section it exists to serve — CF appeared in the same
+    # sentence as SOSA and QUDT and was omitted anyway. Each entry below
+    # carries the reason it is domain-neutral.
+    "CF",    # CF Standard Names — international climate/forecast vocabulary
+    "NVS",   # NERC Vocabulary Server — international term registry
+    "DQV",   # W3C Data Quality Vocabulary
+    "ADMS",  # W3C Asset Description Metadata Schema
+    "DCAT",  # W3C Data Catalog Vocabulary
+    "DCT",   # DCMI Terms
+    "OMS",   # ISO 19156 Observations, Measurements and Samples
+    "UCUM",  # Unified Code for Units of Measure
+    "SSN",   # W3C Semantic Sensor Network
+    "GEO",   # GeoSPARQL
+    "TIME",  # W3C Time Ontology
 }
 
 
@@ -189,14 +251,60 @@ def rule_jurisdiction(path, doc):
                        f"genuinely domain-neutral, add it to "
                        f"GENERIC_ACRONYMS with a reason")
 
-    for n in (doc.get("classes") or {}):
+    def check_uri(kind, where, value):
+        """A prefix or CURIE pointing outside the generic-namespace
+        allowlist. F12: CLAUDE.md says code lists are SKOS schemes
+        referenced via `PermissibleValue.meaning`, so once the project
+        follows its own conventions, names are the place jurisdiction
+        content is LEAST likely to appear."""
+        v = str(value)
+        if "://" in v:
+            rest = v.split("://", 1)[1]
+            host = rest.split("/")[0].split(":")[0].lower()
+            hostpath = f"{host}/{'/'.join(rest.split('/')[1:])}".rstrip("/#")
+            if host in SHARED_NAMESPACE_HOSTS:
+                if not any(hostpath.startswith(a) for a in SHARED_ALLOWED_PREFIXES):
+                    bad.append(f"{path}: {kind} `{where}` declares namespace "
+                               f"`{v}` on `{host}`, which is a public "
+                               f"permanent-identifier redirect — anyone may "
+                               f"register there, so the path must be "
+                               f"allowlisted, not the host")
+            elif host not in SINGLE_AUTHORITY_HOSTS:
+                bad.append(f"{path}: {kind} `{where}` declares namespace "
+                           f"`{v}` on host `{host}`, which is not a known "
+                           f"generic vocabulary host — jurisdiction-specific "
+                           f"namespaces belong in vocab/profiles/")
+        elif ":" in v:
+            pfx = v.split(":", 1)[0]
+            declared = doc.get("prefixes") or {}
+            if pfx and pfx not in declared and pfx.upper() not in GENERIC_ACRONYMS:
+                bad.append(f"{path}: {kind} `{where}` uses CURIE prefix "
+                           f"`{pfx}`, which is neither declared in this file "
+                           f"nor a known generic vocabulary")
+
+    prefixes = doc.get("prefixes") or {}
+    if isinstance(prefixes, dict):
+        for pfx, uri in prefixes.items():
+            check_uri("prefix", pfx, uri)
+
+    for n, c in (doc.get("classes") or {}).items():
         check("class", n)
-    for n in (doc.get("slots") or {}):
+        if isinstance(c, dict):
+            for f in ("class_uri", "meaning"):
+                if c.get(f):
+                    check_uri(f"class {f}", n, c[f])
+    for n, sl in (doc.get("slots") or {}).items():
         check("slot", n)
+        if isinstance(sl, dict):
+            for f in ("slot_uri", "meaning"):
+                if sl.get(f):
+                    check_uri(f"slot {f}", n, sl[f])
     for n, e in (doc.get("enums") or {}).items():
         check("enum", n)
-        for pv in ((e or {}).get("permissible_values") or {}):
+        for pv, body in ((e or {}).get("permissible_values") or {}).items():
             check("permissible value", pv)
+            if isinstance(body, dict) and body.get("meaning"):
+                check_uri("permissible value meaning", pv, body["meaning"])
     return bad
 
 

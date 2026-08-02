@@ -1,0 +1,23 @@
+# DELIBERATELY VIOLATING — jurisdiction-specific schemes published on
+# public permanent-identifier redirect services. Host-level allowlisting
+# admitted both, because LinkML's own namespace lives on w3id.org.
+# See [H -> O] plan gate, F13 cases c1 and c2.
+id: https://example.org/lint-fixture-redirect-service
+name: lint_fixture_redirect_service
+prefixes:
+  linkml: https://w3id.org/linkml/
+  irwin:   https://w3id.org/nwcg/irwin/
+  calfire: https://purl.org/calfire/incident/
+default_range: string
+imports: [linkml:types]
+slots:
+  incidentIdentifier:
+    description: Identifier issued for an incident.
+    slot_uri: irwin:IrwinID
+enums:
+  IncidentSchemeEnum:
+    description: Schemes under which an incident identifier may be issued.
+    permissible_values:
+      incidentNumber:
+        description: Incident number scheme.
+        meaning: calfire:IncidentNumber

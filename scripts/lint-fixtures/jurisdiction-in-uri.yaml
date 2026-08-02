@@ -1,0 +1,22 @@
+# DELIBERATELY VIOLATING — every NAME is generic; the jurisdiction is
+# carried entirely in the URIs, which is where CLAUDE.md's own
+# conventions say scheme identity belongs. The name-only rule passed
+# this clean. See [O -> H] block verification, F12.
+id: https://example.org/lint-fixture-jurisdiction-in-uri
+name: lint_fixture_jurisdiction_in_uri
+prefixes:
+  linkml: https://w3id.org/linkml/
+  airnow: https://airnow.gov/scheme/
+default_range: string
+imports: [linkml:types]
+slots:
+  siteIdentifier:
+    description: Identifier issued for a monitoring site.
+    slot_uri: airnow:AQSID
+enums:
+  IdentifierSchemeEnum:
+    description: Schemes under which an alias may be issued.
+    permissible_values:
+      siteIdentifier:
+        description: Site-level identifier scheme.
+        meaning: airnow:AQSID

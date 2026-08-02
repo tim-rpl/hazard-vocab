@@ -91,6 +91,17 @@ The three READMEs under `vocab/profiles/`, `codelists/`, and
 **Default deny.** If a file is not in this table, it is the human's.
 H asks in the gate rather than assuming.
 
+**Tooling changes are declared, not discovered.** A change to
+`scripts/`, `Makefile`, or `.claude/` gets an assertion in the next
+`[H → O]` message naming what changed and what verifies it. H did not
+make the change and must verify rather than trust it; O verifies
+deliberately rather than discovering it several gates later.
+
+`make lint-selftest` enumerates every rule/fixture pair by name and
+fails on any fixture no case references, so the tooling's own coverage
+is inspectable rather than asserted. See
+`scripts/lint-fixtures/README.md`.
+
 **A `covered` status in `docs/coverage.md` is an assertion H is
 making.** O may falsify it — "you marked X covered, here is a case it
 does not handle" — and reports that in `[O → H]`. H applies the
