@@ -1661,8 +1661,11 @@ rule, and does not fire on content that complies.
   **Round 6, 2026-08-02 — the round-5 hole is closed and an eighth
   counterexample sits one field over. Status unchanged.**
 
-  The `default_prefix` route is fixed: it is now honoured only when it
-  agrees with `id:`, `scripts/lint-fixtures/default-prefix-escape.yaml`
+  The `default_prefix` route is fixed **— superseded by round 7 below,
+  which reopens it: "agrees with" is a two-directional prefix match, so
+  `default_prefix` still exempts any ancestor of `id:`**: it is now
+  honoured only when it agrees with
+  `id:`, `scripts/lint-fixtures/default-prefix-escape.yaml`
   is committed as the recall fixture, a sixth rule `documented` has
   landed (see C20), and `lint-selftest` reports **26 rule/fixture pairs,
   7/7 rules with demonstrated recall** (the 23 / 22 / 20 figures above
@@ -1695,6 +1698,51 @@ rule, and does not fire on content that complies.
   counts as its own namespace. Constraining one field that feeds the
   exemption set leaves the other, and the fix for a recall hole was
   again tested only in the direction it closed.
+
+  **Round 7, 2026-08-02 — ninth counterexample. The repair for BV19 is
+  inert, and BV14's route is open again in one line.** The declaration
+  was moved out of the schema into `scripts/project-namespaces.txt`,
+  whose header states that the project's namespaces are declared there
+  "where a schema author cannot edit it as part of authoring a schema",
+  and that if the file is missing "NO namespace is treated as the
+  project's own ... the guard fails loud rather than open."
+
+  **`PROJECT_NAMESPACES` is assigned at `scripts/drift-lint.py:119` and
+  never read.** `grep -rn PROJECT_NAMESPACES scripts/` returns the
+  assignment and nothing else. §4 mutation test — the file was moved
+  away and the suite re-run:
+
+  | With `project-namespaces.txt` | absent |
+  |---|---|
+  | `make lint` | `lint ok`, unchanged |
+  | `make lint-selftest` | 27 pairs, 7/7, unchanged |
+  | `own-namespace.yaml` (precision) | `ok`, unchanged |
+
+  Output identical in every case, so the guard is not about that file.
+  The fail-loud sentence in its header is false in both directions: the
+  file changes nothing whether present or absent. `drift-lint.py:292`
+  still reads `SELF IS DERIVED FROM `id:` ALONE` — the exemption is
+  sourced from the document under inspection, which is exactly what
+  BV19 identified as unfixable from inside the file.
+
+  **And `default_prefix` re-widens the exemption to any ancestor of
+  `id:`.** The agreement test at `drift-lint.py:311` matches in *both*
+  directions (`dp_uri.startswith(o) or o.startswith(dp_uri)`), so a
+  `default_prefix` naming a parent of the schema's own `id:` adds that
+  parent to `own`. Two files differing by one line:
+
+  | File | `jurisdiction` |
+  |---|---|
+  | `id: .../nwcg/irwin/core`, prefix `irwin: .../nwcg/irwin/` | **FAIL**, exit 1 |
+  | the same **plus** `default_prefix: irwin` | **`ok`, exit 0** |
+
+  The shipped fixture `id-claims-foreign-namespace.yaml` fires only
+  because it omits `default_prefix`. The project's own precision fixture
+  `own-namespace.yaml` carries `default_prefix: hv`, so the exempting
+  shape is the ordinary one and the detected shape is the unusual one.
+  Third consecutive round in which the repair for a recall hole leaves
+  the same hole one field over. `scripts/` is human-owned; reported,
+  not edited.
 - **Updated:** 2026-08-02
 - **Cheapest test — superseded 2026-08-02.** *"Two throwaway files per
   rule — one violating, one compliant — run `make lint`, confirm it

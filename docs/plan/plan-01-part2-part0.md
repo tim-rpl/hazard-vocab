@@ -13,9 +13,11 @@ Sequenced work items in topological order for the unit measured in
 [`measure-01-part2-part0.md`](../measure/measure-01-part2-part0.md).
 Items, dependencies and ordering only — *how* is the design stage.
 
-Assertions are numbered **PA1–PA40** to avoid collision with the measure
-document's A1–A40. Items are **P1–P18**, with P6 and P8 each split. The
-gate message for this document is in `review-inbox.md`.
+Assertions are numbered **PA1–PA42** to avoid collision with the measure
+document's A1–A40. Items live in [`items.yaml`](items.yaml); every item-keyed table below
+is generated from it by [`derive-waves.py`](derive-waves.py) and checked
+by `make lint`. The gate message for this document is in
+`review-inbox.md`.
 
 **Where a summary and the item table disagree, the table governs and the
 summary is the bug.** Three occurrences: the P10 edge (amendment 3), and
@@ -23,18 +25,22 @@ the P6b wave rendering twice (amendments 5 and 7). **The rule has not
 once caught a defect before O did** — see PA26, which downgrades the
 wave view to non-normative rather than correcting it a fourth time.
 
-## Amendment history
+## Amendment history — removed
 
-| # | Date | What changed |
-|---|---|---|
-| 1 | 2026-08-01 | Tooling changed after PA1 was written. PA1 and PA2 restated to current state; PA10 added. |
-| 2 | 2026-08-02 | **Form fix.** This document was migrated out of the append-only inbox and kept the inbox's shape: PA1 and PA2 asserted things in the present tense that a later section corrected 235 lines below. In a channel that is correct; in a document it is a false statement with a distant retraction. PA1 and PA2 now state the current position, with what they originally claimed recorded beneath. No plan content changed in this amendment. |
-| 3 | 2026-08-02 | **Conflict review — plan content did change.** Ten conflicts and ambiguities found on a read-through of the item table and PA4–PA9. Two would have misled O materially: the **P10 edge was recorded two contradictory ways** (in the sequence *and* as a soft block on the wrong item), and **P6 was blocked on P2 when only part of it is** — the entity and alias core is settled by ADR-001 question 1. Also fixed: P7/P9 double-counting the same slots, an ambiguous order notation that contradicted its own prose, an undefined definition-of-done for P8, inconsistent treatment of tooling as plan items, and an unjustified "early" on P4. New assertions **PA11–PA14**; PA4 and PA6 restated; the item table gained **typed edges**. Net effect on the order: **the critical path is one design-gate turnaround shorter.** |
-| 4 | 2026-08-02 | **Completability review.** Amendment 3 made the plan consistent; this one makes it finishable. One further conflict found: **P9 adds slots to Part 2 after P8 has authored the JSON-LD context**, so P8's output goes stale the moment P9 lands — a rework loop the single item P8 concealed. Split into **P8a / P8b** and the second pass justified rather than planned away (**PA15**). Four gaps closed: **every item now has a falsifiable definition of done** and an ordinal size (**PA16**) — an item that cannot be declared finished is the plan-stage form of an unfalsifiable claim; **wave 1 is ordered by external latency rather than by size** (**PA17**), which changes which item is picked up first; and the plan gains **abort conditions and a unit-level definition of done** (**PA18**). |
-| 5 | 2026-08-02 | **Block response to O's `blocked` verdict.** **T4 falsified** by O in four minutes — the experiment was on H's own cheapest-test list, and `sosa:madeBySensor`'s cardinality differs by ADR-003 outcome because Open-Meteo publishes no instrument. **The abort condition it was supposed to fire did not fire, because it named the wrong item** (**PA19**): P5 is resolve-and-cache, form is authored at P7, and P7 already waits on P3. PA5's justification withdrawn and re-based on T4a; PA18's T4 clause withdrawn and replaced with the Part 0 case that would genuinely require re-derivation. **PG1** — the wave rendering put P6b on the path to P7 and was cancelling PA11's headline benefit; the item table governs (**PA20**). **PG6** — P8a and the unit done-criteria presupposed option B; both now conditional (**PA21**). **PG2** accepted, M2 dropped from P4. **PG3/PG4** — two new wave-1 items, **P13** (capture rules) and **P14** (the 24-snapshot series, the only uncompressible latency in the plan), and PA17's premise corrected (**PA22**). **PG5** — C12 and C15 scheduled into P6a rather than left silent (**PA23**). **PA6 kept**, per O's ruling. |
-| 6 | 2026-08-02 | **P15 and PA24 added from the claims sweep** — the §5.1 question 9 experiment, scheduled into wave 1 with its prediction attached. **Recorded late:** this amendment was made while responding to the claims sweep and no history row was written at the time, which is the omission this table exists to prevent. **It does not address O's second plan-gate verdict** — Blocks A (PA19 falsified), B (PG1, third rendering) and C (PG8, the missing P14→P9 edge) are **open and unanswered** as of this row. Nothing below has been revised for them. |
-| 7 | 2026-08-02 | **Blocks A, B and C answered.** **A** — O's `gen-shacl` experiment reproduced: a bare slot emits `sh:maxCount 1`, so P5's clause 3 was authoring form, and PA19's identity/form split did not reach the ten local terms. **PA19 withdrawn.** The ten-row table (**PA25**) shows one of ten is ADR-dependent — `procedureKind`, a Part 2 slot authored at P7, which already waits on P3 — so clause 3 is **removed from P5**, not narrowed. PA18's abort still does not fire, for a different reason than PA19 gave. A **third double-count** surfaced: `assertedTime` is in the ten *and* `prov:generatedAtTime` is in the 23. **B** — the wave view drifted a third time; it is now **non-normative** and P6b is shown on its own line (**PA26**). **C** — the P14→P9 edge is in the table as **blocks-trust** (**PA27**). Also: `observingSystemStatus` is P9's, not P5's (PG7). |
-| 8 | 2026-08-02 | **Block A answered a second time; B and C cleared.** **BV4** — removing clause 3 fixed the ADR-ordering defect and created a worse one: O's probe built P6a's file with **none** of its eight local terms and it passed every clause. Every one of the ten is now named in a definition of done **against `build/shapes.ttl`**, which makes the criteria mechanically checkable and makes that probe fail (**PA28**). The ADR-invariance clause, which was best satisfied by declaring no slots at all, is fixed with it. **BV5** — `crs` carries its condition and substitute to PG6's standard (**PA29**). **BV6/PG10** — `Alias` is not a class; A1's Part 0 fragment has **no carrier for statement-level slots** and is short by one, reported not acted on (**PA30**). **BV7** — the fourth drift was P15, absent from the wave view since amendment 6 and unseen by amendment 7, which re-read that table to fix a drift. **PA26's falsifier has fired** (**PA31**). **BV8** — the jurisdiction rule rejects every namespace this project could choose, so P6a's lint clause is unsatisfiable; new item **P16** (**PA32**). **PG9/PG11** closed — C13 and C14 deferred with reasons, `vocabulary.yaml` added to P6a (**PA33**). **PA34** records two design-gate items: P10 must use `SchemaView`, and `drift-lint.py`'s recall prediction fires the first time `vocab/core/` holds more than one file. |
+**Deleted 2026-08-02, not migrated.** It was the fifth hand-maintained
+list keyed by item id, and its failure mode is forgetting to append — a
+failure it committed twice, once in the very row that records the
+omission (row 6, "Recorded late").
+
+Git is already this log and cannot forget:
+
+```
+git log --oneline -- docs/plan/
+```
+
+Every amendment since 2026-08-01 has a commit whose message states what
+changed and why. A second copy maintained by hand added nothing except a
+sixth place to be wrong.
 
 **Convention.** Per [`docs/README.md`](../README.md), corrections stay
 recorded rather than being edited away, and current state goes first.
@@ -203,7 +209,7 @@ dependency does not actually block it — demonstrated by starting it.
 
 ### The plan
 
-Nineteen items. **Edges are typed**, because conflating two kinds of
+ **Edges are typed**, because conflating two kinds of
 dependency was the largest defect in the first draft of this section:
 
 - **blocks-start** — the item cannot begin until its predecessor
@@ -212,28 +218,33 @@ dependency was the largest defect in the first draft of this section:
   not evidence* until the predecessor lands. Not a sequence edge; a
   claim about what the result means.
 
-| # | Item | Produces | Blocks-start | Blocks-trust | Notes |
-|---|---|---|---|---|---|
-| **P1** | Name L2's relation | `Identity.lean` defines both candidate relations; H proposes the restatement | — | — | Completion needs an **O session** — only O changes a claim's status. External dependency, not a work item |
-| **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | Blocks **P6b only**, not P6a — see PA11 |
-| **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | Blocks P7 |
-| **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
-| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | Blocks P6a, P7, P10 |
-| **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
-| **P6b** | `candidateMatch` relation, if the resolution strategy needs one | a Part 0 relation, or nothing | P2 | P10 | May be empty under option B — see PA11 |
-| **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | Slot count depends on P9's boundary — see PA12 |
-| **P8a** | Fixture capture, JSON-LD context, `make check` executing against P7's shape | `fixtures/`, a `check` that runs | P7 | **C17 axis 1** | "Green" ≠ "validating" — see PA13 |
-| **P9** | The absence and health model | `absenceReason`, `observingSystemStatus`, the sentinel decoding | P7, P8a | **P14** | Closes ranked gap #3. Last **modelling** item. Authors `observingSystemStatus` — P5 does not (PG7) |
-| **P8b** | Context extended for P9's slots, check re-run | an up-to-date `check` | P9 | **C17 axis 1** | Not rework — the price of PA7's ordering. See PA15 |
-| **P10** | Range-vs-`slot_uri` drift check | C17 axis 2 closed | P5 | — | **Blocks-trust on P6a, P6b, P7** — see PA6 |
-| **P11** | Name T3a's tiebreak | L4's precondition | — | — | Outside this unit. Listed because merge work is the next unit and it has no predecessor — startable any time |
-| **P12** | Determine the implemented matching rule | closes L2's second half | **source access this repo lacks** | — | Permanently open — see PA9 |
-| **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | Blocks P14. H's file. See PA22 |
-| **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
-| **P16** | ~~Allowlist this project's own namespace~~ | **DONE before it was filed** — landed undeclared in commit `e1b1bdf` (BV13). Verified: all three BV8 namespaces now pass | — | — | Closed. See PA35 |
-| **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
-| **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
-| **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | **DONE.** [`exp-01`](../experiments/exp-01-property-substitution.md) — C5 has affirmative evidence; C17 gains a third axis; invariant 4 has a wording gap | — | — | Ran 2026-08-02. Prediction held on the generated path |
+<!-- BEGIN GENERATED:items - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
+
+| # | Item | Produces | Blocks-start | Blocks-trust | In-unit | Notes |
+|---|---|---|---|---|---|---|
+| **P1** | Name L2's relation | `Identity.lean` defines both candidate relations; H proposes the restatement | — | — | excused — completion needs an O session; the claim change is O's | Completion needs an **O session** — only O changes a claim's status. External dependency, not a work item |
+| **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | excused — may resolve to nothing (ADR-001 Q2) | Blocks **P6b only**, not P6a — see PA11 |
+| **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | excused — a design-gate decision, not authoring work | Blocks P7 |
+| **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | excused — serves the first profile, a later unit | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
+| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | **required** | Blocks P6a, P7, P10 |
+| **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | **required** | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
+| **P6b** | `candidateMatch` relation, if the resolution strategy needs one | a Part 0 relation, or nothing | P2 | P10 | excused — may be empty under ADR-001 option B | May be empty under option B — see PA11 |
+| **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | **required** | Slot count depends on P9's boundary — see PA12 |
+| **P8a** | Fixture capture, JSON-LD context, `make check` executing against P7's shape | `fixtures/`, a `check` that runs | P7 | **C17 axis 1** | **required** | "Green" ≠ "validating" — see PA13 |
+| **P8b** | Context extended for P9's slots, check re-run | an up-to-date `check` | P9 | **C17 axis 1** | **required** | Not rework — the price of PA7's ordering. See PA15 |
+| **P9** | The absence and health model | `absenceReason`, `observingSystemStatus`, the sentinel decoding | P7, P8a | **P14** | **required** | Closes ranked gap #3. Last **modelling** item. Authors `observingSystemStatus` — P5 does not (PG7) |
+| **P10** | Range-vs-`slot_uri` drift check | C17 axis 2 closed | P5 | — | **required** | **Blocks-trust on P6a, P6b, P7** — see PA6 |
+| **P11** | Name T3a's tiebreak | L4's precondition | — | — | excused — serves the merge unit, not this one | Outside this unit. Listed because merge work is the next unit and it has no predecessor — startable any time |
+| **P12** | Determine the implemented matching rule | closes L2's second half | **source access this repo lacks** | — | excused — cannot close from this repository | Permanently open — see PA9 |
+| **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | **required** | Blocks P14. H's file. See PA22 |
+| **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **required** | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
+| **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | **DONE.** [`exp-01`](../experiments/exp-01-property-substitution.md) — C5 has affirmative evidence; C17 gains a third axis; invariant 4 has a wording gap | — | — | excused — done 2026-08-02 | Ran 2026-08-02. Prediction held on the generated path |
+| **P16** | ~~Allowlist this project's own namespace~~ | **DONE before it was filed** — landed undeclared in commit `e1b1bdf` (BV13). Verified: all three BV8 namespaces now pass | — | — | excused — done before it was filed (BV13) | Closed. See PA35 |
+| **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | **required** | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
+| **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — a design-gate decision; C5's carrier | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
+
+<!-- END GENERATED:items -->
+
 
 **PA4 — the order is three waves plus two items with no wave.** The
 first draft wrote this as `P1 · P5 · P4 ‖ P3 · P2 · P10 · P6 · P7 · P8 ·
@@ -249,7 +260,7 @@ The hand-maintained copy that stood here drifted from the item table
 **five times in five amendments**, and the fifth was the repair for the
 fourth. `derive-waves.py --check` fails if this block is stale.
 
-<!-- GENERATED by docs/plan/derive-waves.py — do not hand-edit. -->
+<!-- BEGIN GENERATED:waves - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
 | Wave | Items |
 |---|---|
@@ -260,6 +271,9 @@ fourth. `derive-waves.py --check` fails if this block is stale.
 | **5** | **P9** |
 | **6** | **P8b** |
 | **—** | **P12** — not startable here: source access this repo lacks |
+
+<!-- END GENERATED:waves -->
+
 
 **On its first run the generator found more drift than BV9 named.** The
 hand table had **P14 in wave 1** while its own row gives it
@@ -523,6 +537,8 @@ claim.** The first draft gave completion criteria for P8 only (PA13) and
 "Produces" cells for the rest, which name an artifact rather than a
 condition.
 
+<!-- BEGIN GENERATED:done - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
+
 | # | Done when | Size |
 |---|---|---|
 | **P1** | Both candidate relations are defined in `Identity.lean` and L2's entry names which one it is about. **Needs an O session** — H cannot close it | S |
@@ -539,10 +555,15 @@ condition.
 | **P10** | A check compares each `slot_uri`'s external range against the local **effective** range — via `linkml_runtime` `SchemaView.induced_slot`, **not raw YAML** (PA34) — and fails on disagreement; the `sosa:observedProperty` case from A34 fires; it survives a schema using `slot_usage` or a mixin | M |
 | **P11** | T3a's entry names a tiebreak, or records that none exists | S |
 | **P12** | — permanently open | — |
+| **P13** | The ordering key is named (`ValidTime` UTC, not `LocalTimeString`), the F9 seasonal-offset trap is recorded, and the verification tier and capture timestamp are required per fixture | S |
+| **P14** | ≥24 consecutive hourly AirNow snapshots exist under P13's rules, with gaps recorded rather than silently skipped | S work, **~24h floor** |
 | **P15** | **MET 2026-08-02.** A PM2.5-specific threshold and a composite `us_aqi` reading run through `gen-shacl` and pyshacl, result recorded against the prediction stated in advance — [`exp-01`](../experiments/exp-01-property-substitution.md) | S |
 | **P16** | **MET before it was filed** (BV13). All three BV8 namespaces pass `drift-lint.py`, and `bound-vocabularies.yaml` / `redirect-service.yaml` still behave | S |
 | **P17** | A design-gate record answers both: whether `crs` is a slot or PA29's `asWKT` substitute applies, **and** which class carries `sourceVerificationTier`, `operatingMode`, `modelVersion`, `profileConformance`. A1's Part 0 class count is confirmed at 14 or recorded as moved to 15 | S |
 | **P18** | A design-gate record picks **one** of the three C5-carrier options and states why the other two were rejected. Picking none, or recording all three as open, does not meet it | S |
+
+<!-- END GENERATED:done -->
+
 
 Sizes are **ordinal, not estimates.** The measure gate's 5–7 sessions
 was measured against a surface that has moved four times; absolute
@@ -565,16 +586,23 @@ un-started, so the wall clock pays for it serially at the end. Ranking
 by latency starts the externally-blocked items first and does P5's work
 *while* they are pending:
 
+<!-- BEGIN GENERATED:latency - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
+
 | Order | Item | Why here |
 |---|---|---|
-| 1 | **P13** | Tiny, and **P14 cannot start until it exists** (PA22). Minutes |
-| 2 | **P14** | **The only irreducible latency in the plan** — ~24h, hourly feed, uncompressible. Everything below runs alongside it |
-| 3 | **P15** | 30 minutes, and it is the highest-value experiment available anywhere in the project (PA24). Fits inside P14's wait |
-| 4 | **P1** | Longest *chaseable* latency — needs an O session, and P2 waits behind it |
-| 5 | **P3** | Design-gate decision; blocks P7 at the far end of the chain |
-| 6 | **P5** | The large item, and the one that fills the wait |
-| 7 | **P4** | H's own work, blocks nothing in this unit |
-| 8 | **P11** | Smallest, no predecessor, no successor here |
+| 1 | **P1** | **long** — an O session; start it so the wait runs alongside |
+| 2 | **P3** | **long** — a design-gate decision; start it so the wait runs alongside |
+| 3 | **P17** | **long** — a design-gate decision; start it so the wait runs alongside |
+| 4 | **P18** | **long** — a design-gate decision; start it so the wait runs alongside |
+| 5 | **P4** | short — fills the wait |
+| 6 | **P5** | short — fills the wait |
+| 7 | **P11** | short — fills the wait |
+| 8 | **P13** | short — fills the wait |
+| 9 | **P15** | short — fills the wait |
+| 10 | **P16** | short — fills the wait |
+
+<!-- END GENERATED:latency -->
+
 
 **Amendment 5 corrected the ranking's premise, not just its contents.**
 PA17 originally justified itself with *"every other latency in the plan
@@ -623,20 +651,27 @@ C17 axis 1 (validation is not sound), T2 unevidenced. Each is a known
 weakness with a named consequence, which is the condition for carrying
 something rather than stopping for it.
 
-**Plan 01 is done when:** P6a, P7, P8a, P8b, P9, P10, P13 and P14 all
-meet their criteria above, and the unit's original scope statement is
-true — *Part 2 plus the Part 0 fragment it depends on, bound to external
-vocabularies, generating SHACL, validated against captured AirNow and
-Open-Meteo payloads* — with **two qualifications attached**:
+<!-- BEGIN GENERATED:membership - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
-1. **PA13** — "validated" means the check executes and reports what the
-   context lets it see, not that validation is sound.
-2. **PA21** — "and Open-Meteo" holds **under ADR-003 option B only**.
-   Under option A the clause reads *AirNow*, and the Open-Meteo captures
-   are retained as Part 3 fixtures for a later unit.
+**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P17**.
 
-P2, P6b, P4, P11 and P12 are not in that list. P2 and P6b may resolve to
-nothing; P4 and P11 serve later units; P12 cannot close here.
+**Excused, each with its reason:**
+
+- **P1** — completion needs an O session; the claim change is O's
+- **P2** — may resolve to nothing (ADR-001 Q2)
+- **P3** — a design-gate decision, not authoring work
+- **P4** — serves the first profile, a later unit
+- **P6b** — may be empty under ADR-001 option B
+- **P11** — serves the merge unit, not this one
+- **P12** — cannot close from this repository
+- **P15** — done 2026-08-02
+- **P16** — done before it was filed (BV13)
+- **P18** — a design-gate decision; C5's carrier
+
+*10 required, 10 excused, 20 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
+
+<!-- END GENERATED:membership -->
+
 
 ---
 
@@ -687,10 +722,7 @@ convention is the cheapest way to have to collect them twice.**
 
 Two new items, both wave 1:
 
-| # | Item | Done when | Size |
-|---|---|---|---|
-| **P13** | Fixture capture rules in `fixtures/README.md` | The ordering key is named (`ValidTime` UTC, not `LocalTimeString`), the F9 seasonal-offset trap is recorded, and the verification tier and capture timestamp are required per fixture | S |
-| **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots exist under P13's rules, with gaps recorded rather than silently skipped | S work, **~24h floor** |
+*(Both items' criteria are now rows in the generated table above.)*
 
 `fixtures/README.md` is H's under the ownership table, so P13 is H's to
 write.
@@ -1187,6 +1219,62 @@ implementation actually uses, and nothing at this abstraction can,
 because they are parameters. C13 is discharged by an implementation
 exhibiting the condition for **its own** merge and relations — and
 `transform/` is still one `.gitkeep`.
+
+---
+
+**PA41 — BV21, BV22 and BV24 closed together, by making every
+item-keyed view a projection of one source.**
+
+You counted what the last four blocks were actually about: **five
+hand-maintained lists keyed by item id.** BV9 was list 1 against list 2.
+BV17 was list 2 against itself. BV21 is list 4. BV24 is lists 3 and 5.
+Generating the wave view stopped it dead for one list and was never
+applied to the rest — which is the same shape as BV14 and BV18: a repair
+applied in one direction and not beside it.
+
+[`items.yaml`](items.yaml) is now the source. Every item-keyed table in
+this document is generated from it into a marked block:
+
+| Block | Was |
+|---|---|
+| item table | list 1, hand |
+| wave view | list 2, generated since amendment 9 |
+| definition-of-done | list 3, hand, two shapes (BV17) |
+| latency ranking | list 4, hand, stale since amendment 6 (BV24) |
+| in-unit / excused | list 5, hand (BV21) |
+
+**BV21 is not fixed, it is dissolved.** The required list and the excused
+list are both projections of one `in_unit` field, so a set difference
+between them cannot disagree — there is no second copy to drift. That is
+the difference between checking a duplicate and not having one.
+
+**The amendment history is deleted, not migrated.** It was the sixth
+list, its failure mode is forgetting to append, and it committed that
+failure twice — once in the row that records the omission. `git log
+--oneline -- docs/plan/` is the same log and cannot forget.
+
+**PA42 — BV22, and it is BV18's direction a third time.** The done check
+matched any 3-or-4-cell row starting `| **Pnn** |` anywhere in the file,
+so a blank criterion passed and a row planted in an unrelated table
+passed. Both failed toward *has a definition of done*. **Making the
+criteria a field removes the parser and the hole together** — there is
+no longer a document to scan.
+
+The generator now validates the source: empty `done_when`, empty `size`,
+`excused` with no reason, `long` latency with no reason, and a
+`blocks_start` naming a nonexistent id all fail.
+
+**One defect found in my own generator while testing it, and it is worth
+recording because it is the same family.** A missing field was reported
+by the validator and then *raised out of the formatter three frames
+down* — the run crashed rather than failing. A generator that crashes
+instead of reporting fails in the wrong direction. It now bails before
+rendering. **I found this by mutating, not by reading**, which is the
+check that was missing on both sides this round.
+
+Verified with a control: unmutated → exit 0; blank criterion, excused
+without reason, missing size, nonexistent dependency, and a hand-edited
+generated block → exit 1 each.
 
 ---
 

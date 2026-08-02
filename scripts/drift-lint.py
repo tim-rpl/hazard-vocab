@@ -279,39 +279,45 @@ def rule_jurisdiction(path, doc):
     """
     bad = []
 
-    # A schema's own `id:` DECLARES its namespace. A prefix pointing at
-    # the schema's own base is self-reference, not jurisdiction leakage.
+    # SELF-REFERENCE IS DECLARED OUTSIDE THE SCHEMA.
     #
-    # Without this, no namespace this project can choose passes: its
-    # base is neither a single-authority host nor an allowlisted
-    # redirect path, so `make lint` rejects the first file the project
-    # authors for itself. That is the precision half of claims.md C18
-    # firing on original content rather than on borrowed content — all
-    # five earlier counterexamples were borrowed. See [O -> H] plan gate,
-    # BV8.
-    # SELF IS DERIVED FROM `id:` ALONE.
+    # A schema may use its own namespace freely, but it does not get to
+    # say which namespace that is. Three attempts derived the exemption
+    # from inside the file and all three were escapable, because a
+    # self-declared field cannot constrain itself:
     #
-    # The first version also seeded it from whatever `default_prefix`
-    # resolved to. `default_prefix` is unconstrained, so one line —
-    # `default_prefix: irwin` — exempted `https://w3id.org/nwcg/irwin/`
-    # and reopened the c1 counterexample this rule had closed. Seventh
-    # counterexample to claims.md C18 and the first one a repair
-    # introduced. See [O -> H] plan gate block verification 3, BV14.
+    #   BV8  — no namespace passed at all                  (precision)
+    #   BV14 — `default_prefix` nominated any namespace     (recall)
+    #   BV19 — `id:` nominated any namespace                (recall)
+    #   BV23 — `default_prefix` naming any ANCESTOR of `id:`,
+    #          because the agreement test matched both ways (recall)
     #
-    # `default_prefix` is now honoured only when it agrees with `id:` —
-    # i.e. when it names the schema's own namespace rather than any
-    # namespace the author cares to nominate.
+    # `id:` and `default_prefix` count as self ONLY when they fall under
+    # a namespace listed in scripts/project-namespaces.txt, which a
+    # schema author does not edit while authoring a schema. Neither
+    # widens the other: both are tested against the external list, so
+    # there is no agreement test left to match in the wrong direction.
+    if not PROJECT_NAMESPACES:
+        bad.append(f"{path}: scripts/project-namespaces.txt is missing or "
+                   f"empty, so no namespace counts as the project's own "
+                   f"and every schema's own terms will fire. Declare the "
+                   f"project namespace there")
+
+    def under_project(uri) -> bool:
+        u = str(uri).rstrip("/#")
+        return any(u == ns or u.startswith(ns.rstrip("/#") + "/") or
+                   u == ns.rstrip("/#") for ns in PROJECT_NAMESPACES)
+
     own = []
-    if doc.get("id"):
+    if doc.get("id") and under_project(doc["id"]):
         base = str(doc["id"]).rstrip("/#")
-        own.append(base)
-        own.append(base + "/")
+        own += [base, base + "/"]
     dp = doc.get("default_prefix")
     if dp and isinstance(doc.get("prefixes"), dict) and dp in doc["prefixes"]:
         dp_uri = str(doc["prefixes"][dp]).rstrip("/#")
-        if own and any(dp_uri.startswith(o.rstrip("/#")) or
-                       o.rstrip("/#").startswith(dp_uri) for o in own):
+        if under_project(dp_uri):
             own.append(dp_uri)
+
 
     def is_self(uri: str) -> bool:
         u = str(uri).rstrip("/#")

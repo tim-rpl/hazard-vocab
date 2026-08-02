@@ -46,6 +46,7 @@ CASES = [
     ("jurisdiction",      "own-namespace",       False, "precision — BV8, the project's own id: and default_prefix"),
     ("jurisdiction",      "default-prefix-escape", True, "recall — BV14, default_prefix nominating a foreign namespace"),
     ("jurisdiction",      "id-claims-foreign-namespace", True, "recall — BV19, id: nominating a foreign namespace"),
+    ("jurisdiction",      "default-prefix-ancestor", True, "recall — BV23, default_prefix naming an ancestor of id:"),
     ("documented",        "undocumented",        True,  "recall — C20, placeholder descriptions and no examples"),
     ("documented",        "own-namespace",       False, "precision — a documented file with examples"),
 ]
@@ -115,6 +116,32 @@ def main() -> int:
                 f"[{rule}] {fixture}.lean: expected "
                 f"{'a violation' if must_fire else 'no violation'}, "
                 f"got the opposite")
+
+    # §4 mutation test on the external declaration. BV23: the config
+    # file was added, never read, and moving it away changed nothing —
+    # while its own header promised to fail loud. Verifying PRESENCE is
+    # what a declaration already asserts; this verifies EFFECT.
+    pns = HERE / "project-namespaces.txt"
+    if pns.exists():
+        stash = pns.read_text()
+        try:
+            pns.unlink()
+            r = subprocess.run(
+                [sys.executable, str(LINT), "--only", "jurisdiction",
+                 "--quiet", str(FIX / "own-namespace.yaml")],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                print(" FAIL  [jurisdiction] project-namespaces.txt is inert — "
+                      "removing it changed no output (BV23)")
+                failures.append("project-namespaces.txt has no effect")
+            else:
+                print("  ok   [jurisdiction] project-namespaces.txt — "
+                      "removing it makes the guard fail loud (BV23 mutation)")
+        finally:
+            pns.write_text(stash)
+    else:
+        print(" FAIL  scripts/project-namespaces.txt is missing")
+        failures.append("project-namespaces.txt missing")
 
     lean_on_disk = {p.stem for p in LEAN_FIX.glob("*.lean")}
     lean_orphans = sorted(lean_on_disk - {f for _, f, _, _ in LEAN_CASES})
