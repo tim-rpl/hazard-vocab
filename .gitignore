@@ -12,3 +12,6 @@ __pycache__/
 .role-O
 # alloy exec output directories
 /parts/
+
+review-inbox.md
+review-inbox-*.md
