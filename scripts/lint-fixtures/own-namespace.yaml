@@ -1,0 +1,21 @@
+# DELIBERATELY CLEAN — a schema declaring and using its OWN namespace.
+# Before the self-reference exemption, no namespace this project could
+# choose passed the jurisdiction rule, so `make lint` rejected the first
+# file authored for the project itself. See [O -> H] plan gate, BV8.
+id: https://w3id.org/hazard-vocab/core
+name: hazard_vocab_core_fixture
+default_prefix: hv
+prefixes:
+  linkml: https://w3id.org/linkml/
+  hv:     https://w3id.org/hazard-vocab/core/
+default_range: string
+imports: [linkml:types]
+slots:
+  identifierValue:
+    description: The literal value of an identifier under some scheme.
+    slot_uri: hv:identifierValue
+classes:
+  Asset:
+    description: A thing that can be assigned, exposed, or observed with.
+    class_uri: hv:Asset
+    slots: [identifierValue]

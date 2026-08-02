@@ -265,6 +265,29 @@ def rule_jurisdiction(path, doc):
     """
     bad = []
 
+    # A schema's own `id:` DECLARES its namespace. A prefix pointing at
+    # the schema's own base is self-reference, not jurisdiction leakage.
+    #
+    # Without this, no namespace this project can choose passes: its
+    # base is neither a single-authority host nor an allowlisted
+    # redirect path, so `make lint` rejects the first file the project
+    # authors for itself. That is the precision half of claims.md C18
+    # firing on original content rather than on borrowed content — all
+    # five earlier counterexamples were borrowed. See [O -> H] plan gate,
+    # BV8.
+    own = []
+    if doc.get("id"):
+        base = str(doc["id"]).rstrip("/#")
+        own.append(base)
+        own.append(base + "/")
+    dp = doc.get("default_prefix")
+    if dp and isinstance(doc.get("prefixes"), dict) and dp in doc["prefixes"]:
+        own.append(str(doc["prefixes"][dp]).rstrip("/#"))
+
+    def is_self(uri: str) -> bool:
+        u = str(uri).rstrip("/#")
+        return any(u == o.rstrip("/#") or u.startswith(o) for o in own if o)
+
     def check(kind, name):
         n = str(name)
         if ACRONYM.match(n) and n not in GENERIC_ACRONYMS:
@@ -281,6 +304,8 @@ def rule_jurisdiction(path, doc):
         follows its own conventions, names are the place jurisdiction
         content is LEAST likely to appear."""
         v = str(value)
+        if is_self(v):
+            return
         if "://" in v:
             rest = v.split("://", 1)[1]
             host = rest.split("/")[0].split(":")[0].lower()
@@ -300,6 +325,8 @@ def rule_jurisdiction(path, doc):
         elif ":" in v:
             pfx = v.split(":", 1)[0]
             declared = doc.get("prefixes") or {}
+            if pfx in declared and is_self(declared[pfx]):
+                return
             if pfx and pfx not in declared and pfx.upper() not in GENERIC_ACRONYMS:
                 bad.append(f"{path}: {kind} `{where}` uses CURIE prefix "
                            f"`{pfx}`, which is neither declared in this file "

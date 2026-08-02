@@ -4,6 +4,7 @@
 |---|---|---|
 | `measure/` | measure-stage documents — blast radius, surface, bindings, fixtures, cost | H |
 | `plan/` | plan-stage documents — items, dependencies, topological order | H |
+| `experiments/` | experiment records — setup, prediction stated in advance, result, falsifier | H |
 | `coverage.md` | the capability matrix | H |
 | `sources/` | the authoritative source register | human |
 | `reference/` | external specifications cited by ADRs | human |

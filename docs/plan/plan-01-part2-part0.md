@@ -231,7 +231,7 @@ dependency was the largest defect in the first draft of this section:
 | **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | Blocks P14. H's file. See PA22 |
 | **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
 | **P16** | Allowlist this project's own namespace in the jurisdiction rule | a `make lint` a real Part 0 file can pass | — | — | **Blocks P6a's lint clause** (PA32, BV8). `scripts/` is human-owned |
-| **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | evidence on **C5, C17 and the motivating defect at once** | — | — | ~30 min. No `vocab/` needed, neither ADR blocks it. **Prediction attached.** See PA24 |
+| **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | **DONE.** [`exp-01`](../experiments/exp-01-property-substitution.md) — C5 has affirmative evidence; C17 gains a third axis; invariant 4 has a wording gap | — | — | Ran 2026-08-02. Prediction held on the generated path |
 
 **PA4 — the order is three waves plus two items with no wave.** The
 first draft wrote this as `P1 · P5 · P4 ‖ P3 · P2 · P10 · P6 · P7 · P8 ·
