@@ -1,0 +1,14 @@
+# DELIBERATELY VIOLATING — a national scheme from a hazard and country
+# this project has never touched. The previous rule carried a US-wildfire
+# denylist and would have passed this clean.
+id: https://example.org/lint-fixture-jurisdiction-foreign
+name: lint_fixture_jurisdiction_foreign
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+enums:
+  GaugeSchemeEnum:
+    description: Schemes under which a gauge identifier may be issued.
+    permissible_values:
+      DWD:  {description: National meteorological gauge identifier.}
+      JMA:  {description: National seismic station identifier.}

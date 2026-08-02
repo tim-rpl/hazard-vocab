@@ -1,0 +1,14 @@
+# DELIBERATELY VIOLATING — two exact_mappings, and the list ends the file.
+# The previous awk only tested on the next non-list line, so at EOF it
+# never fired. See [O -> H] measure gate, F3.
+id: https://example.org/lint-fixture-mappings-eof
+name: lint_fixture_mappings_eof
+prefixes: {linkml: 'https://w3id.org/linkml/', sosa: 'http://www.w3.org/ns/sosa/'}
+default_range: string
+imports: [linkml:types]
+classes:
+  Asset:
+    description: Bound to two role classes, asserting they are equivalent.
+    exact_mappings:
+      - sosa:Platform
+      - sosa:Sensor

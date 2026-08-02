@@ -1,0 +1,24 @@
+# DELIBERATELY VIOLATING. Used by `make lint-selftest` to exercise the
+# recall of the lint rules (claims.md C18). Never imported by vocab/.
+id: https://example.org/lint-fixture-violating
+name: lint_fixture_violating
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+
+classes:
+  ExposedElement:            # role-named class — C7
+    is_a: Thing
+    exact_mappings:          # two exact_mappings — asserts equivalence
+      - sosa:Platform
+      - sosa:Sensor
+    attributes:              # inline attributes — class-centric
+      inlineThing:
+        range: string
+  Thing:
+    is_a: Root
+  Root:
+    is_a: Base               # is_a depth 3
+  Base: {}

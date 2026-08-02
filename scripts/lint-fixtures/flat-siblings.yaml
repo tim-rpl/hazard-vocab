@@ -1,0 +1,14 @@
+# DELIBERATELY CLEAN — the Part 0 entity-core shape. Three siblings under
+# one abstract base is is_a chain DEPTH 1. The previous rule counted
+# declarations per file and rejected this. See [O -> H] measure gate, F2.
+id: https://example.org/lint-fixture-flat-siblings
+name: lint_fixture_flat_siblings
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+classes:
+  Entity:   {description: Abstract base for the entity core., abstract: true}
+  Asset:    {is_a: Entity, description: A thing that can be assigned or exposed.}
+  Place:    {is_a: Entity, description: A feature with spatial extent.}
+  Agent:    {is_a: Entity, description: A thing that can act or be responsible.}
+  Activity: {is_a: Entity, description: Something occurring over an interval.}

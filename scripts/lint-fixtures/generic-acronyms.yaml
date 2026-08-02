@@ -1,0 +1,18 @@
+# DELIBERATELY CLEAN — acronyms that are international and domain-neutral.
+# The jurisdiction rule must not fire on these.
+id: https://example.org/lint-fixture-generic-acronyms
+name: lint_fixture_generic_acronyms
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+enums:
+  CoordinateReferenceEnum:
+    description: Coordinate reference systems.
+    permissible_values:
+      EPSG: {description: Registry-issued coordinate reference code.}
+      WKT:  {description: Well-known text geometry encoding.}
+  TimeScaleEnum:
+    description: Time scales.
+    permissible_values:
+      UTC: {description: Coordinated universal time.}
+      TAI: {description: International atomic time.}

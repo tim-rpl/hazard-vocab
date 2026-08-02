@@ -1,0 +1,14 @@
+# DELIBERATELY VIOLATING — a national identifier scheme as a permissible
+# value, with no agency named anywhere in prose. The previous grep
+# scanned descriptions and missed it. See [O -> H] measure gate, F4.
+id: https://example.org/lint-fixture-jurisdiction
+name: lint_fixture_jurisdiction
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+default_range: string
+imports: [linkml:types]
+enums:
+  IdentifierSchemeEnum:
+    description: Schemes under which an alias may be issued.
+    permissible_values:
+      AQSID: {description: Air quality site identifier, national scheme.}
+      IRWIN: {description: Interagency incident identifier.}

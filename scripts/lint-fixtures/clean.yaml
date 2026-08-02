@@ -1,0 +1,24 @@
+# DELIBERATELY CLEAN. Used by `make lint-selftest` to verify the lint
+# rules do not fire on compliant content. Never imported by vocab/.
+id: https://example.org/lint-fixture-clean
+name: lint_fixture_clean
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports:
+  - linkml:types
+
+slots:
+  aliasKind:
+    description: Whether an alias is a label or an authoritative identifier.
+    range: string
+    examples:
+      - value: authoritativeIdentifier
+
+classes:
+  Asset:
+    description: A thing that can be assigned, exposed, or observed with.
+    slots:
+      - aliasKind
+    close_mappings:
+      - ssn:System
