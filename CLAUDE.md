@@ -24,8 +24,17 @@ These are not preferences. Violating one is a bug.
    properties about the design. `transform/` is the implementation.
    They are independent; deleting `design/` must break nothing.
 
-4. **Only SHACL-expressible constraints belong in LinkML.** If a
-   constraint cannot survive `make gen`, it does not go in the schema.
+4. **Only SHACL-*generable* constraints belong in LinkML.**
+   Expressibility is necessary and not sufficient. `sh:equals` is SHACL
+   Core, works, and is the constraint that makes claims.md C5 true — and
+   linkml 1.11.1 accepts both `equals_expression` and a class-level
+   `rules:` block carrying it, exits 0, and emits **no cross-slot
+   construct at all**. A constraint can satisfy "SHACL-expressible" and
+   vanish silently.
+
+   **The test is what appears in `build/shapes.ttl`,** not what the
+   source language accepts. If a constraint matters, assert its
+   generated form — the same discipline P6a's criteria now use.
 
 5. **Prefer mixins and slot reuse over `is_a` depth.** Slots are
    first-class. Deep inheritance is the thing that migrates worst.
