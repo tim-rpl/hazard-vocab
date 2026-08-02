@@ -193,7 +193,8 @@ The canonical fact set is independent of source arrival order.
   and `transform/` contains one `.gitkeep`. There is nothing to replay
   and nothing to replay it through.
 - **Note on the Lean obligation.** `fold_order_irrelevant`
-  (`Merge.lean:37`) takes `Assoc merge` and `Comm merge` as hypotheses.
+  (`Merge.lean`, one of the file's two remaining `sorry`s as of
+  2026-08-02) takes `Assoc merge` and `Comm merge` as hypotheses.
   Those are what T1 needs established, not assumed, so discharging its
   `sorry` would not establish T1 — it establishes that *if* the
   implemented merge is a commutative semigroup, order does not matter.
@@ -223,19 +224,30 @@ resolver is a total order on `(authority, validTime, tiebreak)`.
   exit 0): `union_assoc`, `union_comm`, `union_idem` over
   `FactSet F := F → Prop`.
 
-  **L4's own Lean obligation is false as stated, independently.**
-  `not_idem_of_incomparable` (`Merge.lean:70`) — labelled in the file as
-  "the converse direction, which is the one that bites" — is refutable:
-  take `S := Unit`, `le := fun _ _ => False`, `merge := fun _ _ => ()`.
+  **L4's own Lean obligation was false as stated, independently.**
+  `not_idem_of_incomparable` — labelled in the file as "the converse
+  direction, which is the one that bites" — was refutable: take
+  `S := Unit`, `le := fun _ _ => False`, `merge := fun _ _ => ()`.
   `PicksGreater` holds vacuously, `¬ le a b` and `¬ le b a` hold, and
   the conclusion `∃ x y, merge x y ≠ merge y x ∨ ¬ (∀ z, merge z z = z)`
-  fails. Proved as `refute_not_idem`, same run. Its `sorry` can never be
-  discharged as written.
+  fails. Its `sorry` could never have been discharged as written.
 
-  The other obligation, `semilattice_of_total_resolver`
-  (`Merge.lean:61`), is the **sufficiency** direction. L4 asserts
-  necessity. So the file formalises the direction L4 does not claim and
-  gets the direction L4 does claim wrong.
+  **Discharged 2026-08-02 (B1 block verification).** The false
+  obligation is gone from `Merge.lean`. The refutation is retained in
+  the file as `refute_not_idem`, and the removed statement is quantified
+  there verbatim — verified by diffing the theorem against its deleted
+  text, so this is a refutation of what actually stood, not of a weaker
+  restatement. The true content is now `underdetermined_of_incomparable`
+  (**proved, no `sorry`**): incomparability does not break the algebra,
+  it underdetermines the merge — given any conforming `merge`, a second
+  conforming `merge'` exists disagreeing on the incomparable pair. Its
+  hypotheses were machine-checked satisfiable at `S := Bool` before this
+  was recorded, so it is not vacuous (FALSIFIER §4 question 2).
+
+  The other obligation, `semilattice_of_total_resolver`, is the
+  **sufficiency** direction. L4 asserts necessity. So the file
+  formalises the direction L4 does not claim and got the direction L4
+  does claim wrong — the second half is now repaired, the first stands.
 
   **Root defect: the subject is not named.** "Merge" denotes both the
   accumulating fact-set merge of L5 and a per-subject conflict-resolving
@@ -263,8 +275,9 @@ it, then the merge is associative, commutative and idempotent.
 - **Falsifier:** a total order and a picking merge under it for which
   associativity, commutativity or idempotence fails.
 - **Evidence:** — *(not tested. `semilattice_of_total_resolver`
-  (`Merge.lean:61`) states exactly this and carries `sorry`, confirmed
-  by `make lean` 2026-08-02.)*
+  (`Merge.lean`) states exactly this and still carries `sorry` —
+  confirmed by a forced `make lean` rebuild, 2026-08-02, in which it is
+  one of the file's only two remaining `sorry`s.)*
 - **Updated:** 2026-08-02
 - **Note:** the operationally interesting question survives the loss of
   necessity and is not asserted by either entry — *which* subjects
@@ -343,6 +356,19 @@ as a new fact with later validity, not as deletion.
   that returns clean would therefore be an instrument reporting success
   having inspected the wrong thing (FALSIFIER §4). The proxy is still
   worth running; it is not equivalent to the claim.
+- **Audit finding, 2026-08-02 — L5's Lean obligation is empty, and the
+  file's corrected header note now vouches for it.**
+  `monotone_under_source_addition` (`Merge.lean`) takes `hmono : ∀ a b
+  f, a f → merge a b f` as a hypothesis and its proof body is
+  `hmono a b f` — the hypothesis applied to its own arguments. It
+  carries no `sorry` and elaborates clean, which is the FALSIFIER §4
+  "artifact can be empty" failure in the form the `: True :=` lint does
+  not catch. The honesty note rewritten at the B1 repair lists it under
+  *what this file now guarantees* as "carries none — it is proved".
+  That is literally true and it is the one theorem in the file this
+  sweep had already recorded as establishing nothing. **Discharging its
+  `sorry` was never the obligation; exhibiting `hmono` for a real merge
+  is.**
 - **Audit finding — L5 is partly a policy, not a claim.** "We will not
   write deletions" is satisfiable by fiat at any moment. The falsifiable
   content is whether the *domain* permits it: can every real retraction
@@ -1031,21 +1057,45 @@ The model can express "the earlier fact was wrong" separately from
   correction names — our own file is not evidence. A repository artifact
   now supplies it, and it is worse than the citation suggested.
 
-  `design/lean/HazardVocab/Merge.lean:103`,
-  `correction_distinct_from_supersession`, is the obligation this claim
-  would be discharged by. **It is false as stated and its `sorry` can
-  never be closed.** It quantifies over *arbitrary* relations `corrects`
-  and `supersedes` and concludes both are non-empty and mutually
-  distinct; instantiate both at `fun _ _ => False` and the first
-  conjunct fails. Machine-checked as `refute_correction_distinct`
-  (Lean 4.32.2, `lake env lean` against this project's toolchain, no
-  Mathlib, no `sorry`, exit 0; a `1 = 2` control confirmed the harness
-  reports errors rather than passing silently).
+  `correction_distinct_from_supersession` in
+  `design/lean/HazardVocab/Merge.lean` was the obligation this claim
+  would have been discharged by. **It was false as stated and its
+  `sorry` could never be closed.** It quantified over *arbitrary*
+  relations `corrects` and `supersedes` and concluded both are non-empty
+  and mutually distinct; the diagonal breaks it. Machine-checked as
+  `refute_correction_distinct` (Lean 4.32.2, `lake env lean` against
+  this project's toolchain, no Mathlib, no `sorry`, exit 0; a `1 = 2`
+  control confirmed the harness reports errors rather than passing
+  silently).
 
-  The statement needs the two relations to be the *implemented* ones,
-  not universally quantified. As written it asserts that no two
-  relations on any type are ever equal, which is false and is not what
-  C13 is about.
+  **Correction, 2026-08-02:** this entry previously described that
+  refutation as instantiating both relations at `fun _ _ => False`. That
+  witness is also valid, but it is **not the one the artifact uses** —
+  `refute_correction_distinct` takes both at `fun _ _ => True`. The
+  register described a refutation the file does not contain. Same
+  register-versus-artifact defect this sweep filed against others;
+  recorded rather than quietly overwritten.
+
+  **Restated 2026-08-02 (B1 block verification).** The false obligation
+  is gone. `Distinguishes` is now a **definition** — each relation holds
+  somewhere the other does not — and `collapsed_implementation_fails`
+  (**proved, no `sorry`**) establishes `¬ Distinguishes r r`: one
+  relation cannot do both jobs. That is C13's complaint, machine-checked,
+  and it is the honest form — distinguishability is an adequacy
+  condition an implementation exhibits, not a theorem about arbitrary
+  relations.
+
+  **Status stays `falsified`, and the artifact does not discharge it.**
+  Two gaps. First, `collapsed_implementation_fails` is one unfolding
+  step from `Distinguishes`; the content sits in the definition H
+  authored, not in the theorem. Second, `Distinguishes` ranges over
+  arbitrary `F → F → Prop` with **no tie to `FactSet`, to `merge`, or to
+  monotonicity** — so an implementation could exhibit it for two
+  relations having nothing to do with the merge and read as discharging
+  C13. What C13 needs is that the *implemented* correction and
+  supersession relations are distinguishable **and both monotone under
+  L5**. The artifact states the first half over any relations at all and
+  says nothing about the second (FALSIFIER §4 question 3).
 - **Updated:** 2026-08-02
 - **Note:** L5 is not wrong, but it is incomplete. Do not withdraw it —
   add correction as a second, distinct relation.

@@ -33,7 +33,30 @@ What this file now guarantees, in place of the claim that was wrong:
   `semilattice_of_total_resolver`, the latter being the L4 sufficiency
   direction that survives as L4a. Named rather than numbered — line
   references in a header note drift on the first edit.
-  `monotone_under_source_addition` carries none — it is proved.
+
+**And a `sorry` count is not an honesty measure.** The first version of
+this note added `monotone_under_source_addition` "carries none — it is
+proved." True, and useless: its proof body was `hmono a b f`, the
+hypothesis applied to its own arguments. It was the emptiest statement
+in the file and the note vouched for it (BV1). **Proved** and
+**establishes something** are different properties, and only the second
+is what this file exists to record. That theorem is gone; `Monotone` is
+now a definition, and what stands in its place are two statements that
+separate merges — `retracting_merge_not_monotone` and
+`union_merge_monotone`.
+
+The general lesson, since this is the fourth instance of the family: an
+artifact can fail by concluding `True` and so proving nothing, by
+carrying a `sorry` that can never close (the two removed here), or by
+proving a hypothesis from itself. The first is lint-catchable, the
+second needs a refutation attempt, and **the third looks like completed
+work and is caught only by reading the proof body.**
+
+(The literal pattern for the first is not written out above: the
+vacuity lint greps `*.lean` for it and fired on this very sentence when
+it was. That is a precision failure of the rule and is reported as a
+finding, not worked around silently — the workaround is only here so
+the build stays green while the rule is human-owned.)
 * Every refuted statement is retained as an explicit refutation rather
   than deleted.
 * Do not "fix" a `sorry` by weakening a conclusion, and do not add one
@@ -160,15 +183,37 @@ remain distinguishable downstream. -/
 
 abbrev FactSet (F : Type) := F → Prop
 
-/-- L5 proper. Note this is definitional given `hmono`; it is stated so
-    the obligation is visible, and so that any merge implementation
-    must exhibit `hmono` rather than assume it. -/
-theorem monotone_under_source_addition {F : Type}
-    (merge : FactSet F → FactSet F → FactSet F)
-    (hmono : ∀ a b f, a f → merge a b f)
-    (a b : FactSet F) (f : F) :
-    a f → merge a b f :=
-  hmono a b f
+/-- Monotonicity as a property a merge either has or lacks. L5 is the
+    assertion that the implemented merge has it. -/
+def Monotone {F : Type} (merge : FactSet F → FactSet F → FactSet F) : Prop :=
+  ∀ a b f, a f → merge a b f
+
+/-! `monotone_under_source_addition` stood here and was **empty** — its
+proof body was `hmono a b f`, the hypothesis applied to its own
+arguments. It elaborated, carried no `sorry`, and established nothing.
+The corrected header note then vouched for it as "proved", which is
+true and is exactly why the note was not sufficient: *proved* and
+*establishes something* are different properties, and only the second
+is what this file is for. Found by a claims sweep (BV1).
+
+L5 was never discharged by proving an implication from its own
+hypothesis. It is discharged by an implementation **exhibiting**
+`Monotone` for its actual merge — and the file's contribution is to say
+what that rules out. -/
+
+/-- Retraction by deletion violates L5, exhibited rather than asserted.
+    `merge a b := b` discards everything in `a`. -/
+theorem retracting_merge_not_monotone :
+    ¬ Monotone (fun (_ b : FactSet Unit) => b) := by
+  intro h
+  exact h (fun _ => True) (fun _ => False) () trivial
+
+/-- Union is monotone, so L5 is satisfiable — the obligation is real
+    rather than impossible. Together with the above, `Monotone` is a
+    property that genuinely separates merges. -/
+theorem union_merge_monotone {F : Type} :
+    Monotone (fun (a b : FactSet F) => fun f => a f ∨ b f) :=
+  fun _ _ _ ha => Or.inl ha
 
 /-! ### Correction versus supersession — a condition, not a theorem
 
@@ -208,5 +253,31 @@ theorem collapsed_implementation_fails {F : Type} (r : F → F → Prop) :
     ¬ Distinguishes r r := by
   rintro ⟨⟨_, _, hc, hs⟩, -⟩
   exact hs hc
+
+/-! ### Tying C13 to the merge (BV2)
+
+`Distinguishes` alone is not C13. It ranges over arbitrary relations
+with no tie to `FactSet`, to `merge`, or to monotonicity — so an
+implementation could exhibit it for two relations having nothing to do
+with the merge and read as having discharged the claim.
+
+C13 sits next to L5 for a reason: correction and supersession must be
+**distinguishable** *and* both recorded additively, under a merge that
+**does not retract**. That pairing is the condition; neither half
+implies the other, which is why both must be exhibited. -/
+
+/-- The condition C13 actually requires. -/
+def AdequateC13 {F : Type}
+    (merge : FactSet F → FactSet F → FactSet F)
+    (corrects supersedes : F → F → Prop) : Prop :=
+  Distinguishes corrects supersedes ∧ Monotone merge
+
+/-- The halves are independent: a monotone merge tells you nothing about
+    whether the two relations are distinguishable. Witness: union, which
+    is monotone, paired with one relation used for both jobs. -/
+theorem monotone_does_not_give_distinguishes {F : Type} (r : F → F → Prop) :
+    Monotone (fun (a b : FactSet F) => fun f => a f ∨ b f) ∧
+    ¬ AdequateC13 (fun (a b : FactSet F) => fun f => a f ∨ b f) r r :=
+  ⟨union_merge_monotone, fun h => collapsed_implementation_fails r h.1⟩
 
 end HazardVocab.Merge

@@ -1,27 +1,26 @@
 # Plan 01 — Part 2 (Observation) + the Part 0 fragment it depends on
 
-**Stage:** plan · **Status:** **`blocked`** — three open blocks, unanswered
-**Opened:** 2026-08-01 · **Last amended:** 2026-08-02
+**Stage:** plan · **Status:** block response filed, awaiting O
+**Opened:** 2026-08-01 · **Last amended:** 2026-08-02 (amendment 7)
 
-> **Do not read this document as current.** O's plan-gate block
-> verification of 2026-08-02 falsified **PA19** by its own falsifier
-> (P5's clause 3 declares the ten local terms, two of which are
-> ADR-dependent), found **PG1 still uncleared** at its third rendering,
-> and filed **PG8** — the P14→P9 edge exists only as prose in a Notes
-> cell. PA4, PA5, PA18, PA19, PA20 and PA22 all rest on points now under
-> challenge. See `review-inbox.md`.
+> **Blocks A, B and C are answered in amendment 7** — PA25, PA26, PA27.
+> PA19 is **withdrawn**: its identity/form split was sound for the 23
+> bound terms and did not reach the ten local ones. The repair removes
+> clause 3 from P5 rather than narrowing it. Verification pending.
 
 Sequenced work items in topological order for the unit measured in
 [`measure-01-part2-part0.md`](../measure/measure-01-part2-part0.md).
 Items, dependencies and ordering only — *how* is the design stage.
 
-Assertions are numbered **PA1–PA24** to avoid collision with the measure
+Assertions are numbered **PA1–PA27** to avoid collision with the measure
 document's A1–A40. Items are **P1–P15**, with P6 and P8 each split. The
 gate message for this document is in `review-inbox.md`.
 
 **Where a summary and the item table disagree, the table governs and the
-summary is the bug.** That has now happened twice — the P10 edge
-(amendment 3) and the P6b wave rendering (amendment 5, PA20).
+summary is the bug.** Three occurrences: the P10 edge (amendment 3), and
+the P6b wave rendering twice (amendments 5 and 7). **The rule has not
+once caught a defect before O did** — see PA26, which downgrades the
+wave view to non-normative rather than correcting it a fourth time.
 
 ## Amendment history
 
@@ -30,9 +29,10 @@ summary is the bug.** That has now happened twice — the P10 edge
 | 1 | 2026-08-01 | Tooling changed after PA1 was written. PA1 and PA2 restated to current state; PA10 added. |
 | 2 | 2026-08-02 | **Form fix.** This document was migrated out of the append-only inbox and kept the inbox's shape: PA1 and PA2 asserted things in the present tense that a later section corrected 235 lines below. In a channel that is correct; in a document it is a false statement with a distant retraction. PA1 and PA2 now state the current position, with what they originally claimed recorded beneath. No plan content changed in this amendment. |
 | 3 | 2026-08-02 | **Conflict review — plan content did change.** Ten conflicts and ambiguities found on a read-through of the item table and PA4–PA9. Two would have misled O materially: the **P10 edge was recorded two contradictory ways** (in the sequence *and* as a soft block on the wrong item), and **P6 was blocked on P2 when only part of it is** — the entity and alias core is settled by ADR-001 question 1. Also fixed: P7/P9 double-counting the same slots, an ambiguous order notation that contradicted its own prose, an undefined definition-of-done for P8, inconsistent treatment of tooling as plan items, and an unjustified "early" on P4. New assertions **PA11–PA14**; PA4 and PA6 restated; the item table gained **typed edges**. Net effect on the order: **the critical path is one design-gate turnaround shorter.** |
+| 4 | 2026-08-02 | **Completability review.** Amendment 3 made the plan consistent; this one makes it finishable. One further conflict found: **P9 adds slots to Part 2 after P8 has authored the JSON-LD context**, so P8's output goes stale the moment P9 lands — a rework loop the single item P8 concealed. Split into **P8a / P8b** and the second pass justified rather than planned away (**PA15**). Four gaps closed: **every item now has a falsifiable definition of done** and an ordinal size (**PA16**) — an item that cannot be declared finished is the plan-stage form of an unfalsifiable claim; **wave 1 is ordered by external latency rather than by size** (**PA17**), which changes which item is picked up first; and the plan gains **abort conditions and a unit-level definition of done** (**PA18**). |
 | 5 | 2026-08-02 | **Block response to O's `blocked` verdict.** **T4 falsified** by O in four minutes — the experiment was on H's own cheapest-test list, and `sosa:madeBySensor`'s cardinality differs by ADR-003 outcome because Open-Meteo publishes no instrument. **The abort condition it was supposed to fire did not fire, because it named the wrong item** (**PA19**): P5 is resolve-and-cache, form is authored at P7, and P7 already waits on P3. PA5's justification withdrawn and re-based on T4a; PA18's T4 clause withdrawn and replaced with the Part 0 case that would genuinely require re-derivation. **PG1** — the wave rendering put P6b on the path to P7 and was cancelling PA11's headline benefit; the item table governs (**PA20**). **PG6** — P8a and the unit done-criteria presupposed option B; both now conditional (**PA21**). **PG2** accepted, M2 dropped from P4. **PG3/PG4** — two new wave-1 items, **P13** (capture rules) and **P14** (the 24-snapshot series, the only uncompressible latency in the plan), and PA17's premise corrected (**PA22**). **PG5** — C12 and C15 scheduled into P6a rather than left silent (**PA23**). **PA6 kept**, per O's ruling. |
 | 6 | 2026-08-02 | **P15 and PA24 added from the claims sweep** — the §5.1 question 9 experiment, scheduled into wave 1 with its prediction attached. **Recorded late:** this amendment was made while responding to the claims sweep and no history row was written at the time, which is the omission this table exists to prevent. **It does not address O's second plan-gate verdict** — Blocks A (PA19 falsified), B (PG1, third rendering) and C (PG8, the missing P14→P9 edge) are **open and unanswered** as of this row. Nothing below has been revised for them. |
-| 4 | 2026-08-02 | **Completability review.** Amendment 3 made the plan consistent; this one makes it finishable. One further conflict found: **P9 adds slots to Part 2 after P8 has authored the JSON-LD context**, so P8's output goes stale the moment P9 lands — a rework loop the single item P8 concealed. Split into **P8a / P8b** and the second pass justified rather than planned away (**PA15**). Four gaps closed: **every item now has a falsifiable definition of done** and an ordinal size (**PA16**) — an item that cannot be declared finished is the plan-stage form of an unfalsifiable claim; **wave 1 is ordered by external latency rather than by size** (**PA17**), which changes which item is picked up first; and the plan gains **abort conditions and a unit-level definition of done** (**PA18**). |
+| 7 | 2026-08-02 | **Blocks A, B and C answered.** **A** — O's `gen-shacl` experiment reproduced: a bare slot emits `sh:maxCount 1`, so P5's clause 3 was authoring form, and PA19's identity/form split did not reach the ten local terms. **PA19 withdrawn.** The ten-row table (**PA25**) shows one of ten is ADR-dependent — `procedureKind`, a Part 2 slot authored at P7, which already waits on P3 — so clause 3 is **removed from P5**, not narrowed. PA18's abort still does not fire, for a different reason than PA19 gave. A **third double-count** surfaced: `assertedTime` is in the ten *and* `prov:generatedAtTime` is in the 23. **B** — the wave view drifted a third time; it is now **non-normative** and P6b is shown on its own line (**PA26**). **C** — the P14→P9 edge is in the table as **blocks-trust** (**PA27**). Also: `observingSystemStatus` is P9's, not P5's (PG7). |
 
 **Convention.** Per [`docs/README.md`](../README.md), corrections stay
 recorded rather than being edited away, and current state goes first.
@@ -216,18 +216,18 @@ dependency was the largest defect in the first draft of this section:
 | **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | Blocks **P6b only**, not P6a — see PA11 |
 | **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | Blocks P7 |
 | **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
-| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, 10 local terms declared, external graphs cached | the binding surface — **identity, not form** (PA19) | — | — | Blocks P6a, P7, P10 |
+| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | Blocks P6a, P7, P10 |
 | **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5 | P10 | Settled by ADR-001 Q1. Does **not** wait on P2 |
 | **P6b** | `candidateMatch` relation, if the resolution strategy needs one | a Part 0 relation, or nothing | P2 | P10 | May be empty under option B — see PA11 |
 | **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | Slot count depends on P9's boundary — see PA12 |
 | **P8a** | Fixture capture, JSON-LD context, `make check` executing against P7's shape | `fixtures/`, a `check` that runs | P7 | **C17 axis 1** | "Green" ≠ "validating" — see PA13 |
-| **P9** | The absence and health model | `absenceReason`, `observingSystemStatus`, the sentinel decoding | P7, P8a | — | Closes ranked gap #3. Last **modelling** item |
+| **P9** | The absence and health model | `absenceReason`, `observingSystemStatus`, the sentinel decoding | P7, P8a | **P14** | Closes ranked gap #3. Last **modelling** item. Authors `observingSystemStatus` — P5 does not (PG7) |
 | **P8b** | Context extended for P9's slots, check re-run | an up-to-date `check` | P9 | **C17 axis 1** | Not rework — the price of PA7's ordering. See PA15 |
 | **P10** | Range-vs-`slot_uri` drift check | C17 axis 2 closed | P5 | — | **Blocks-trust on P6a, P6b, P7** — see PA6 |
 | **P11** | Name T3a's tiebreak | L4's precondition | — | — | Outside this unit. Listed because merge work is the next unit and it has no predecessor — startable any time |
 | **P12** | Determine the implemented matching rule | closes L2's second half | **source access this repo lacks** | — | Permanently open — see PA9 |
 | **P13** | Fixture capture rules | `fixtures/README.md` — ordering key, F9 trap, per-fixture tier | — | — | Blocks P14. H's file. See PA22 |
-| **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** Blocks P9's falsifier. See PA22 |
+| **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
 | **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | evidence on **C5, C17 and the motivating defect at once** | — | — | ~30 min. No `vocab/` needed, neither ADR blocks it. **Prediction attached.** See PA24 |
 
 **PA4 — the order is three waves plus two items with no wave.** The
@@ -235,11 +235,18 @@ first draft wrote this as `P1 · P5 · P4 ‖ P3 · P2 · P10 · P6 · P7 · P8 
 P9`, which was pseudo-notation that did not say what `·` and `‖` bind
 and contradicted its own prose. Waves instead:
 
+**Derived view — non-normative.** This table is a hand-maintained second
+copy of the item table and has drifted from it three times in three
+amendments (PA20, PA26). **Where they disagree the item table governs
+and this view is the bug.** Kept for readability; a generated view would
+be the actual fix.
+
 | Wave | Items | Why together |
 |---|---|---|
 | **1** | **P13 → P14**, then **P1, P3, P4, P5, P11** | P13/P14 first — see PA17. The rest have no predecessors and run alongside P14's 24-hour wait |
 | **2** | **P2, P10** | P2 needs P1; P10 needs P5. Independent of each other |
-| **3** | **P6a → P7 → P8a → P9 → P8b**, with **P6b branching off P6a in parallel** | The authoring chain. **P6b is a branch, not a link** — see PA20. P9 is the last modelling item; P8b is a mechanical re-run behind it (PA15) |
+| **3** | **P6a → P7 → P8a → P9 → P8b** | The authoring chain. P9 is the last modelling item; P8b is a mechanical re-run behind it (PA15) |
+| **—** | **P6b** | **Startable when P2 lands. No dependency on P6a or on the chain** (PA26). May be empty |
 | **—** | **P12** | Never startable here |
 
 P6b may be empty (PA11), in which case the branch disappears.
@@ -505,7 +512,7 @@ condition.
 | **P2** | ADR-001 question 2 records A, B or C, or records a deferral with its reason | S |
 | **P3** | ADR-003 records A or B, and `docs/coverage.md` plus ADR-002's modality table agree with it | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
-| **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; the 10 local terms are declared; external graphs are cached locally | **L** |
+| **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25 | **L** |
 | **P6a** | **No Part 0 slot's cardinality or range differs by ADR-003 or ADR-001 outcome** (the PA19 residual — check first, it is cheap); the entity and alias core validates under `make lint`; `flat-siblings.yaml`'s shape passes as it does today; `operatingMode`, `modelVersion` and `profileConformance` are declared (PG5) | M |
 | **P6b** | Either a `candidateMatch` relation exists, or a line records that the chosen option needs none | S–0 |
 | **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error | M |
@@ -739,6 +746,118 @@ PG4 and PG5, and the third instance this week.
 **Falsifier for PA24:** an experiment that measures C5 more directly, or
 evidence that a threshold and a reading cannot be expressed in one
 schema without `vocab/` content.
+
+**PA25 — Block A. The ten-row table, and it repairs PA19 by removing
+clause 3 from P5 rather than by narrowing it.**
+
+O's experiment reproduces here: a LinkML slot with no `range`, no
+`required` and no `multivalued` emits `sh:maxCount 1`, and
+`multivalued: true` removes it. **Declaring a slot chooses a
+cardinality, silently.** So clause 3 of P5's criterion — *"the 10 local
+terms are declared"* — is authoring form, and PA19's identity/form split
+does not reach the ten. PA19 was right about the 23 and wrong to let
+clause 3 ride on the same argument.
+
+| # | Term | Class · Part | Authored at | ADR-dependent? |
+|---|---|---|---|---|
+| 1 | `id` | `Entity` · 0 | **P6a** | No. The *minting rule* is open (A10) but the form is 1..1 under every option |
+| 2 | `identifierValue` | `Alias` · 0 | **P6a** | No — ADR-001 **Q1** settled it |
+| 3 | `identifierScheme` | `Alias` → SKOS · 0 | **P6a** | No — Q1 |
+| 4 | `issuingAuthority` | `Alias` → `Agent` · 0 | **P6a** | No — Q1 |
+| 5 | `assertedTime` | `Alias` · 0 | **P6a** | No — **and it may not belong in this list**, see below |
+| 6 | `crs` | `Geometry` · 0 | **P6a**, if at all | No — conditional on a GeoSPARQL decision, not on either ADR |
+| 7 | `elevation` | `Place` · 0 | **P6a** | No |
+| 8 | **`procedureKind`** | `Procedure` · **2** | **P7** | **YES — ADR-003** |
+| 9 | **`observingSystemStatus`** | absence/health · 2 | **P9** | No — and P5 must not claim it (PG7) |
+| 10 | `sourceVerificationTier` | source provenance · 0 | **P6a** | No |
+
+**One of ten is ADR-dependent. It is a Part 2 slot and it is authored at
+P7, which blocks-start on P3.** Nine are authored at P6a or P9 and none
+of those is ADR-dependent.
+
+**The repair: clause 3 leaves P5 entirely.** Not narrowed — removed. The
+ten have no external identity to resolve; a term with no external URI
+*is* its name, and everything else about it is local form authored where
+its class is authored. P5 resolves the 23 external identities, declares
+prefixes, and caches graphs. That is the resolve-and-cache reading
+applied consistently instead of applied to three clauses out of four.
+
+O pre-empted the weaker repair — reading "declared" as *enumerated* —
+and was right that it fails: a clause satisfiable by transcription is
+not a definition of done. **Removal is the repair that survives that
+objection**, because the ten are then covered by items whose criteria
+already bite.
+
+**PA18's abort still does not fire, but for a different reason than
+PA19 gave.** Not "P5 does not author form" — it did, and that was the
+defect. The reason is that **once clause 3 is removed, every
+ADR-dependent term is authored behind its ADR's edge**: `procedureKind`
+at P7, and P7 waits on P3. The Part 2 exemption is sound; PA19's
+justification for it was not.
+
+**A third double-count, found while building the table.**
+`assertedTime` is item 5 of the ten *and* `prov:generatedAtTime` is
+among A3's five PROV terms in the 23 — and ADR-001 §4 states plainly
+that "`assertedTime` comes from PROV-O." If they are the same slot the
+surface is **24 bind / 9 write**, not 23/10. **I am not moving the
+count**: A1 is the measure document's and whether `assertedTime` binds
+`prov:generatedAtTime` specifically is a design-gate question. Recorded
+here because it is the third instance this week of one slot claimed
+twice — after `observingSystemStatus` (P5/P9, PG7) and PA12's P7/P9.
+
+**Falsifier for PA25:** a term in the table authored at an item other
+than the one named, or an ADR-dependency the table misses.
+
+**PA26 — Block B. The wave table is a derived view, it has drifted
+three times in three amendments, and it is now labelled non-normative.**
+
+PG1's third rendering was wrong the same way as the first two. The item
+table gives P6b exactly one blocks-start edge — **P2** — and no
+dependency on P6a. "Branching off P6a" still asserts P6a precedes it,
+and P6a waits on P5, the L-sized long pole, so the rendering put P6b
+behind work it does not wait on. PA11's entire point is that P6b's
+dependencies are *narrower* than first claimed.
+
+O's diagnosis is the one that matters: **the wave table has no cell for
+an item whose predecessor finished two waves earlier.** The abstraction
+does not fit the graph, and I have now bent it three times rather than
+saying so.
+
+Two changes:
+
+1. **P6b is shown on its own line, startable when P2 lands, with no
+   dependency on the P6a chain.**
+2. **The wave table is marked derived and non-normative.** Three drifts
+   in three amendments is enough evidence that a hand-maintained second
+   copy of the graph is a liability. The standing rule — *the table
+   governs* — was added in the same amendment that violated it, which as
+   O says makes it a way of describing defects rather than catching
+   them. Labelling the view as derived is weaker than deleting it and
+   stronger than another correction; **the honest position is that this
+   is mitigation, not a fix.** A generated view would be the fix.
+
+**Falsifier for PA26:** a fourth drift between the wave view and the
+item table.
+
+**PA27 — Block C. The P14 → P9 edge is now in the table, as
+blocks-trust.**
+
+P14 was added to produce the 24 snapshots and **the dependency did not
+come with it** — the only record was prose in a Notes cell, and under
+the document's own governing rule the table is the plan. P9's criterion
+was satisfiable against the single snapshot C11 already measured, which
+is precisely the state PG3 was filed against.
+
+On the typing PA6 introduced, this is **blocks-trust**: P9 can be
+authored without P14, and its output is not evidence until P14 lands.
+Same shape as P10's edge. Adding the item and omitting its edge is a
+new failure mode worth naming — **an item added to close a finding can
+leave the finding open if the reason it was added lives only in prose.**
+
+**Falsifier for PA27:** a reading of P9's criterion satisfiable with
+fewer than 24 snapshots once the edge is in place.
+
+---
 
 ### O's cheapest-experiment list
 
