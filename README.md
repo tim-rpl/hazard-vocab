@@ -3,27 +3,76 @@
 A declarative, multi-hazard vocabulary for emergency and hazard data —
 the reference model that source feeds are transformed into.
 
-- **Structure** — LinkML (`vocab/`)
-- **Code lists** — SKOS concept schemes (`codelists/`)
-- **Transformation** — Datalog / Mangle (`transform/`)
-- **Design checking** — Lean and Alloy (`design/`)
+There is no international standard for hazard data analogous to IEC CIM
+for electric utilities. What exists is a stack of partial standards,
+each covering one slice, with no unifying model. This project assembles
+one, and does not assume it is correct.
+
+| Layer | Technology |
+|---|---|
+| Structure | LinkML (`vocab/`) |
+| Code lists | SKOS concept schemes (`codelists/`) |
+| Transformation | Datalog / Mangle (`transform/`) |
+| Design checking | Lean and Alloy (`design/`) |
 
 Everything in `build/` is generated. The source of truth is `vocab/`.
+
+## Status
+
+**Pre-alpha. Do not depend on this.** No vocabulary has been authored
+yet; the repository holds the design record, the claims register, and
+the toolchain.
+
+See `claims.md`. Roughly a third of its entries are `falsified` with
+evidence attached, and **none is `tested`**. That is the intended
+state — a register recording only successes would be worthless.
+
+## Method
+
+This project is **falsification-driven**, and falsification is used as
+a governance check on every artifact type, not only on proofs.
+
+Two roles work against the same repository:
+
+- **H** — the builder. Authors the vocabulary, code lists, transform,
+  ADRs, proofs, plans, and the coverage matrix.
+- **O** — the overseer. Reads only what H produced, never the design
+  rationale, and tries to break it. Writes only claim statuses and
+  review messages.
+
+H works in four gated stages — **measure → plan → design →
+implement**. At the end of each, H posts to `review-inbox.md` and
+stops. O falsifies and replies. H may not pass a gate until O has
+posted, and must address every `blocked` finding. H may contest a
+finding once; unresolved disputes are adjudicated by a human and the
+outcome is recorded either way, including when O is overruled.
+
+`CLAUDE.md` holds the invariants, the file-ownership rule, and the
+declare-don't-discover rule for tooling changes. `FALSIFIER.md` holds
+O's charter and carries a version number O must state, so a stale
+charter fails loudly rather than silently. `docs/coverage.md` is the
+comprehensiveness instrument — a capability checklist with explicit,
+ranked gaps.
+
+**Guards are themselves guarded.** `make lint-selftest` exercises every
+lint rule against fixtures with known-correct outcomes, in both
+directions, and fails on any fixture no case references. Before those
+fixtures existed, every firing of every rule had been a false positive.
 
 ## Parts
 
 Segmented by **epistemic kind**, not subject matter. Weather and air
 quality are not parts — they appear in Part 2 as observations and
-Part 3 as forecasts, the same class with different procedures.
+Part 3 as forecasts: the same class with different procedures.
 
 | Part | Scope |
 |---|---|
-| 0 | Foundation — identity, time, geometry, coverage, sampling, agents, provenance |
+| 0 | Foundation — entity core, identity, time, geometry, coverage, sampling, provenance |
 | 1 | Hazard — process, event, area, intensity, cascade relations |
 | 2 | Observation — sensed state |
 | 3 | Model — forecast, interpolation, derivation |
 | 4 | Exposure — exposed elements, vulnerability, risk |
-| 5 | Response — incidents, resources, assignments, missions |
+| 5 | Intent and Action — plans, orders, resources, assignments, missions |
 | 6 | Warning — zones, protective actions, alerts |
 | 7 | Context — terrain, hydrography, transport, land cover |
 | R | Registry — observable properties, units, code lists (cross-cutting) |
@@ -31,31 +80,121 @@ Part 3 as forecasts, the same class with different procedures.
 Parts form a module dependency order: Part *n* may reference Parts < *n*,
 never >.
 
-## Status
+### Entity core
 
-Pre-alpha. See `claims.md` — most claims are `asserted` and untested.
-Do not depend on this yet.
+Part 0 declares five abstract entities. Parts 1–7 assign them **roles
+in relations** — no entity is subtyped by a role it plays, so a fire
+station is one `Asset` appearing in both an exposure relation and an
+assignment relation rather than two objects joined by `sameAs`.
+
+`Agent` · `Asset` · `Place` · `Activity` · `Document`
+
+Three Part 0 relations carry the structure the parts share:
+`partOf(Whole, Part, Interval)` for crews, incident complexes and
+sub-sampling; `authority(Agent, Place, HazardType, Function, Interval)`
+for jurisdiction, mutual aid and delegation; and
+`capability(Agent|Asset, Type, Level, Interval)` for qualifications and
+resource typing.
+
+### Modalities
+
+Four, of which the first two carry most standards work and the last two
+are usually missed:
+
+| Modality | Emergency management | Home |
+|---|---|---|
+| **is** — observed | monitors, perimeters, positions | Part 2 |
+| **will be** — modelled | forecast, spread model, plume | Part 3 |
+| **shall be** — intended | incident action plan, resource order, closure | Part 5 |
+| **must be** — mandated | jurisdiction, mutual aid, delegation | Part 0 |
+
+Intent is not prediction. Collapsing it into Part 3 is the same
+category error as collapsing forecast into observation.
 
 ## Layout
 
 ```
-vocab/core/         Parts 0-7, jurisdiction-neutral
-vocab/profiles/     hazard and jurisdiction bindings
-codelists/          SKOS concept schemes (Turtle)
-transform/          Mangle/Datalog rules
-design/             Lean, Alloy, ADRs — never executed in production
-fixtures/           real captured payloads
-build/              GENERATED
+CLAUDE.md            invariants, file ownership, gate protocol
+FALSIFIER.md         O's charter, with a version number
+claims.md            falsification register
+review-inbox.md      H <-> O channel, append-only
+
+vocab/core/          Parts 0-7, jurisdiction-neutral
+vocab/profiles/      hazard and jurisdiction bindings
+codelists/           SKOS concept schemes (Turtle)
+transform/           Mangle/Datalog rules
+fixtures/            real captured payloads
+
+design/ADR-*.md      decision records — O may not read these
+design/lean/         proofs; never extracted to executable code
+design/alloy/        structural models
+
+docs/coverage.md     capability matrix with ranked gaps
+docs/plan/           gated plans
+docs/prompts/        session-opening prompts for H and O
+docs/reference/      external specifications
+docs/sources/        source register for the reference implementation
+
+scripts/             lint rules and their fixtures
+build/               GENERATED — do not edit
 ```
 
 ## Development
 
-See `CLAUDE.md` for invariants. See `FALSIFIER.md` for the
-falsification pass charter.
+```
+make env             resolved toolchain and current role
+make gen             LinkML -> SHACL, JSON Schema, Mangle decls, docs
+make check           SHACL validation against fixtures/
+make lint            jurisdiction, declarative-drift, and vacuity rules
+make lint-selftest   exercises every lint rule against known fixtures
+make lean            design proofs — `sorry` means unproved
+make alloy           structural models — scope-bounded
+make clean
+```
 
-```
-make gen && make check
-```
+`make gen` and `make check` are non-functional until
+`vocab/core/vocabulary.yaml` exists. That is a recorded finding, not an
+oversight.
+
+A clean result from any of these is a claim about that tool's coverage
+until you have checked what it inspected. Several artifacts in this
+repository have passed while asserting nothing. See `FALSIFIER.md` §4.
+
+## Design commitments
+
+- **Reuse over authorship.** External vocabularies are referenced by
+  URI, never transcribed — SOSA, PROV-O, QUDT, CF via NERC NVS2,
+  ADMS, DQV, DCAT, GeoSPARQL.
+- **Jurisdiction-neutral core.** No agency name, national identifier
+  scheme, or national namespace appears in `vocab/core/`. All of it
+  lives in `vocab/profiles/`, so the model retargets from wildfire to
+  flood or earthquake without core edits. Enforced by a lint that tests
+  by shape rather than by a list of agency names.
+- **Declarative, not object-oriented.** Slots are first-class and
+  independent of classes. Profiles compose by conjunction rather than
+  requiring tooling to subset. Structure adopted from class-shaped
+  standards is **translated, not transcribed**.
+- **Generated artifacts are never hand-edited.** One source, many
+  serializations.
+- **Constraints must be *generable*, not merely expressible.** A
+  constraint the source language accepts but the generator silently
+  drops is not in force. The test is what appears in `build/shapes.ttl`.
+
+## Open questions
+
+Recorded rather than deferred, each with an ADR or a claim behind it:
+
+- **Whether Part 2 and Part 3 are separate parts** (ADR-003). The split
+  contradicts ISO 19156, which treats a simulation result as an
+  observation with a simulation-typed procedure.
+- **What establishes identity** (ADR-001 question 2), gated on a claim
+  that is ambiguous between two relations with opposite truth values.
+- **How cross-slot constraints reach the generated shapes.** The
+  constraint that makes the canonical layer's motivating case
+  detectable is SHACL Core, works when hand-written, and is not emitted
+  by the generator from any source construct tried so far.
+- **Whether the standard or the substrate is the asset.** These imply
+  very different levels of investment here, and the question is open.
 
 ## License
 
