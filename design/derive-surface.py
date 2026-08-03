@@ -17,6 +17,7 @@ about lint behaviour, not figures, and generation would have missed both.
 The answer to that class is O's: **the search key for a tooling change
 is the tool's behaviour, not its name.**
 """
+import re
 import sys
 from pathlib import Path
 
@@ -133,6 +134,28 @@ def main():
         for name, lines in blocks.items():
             print("--- %s ---\n%s\n" % (name, "\n".join(lines)))
         return 0
+
+    # BV5-1: the generator's boundary was one paragraph too high. A
+    # hand-typed restatement of the counts sat below END GENERATED and
+    # nothing checked it. Proximity is the wrong test — a number near a
+    # marker may be a date or a historical narrative — so this targets
+    # the *shapes a restatement takes* instead.
+    outside = text
+    for name in blocks:
+        beg, end = BEGIN % name, END % name
+        if beg in outside and end in outside:
+            i, j = outside.index(beg), outside.index(end) + len(end)
+            outside = outside[:i] + outside[j:]
+    restated = []
+    for pat in (r"\d+\s+bound", r"\d+\s+local", r"=\s*\d+\s+of A1",
+                r"\d+\s+class bindings", r"\d+\s+value URIs"):
+        for m in re.finditer(pat, outside):
+            line = outside[:m.start()].count("\n") + 1
+            restated.append("a generated count is restated by hand outside "
+                            "the blocks: %r" % m.group(0))
+    if restated:
+        print("FAIL\n  " + "\n  ".join(sorted(set(restated))), file=sys.stderr)
+        return 1
 
     stale = []
     for name, lines in blocks.items():

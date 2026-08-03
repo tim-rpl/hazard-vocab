@@ -33,6 +33,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import fnmatch
 import re
 import shlex
 import sys
@@ -60,50 +61,51 @@ REGEX_CHARS = set("^$*+?[]{}()|\\")
 WRITE_ALLOWED = ("claims.md", "review-inbox.md")
 
 
+RATIONALE = "ADR-000-rationale.md"
+GLOB_CHARS = "*?[]{}"
+
+
 def is_blocked(path: str) -> bool:
-    """True for the RATIONALE under design/, False for everything else.
+    """True for the rationale only. False for everything else.
 
-    What is blocked is the reasoning O exists to test independently, not
-    every file in the directory.
+    The previous version had a `return True` fallthrough for anything
+    under design/ that was not lean/, alloy/, or ADR-NNN with NNN > 000.
+    That blocked `design/surface.yaml` and `design/derive-surface.py` —
+    the artifacts of a declared change — and contradicted charter v8,
+    FALSIFIER.md §1, and this docstring, all of which say everything
+    else under design/ is readable. It cost a gate two unverified
+    mutation rows. See [O -> H] design gate block verification 5, BV5-3.
 
-      * design/lean/, design/alloy/ -- artifacts O must run and may need
-        to read to answer §4's vacuity questions (F7).
-      * design/ADR-000-rationale.md -- the pre-decision rationale. This
-        is what anchoring means and it stays blocked.
-      * design/ADR-NNN-*.md for NNN > 000 -- decisions of record. At a
-        design gate these ARE the artifact under review. Blocking them
-        would leave O reviewing H's summary of a decision instead of the
-        decision, which is the prose-versus-artifact defect this project
-        has spent six gate blocks on.
+    Globs are resolved by the SHELL, so the hook only ever sees the
+    unexpanded token: `design/*` reads eleven files including this one.
+    A glob is therefore blocked when it COULD match the rationale, which
+    is what fnmatch answers. `design/ADR-003*` does not; `design/ADR-*`
+    does, and blocking it is correct because it expands to include the
+    rationale. BV5-2.
     """
     if not path:
         return False
     p = path.replace("\\", "/").strip("'\"")
+    if any(ch in p for ch in GLOB_CHARS):
+        tok = p.lstrip("./").replace("{", "").replace("}", "")
+        target = "design/" + RATIONALE
+        return (fnmatch.fnmatch(target, tok)
+                or fnmatch.fnmatch(RATIONALE, tok)
+                or fnmatch.fnmatch(target, tok.rstrip("/") + "/*"))
     parts = [seg for seg in p.split("/") if seg not in ("", ".")]
-    if "design" not in parts:
-        return False
-    i = parts.index("design")
-    tail = parts[i + 1:]
-    if not tail:
-        return True
-    if tail[0] in ("lean", "alloy"):
-        return False
-    if tail[0].startswith("ADR-") and not tail[0].startswith("ADR-000"):
-        return False
-    return True
+    return bool(parts) and parts[-1] == RATIONALE
 
 
-HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?.*?^\1\s*$",
-                     re.S | re.M)
 PATHISH = re.compile(r"[\w./~-]+")
+HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?.*?^\1\s*$", re.S | re.M)
 
 
 def strip_heredocs(command: str) -> str:
     """Remove heredoc BODIES, keeping the command that introduces them.
 
-    A heredoc body is content being written, not a path being read --
-    that is F7. Stripping it lets the rest of the command be parsed
-    normally instead of defeating the parser.
+    A heredoc body is content being written, not a path being read —
+    that is F7. Stripping it lets the rest of the command parse normally
+    instead of defeating the parser.
     """
     return HEREDOC.sub("<<HEREDOC", command)
 
@@ -124,11 +126,18 @@ def blocked_reads(command: str) -> list[str]:
         # Unparseable after heredoc stripping. Do NOT give up: scan every
         # path-like token. Coarser, and errs toward blocking.
         return [t for t in PATHISH.findall(command) if is_blocked(t)]
-    hits, cmd_position, pattern_pending = [], True, False
-    reading = False
+    # Flags that consume the NEXT token. `-e PATTERN` supplies the
+    # pattern, so the first positional is then a FILE, not a pattern —
+    # the previous version swallowed it anyway. `-f FILE` supplies a
+    # file of patterns, which is itself a read.
+    PATTERN_FLAGS = {"-e", "--regexp"}
+    FILE_FLAGS = {"-f", "--file"}
+
+    hits, cmd_position, pattern_pending, reading = [], True, False, False
+    expect = None
     for tok in tokens:
         if tok in SEPARATORS:
-            cmd_position, reading, pattern_pending = True, False, False
+            cmd_position, reading, pattern_pending, expect = True, False, False, None
             continue
         if cmd_position:
             cmd_position = False
@@ -136,15 +145,27 @@ def blocked_reads(command: str) -> list[str]:
             reading = base in READERS
             pattern_pending = base in PATTERN_FIRST
             continue
+        if expect == "pattern":
+            expect, pattern_pending = None, False
+            continue
+        if expect == "file":
+            expect = None
+            if is_blocked(tok):
+                hits.append(tok)
+            continue
         if tok.startswith("-"):
+            if tok in PATTERN_FLAGS:
+                expect = "pattern"
+            elif tok in FILE_FLAGS:
+                expect = "file"
             continue
         if pattern_pending:
-            # first non-flag argument to a grep-family command is the
-            # pattern being searched FOR, not a file being read
+            # first positional of a grep-family command is the pattern
             pattern_pending = False
             continue
-        if set(tok) & REGEX_CHARS:
-            continue
+        # Regex metacharacters only disqualify a token in the PATTERN
+        # slot. Applying it to every reader let `wc -l design/*` through,
+        # because `*` is a regex character and also a glob. BV5-2.
         if reading and is_blocked(tok):
             hits.append(tok)
     return hits

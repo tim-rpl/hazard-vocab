@@ -216,9 +216,15 @@ comes from the artifact.
 
 <!-- END GENERATED:worklist -->
 
-**Slots: 16 bound + 8 local = 24 of A1's enumerated slots**, plus
-`epistemicKind` outside that list. It is not the unit's slot total and
-is not claimed to be one.
+**The generated partition above is the count.** A hand-typed
+restatement stood here and was the last copy the generator had not
+deleted — its boundary was one paragraph too high, so nothing checked
+it (BV5-1). **Deleted rather than corrected**, and
+`derive-surface.py --check` now fails on any hand-typed restatement of
+these counts anywhere outside the generated blocks.
+
+Whatever the figure is, **it is not the unit's slot total** and is not
+claimed to be one.
 
 **`23 bind / 10 write of 33` and `35–36` are both retired rather than
 reconciled.** Neither is recoverable, and carrying either forward would

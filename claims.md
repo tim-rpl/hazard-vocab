@@ -2260,16 +2260,29 @@ Every class and slot in `vocab/` carries a `description` and an
 
 *(added by O at the design gate, 2026-08-02)*
 
-### C21 — Distinct core classes bind distinct external class URIs
-No two classes in `vocab/core/` carry the same `class_uri`. Where two
-core classes are both kinds of one external class, the relationship is
-expressed by something other than assigning both that class's URI.
+### C21 — Distinct schema elements assert distinct external identity URIs
+No two schema elements in `vocab/core/` assert identity to the same
+external URI, by any construct — `class_uri`, `slot_uri`, or
+`exact_mappings`. Where two elements are both kinds of one external
+term, the relationship is expressed by something other than asserting
+that term's URI on both. `close_mappings` and `related_mappings` are
+outside the claim, because neither asserts identity.
+
+*(Restated 2026-08-02 at block verification 5, from H's proposal at the
+design gate. The previous wording — "no two classes in `vocab/core/`
+carry the same `class_uri`" — is superseded, not withdrawn: it was true
+and remains true, and is a strict special case of this. This is a
+widening, not a weakening; nothing that failed the old statement passes
+the new one. See the block-verification-5 evidence block for what the
+guard does and does not enforce of it.)*
 
 - **Status:** `asserted`
-- **Falsifier:** two classes in `vocab/core/` carrying the same
-  `class_uri`; or a generated `build/shapes.ttl` containing one
-  `sh:NodeShape` whose `sh:targetClass` is an external URI and whose
-  property shapes come from more than one declared class.
+- **Falsifier:** two elements in `vocab/core/` — two classes, two slots,
+  or a class and a slot — asserting the same external URI via any of
+  `class_uri`, `slot_uri` or `exact_mappings`; or a generated
+  `build/shapes.ttl` containing one `sh:NodeShape` whose
+  `sh:targetClass` is an external URI and whose property shapes come
+  from more than one declared class.
 - **Cheapest test:** `gen-shacl`, then count `sh:NodeShape` against
   count of `classes:`. Seconds, once `vocab/core/` has content.
 - **Evidence:** 2026-08-02 — **the claim is untested against the
@@ -2479,6 +2492,48 @@ expressed by something other than assigning both that class's URI.
   there is still nothing authored to check and no generated
   `build/shapes.ttl` to count shapes in. A guard widening is not evidence
   the claim holds.
+
+  **2026-08-02, block verification 5 — the restatement is adopted, and
+  the guard enforces less of it than the previous wording implied.**
+  H proposed the widening at the design gate and it is taken: the claim
+  is about the vocabulary, and identity by `exact_mappings` is the same
+  defect as identity by `class_uri`.
+
+  **But adopting H's rationale verbatim would have inverted the very
+  mismatch it was raised to close.** H's ground was *"the guard enforces
+  more than the register claims."* That was right for `exact_mappings`
+  within one population and wrong as a general statement. Probed the
+  shipped `scripts/drift-lint.py` against the restatement's own
+  falsifier — *two elements doing so that the guard passes* — on schemas
+  clean enough that no unrelated rule fires:
+
+  | Probe | `[shared-uri]` | exit |
+  |---|---|---|
+  | two classes, both `class_uri: prov:Entity` *(control)* | **FAIL** | 1 |
+  | a **class** via `class_uri` + a **slot** via `exact_mappings`, same URI | `ok` | **0** |
+  | a class via `class_uri` + a class via **`same_as`**, same URI | `ok` | **0** |
+  | two **`PermissibleValue.meaning`** values, same URI | `ok` | **0** |
+
+  Cause, read from source: `rule_shared_uri`
+  (`scripts/drift-lint.py:461-486`) calls its `collect` helper **twice
+  with a fresh `claims` dict each time** — once over `classes`/`class_uri`,
+  once over `slots`/`slot_uri`. The two maps never meet, so a cross-population
+  collision is outside its subject by construction. `same_as` and
+  `PermissibleValue.meaning` are collected by no rule at all, and
+  `meaning` is the construct `CLAUDE.md` names as the route to every SKOS
+  code list.
+
+  So the register and the guard are still not the same shape — the
+  direction has reversed. That is recorded here rather than fixed in the
+  claim, because the claim is about the vocabulary and the guard's
+  coverage is evidence, not content. `scripts/` is human-owned; reported,
+  not edited.
+
+  Status stays `asserted`, for the reason it has stayed `asserted`
+  through four block verifications: `vocab/core/` still holds one
+  `.gitkeep`. Nothing is authored, so the widened claim is no more tested
+  against material than the narrow one was. Restating a claim is not
+  evidence for it.
 - **Updated:** 2026-08-02
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the

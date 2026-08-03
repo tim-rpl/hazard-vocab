@@ -49,7 +49,11 @@ lint:
 	@echo "P: the wave view is derived from the item table"
 	@if [ -f docs/plan/derive-waves.py ]; then \
 		$(BIN)python docs/plan/derive-waves.py --check; \
-	else echo "  skip — docs/plan/derive-waves.py not present"; fi
+	else echo "  note: docs/plan/derive-waves.py not present — this check inspected nothing"; fi
+	@echo "S: the surface counts are derived from design/surface.yaml"
+	@if [ -f design/derive-surface.py ]; then \
+		$(BIN)python design/derive-surface.py --check; \
+	else echo "  note: design/derive-surface.py not present — this check inspected nothing"; fi
 	@echo "lint ok"
 
 lint-selftest:
