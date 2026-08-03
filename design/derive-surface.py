@@ -146,13 +146,26 @@ def main():
         if beg in outside and end in outside:
             i, j = outside.index(beg), outside.index(end) + len(end)
             outside = outside[:i] + outside[j:]
+    # Fire only on the CURRENT generated values. An earlier version
+    # matched any numeral in these shapes, which forbade the historical
+    # record this project requires — "an earlier draft read 17 bound + 9
+    # local" is a retraction, not a restatement, and every ADR here
+    # carries one. Narrowing to live values lets the record stand.
+    #
+    # RESIDUAL, stated rather than claimed solved: a coincidental phrase
+    # carrying a live value still fires — "16 bound volumes" would. No
+    # pattern can separate that from a real restatement, so the check is
+    # deliberately noisy in that one direction rather than silent.
+    nb, nl = len(d["slot_uri"]), len(d["local_slots"])
+    live = {r"%d\s+bound" % nb, r"%d\s+local" % nl,
+            r"=\s*%d\s+of A1" % (nb + nl),
+            r"%d\s+class bindings" % len(d["class_uri"]),
+            r"%d\s+value URIs" % len(d["meaning_verified"])}
     restated = []
-    for pat in (r"\d+\s+bound", r"\d+\s+local", r"=\s*\d+\s+of A1",
-                r"\d+\s+class bindings", r"\d+\s+value URIs"):
+    for pat in live:
         for m in re.finditer(pat, outside):
-            line = outside[:m.start()].count("\n") + 1
-            restated.append("a generated count is restated by hand outside "
-                            "the blocks: %r" % m.group(0))
+            restated.append("a LIVE generated count is restated by hand "
+                            "outside the blocks: %r" % m.group(0))
     if restated:
         print("FAIL\n  " + "\n  ".join(sorted(set(restated))), file=sys.stderr)
         return 1
