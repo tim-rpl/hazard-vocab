@@ -356,6 +356,29 @@ as a new fact with later validity, not as deletion.
   that returns clean would therefore be an instrument reporting success
   having inspected the wrong thing (FALSIFIER §4). The proxy is still
   worth running; it is not equivalent to the claim.
+- **Instrument finding, 2026-08-02 (block verification 6) — a `sorry`
+  inventory taken from `make lean` output is cache-dependent, and this
+  round it under-reported by five.** `make lean` runs `lake build`,
+  which emits `declaration uses 'sorry'` only for modules it actually
+  elaborates. Modules replayed from cache emit nothing. Measured in one
+  session, same working tree, no source edit:
+
+  | Invocation | `sorry` warnings |
+  |---|---|
+  | `make lean`, cache as found at session start | **4** — `Identity.lean:83`, `:100`, `Merge.lean:89`, `:113` |
+  | after `rm -rf .lake/build/lib && lake build` | **9** — seven in `Identity.lean` (`:26 :33 :59 :70 :77 :83 :100`), two in `Merge.lean` (`:89 :113`) |
+  | `make lean` again, warm | 9 |
+
+  Source `grep` agrees with the clean rebuild: `Identity.lean` carries
+  seven `sorry`s, `Merge.lean` two. **This corrects O's own evidence in
+  block verification 5**, which recorded "the four in `Identity.lean`"
+  — that was the cached number, not the file's. The replay caveat was
+  already noted for one theorem pair below; the general form is that
+  **`make lean` reports a lower bound on `sorry`, never a count.** Same
+  family as C17 and C18: an instrument reporting success over what it
+  did not inspect. Any claim citing a `sorry` count from `make lean`
+  needs a clean rebuild or a source `grep` behind it. The Makefile is
+  human-owned; reported, not edited.
 - **Audit finding, 2026-08-02 — L5's Lean obligation is empty, and the
   file's corrected header note now vouches for it.**
   `monotone_under_source_addition` (`Merge.lean`) takes `hmono : ∀ a b
@@ -1743,6 +1766,53 @@ rule, and does not fire on content that complies.
   Third consecutive round in which the repair for a recall hole leaves
   the same hole one field over. `scripts/` is human-owned; reported,
   not edited.
+
+  **Round 8, 2026-08-02 — the repair landed and works. The tenth
+  counterexample is that one of the three fixtures certifying it does
+  not exercise what it is named for.** Round 7's two defects are both
+  closed, verified by mutating the linter rather than reading it:
+
+  | Mutation of `scripts/drift-lint.py` | Effect on `lint-selftest` |
+  |---|---|
+  | `_project_namespaces()` returns a hardcoded list when the file is absent | ` FAIL [jurisdiction] project-namespaces.txt is inert` — **the selftest's own §4 mutation case fires** |
+  | drop `under_project` on the `default_prefix` branch | `default-prefix-escape` **and** `default-prefix-ancestor` both stop firing |
+  | reinstate the two-directional agreement test | **no change** — `own` is now empty for a foreign `id:`, so the ancestor route is closed by the `id:` gate, not by the agreement test's removal |
+  | drop `under_project` on the `id:` branch | **no change, 28 pairs, 7/7** |
+  | **delete the `id:` branch entirely** | **no change, 28 pairs, 7/7** |
+
+  The first three are the repair holding. The last two are the finding.
+  All three namespace fixtures — `default-prefix-escape.yaml`,
+  `id-claims-foreign-namespace.yaml` and `default-prefix-ancestor.yaml`
+  — fire on one identical message:
+
+  ```
+  prefix `irwin` declares namespace `https://w3id.org/nwcg/irwin/` on
+  `w3id.org`, which is a public permanent-identifier redirect
+  ```
+
+  That is F13's redirect rule, not the self-namespace exemption. Two of
+  the three are nonetheless bound to the exemption, because exempting
+  the `default_prefix` URI suppresses that same message. The third,
+  labelled *"recall — BV19, `id:` nominating a foreign namespace"*, is
+  not: the schema's `id:` is a **descendant** of the prefix namespace it
+  declares, so adding the `id:` base to `own` never exempts the prefix.
+  Its firing is independent of the branch it certifies.
+
+  **The `id:` branch is load-bearing; only its test is not.** A probe
+  with a foreign `id:` that declares no foreign *prefix* —
+  `id: https://w3id.org/nwcg/irwin/core`, class and slot URIs under it,
+  `prefixes:` carrying `linkml` only — exits **1** on the shipped code
+  and **0** with the `under_project` gate removed. That is BV19's real
+  escape and no fixture covers it.
+
+  So `7/7 rules with demonstrated recall` remains true at rule
+  granularity and overstates the case at branch granularity: the
+  guard-clause the round-7 repair added has no test that would notice
+  its deletion. Same family as the four defects above — an instrument
+  reporting coverage it does not have — and the reason it survived is
+  the one this entry keeps recording: the fixture was checked for
+  *firing*, not for *firing because of the thing under test*.
+  `scripts/` is human-owned; reported, not edited.
 - **Updated:** 2026-08-02
 - **Cheapest test — superseded 2026-08-02.** *"Two throwaway files per
   rule — one violating, one compliant — run `make lint`, confirm it

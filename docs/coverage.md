@@ -142,17 +142,23 @@ defect.
 
 | Capability | Control-centre analogue | Home | Status |
 |---|---|---|---|
-| Gap filling / interpolation | State estimation | Part 3 | `covered` |
-| Forecast | Load / generation forecast | Part 3 | `covered` |
-| Derived indices | Calculated points | Part 3 | `covered` |
+| Gap filling / interpolation | State estimation | Part 2, `epistemicKind: modelled` | `covered` |
+| Forecast | Load / generation forecast | Part 2, `epistemicKind: modelled` | `covered` |
+| Derived indices | Calculated points | Part 2, `epistemicKind: modelled` | `covered` |
 | **Limit and threshold definition** | `OperationalLimit` | — | **`GAP`** |
 | **Violation detection** | Limit violation | — | **`GAP`** |
 | **Alarm state, acknowledgement, suppression** | Alarm list | — | **`GAP`** |
-| Uncertainty representation | — | Part 3 | `partial` — no mature standard |
+| Uncertainty representation | — | Part 2 | `partial` — no mature standard |
 | **Cascade / interdependency analysis** | Contingency analysis | — | **`GAP`** — requires network topology |
 
+> **Part 3 no longer exists.** ADR-003 chose option B on 2026-08-02:
+> Parts 2 and 3 are one `Observation` class distinguished by a required
+> `epistemicKind` slot. Rows that read "Part 3" now read
+> "Part 2, `epistemicKind: modelled`". Part 3 is a documented vacancy,
+> not renumbered.
+
 > **Limits and violations are most of what a control centre does.**
-> This is where Part 3 (derive the violation) meets Part 6 (escalate to
+> This is where the modelled epistemic kind (derive the violation) meets Part 6 (escalate to
 > public warning), and therefore where the observed/modelled discipline
 > gets its hardest test — an alarm is a *derived* fact presented with
 > the urgency of an observed one.
@@ -216,7 +222,7 @@ defect.
 | Risk | Part 4 | `covered` |
 | Population | Part 4 | `covered` |
 | **Damage assessment** | — | **`GAP`** — post-event observed impact, distinct from pre-event exposure |
-| Loss estimation | Part 3 | `partial` |
+| Loss estimation | Part 2, `epistemicKind: modelled` | `partial` |
 
 ## Warning and protective action
 

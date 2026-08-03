@@ -1,7 +1,7 @@
 # ADR-003 — Whether Part 2 and Part 3 are separate parts
 
-**Status:** proposed — BLOCKED pending the design gate
-**Date:** —
+**Status:** accepted — **option B**
+**Date:** 2026-08-02
 
 ## Context
 
@@ -70,12 +70,59 @@ be omitted any more than a module boundary can be crossed.
 
 ## Decision
 
-TBD at the design gate.
+**Option B. Parts 2 and 3 merge into one `Observation` class,
+distinguished by `procedure` and by a required `epistemicKind` slot with
+a closed vocabulary.** Part 3 becomes a documented vacancy rather than
+being renumbered.
 
-**The bar:** if the reason A is better cannot be articulated beyond
-"the distinction feels more important as structure," the split is not
-load-bearing and B should win on interoperability alone. Fighting the
-standard you bind to needs a stated reason.
+### Why, against this ADR's own bar
+
+The bar this ADR set for itself: *"if the reason A is better cannot be
+articulated beyond 'the distinction feels more important as structure,'
+the split is not load-bearing and B should win on interoperability
+alone."*
+
+**Five gates have passed and nobody has articulated it** — not H, not O,
+not the falsification sweep. That alone settles it under the stated
+rule. The evidence accumulated since is one-directional:
+
+| Finding | Bears on |
+|---|---|
+| **A29 / S8** — SOSA's own `sosa:Sensor` definition reads *"Device, agent (including humans), or **software (simulation)**"*, verified verbatim at `sosa.ttl:154` | The standard we bind classes a simulation as a sensor. A is fighting the vocabulary it imports, not only the one it cites |
+| **A5**, survived under experiment | Under A this unit is **not executable as scoped** — Open-Meteo publishes no instrument (S10 probed for one and found none), so it has no Part 2 shape |
+| **T4**, falsified by experiment | `sosa:madeBySensor`'s cardinality differs by outcome. Under B it *cannot* be required; under A it can. The A/B choice is forced by the payloads, not chosen |
+| **A7** | B costs **+1 slot and +1 enum**. A costs a Part 3 that re-declares the observation shape, plus a union query on every consumer, forever |
+| **L6**, weakened on its own terms | Stratification constrains *derivation only, not presentation*, and the stratum assignment is a judgment call at exactly the boundary cases — QC'd and gap-filled readings, data assimilation, EPA's interpolated contours published as observational products |
+
+**The one argument that would have favoured A is the one that fails.**
+A was chosen so the observed/modelled distinction would be *structural
+and therefore enforceable*. L6 shows the enforcement covers derivation
+and not presentation, which is the product property that matters; and a
+**required slot with a closed vocabulary cannot be omitted any more than
+a module boundary can be crossed.** B gets the discipline without the
+query cost.
+
+### What B loses, stated rather than assumed away
+
+**A module boundary is checkable by a human reading a file tree; a
+required slot is checkable only by running validation.** Under A, a
+Part 3 fact in a Part 2 file is visible on inspection. Under B, an
+`epistemicKind` of the wrong value is visible only to the lint. That is
+a real reduction in inspectability and it is the price.
+
+The mitigation is the lint rule this ADR already required, and it is now
+an obligation rather than a note.
+
+### Note on the interoperability argument, which is weaker than it reads
+
+**OMS publishes no dereferenceable ontology** — `http://www.opengis.net/ont/om`
+returns a 288-byte Prez stub with zero occurrences of `resultQuality`,
+and the ISO TC211 URI 404s (A24). So "interoperate with ISO 19156" is
+not a binding relationship; it is a shape we are borrowing.
+
+**SOSA does dereference, and SOSA follows the same pattern.** That is
+the interoperability argument that survives, and it is the one this
+decision rests on.
 
 ## Obligation
 

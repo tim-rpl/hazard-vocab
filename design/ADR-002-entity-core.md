@@ -27,8 +27,14 @@ carefully separated only two.
 | `Activity` | Observation acts, assignments, hazard events, warning issuances | `prov:Activity` |
 | `Document` | IAPs, situation reports, delegation letters, orders as legal instruments | `prov:Entity`, `foaf:Document` |
 
-`Statement` — the reified assertion with provenance — is the sixth, but
-is already covered by the provenance layer and needs no new class.
+`Statement` — the reified assertion with provenance — is the sixth.
+
+**Amended 2026-08-02 by ADR-004.** This read *"is already covered by the
+provenance layer and needs no new class."* That was right when nothing
+hung off it. Four slots now do — `sourceVerificationTier`,
+`operatingMode`, `modelVersion`, `profileConformance` — so `Statement`
+is a Part 0 class binding `prov:Entity`, and Part 0 carries **six**
+entities. See ADR-004 Decision B.
 
 ## Decision B — Role, not subtype
 
@@ -126,10 +132,18 @@ four. The full set, with its control-centre analogue:
 
 | Modality | Control centre | Emergency management | Home |
 |---|---|---|---|
-| **is** — observed | SCADA telemetry | Monitors, perimeters, positions | Part 2 |
-| **will be** — modelled | State estimation, contingency analysis | Forecast, spread model, plume | Part 3 |
+| **is** — observed | SCADA telemetry | Monitors, perimeters, positions | Part 2, `epistemicKind: observed` |
+| **will be** — modelled | State estimation, contingency analysis | Forecast, spread model, plume | Part 2, `epistemicKind: modelled` |
 | **shall be** — intended | Switching plan, work order | IAP, resource order, closure order | Part 5 (rescoped) |
 | **must be** — mandated | Operating agreement, interconnection | Jurisdiction, mutual aid, delegation | Part 0 (`authority`) |
+
+**Amended 2026-08-02 by ADR-003, which chose option B.** The first two
+rows read "Part 2" and "Part 3". Parts 2 and 3 are now one
+`Observation` class distinguished by `procedure` and by a required
+`epistemicKind` slot, so the modality is carried by a property rather
+than by a module boundary. **The four modalities survive unchanged** —
+ADR-003 said they would, and this is where that is recorded. Part 3 is
+a documented vacancy.
 
 Intent is not prediction. A switching plan is not a forecast of what
 the network will do; it is a declaration of what an operator will make

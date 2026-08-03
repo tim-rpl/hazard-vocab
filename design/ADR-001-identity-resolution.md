@@ -177,11 +177,60 @@ Open within question 1: whether precedence attaches to `AliasKind` or
 `NameType`, and whether `NameType` is a class or a SKOS concept scheme
 (see ADR-000 D5).
 
-**Question 2 — TBD.** Leaning B: heuristic matches recorded as
-`candidateMatch` facts rather than identity facts. They stay in the
-store, remain queryable and auditable, and never silently fuse two
-distinct entities. Option A is what naive pipelines do implicitly,
-without the bound.
+**Question 2 — decided: B.** Heuristic matches are recorded as
+`candidateMatch` facts, never as identity facts. Identity is established
+only by an authority scheme, under the precedence order a profile
+declares.
+
+### Why B, and what L2's ambiguity costs the decision
+
+L2 is ambiguous between two relations with **opposite truth values** —
+grid-cell equality (transitive, so L2 is false) and tolerance proximity
+(not transitive, so L2 is true). That ambiguity is not resolved here and
+cannot be resolved from this repository (P12).
+
+**It costs this decision nothing, and that is the argument for B.**
+
+| Option | What L2's ambiguity does to it |
+|---|---|
+| **A** — transitive closure | **Decisive.** Under proximity, union-find over a non-transitive relation over-merges without bound, and the obligation is to prove a cluster bound nobody can state until the relation is known. Under grid-cell equality the closure is just the quotient and is safe. A cannot be chosen without resolving L2 |
+| **C** — policy clustering | **Decisive.** The obligation is proving the policy order-independent, and whether that is provable depends on which relation it disposes over |
+| **B** — authority only | **None.** The heuristic never establishes identity, so its algebraic properties are not load-bearing. B is *invariant* under the ambiguity |
+
+**B is the only option whose correctness does not depend on a question
+this project cannot currently answer.** That is a stronger reason than
+the prior art, and it is the reason of record.
+
+The prior art agrees and is worth keeping as corroboration rather than
+as grounds: the reference implementation implements B, with an explicit
+refusal in place of a guess (register category 08); and the CIM profile
+states that `IdentifiedObject.name` is non-unique, is for user interface
+and debugging, must not carry embedded information requiring parsing,
+and that the mRID is the only unique and persistent identifier in the
+exchange. **That profile does not dereference (A30, PA10), so it binds
+nothing** — it is a second mature system reaching the same shape
+independently, not an authority.
+
+### What B costs, stated
+
+**Recall.** Records carrying no authority identifier are never fused.
+The reference implementation's aircraft case shows the shape: an entity
+with no resolvable identifier is not rendered at all. Add a recall
+metric to `claims.md`, per this ADR's own obligation.
+
+### Consequence for `candidateMatch`
+
+**It exists, and it is Part 0 schema rather than `transform/` content.**
+Under B the heuristic still runs — it just produces a different kind of
+fact. That fact relates two `Entity` instances and carries provenance,
+so it needs a declared shape.
+
+The rule that *derives* it is `transform/`. The relation it derives *to*
+is Part 0. That is ADR-000 D4's three layers — signature, constraints,
+derivation — with the boundary drawn where D4 draws it.
+
+**So P6b is non-empty**, which resolves the ambiguity PA11 left open in
+the direction PA11 flagged as possible but did not assume.
 
 ## Obligation
 

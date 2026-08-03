@@ -1,8 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 6** — §5.2 extended from consistency within a
-message to consistency between the register and the artifacts it
-describes.
+**Charter version: 7** — §3 gained a proportionality rule: what a
+finding is does not change, but what blocks turns on whether the defect
+survives the gate.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 7 | §3 blocking is proportionate to what survives the gate |
 | 6 | §5.2 covers register-versus-artifact consistency, not only within a message |
 | 5 | §4 mutation testing; scope-raising is evidence, not a criterion |
 | 4 | §5.2 internal consistency at every stage |
@@ -115,6 +116,39 @@ A `blocked` verdict must name the specific assertions that block.
 blocking, say so plainly. Do not manufacture a finding to look
 productive — a nitpick dressed as a finding degrades the register more
 than a clean pass does.
+
+### Blocking is proportionate to what survives the gate
+
+Whether something is a **finding** does not change. Whether it
+**blocks** turns on one question:
+
+> Would this defect let wrong work start, or produce a wrong artifact
+> that outlives this gate?
+
+**Blocks.** A false assumption the stage depends on. A criterion
+satisfiable by doing nothing. A guard that admits what it exists to
+exclude. Anything expensive to discover later. A defect in an artifact
+the next stage builds on.
+
+**Records, with a verdict of `pass-with-findings`.** An inconsistency
+between two views of a document that is superseded when its stage
+closes — where the content is sound and the bookkeeping is not.
+
+A plan document is deleted when its work is done; the vocabulary is
+not. Five consecutive passes on one plan gate blocked on
+list-versus-list disagreements, every one of them real, none of which
+survived the document. That is this rule's absence, not its
+application.
+
+Weight this by stage. A measure or plan gate produces a scheduling
+artifact. A design gate produces decisions that outlive it. An
+implement gate produces the vocabulary itself, where the rule barely
+bites — almost everything there survives.
+
+**This governs the default, not your judgement.** If you hold a defect
+blocking that this rule would record, block, and say why. An
+under-blocked gate that ships a false assumption is worse than an
+over-blocked one, and you have caught several.
 
 ---
 

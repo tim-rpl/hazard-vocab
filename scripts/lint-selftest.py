@@ -45,8 +45,9 @@ CASES = [
     ("jurisdiction",      "bound-vocabularies",  False, "precision — F11, every vocabulary CLAUDE.md binds"),
     ("jurisdiction",      "own-namespace",       False, "precision — BV8, the project's own id: and default_prefix"),
     ("jurisdiction",      "default-prefix-escape", True, "recall — BV14, default_prefix nominating a foreign namespace"),
-    ("jurisdiction",      "id-claims-foreign-namespace", True, "recall — BV19, id: nominating a foreign namespace"),
+    ("jurisdiction",      "id-claims-foreign-namespace", True, "recall — F13 redirect rule; does NOT reach the id: gate (BV25)"),
     ("jurisdiction",      "default-prefix-ancestor", True, "recall — BV23, default_prefix naming an ancestor of id:"),
+    ("jurisdiction",      "id-branch-only",      True,  "recall — BV25, the ONLY case reaching the id: gate"),
     ("documented",        "undocumented",        True,  "recall — C20, placeholder descriptions and no examples"),
     ("documented",        "own-namespace",       False, "precision — a documented file with examples"),
 ]

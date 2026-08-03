@@ -1,0 +1,32 @@
+# DELIBERATELY VIOLATING — and it is the ONLY fixture that exercises the
+# `id:` gate in the self-reference exemption.
+#
+# `id-claims-foreign-namespace.yaml` was named for that branch and does
+# not reach it: its `id:` is a DESCENDANT of the prefix it would need to
+# exempt, so `is_self` can never match the prefix above it, and the file
+# fires on F13's redirect-service rule instead. Deleting the `id:`
+# branch entirely left the selftest at 7/7. Tenth counterexample to
+# claims.md C18. See [O -> H] plan gate block verification 6, BV25.
+#
+# Here the foreign namespace is reached ONLY through `id:` — no foreign
+# prefix is declared, and the terms are full URIs under the id. Remove
+# the `under_project` gate on the `id:` branch and this stops firing.
+id: https://w3id.org/nwcg/irwin/core
+name: lint_fixture_id_branch_only
+prefixes:
+  linkml: https://w3id.org/linkml/
+default_range: string
+imports: [linkml:types]
+slots:
+  incidentName:
+    description: The name an incident is known by.
+    examples:
+      - value: Bootleg
+    slot_uri: https://w3id.org/nwcg/irwin/core/incidentName
+classes:
+  Incident:
+    description: A hazard occurrence under management.
+    examples:
+      - value: a wildland fire under a single incident commander
+    class_uri: https://w3id.org/nwcg/irwin/core/Incident
+    slots: [incidentName]

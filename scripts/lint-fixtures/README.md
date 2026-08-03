@@ -20,6 +20,27 @@ Each fixture is a **regression** for a specific finding, named in its
 header comment. Do not edit one to make a rule pass; the fixture
 records what the rule got wrong.
 
+## Mutation, not just coverage
+
+A fixture that fires proves the rule fires. It does not prove the rule
+fires **because of the thing the fixture is named for** — and that gap
+has now produced ten counterexamples to claims.md C18.
+
+`id-claims-foreign-namespace.yaml` was named for the `id:` gate in the
+self-reference exemption and never reached it: its `id:` is a
+*descendant* of the prefix it would need to exempt, so it fired on the
+redirect-service rule instead. Deleting the entire `id:` branch left the
+selftest at 7/7 and green.
+
+**So: for every guard clause, delete it and confirm a NAMED test
+notices.** Not that some test fails — that the test claiming to cover
+that clause fails. Three of six mutations run against this linter in one
+review changed nothing, and two of those three were the finding.
+
+`lint-selftest` runs one such mutation automatically, on
+`project-namespaces.txt`. The rest are manual and belong in the tooling
+declaration when a guard changes.
+
 ## Convention
 
 | | |
@@ -42,6 +63,12 @@ records what the rule got wrong.
 | `generic-acronyms.yaml` | precision — `EPSG`, `UTC`, `WKT`, `TAI` are not jurisdictions |
 | `jurisdiction-in-uri.yaml` | **F12** — generic names with the jurisdiction carried entirely in `prefixes:` and `slot_uri` |
 | `bound-vocabularies.yaml` | **F11** — every external vocabulary `CLAUDE.md` commits to binding must pass |
+| `own-namespace.yaml` | **BV8** — the project's own declared namespace must pass |
+| `default-prefix-escape.yaml` | **BV14** — `default_prefix` nominating a foreign namespace |
+| `id-claims-foreign-namespace.yaml` | F13's redirect rule. **Does not reach the `id:` gate** — see BV25 |
+| `default-prefix-ancestor.yaml` | **BV23** — `default_prefix` naming an ancestor of `id:`; the ordinary shape |
+| `id-branch-only.yaml` | **BV25** — the only fixture reaching the `id:` gate |
+| `undocumented.yaml` | **C20** — placeholder descriptions, no examples |
 
 `bound-vocabularies.yaml` is the standing guard against F11 recurring:
 the allowlist was originally populated from a partial reading of the

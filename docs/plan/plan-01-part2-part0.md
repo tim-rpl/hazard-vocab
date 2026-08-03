@@ -223,12 +223,12 @@ dependency was the largest defect in the first draft of this section:
 | # | Item | Produces | Blocks-start | Blocks-trust | In-unit | Notes |
 |---|---|---|---|---|---|---|
 | **P1** | Name L2's relation | `Identity.lean` defines both candidate relations; H proposes the restatement | — | — | excused — completion needs an O session; the claim change is O's | Completion needs an **O session** — only O changes a claim's status. External dependency, not a work item |
-| **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | excused — may resolve to nothing (ADR-001 Q2) | Blocks **P6b only**, not P6a — see PA11 |
-| **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | excused — a design-gate decision, not authoring work | Blocks P7 |
+| **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | excused — decided at the design gate 2026-08-02 (ADR-001) | Blocks **P6b only**, not P6a — see PA11 |
+| **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | excused — decided at the design gate 2026-08-02 (ADR-003) | Blocks P7 |
 | **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | excused — serves the first profile, a later unit | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
 | **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | **required** | Blocks P6a, P7, P10 |
 | **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | **required** | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
-| **P6b** | `candidateMatch` relation, if the resolution strategy needs one | a Part 0 relation, or nothing | P2 | P10 | excused — may be empty under ADR-001 option B | May be empty under option B — see PA11 |
+| **P6b** | `candidateMatch` relation — Part 0 | a Part 0 relation binding two `Entity` instances, with provenance | P2 | P10 | **required** | **Non-empty.** ADR-001 chose option B, under which heuristic matches are recorded as `candidateMatch` facts. The deriving rule is `transform/`; the relation is Part 0 (ADR-000 D4) |
 | **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | **required** | Slot count depends on P9's boundary — see PA12 |
 | **P8a** | Fixture capture, JSON-LD context, `make check` executing against P7's shape | `fixtures/`, a `check` that runs | P7 | **C17 axis 1** | **required** | "Green" ≠ "validating" — see PA13 |
 | **P8b** | Context extended for P9's slots, check re-run | an up-to-date `check` | P9 | **C17 axis 1** | **required** | Not rework — the price of PA7's ordering. See PA15 |
@@ -240,8 +240,9 @@ dependency was the largest defect in the first draft of this section:
 | **P14** | Capture the T1 snapshot series | ≥24 consecutive hourly AirNow snapshots | P13 | — | **required** | **~24h irreducible floor.** **Blocks-trust on P9** — the edge is in P9's row, not only here (PA27) |
 | **P15** | The §5.1 q9 experiment — PM2.5 threshold vs composite AQI | **DONE.** [`exp-01`](../experiments/exp-01-property-substitution.md) — C5 has affirmative evidence; C17 gains a third axis; invariant 4 has a wording gap | — | — | excused — done 2026-08-02 | Ran 2026-08-02. Prediction held on the generated path |
 | **P16** | ~~Allowlist this project's own namespace~~ | **DONE before it was filed** — landed undeclared in commit `e1b1bdf` (BV13). Verified: all three BV8 namespaces now pass | — | — | excused — done before it was filed (BV13) | Closed. See PA35 |
-| **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | **required** | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
-| **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — a design-gate decision; C5's carrier | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
+| **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | excused — decided at the design gate 2026-08-02 (ADR-004) | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
+| **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
+| **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
 
 <!-- END GENERATED:items -->
 
@@ -264,7 +265,7 @@ fourth. `derive-waves.py --check` fails if this block is stale.
 
 | Wave | Items |
 |---|---|
-| **1** | **P1**, **P3**, **P4**, **P5**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18** |
+| **1** | **P1**, **P3**, **P4**, **P5**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18**, **P19** |
 | **2** | **P2**, **P6a**, **P10**, **P14** |
 | **3** | **P6b**, **P7** |
 | **4** | **P8a** |
@@ -542,12 +543,12 @@ condition.
 | # | Done when | Size |
 |---|---|---|
 | **P1** | Both candidate relations are defined in `Identity.lean` and L2's entry names which one it is about. **Needs an O session** — H cannot close it | S |
-| **P2** | ADR-001 question 2 records A, B or C, or records a deferral with its reason | S |
-| **P3** | ADR-003 records A or B, and `docs/coverage.md` plus ADR-002's modality table agree with it | S |
+| **P2** | **MET 2026-08-02.** ADR-001 records option **B** with its reason: B is the only option whose correctness does not depend on resolving L2 | S |
+| **P3** | **MET 2026-08-02.** ADR-003 records option **B**; `docs/coverage.md` and ADR-002's modality table amended in the same pass | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
 | **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25 | **L** |
 | **P6a** | **P17 answers PA29 and PA30's decisions first** (a blocks-start edge, not a sentence — BV12). Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`**, and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each of those seven, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` (P16 is **done**, BV13); `flat-siblings.yaml` still passes | M |
-| **P6b** | Either a `candidateMatch` relation exists, or a line records that the chosen option needs none | S–0 |
+| **P6b** | `build/shapes.ttl` carries an `sh:path` for the `candidateMatch` relation's slots, and no heuristic match appears as an identity fact | S–0 |
 | **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error, **and it carries an `sh:path` for `procedureKind`** — or ADR-003's record states the slot does not exist (PA28) | M |
 | **P8a** | **Under ADR-003 option B:** `make check` executes against ≥1 real AirNow **and** ≥1 real Open-Meteo capture and reports violations it can see. **Under option A:** AirNow only — Open-Meteo has no Part 2 shape to validate against (A5), and the Open-Meteo captures are retained as Part 3 fixtures for a later unit. See PA21 | M |
 | **P8b** | The context maps P9's slots; `make check` re-run and green | S |
@@ -559,8 +560,9 @@ condition.
 | **P14** | ≥24 consecutive hourly AirNow snapshots exist under P13's rules, with gaps recorded rather than silently skipped | S work, **~24h floor** |
 | **P15** | **MET 2026-08-02.** A PM2.5-specific threshold and a composite `us_aqi` reading run through `gen-shacl` and pyshacl, result recorded against the prediction stated in advance — [`exp-01`](../experiments/exp-01-property-substitution.md) | S |
 | **P16** | **MET before it was filed** (BV13). All three BV8 namespaces pass `drift-lint.py`, and `bound-vocabularies.yaml` / `redirect-service.yaml` still behave | S |
-| **P17** | A design-gate record answers both: whether `crs` is a slot or PA29's `asWKT` substitute applies, **and** which class carries `sourceVerificationTier`, `operatingMode`, `modelVersion`, `profileConformance`. A1's Part 0 class count is confirmed at 14 or recorded as moved to 15 | S |
-| **P18** | A design-gate record picks **one** of the three C5-carrier options and states why the other two were rejected. Picking none, or recording all three as open, does not meet it | S |
+| **P17** | **MET 2026-08-02.** ADR-004: no `crs` slot (`asWKT` range constrained to `geo:wktLiteral`); `Statement` is a Part 0 class binding `prov:Entity`; A1's class count moves **14 to 15** | S |
+| **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
+| **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
 
 <!-- END GENERATED:done -->
 
@@ -600,6 +602,7 @@ by latency starts the externally-blocked items first and does P5's work
 | 8 | **P13** | short — fills the wait |
 | 9 | **P15** | short — fills the wait |
 | 10 | **P16** | short — fills the wait |
+| 11 | **P19** | short — fills the wait |
 
 <!-- END GENERATED:latency -->
 
@@ -653,22 +656,23 @@ something rather than stopping for it.
 
 <!-- BEGIN GENERATED:membership - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
-**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P17**.
+**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**.
 
 **Excused, each with its reason:**
 
 - **P1** — completion needs an O session; the claim change is O's
-- **P2** — may resolve to nothing (ADR-001 Q2)
-- **P3** — a design-gate decision, not authoring work
+- **P2** — decided at the design gate 2026-08-02 (ADR-001)
+- **P3** — decided at the design gate 2026-08-02 (ADR-003)
 - **P4** — serves the first profile, a later unit
-- **P6b** — may be empty under ADR-001 option B
 - **P11** — serves the merge unit, not this one
 - **P12** — cannot close from this repository
 - **P15** — done 2026-08-02
 - **P16** — done before it was filed (BV13)
-- **P18** — a design-gate decision; C5's carrier
+- **P17** — decided at the design gate 2026-08-02 (ADR-004)
+- **P18** — decided at the design gate 2026-08-02 (ADR-005)
+- **P19** — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists
 
-*10 required, 10 excused, 20 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
+*10 required, 11 excused, 21 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
 
 <!-- END GENERATED:membership -->
 
