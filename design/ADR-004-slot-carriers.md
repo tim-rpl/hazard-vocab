@@ -37,8 +37,8 @@ CRS rather than reading a property. That is a real cost and it is
 narrower than it sounds: the CRS is needed for reprojection, and
 anything reprojecting is already parsing the geometry.
 
-**Consequence:** A1's surface moves to **23 bind / 9 write of 32**, by
-A1's own arithmetic.
+**Consequence:** see the reconciliation below — the figure is not
+23/9 of 32 for the reason this section originally gave.
 
 ## Decision B — a `Statement` class. A1 moves 14 → 15
 
@@ -72,10 +72,54 @@ exercise data must not render as live. A discriminator that must sit on
 strongest single argument for this decision and it is the one that
 would have forced it eventually.
 
+## Decision C — `assertedTime` binds `prov:generatedAtTime`
+
+Deferred to this gate at PA25 and decided here rather than carried
+again. They are **one slot**: `assertedTime` is the local name and
+`prov:generatedAtTime` is its `slot_uri`.
+
+**Why they are the same.** An alias is a `prov:Entity` — a thing
+asserted — and the time it was generated *is* the time it was asserted.
+ADR-001 §4 already stated that `assertedTime` comes from PROV-O; what
+was missing was saying which term, and therefore whether the slot was a
+bind or a write. It is a bind.
+
+**It does not add to the bind count.** `prov:generatedAtTime` was
+already among A3's five PROV terms, so the URI was counted; what changes
+is that the *slot* leaves the write list.
+
+## Reconciliation of the surface figure
+
+Two corrections were outstanding and they move in opposite directions,
+so the arithmetic must be shown rather than asserted.
+
+| Step | Bind | Write | Total |
+|---|---|---|---|
+| A1 as restated at the measure gate | 23 | 10 | 33 |
+| **ADR-004 A** — `crs` is not a slot | 23 | 9 | **32** |
+| **ADR-004 C** — `assertedTime` is a bind, and its URI was already counted | 23 | 8 | **31** |
+| **ADR-003 B** — `epistemicKind` is a new local slot | 23 | **9** | **32** |
+
+**Final: 23 bind / 9 write of 32.**
+
+**That is the same figure this ADR first stated, and it was right by
+coincidence.** The `crs` removal and the `epistemicKind` addition
+cancel, and the `assertedTime` identification is a third change that
+happened to land back on the total. A figure that survives for the wrong
+reasons is not a verified figure — recorded because this project has
+spent four gates on numbers that agreed by accident.
+
+**The enum ADR-003 adds is not a slot** and does not enter this count.
+
+`docs/measure/measure-01-part2-part0.md` is a closed measure document
+and is not edited at a design gate; this table supersedes A1's figure.
+
 ## Consequences
 
 - `crs` leaves the write list; `asWKT`'s range constraint enters P6a's
   definition of done.
+- `assertedTime` leaves the write list and binds `prov:generatedAtTime`.
+- The surface is **23 bind / 9 write of 32**, per the table above.
 - `Statement` enters Part 0. A1's class count is **15**, recorded here
   because `docs/measure/measure-01-part2-part0.md` is a closed measure
   document and is not edited at a design gate.

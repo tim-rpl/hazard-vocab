@@ -73,6 +73,39 @@ notes said C5 had nothing to rest on without it. The decision belongs
 here and is made; the implementation belongs to a later unit and is
 named.
 
+## The second producer, and the obligation it creates
+
+**This gives `build/shapes.ttl` two producers** — `gen-shacl` and the
+project generator. Invariant 1 still holds, because nothing is
+hand-edited. But two producers writing one artifact is a merge, and a
+merge has properties that must be stated or they will be discovered.
+
+**Required of the merge, and testable:**
+
+1. **Additive.** The generator **extends** `gen-shacl`'s output and
+   never modifies or removes a triple it emitted. A cross-slot
+   constraint is a new shape, not an edit to an existing one.
+2. **Order-independent.** Running the generator before or after any
+   other post-step yields the same graph. This is T1's property applied
+   to the build rather than to the data, and it is required for the same
+   reason.
+3. **Deterministic.** Two runs over unchanged sources produce
+   **byte-identical** `build/shapes.ttl`. Without this, `make gen`
+   produces spurious diffs and nobody can tell a real change from
+   serialisation noise.
+
+**Cheapest test for all three:** run `make gen` twice and `diff`; then
+run it with the post-step order reversed and `diff` again. Both must be
+empty. Under a minute, and it is the check that would catch the merge
+turning into a rewrite.
+
+**Why this is an obligation rather than a note.** The alternative to
+stating it is discovering it — as a shapes file that changes on every
+build, or a constraint silently dropped by a second run. This project
+has spent five gates on artifacts with two producers disagreeing; the
+difference here is that the second producer is being designed rather
+than inherited, so the property can be required up front.
+
 ## Obligation
 
 - A new claim when the generator exists: *every cross-slot constraint

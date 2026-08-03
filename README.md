@@ -69,8 +69,8 @@ Part 3 as forecasts: the same class with different procedures.
 |---|---|
 | 0 | Foundation — entity core, identity, time, geometry, coverage, sampling, provenance |
 | 1 | Hazard — process, event, area, intensity, cascade relations |
-| 2 | Observation — sensed state |
-| 3 | Model — forecast, interpolation, derivation |
+| 2 | Observation — sensed and modelled state, distinguished by `procedure` and a required `epistemicKind` |
+| 3 | *vacant* — merged into Part 2 by ADR-003; the number is retained rather than renumbered |
 | 4 | Exposure — exposed elements, vulnerability, risk |
 | 5 | Intent and Action — plans, orders, resources, assignments, missions |
 | 6 | Warning — zones, protective actions, alerts |
@@ -103,13 +103,18 @@ are usually missed:
 
 | Modality | Emergency management | Home |
 |---|---|---|
-| **is** — observed | monitors, perimeters, positions | Part 2 |
-| **will be** — modelled | forecast, spread model, plume | Part 3 |
+| **is** — observed | monitors, perimeters, positions | Part 2, `epistemicKind: observed` |
+| **will be** — modelled | forecast, spread model, plume | Part 2, `epistemicKind: modelled` |
 | **shall be** — intended | incident action plan, resource order, closure | Part 5 |
 | **must be** — mandated | jurisdiction, mutual aid, delegation | Part 0 |
 
-Intent is not prediction. Collapsing it into Part 3 is the same
+Intent is not prediction. Collapsing it into a forecast is the same
 category error as collapsing forecast into observation.
+
+The first two modalities share a class and are distinguished by a
+required slot rather than by a module boundary. That is a deliberate
+trade: a module boundary is checkable by reading a file tree, a required
+slot only by running validation. See ADR-003.
 
 ## Layout
 
@@ -184,17 +189,20 @@ repository have passed while asserting nothing. See `FALSIFIER.md` §4.
 
 Recorded rather than deferred, each with an ADR or a claim behind it:
 
-- **Whether Part 2 and Part 3 are separate parts** (ADR-003). The split
-  contradicts ISO 19156, which treats a simulation result as an
-  observation with a simulation-typed procedure.
-- **What establishes identity** (ADR-001 question 2), gated on a claim
-  that is ambiguous between two relations with opposite truth values.
-- **How cross-slot constraints reach the generated shapes.** The
-  constraint that makes the canonical layer's motivating case
-  detectable is SHACL Core, works when hand-written, and is not emitted
-  by the generator from any source construct tried so far.
 - **Whether the standard or the substrate is the asset.** These imply
   very different levels of investment here, and the question is open.
+- **Whether a heuristic match can ever establish identity.** Decided no
+  (ADR-001), but the claim underneath remains ambiguous between two
+  relations with opposite truth values. The decision was chosen for
+  being invariant under that ambiguity rather than for resolving it.
+- **Whether the four modalities are exhaustive.** Curated narrative
+  content is a live candidate falsifier.
+
+Four questions that were open here have been decided: the observation
+and model split (ADR-003, merged), identity resolution (ADR-001,
+authority-only), slot carriers (ADR-004), and how cross-slot constraints
+reach validation (ADR-005, a generator over `annotations:` — decided and
+not yet built).
 
 ## License
 

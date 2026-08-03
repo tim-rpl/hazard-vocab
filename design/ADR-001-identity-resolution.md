@@ -1,7 +1,7 @@
 # ADR-001 — Identity resolution strategy
 
-**Status:** proposed — structure settled, relation BLOCKED pending L2
-**Date:** —
+**Status:** accepted — question 1 by prior art, question 2 as **option B**
+**Date:** 2026-08-02
 
 ## Context
 
@@ -234,17 +234,39 @@ the direction PA11 flagged as possible but did not assume.
 
 ## Obligation
 
-- Resolve L2 first. The structure above is neutral between A, B, and C.
-- If A: state and prove the cluster bound. New claim.
-- If B: none beyond L1. Add a recall metric to `claims.md`.
-- If C: prove policy order-independence. New claim, and the hardest of
-  the three.
-- Either way: the no-embedded-information constraint on `name` becomes
-  a lint rule.
+Option B was chosen, so the three-way branch is discharged. What remains:
+
+- **A recall metric in `claims.md`.** B's stated cost is that records
+  carrying no authority identifier are never fused. That cost must be
+  measurable, not asserted. Proposed as a new claim when fixtures exist:
+  *the proportion of source records carrying no resolvable authority
+  identifier is X*, falsifiable by counting.
+- **The no-embedded-information constraint on `name` becomes a lint
+  rule.** Adopted from the CIM profile: `name` is for user interface and
+  debugging, and must not carry information requiring parsing.
+- **`candidateMatch` is authored in Part 0** (P6b), and its deriving
+  rule in `transform/`.
+
+**L2 is not an obligation of this ADR.** Question 2 was decided without
+it and is invariant under it. L2 remains `asserted` and ambiguous, and
+P12 — determining which relation the reference implementation
+implements — remains permanently open. **Anyone reopening L2 should know
+it no longer gates anything here.**
 
 ## Consequences
 
-TBD for question 2. For question 1: Part 0 gains four classes rather
-than one, and the alias structure stops being a flat tuple. ADR-000 D3
-is superseded on this point and is left unedited, per the rule that
-ADRs record what was believed when they were accepted.
+- **Part 0 gains four classes rather than one**, and the alias structure
+  stops being a flat tuple. ADR-000 D3 is superseded on this point and
+  is left unedited, per the rule that ADRs record what was believed when
+  accepted.
+- **Identity is never established heuristically.** A record with no
+  authority identifier stands alone. Downstream, that is visible as a
+  refusal rather than as a guess — the behaviour the reference
+  implementation adopted after a real defect.
+- **`candidateMatch` facts accumulate and are never deleted**, which
+  keeps them queryable and auditable and puts them under L5's
+  monotonicity rather than outside it.
+- **Recall is the exposed flank.** If the metric shows most records lack
+  an authority identifier, B is still correct and the *pipeline* has a
+  coverage problem that no resolution strategy fixes. That is worth
+  knowing early and is why the metric is an obligation.

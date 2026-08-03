@@ -1,7 +1,13 @@
 # ADR-002 — Entity core and the modality axis
 
-**Status:** proposed
-**Date:** 2026-07-31
+**Status:** accepted — 2026-08-02, after amendment by ADR-003 and ADR-004
+**Date:** 2026-07-31 (decided) · 2026-08-02 (accepted)
+
+> **Two amendments by accepted ADRs are recorded inline below**, marked
+> where they apply: ADR-003 relocated the modality table's first two
+> rows onto `epistemicKind`, and ADR-004 made `Statement` a class. An
+> ADR amended twice while still `proposed` was the scaffolding this
+> status change removes.
 
 ## Context
 

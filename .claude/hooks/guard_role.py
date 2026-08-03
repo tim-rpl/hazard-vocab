@@ -51,7 +51,21 @@ WRITE_ALLOWED = ("claims.md", "review-inbox.md")
 
 
 def is_blocked(path: str) -> bool:
-    """True for the ADRs under design/, False for lean/ and alloy/."""
+    """True for the RATIONALE under design/, False for everything else.
+
+    What is blocked is the reasoning O exists to test independently, not
+    every file in the directory.
+
+      * design/lean/, design/alloy/ -- artifacts O must run and may need
+        to read to answer §4's vacuity questions (F7).
+      * design/ADR-000-rationale.md -- the pre-decision rationale. This
+        is what anchoring means and it stays blocked.
+      * design/ADR-NNN-*.md for NNN > 000 -- decisions of record. At a
+        design gate these ARE the artifact under review. Blocking them
+        would leave O reviewing H's summary of a decision instead of the
+        decision, which is the prose-versus-artifact defect this project
+        has spent six gate blocks on.
+    """
     if not path:
         return False
     p = path.replace("\\", "/").strip("'\"")
@@ -60,7 +74,11 @@ def is_blocked(path: str) -> bool:
         return False
     i = parts.index("design")
     tail = parts[i + 1:]
-    if tail and tail[0] in ("lean", "alloy"):
+    if not tail:
+        return True
+    if tail[0] in ("lean", "alloy"):
+        return False
+    if tail[0].startswith("ADR-") and not tail[0].startswith("ADR-000"):
         return False
     return True
 

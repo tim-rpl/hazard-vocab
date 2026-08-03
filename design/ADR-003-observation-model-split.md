@@ -126,11 +126,25 @@ decision rests on.
 
 ## Obligation
 
-- If A: state what B could not enforce, and add a claim with a
-  falsifier.
-- If B: Parts 2 and 3 merge; renumber or leave Part 3 as a documented
-  vacancy. Update `README.md`, `docs/coverage.md`, and ADR-002's
-  modality table, which currently maps modalities onto parts.
+Option B was chosen, so the conditional branch is discharged. What
+remains, all of it required:
+
+- **`epistemicKind` is a required slot with a closed vocabulary**, and a
+  lint rule forbids its omission. The module boundary is gone; the slot
+  is what replaces it, and an unenforced required slot would leave the
+  distinction carried by nothing.
+- **Parts 2 and 3 merge.** Part 3 is a **documented vacancy**, not
+  renumbered — renumbering would break every reference in `claims.md`,
+  `docs/coverage.md` and five gate messages to buy tidiness.
+- **Propagation, done in the deciding pass rather than deferred:**
+  `docs/coverage.md`'s five Part 3 rows now read
+  `Part 2, epistemicKind: modelled`; ADR-002's modality table is
+  amended; `README.md` is the human's and the change is reported there
+  rather than made.
+- **A claim for the property the module boundary used to carry.**
+  Proposed: *no instance carries an `epistemicKind` inconsistent with
+  its `procedure`.* Falsifier: one that does. This is the obligation A
+  discharged structurally and B must discharge by validation.
 
 ## Consequences
 
