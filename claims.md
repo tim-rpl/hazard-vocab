@@ -2436,6 +2436,49 @@ expressed by something other than assigning both that class's URI.
   the claim is still untested against material. What is now measured is
   that the state this entry was written about is reachable without any
   instrument objecting.
+
+  **2026-08-02, block verification 4 — the guard closed, and it
+  invalidated sentences in this entry as well as in ADR-004.**
+  `rule_shared_uri` now collects identity URIs from `class_uri`/
+  `slot_uri` **and** `exact_mappings` into one map keyed by URI
+  (`scripts/drift-lint.py:462-486`), landed in `c5f25b5`. Re-ran the
+  mixed-construct probe and added the construct BV3 did not probe:
+
+  | Schema | shipped `scripts/drift-lint.py` |
+  |---|---|
+  | `Document`: `class_uri: foaf:Document` + `exact_mappings: [prov:Entity]`; `Statement`: `class_uri: prov:Entity` | **FAIL `[shared-uri]`**, exit 1 — names both holders and the construct each used |
+  | `exact_mappings: [prov:Entity]` on **both**, one each *(new probe)* | **FAIL `[shared-uri]`**; `ok [exact-mappings]` |
+
+  Branch-mutated per §4 on a scratch copy: deleting the two-line
+  `exact_mappings` collection flips `mixed-construct-identity.yaml` from
+  **FAIL to `ok`**, so the fixture reaches that code and nothing else
+  does. `make lint-selftest` reports **35 rule/fixture pairs, 8/8**.
+
+  **Two statements in this entry are superseded, not corrected** — each
+  was an accurate measurement of a tool that has since changed:
+
+  - *"Nothing in the guard set inspects this"* (above, block-verification
+    -3 block) — `shared-uri` now inspects exactly this.
+  - the probe row reading `ok [shared-uri] … exit 0 on both` — now
+    FAILs.
+  - the figure **32 rule/fixture pairs**, and the later **33**, are both
+    superseded by 35.
+
+  **The claim is now narrower than the rule that cites it.** C21 as
+  stated forbids two classes carrying the same `class_uri`;
+  `rule_shared_uri` also fires on `exact_mappings` identity and its
+  failure message cites *"claims.md C21"* while doing so. The guard
+  enforces more than the register claims. Recorded as a finding for H to
+  propose a restatement against; O does not restate claims.
+
+  Line references in the block-verification-3 entry above (`:258-261`,
+  `:277`) no longer resolve — the sentences they name are at ADR-004
+  `:274-277` and `:293`.
+
+  Status stays `asserted`. `vocab/core/` still holds one `.gitkeep`, so
+  there is still nothing authored to check and no generated
+  `build/shapes.ttl` to count shapes in. A guard widening is not evidence
+  the claim holds.
 - **Updated:** 2026-08-02
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the

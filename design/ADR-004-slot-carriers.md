@@ -153,62 +153,68 @@ A1 enumerated. Classes and permissible values are **separate
 populations and are never summed with slots** — that summing is the
 defect this whole section is about.
 
+<!-- BEGIN GENERATED:partition - design/derive-surface.py. Edit surface.yaml, not this. -->
+
 | Slot population | Count |
 |---|---|
 | Slots carrying an external `slot_uri` | **16** |
 | Slots with no external term, defined locally | **8** |
 | **Distinct total of A1's enumerated slots** | **24** |
 
-**Two removals, not one.** Decision A removes `crs` and Decision C
-removes `assertedTime`, both from A1's ten: `10 − 2 = 8`, total **24**.
-An earlier draft carried 9 and 25 — it applied one removal and then
-**added `epistemicKind`, which A1 never enumerated**, into a row labelled
-*A1's enumerated slots*.
+**Removed from A1's local list by an accepted decision:**
 
-**`epistemicKind` is a slot this unit needs that A1 did not enumerate.**
-It belongs beside the list, not inside it — and it is the first
-demonstrated member of a class this ADR has been asserting exists.
-**D10's nominated falsifier — *the enumerated list is itself
-incomplete* — has therefore already fired**, by at least one, on
-evidence this ADR was carrying without drawing the conclusion.
+- `crs` — ADR-004 Decision A — GeoSPARQL carries CRS in the wktLiteral
+- `assertedTime` — ADR-004 Decision C — binds prov:generatedAtTime, already in the 16
 
-**`assertedTime` does not move the first row, and an earlier draft said
-it did.** That draft read **17**, adding `assertedTime` to a set that
-**already contained `prov:generatedAtTime`** — the URI it binds. One
-slot counted under two names. Decision C settles that they are one slot;
-it does not create a second.
+**Needed by this unit and NOT enumerated by A1** — reported separately and never counted in a row labelled *A1's enumerated slots*, which is exactly how the arithmetic looked closed at 25:
 
-`17 + 9 = 26` was therefore the same defect this section diagnoses four
-lines above it, in this ADR's own words: *"33 inherits the same defect,
-because it was 23 + 10 — a mixed-kind URI count added to a local-slot
-count."* Corrected 2026-08-02. **The distinct total is 25.**
+- `epistemicKind` — ADR-003 B. NOT enumerated by A1 — see not_enumerated_by_a1
 
-Separate populations, listed and not added:
+<!-- END GENERATED:partition -->
 
-| Population | Count |
-|---|---|
-| Classes carrying an external `class_uri` | 13 |
-| Permissible-value URIs, content-verified (QUDT units) | 6 |
-| Permissible-value URIs, **status-code only** (NVS2 P07) | 6 — verify before binding |
+<!-- BEGIN GENERATED:populations - design/derive-surface.py. Edit surface.yaml, not this. -->
 
-### 25 is not the unit's slot total, and no number here is
+| Population | Count | Note |
+|---|---|---|
+| Classes carrying an external `class_uri` | 13 | |
+| Permissible-value URIs, content-verified | 6 | QUDT units |
+| Permissible-value URIs, **status-code only** | 6 | NVS2 P07 — **verify before binding** |
+
+**Never summed with slots.** A permissible value is not a schema element; a class is not a slot. Summing them is what produced `23`, `33` and every figure derived from them.
+
+<!-- END GENERATED:populations -->
+
+### No number here is the unit's slot total
 
 **A1 never enumerated the schema's slots.** It enumerated *external
 URIs* and *local terms* — two populations that do not sum to a schema,
-which is why every total derived from it has been wrong. `25` is the
-count of **the slots A1 enumerated**, and it is the last figure this ADR
-will assert.
+which is why every total derived from it has been wrong. The generated
+figure above counts **the slots A1 enumerated**, and it is the last
+figure this ADR asserts by hand — **it is generated from
+`design/surface.yaml` and checked, not typed.**
 
 **The unit's slot total is unknown, and P5's first output is the
 authoritative count.** That quantity has taken four values across four
-gates — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, `25`, and now `24` —
-and each was arithmetic over a population nobody had fixed. **The
+block rounds — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, `25`, `24` —
+each arithmetic over a population nobody had fixed, and **every residue
+sat at a decision or summary line while the correction sat in an
+analysis section.** That is the plan gate's defect, and it is closed the
+same way: **the counts are generated from one source and the copies are
+deleted.** **The
 replacement baseline is the enumerated list, not a number**; the number
 comes from the artifact.
 
-**What P5 works from:** the **16** bound slots and the **8** local ones
-by name, the 13 class bindings, the 6 verified value URIs, the 6 that
-need verifying first, and **`epistemicKind`**. Not a total.
+<!-- BEGIN GENERATED:worklist - design/derive-surface.py. Edit surface.yaml, not this. -->
+
+**What P5 works from — names, not a total:**
+
+- **16 bound slots:** `observedProperty`, `hasFeatureOfInterest`, `hasResult`, `hasSimpleResult`, `resultTime`, `phenomenonTime`, `madeBySensor`, `usedProcedure`, `isHostedBy`, `hasMember`, `wasAttributedTo`, `generatedAtTime`, `hasGeometry`, `asWKT`, `hasUnit`, `numericValue`
+- **8 local slots:** `id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `elevation`, `procedureKind`, `observingSystemStatus`, `sourceVerificationTier`
+- **13 class bindings:** `Observation`, `Sensor`, `Platform`, `FeatureOfInterest`, `Procedure`, `ObservableProperty`, `ObservationCollection`, `prov:Agent`, `prov:Activity`, `prov:Entity`, `org:Organization`, `geo:Geometry`, `qudt:QuantityValue`
+- **6 value URIs verified**, **6 to verify first**
+- **plus `epistemicKind`**, which A1 did not enumerate
+
+<!-- END GENERATED:worklist -->
 
 **Slots: 16 bound + 8 local = 24 of A1's enumerated slots**, plus
 `epistemicKind` outside that list. It is not the unit's slot total and
@@ -271,10 +277,21 @@ entity table is**, and it still reads:
 > legal instruments | `prov:Entity`, `foaf:Document` |
 
 **Two external class URIs on one class, one of which `Statement` now
-takes.** O ran both constructs: `class_uri` on both fires `shared-uri`;
-the mixed construct — `class_uri` on one, `exact_mappings` on the other
-— **passes both rules** and is exactly the equivalence ADR-002's own
-addendum names as the false claim.
+takes.** `class_uri` on both fires `shared-uri`. The mixed construct —
+`class_uri` on one, `exact_mappings` on the other — **passed both rules
+when this was written and now fires `shared-uri`**, since `c5f25b5`
+made that rule collect identity-asserting URIs from `class_uri`,
+`slot_uri` and `exact_mappings` together. `mixed-construct-identity.yaml`
+is the standing case.
+
+**And the claim about which rule catches it was wrong in both
+directions.** An earlier draft said `exact_mappings` on both *"is what
+the `exact-mappings` lint rule exists to catch"*. It is not:
+`rule_exact_mappings` fires on `len(m) > 1` **within one element**, so
+one mapping each was outside its subject before `c5f25b5` and remains
+so. `lint-selftest.py` has recorded this correctly throughout — its row
+reads *"precision — one exact_mappings each, not a len>1 case"* — so the
+selftest and this ADR disagreed, and **the selftest was right.**
 
 **Decision: `Document` carries `class_uri: foaf:Document` and nothing
 else.** `prov:Entity` is `Statement`'s alone.
@@ -293,8 +310,11 @@ inherits matches this decision.
 **Guarded rather than remembered:** the `shared-uri` rule fails on two
 classes sharing a `class_uri`, with `shared-class-uri.yaml` carrying the
 case. **Its slot branch had no fixture until 2026-08-02** — deleting
-that branch changed no outcome while the report read 8/8. Now
-mutation-covered on both branches at 33 pairs.
+that branch changed no outcome while the report read 8/8. Both branches
+are mutation-covered now, and the `exact_mappings` case with them.
+**The pair count is generated by `make lint-selftest` and is not
+restated here** — an earlier draft said `33` and was invalidated by the
+commit beside the sweep that declared the re-sweep clean.
 
 ## Consequences
 

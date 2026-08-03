@@ -1,0 +1,82 @@
+# The Part 2 + Part 0-fragment surface — the single source for every
+# count ADR-004 states.
+#
+# Four block rounds produced five values for one quantity, every residue
+# at a decision or summary line while the correction sat in an analysis
+# section. That is the plan gate's defect — hand-maintained lists keyed
+# by an identifier — and it was closed there by generating the views.
+# This is the third instance of the class.
+#
+# `derive-surface.py --write` injects the tables into ADR-004;
+# `--check` fails on staleness. Edit here, never in the ADR.
+
+# Terms A1 enumerated, by kind. `meaning` URIs are permissible values,
+# not schema elements, and are never summed with slots.
+slot_uri:
+  - observedProperty
+  - hasFeatureOfInterest
+  - hasResult
+  - hasSimpleResult
+  - resultTime
+  - phenomenonTime
+  - madeBySensor
+  - usedProcedure
+  - isHostedBy
+  - hasMember
+  - wasAttributedTo
+  - generatedAtTime
+  - hasGeometry
+  - asWKT
+  - hasUnit
+  - numericValue
+class_uri:
+  - Observation
+  - Sensor
+  - Platform
+  - FeatureOfInterest
+  - Procedure
+  - ObservableProperty
+  - ObservationCollection
+  - prov:Agent
+  - prov:Activity
+  - prov:Entity
+  - org:Organization
+  - geo:Geometry
+  - qudt:QuantityValue
+meaning_verified:   # content-verified: fetched and grepped
+  - MicroGM-PER-M3
+  - PPB
+  - DEG_C
+  - PERCENT
+  - M-PER-SEC
+  - UNITLESS
+meaning_unverified: # status-code only — VERIFY BEFORE BINDING (A3)
+  - mass_concentration_of_pm2p5…
+  - mass_concentration_of_pm10…
+  - mole_fraction_of_ozone_in_air
+  - air_temperature
+  - wind_speed
+  - atmosphere_boundary_layer_thickness
+
+# Slots A1 enumerated with no external term.
+local_slots:
+  id: "minting rule open (A10)"
+  identifierValue: "ADR-000 D3 alias tuple"
+  identifierScheme: "ADR-000 D3 alias tuple"
+  issuingAuthority: "ADR-000 D3 alias tuple"
+  elevation: "no external term tight enough (A26)"
+  procedureKind: "ADR-003-dependent"
+  observingSystemStatus: "authored at P9, not P5 (PG7)"
+  sourceVerificationTier: "carrier is Statement (ADR-004 B)"
+
+# Removed from A1's local list by an accepted decision.
+removed_from_local:
+  crs: "ADR-004 Decision A \u2014 GeoSPARQL carries CRS in the wktLiteral"
+  assertedTime: "ADR-004 Decision C \u2014 binds prov:generatedAtTime, already in the 16"
+
+# Slots this unit needs that A1 did NOT enumerate. These are the
+# demonstrated members of the class D10's falsifier names. They are
+# reported separately and never counted in an 'A1 enumerated' row —
+# folding one in is exactly how the arithmetic looked closed at 25.
+not_enumerated_by_a1:
+  epistemicKind: "ADR-003 B. NOT enumerated by A1 \u2014 see not_enumerated_by_a1"

@@ -48,6 +48,15 @@ READERS = {
 
 SEPARATORS = {"|", "||", "&&", ";", "&", "(", ")"}
 
+# Readers whose FIRST non-flag argument is a search pattern, not a file.
+# `grep -v '^./design/' list.txt` is an EXCLUSION — it asks not to see the
+# rationale — and blocking it shapes how O can search for anything else.
+# See [O -> H] design gate block verification 4.
+PATTERN_FIRST = {"grep", "egrep", "fgrep", "rg", "ag", "ack", "sed", "awk"}
+
+# Regex metacharacters. A token carrying these is a pattern, not a path.
+REGEX_CHARS = set("^$*+?[]{}()|\\")
+
 WRITE_ALLOWED = ("claims.md", "review-inbox.md")
 
 
@@ -115,17 +124,28 @@ def blocked_reads(command: str) -> list[str]:
         # Unparseable after heredoc stripping. Do NOT give up: scan every
         # path-like token. Coarser, and errs toward blocking.
         return [t for t in PATHISH.findall(command) if is_blocked(t)]
-    hits, cmd_position = [], True
+    hits, cmd_position, pattern_pending = [], True, False
+    reading = False
     for tok in tokens:
         if tok in SEPARATORS:
-            cmd_position = True
+            cmd_position, reading, pattern_pending = True, False, False
             continue
         if cmd_position:
             cmd_position = False
             base = pathlib.PurePath(tok).name
             reading = base in READERS
+            pattern_pending = base in PATTERN_FIRST
             continue
-        if reading and not tok.startswith("-") and is_blocked(tok):
+        if tok.startswith("-"):
+            continue
+        if pattern_pending:
+            # first non-flag argument to a grep-family command is the
+            # pattern being searched FOR, not a file being read
+            pattern_pending = False
+            continue
+        if set(tok) & REGEX_CHARS:
+            continue
+        if reading and is_blocked(tok):
             hits.append(tok)
     return hits
 
@@ -146,15 +166,17 @@ def main() -> int:
     path = ti.get("file_path") or ti.get("path") or ""
     command = ti.get("command") or ""
 
-    charter = "See FALSIFIER.md §1. design/lean/ and design/alloy/ ARE permitted."
+    charter = ("See FALSIFIER.md §1 (charter v8). Only "
+               "design/ADR-000-rationale.md is blocked — numbered ADRs, "
+               "design/lean/ and design/alloy/ are all permitted.")
 
     if path and is_blocked(path):
-        print(f"BLOCKED: role O may not read the ADRs in design/. {charter}",
+        print(f"BLOCKED: role O may not read the design rationale. {charter}",
               file=sys.stderr)
         return 2
 
     for hit in blocked_reads(command):
-        print(f"BLOCKED: role O may not read the ADRs in design/ "
+        print(f"BLOCKED: role O may not read the design rationale "
               f"(reading command targets {hit}). {charter}", file=sys.stderr)
         return 2
 
