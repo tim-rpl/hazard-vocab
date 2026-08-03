@@ -68,6 +68,12 @@ Option B gets the labelling discipline through a required slot and a
 closed vocabulary, without the query cost — and a required slot cannot
 be omitted any more than a module boundary can be crossed.
 
+> **WITHDRAWN 2026-08-02.** The final clause is true and answers the
+> wrong question: a required slot catches **omission**, not
+> **misassignment**. See *The enforcement argument, withdrawn* below.
+> Retained because this is the Context section, which records what was
+> believed before the decision.
+
 ## Decision
 
 **Option B. Parts 2 and 3 merge into one `Observation` class,
@@ -82,9 +88,24 @@ articulated beyond 'the distinction feels more important as structure,'
 the split is not load-bearing and B should win on interoperability
 alone."*
 
-**Five gates have passed and nobody has articulated it** — not H, not O,
-not the falsification sweep. That alone settles it under the stated
-rule. The evidence accumulated since is one-directional:
+> **WITHDRAWN 2026-08-02, and the withdrawal is the point.** This read:
+> *"Five gates have passed and nobody has articulated it — not H, not O,
+> not the falsification sweep. That alone settles it under the stated
+> rule."*
+>
+> **The bar's antecedent is false.** *What B loses*, below in this same
+> file, articulates exactly the reason A is better: a module boundary is
+> checkable by reading a file tree, a required slot only by running
+> validation. It is well past the disqualified phrase *"the distinction
+> feels more important as structure"*. So the bar does not fire and
+> *"that alone settles it"* does not follow.
+>
+> **The decision stands on the evidence table below**, which is
+> independent of the bar: **A29, A5, T4 and A7**. A5 and T4 in
+> particular make option A *not executable as scoped*, which is forced
+> by the payloads rather than chosen.
+
+The evidence accumulated since is one-directional:
 
 | Finding | Bears on |
 |---|---|
@@ -94,13 +115,35 @@ rule. The evidence accumulated since is one-directional:
 | **A7** | B costs **+1 slot and +1 enum**. A costs a Part 3 that re-declares the observation shape, plus a union query on every consumer, forever |
 | **L6**, weakened on its own terms | Stratification constrains *derivation only, not presentation*, and the stratum assignment is a judgment call at exactly the boundary cases — QC'd and gap-filled readings, data assimilation, EPA's interpolated contours published as observational products |
 
-**The one argument that would have favoured A is the one that fails.**
-A was chosen so the observed/modelled distinction would be *structural
-and therefore enforceable*. L6 shows the enforcement covers derivation
-and not presentation, which is the product property that matters; and a
-**required slot with a closed vocabulary cannot be omitted any more than
-a module boundary can be crossed.** B gets the discipline without the
-query cost.
+### The enforcement argument, withdrawn
+
+This section read: *"The one argument that would have favoured A is the
+one that fails. A was chosen so the observed/modelled distinction would
+be structural and therefore enforceable. L6 shows the enforcement covers
+derivation and not presentation; and a **required slot with a closed
+vocabulary cannot be omitted any more than a module boundary can be
+crossed.** B gets the discipline without the query cost."*
+
+**WITHDRAWN 2026-08-02.** The L6 half stands. The clause in bold is true
+and answers a question nobody asked.
+
+**A required slot catches omission. It does not catch misassignment.**
+A forecast declared `epistemicKind: observed` is a well-formed instance
+and validates clean. Misassignment is precisely what *What B loses*
+attributes to A as A's advantage — so this sentence answered a failure
+mode nobody raised while leaving the raised one untouched.
+
+**What would catch it is a cross-slot constraint between `epistemicKind`
+and `procedure`, and ADR-005 — accepted in the same message as this
+decision — establishes that such a constraint is not generable from
+LinkML.** This ADR discharged by validation what its sibling says
+validation cannot do.
+
+**B still stands, on A29, A5, T4 and A7.** Those four are independent of
+this argument and of the bar. What does not stand is the claim that
+option B *enforces* what option A's module boundary enforced. It does
+not, and the Obligation section records that as a permanent gap rather
+than a discharged obligation.
 
 ### What B loses, stated rather than assumed away
 
@@ -116,8 +159,15 @@ cross-slot constraint between `epistemicKind` and `procedure`, which is
 ADR-005's P19.** Corrected 2026-08-02. That is
 a real reduction in inspectability and it is the price.
 
-The mitigation is the lint rule this ADR already required, and it is now
-an obligation rather than a note.
+**There is no mitigation, and an earlier draft claimed one.** It read:
+*"The mitigation is the lint rule this ADR already required."* `make
+lint` reads schema files and has never inspected an instance, so it
+could not have been the mitigation for an instance-level property. The
+required-slot lint catches omission, which is not this.
+
+Instance validation is `make check`, which exists and always could run —
+what it lacks is the constraint. Until that constraint exists,
+**misassignment is caught by review or not at all.**
 
 ### Note on the interoperability argument, which is weaker than it reads
 

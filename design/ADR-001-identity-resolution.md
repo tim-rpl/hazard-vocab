@@ -123,9 +123,26 @@ first, heuristic second" generalises to a ranking. That order must be
 a total order, and two aliases from different schemes designating
 different entities is exactly that conflict.
 
-Open: does precedence attach to `AliasKind` or to `NameType`? A profile
-declares which schemes exist *and their ordering*, so T2 applies — a
-profile may extend the order but never reorder what the base fixed.
+**Decided 2026-08-02: precedence attaches to `NameType`, and T2 does
+not protect it.** Filed as open at two places in this ADR after A32 had
+answered it by measurement — scaffolding on a question with an answer.
+
+`AliasKind` is a **type** distinction (does this name designate, or
+uniquely designate), not a rank; ordering its two values is meaningless,
+because a label does not establish identity at all and so is not low in
+the order but outside it. Precedence is an order *between schemes*, and
+the scheme is `NameType`. It lives as a `skos:OrderedCollection` in the
+code list (A38), which SKOS carries natively and a LinkML enum cannot.
+
+**T2 does not protect the ordering, and this is a checked negative
+rather than a caveat.** `parts.als` models constraints as an unordered
+set, so **reordering drops nothing** and the soundness assertions are
+silent on it; SHACL Core cannot express prefix-extension over an
+`rdf:List` without SPARQL; and **the conjunction of two total orders
+from two composed profiles is a partial order in general** — T3,
+falsified by counterexample. So L4's precondition is unestablished, and
+**T3a's tiebreak is the open item** (plan item P11), not the attachment
+point.
 
 **3. `ObjectType` is role-not-subtype implemented.** It exists to carry
 an object's specialised type when the instance is serialised using a

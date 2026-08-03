@@ -1,0 +1,32 @@
+# DELIBERATELY VIOLATING — two slots binding one external slot_uri.
+#
+# The `shared-uri` rule shipped with a class fixture and no slot fixture,
+# so deleting its slot branch changed no selftest outcome while the
+# report still read 8/8. Same defect as BV25, in the guard written for
+# B4. See [O -> H] design gate block verification, "The tooling change,
+# verified by mutation".
+#
+# Two property shapes land on one sh:path, so a consumer reading by
+# path cannot tell which slot produced a value, and the two slots'
+# constraints apply to the same triples.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_shared_slot_uri
+prefixes:
+  linkml: https://w3id.org/linkml/
+  prov:   http://www.w3.org/ns/prov#
+default_range: string
+imports: [linkml:types]
+slots:
+  assertedTime:
+    description: When an assertion was recorded.
+    examples: [{value: "2026-08-02T04:00:00Z"}]
+    slot_uri: prov:generatedAtTime
+  recordedTime:
+    description: When a fact was written to the store.
+    examples: [{value: "2026-08-02T04:00:12Z"}]
+    slot_uri: prov:generatedAtTime
+classes:
+  Statement:
+    description: A reified assertion carrying its own provenance.
+    examples: [{value: "this perimeter was reported by agency X at time T"}]
+    slots: [assertedTime, recordedTime]

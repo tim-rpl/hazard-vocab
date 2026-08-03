@@ -631,6 +631,29 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
   recorded as *"closed on the plan's side"* is open again on the other
   side. Filed as blocking finding B1 at the design gate; not resolved
   here, because which figure is right is H's to decide.
+
+  **2026-08-02, block verification — the answer is neither 23 nor 24,
+  and this claim's subject population no longer denotes.** ADR-004's
+  amended reconciliation **retires** both `23 bind / 10 write of 33` and
+  A31's `35–36` as incommensurable rather than reconciling them, on the
+  ground that `23` was never a count of slots: A3's list mixes bound
+  slots, bound classes, and permissible-value URIs and reports them as
+  one number. I checked that partition against the published graphs and
+  it holds (see the design-gate message). Its replacement population for
+  bound slots is **16, or 17 on Decision C**.
+
+  So T4a — *"the `slot_uri` of each of the **23** external bindings"* —
+  is stated over a set the deciding ADR has withdrawn, and its Falsifier
+  inherits the same term. This is not a falsification: nothing shows the
+  identity/form split is false. It is a claim whose subject was retired
+  underneath it, and it cannot be tested until the population is
+  restated. Status stays `scoped-down`; restating the claim is H's under
+  CLAUDE.md, and O will not narrow it to make it testable.
+
+  ADR-004 also contradicts itself on which of 16 or 17 is right —
+  Decision C says the identification *"does not add to the bind
+  count"*, and the reconciliation table adds it, citing Decision C.
+  Filed as B1 at the block-verification gate.
 - **Updated:** 2026-08-02
 
 ### C1 — Parts are jurisdiction-neutral
@@ -948,6 +971,28 @@ answered today and that the canonical layer answers.
   two-producer `build/shapes.ttl` — additive, order-independent,
   byte-deterministic — with `make gen` twice plus `diff` as the test.
   Those are obligations of P19, not evidence for C5.
+
+  **2026-08-02, block verification — P19's load grew, and the added load
+  is of a shape ADR-005 has never demonstrated a carrier for. Status
+  unchanged.** ADR-003's second amendment withdraws its own enforcement
+  argument and routes the epistemic-kind constraint here: *"the
+  cross-slot constraint is ADR-005's P19."* That constraint is a
+  **conditional** — if `procedure` is simulation-typed then
+  `epistemicKind` must be `modelled`. Every piece of affirmative
+  evidence under this claim is about **`sh:equals`**, which relates two
+  slots by equality: `exp-01`'s demonstrated catch, the `us_aqi` /
+  PM2.5 substitution, and the two first test cases ADR-005's Obligation
+  names. A conditional needs `sh:condition` or `sh:sparql`, and the
+  measurement recorded above found **`sh:condition` 0, `sh:sparql` 0**
+  emitted from the source language.
+
+  ADR-005's *decision* is generic — "cross-slot constraints" — and can
+  be read to include conditionals. Its *evidence* is not, and its
+  Obligation's test list does not name this constraint. So the property
+  option B traded a module boundary away for is now deferred to a
+  carrier whose demonstrated capability does not cover it. Filed as B6
+  at the block-verification gate. This does not falsify C5 and is not
+  evidence for it; it enlarges what P19 must do before C5 can move.
 - **Updated:** 2026-08-02
 
 ### C6 — The vocabulary is LLM-legible
@@ -1231,7 +1276,26 @@ consumer can render exercise or test data as actual.
 - **Evidence:** no operating-mode field exists anywhere in the model.
   CAP provides `status: Actual | Exercise | System | Test | Draft` and
   we do not carry it.
-- **Updated:** 2026-07-31
+
+  **Carrier decided 2026-08-02 (design gate). Status unchanged, and the
+  reason it does not move is the point.** ADR-004 Decision B creates a
+  Part 0 `Statement` class specifically to carry the four slots that had
+  none — `sourceVerificationTier`, **`operatingMode`**, `modelVersion`,
+  `profileConformance` — and names this claim as the strongest single
+  argument for the decision: *"a discriminator that must sit on every
+  assertion needs a class that **is** the assertion."* A decided carrier
+  is not a field. `vocab/core/` holds one `.gitkeep`, so the Evidence
+  above is still literally true and C12 stays `falsified`.
+
+  **`docs/coverage.md` has not caught up, and it is the row this claim
+  is about.** `coverage.md:303` still reads
+  `Exercise / test / live discriminator | Dispatcher training simulator mode | — | GAP`
+  — `Home` column `—`, meaning no carrier in the design. The same holds
+  for the other three slots of Decision B at `:57`, `:306` and `:307`.
+  The `GAP` statuses are right; the four `—` Home columns contradict a
+  decision accepted in the commit that last edited the file. Filed as B5
+  at the block-verification gate.
+- **Updated:** 2026-08-02
 - **Consequence:** ranked gap #1. Safety-critical and free to fix.
 
 ### C13 — Correction is distinguishable from supersession
@@ -2109,6 +2173,44 @@ expressed by something other than assigning both that class's URI.
   caught rather than silent; it is not evidence that the claim holds,
   because `vocab/core/` still has no classes to check and the design as
   accepted currently plans to violate it.
+
+  **2026-08-02, block verification — the slot branch is now established
+  by mutation rather than by coverage enumeration, and the class branch
+  with it.** The earlier attempt failed because `--linter` and
+  `DRIFT_LINT=` are not supported options, so both invocations silently
+  ran the real linter. The route that works is to copy the whole
+  `scripts/` tree, because `lint-selftest.py` resolves its linter path
+  relative to its own `__file__`. Baseline on the copy reproduces
+  `32 rule/fixture pairs, 8/8`. Then, one branch deleted at a time:
+
+  | Mutation | `make lint-selftest` on the copy |
+  |---|---|
+  | delete `dupes("classes", …, "class_uri")` | **FAILED** — `FAIL [shared-uri] shared-class-uri.yaml`, a NAMED test notices |
+  | delete `dupes("slots", …, "slot_uri")` | **`ok — 32 rule/fixture pairs, 8/8`** — nothing notices |
+
+  The class branch meets `scripts/lint-fixtures/README.md`'s convention.
+  The slot branch does not, and the finding stands as recorded above —
+  now on mutation evidence, which is what the convention asks for.
+
+  **ADR-004 Decision D does not resolve the collision this entry
+  records.** It decides that `Statement` carries
+  `class_uri: prov:Entity` and that the abstract `Entity` carries no
+  external `class_uri`. No document proposed binding the abstract
+  `Entity` to `prov:Entity`; the pair recorded above is `Document`
+  (ADR-002 Decision A, table row, unamended) and `Statement` (ADR-004
+  Decision B). Probed both readings of that pair against the shipped
+  linter:
+
+  | Probe | Result |
+  |---|---|
+  | `Document` and `Statement` both `class_uri: prov:Entity` | **FAIL [shared-uri]** — names both classes and the merge consequence |
+  | `Document` via `exact_mappings: [prov:Entity]`, `Statement` via `class_uri` | `ok [shared-uri]`, `ok [exact-mappings]`, **exit 0 on both** |
+
+  So the guard fires on the vocabulary the two accepted ADRs literally
+  declare, and does not fire on the mixed-construct reading — which is
+  the construct ADR-002's own addendum calls *"the false claim."* The
+  sentence above — *"the design as accepted currently plans to violate
+  it"* — is unchanged by this gate.
 - **Updated:** 2026-08-02
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the

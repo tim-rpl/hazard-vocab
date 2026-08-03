@@ -54,7 +54,7 @@ defect.
 | Observation quality and validity | Measurement quality flags | Part 2 (`resultQuality`, ISO 19157) | `covered` |
 | Sensor and platform description | RTU / IED inventory | Part 0 `Asset`, SOSA | `covered` |
 | **Observing-system health** | `SvStatus`, out-of-service | — | **`GAP`** |
-| **Source verification status** *(register)* | Source quality flag on a point | — | **`GAP`** |
+| **Source verification status** *(register)* | Source quality flag on a point | Part 0 `Statement` (ADR-004 B) | **`GAP`** — carrier decided, slot not authored |
 | **Provider-level fallback chains** *(register)* | Primary / backup RTU path | — | **`GAP`** |
 | **Observation validity conditioned on geometry** *(register)* | Point invalid for its location | — | **`GAP`** |
 | Coverage / field-valued results | Contour and profile data | Part 0 (ISO 19123, CIS) | `partial` — primitive named, not modelled |
@@ -300,12 +300,21 @@ defect.
 
 | Capability | Control-centre analogue | Home | Status |
 |---|---|---|---|
-| **Exercise / test / live discriminator** | Dispatcher training simulator mode | — | **`GAP`** |
+| **Exercise / test / live discriminator** | Dispatcher training simulator mode | Part 0 `Statement` (ADR-004 B) | **`GAP`** — carrier decided, slot not authored |
 | **Correction versus supersession** | Bad telemetry versus changed state | — | **`GAP`** |
 | Retraction / cancellation | — | Part 6 (CAP `msgType`) | `partial` |
-| **Instance-level model version declaration** | — | — | **`GAP`** |
-| **Instance-level profile conformance declaration** | — | — | **`GAP`** |
+| **Instance-level model version declaration** | — | Part 0 `Statement` (ADR-004 B) | **`GAP`** — carrier decided, slot not authored |
+| **Instance-level profile conformance declaration** | — | Part 0 `Statement` (ADR-004 B) | **`GAP`** — carrier decided, slot not authored |
 | Time zone / UTC offset requirement | Control room runs UTC | Part 0 (ISO 8601) | `partial` — not required |
+
+> **A carrier is not a slot.** Four rows above now name Part 0
+> `Statement` as their Home, per ADR-004 Decision B — which decided
+> *where* these live, not that they exist. All four stay `GAP`:
+> `operatingMode`, `modelVersion`, `profileConformance` and
+> `sourceVerificationTier` are in P6a's definition of done and are not
+> authored. **`Home` filled and status `GAP` is the correct state for a
+> decided-but-unbuilt capability**, and reading a Home column as
+> evidence of a slot is how `covered` got applied to the gap-filling row.
 
 > **Exercise mode is safety-critical and CAP already solves it.**
 > `status: Actual | Exercise | System | Test | Draft`. Without this

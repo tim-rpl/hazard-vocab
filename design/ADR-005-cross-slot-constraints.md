@@ -108,6 +108,27 @@ than inherited, so the property can be required up front.
 
 ## Obligation
 
+- **Conditionals are in the decision and were not in the evidence.**
+  Every affirmative result behind this ADR is about **`sh:equals`** —
+  `exp-01`'s catch, the substitution case, and both tests named below.
+  **Misassignment of `epistemicKind` is not an equality**; it is a
+  conditional — *if `procedure` is simulation-typed then `epistemicKind`
+  must be `modelled`* — which needs `sh:condition` or `sh:sparql`, and
+  the measurement behind B2 found **both emitted zero times**.
+
+  This ADR's *decision* is generic and covers conditionals. **Its
+  evidence does not.** Until a conditional is demonstrated end to end,
+  ADR-003's *"unenforced until P19"* is not established: the honest
+  statement is that **misassignment is unenforced indefinitely**, and
+  P19 is a candidate remedy rather than a scheduled one.
+
+  **Third test case, required before P19 may be called done:** a
+  conditional between two slots, declared in `annotations:`, emitted and
+  firing under `make check`. If it cannot be emitted, the cost of
+  discovering that is building P19, passing the two `sh:equals` tests,
+  and finding the gap still open — which is the outcome this obligation
+  exists to prevent.
+
 - A new claim when the generator exists: *every cross-slot constraint
   declared in `annotations:` appears in `build/shapes.ttl`*. Falsifier:
   one that does not.

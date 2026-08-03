@@ -84,9 +84,16 @@ ADR-001 §4 already stated that `assertedTime` comes from PROV-O; what
 was missing was saying which term, and therefore whether the slot was a
 bind or a write. It is a bind.
 
-**It does not add to the bind count.** `prov:generatedAtTime` was
-already among A3's five PROV terms, so the URI was counted; what changes
-is that the *slot* leaves the write list.
+**It adds a bound slot and no new external URI.** Those are different
+populations and an earlier draft conflated them — the sentence read
+*"it does not add to the bind count"*, which contradicts the table
+below showing bound slots moving 16 → 17.
+
+Precisely: `prov:generatedAtTime` was already among the external URIs
+A3 enumerated, so **no new URI enters**. But `assertedTime` was on the
+local-slot list and is now a slot carrying a `slot_uri`, so **the bound
+*slot* count moves 16 → 17** and the local-slot count moves 10 → 9.
+The URI population is unchanged; the slot partition is not.
 
 ## Reconciliation of the surface figure — the partition, and what it found
 
@@ -100,10 +107,18 @@ external slot URIs"* and then lists 35 terms of three different kinds:
 |---|---|---|
 | **`slot_uri`** — a bound slot | `observedProperty`, `hasFeatureOfInterest`, `hasResult`, `hasSimpleResult`, `resultTime`, `phenomenonTime`, `madeBySensor`, `usedProcedure`, `isHostedBy`, `hasMember`, `wasAttributedTo`, `generatedAtTime`, `hasGeometry`, `asWKT`, `hasUnit`, `numericValue` | **16** |
 | **`class_uri`** — a bound class | `Observation`, `Sensor`, `Platform`, `FeatureOfInterest`, `Procedure`, `ObservableProperty`, `ObservationCollection`, `prov:Agent`, `prov:Activity`, `prov:Entity`, `org:Organization`, `geo:Geometry`, `qudt:QuantityValue` | **13** |
-| **`meaning`** — a permissible-value URI, not a schema element at all | 6 QUDT units, 6 NVS2 P07 standard names | **12** |
+| **`meaning`** — a permissible-value URI, **content-verified** | 6 QUDT units | **6** |
+| **`meaning`** — a permissible-value URI, **status-code only** | 6 NVS2 P07 standard names | **6** |
 
 **41 external URIs of three kinds, reported as one number.** `23` is
 none of them.
+
+**And the value row splits again on verification tier.** A3 set the six
+NVS2 P07 standard names apart deliberately: they returned 200 on
+per-term paths and **their payloads were never inspected**, where the
+six QUDT units were content-verified. Folding them into one `12` would
+hand P5 a single work list over two evidence tiers — the finding of this
+section applied to its own repair. They are two rows above.
 
 **And `33` inherits the same defect**, because it was `23 + 10` — a
 mixed-kind URI count added to a local-slot count. A31's `35–36` counts
@@ -121,7 +136,8 @@ This is the figure P5 needs, and it is a work list rather than a total:
 |---|---|---|
 | Slots carrying an external `slot_uri` | 16 | **17** — `assertedTime` joins it (Decision C) |
 | Classes carrying an external `class_uri` | 13 | 13 |
-| Permissible-value URIs to bind | 12 | 12 |
+| Permissible-value URIs, content-verified (QUDT units) | 6 | 6 |
+| Permissible-value URIs, **status-code only** (NVS2 P07) | 6 | 6 — **verify before binding** |
 | Slots with no external term, to define locally | 10 | **9** — minus `crs` (Decision A), minus `assertedTime` (Decision C), plus `epistemicKind` (ADR-003 B) |
 
 **Slots: 17 bound + 9 local = 26 enumerated.** That is not the unit's
@@ -177,16 +193,50 @@ it would have been convenience mistaken for identity.
 `Entity` may carry `close_mappings` to nothing in particular; it needs
 no external term, and a class without one is not a defect.
 
-**This is now guarded rather than remembered:** the `shared-uri` rule
-added for C21 fails on two classes sharing a `class_uri`, with
-`shared-class-uri.yaml` carrying this exact case.
+**The real collision is `Document`, not `Entity`, and an earlier draft
+of this decision foreclosed a binding nobody had proposed.** Our
+abstract `Entity` was never a candidate for `prov:Entity`. **ADR-002's
+entity table is**, and it still reads:
+
+> | `Document` | IAPs, situation reports, delegation letters, orders as
+> legal instruments | `prov:Entity`, `foaf:Document` |
+
+**Two external class URIs on one class, one of which `Statement` now
+takes.** O ran both constructs: `class_uri` on both fires `shared-uri`;
+the mixed construct — `class_uri` on one, `exact_mappings` on the other
+— **passes both rules** and is exactly the equivalence ADR-002's own
+addendum names as the false claim.
+
+**Decision: `Document` carries `class_uri: foaf:Document` and nothing
+else.** `prov:Entity` is `Statement`'s alone.
+
+`Document` *is* a `prov:Entity` in the ordinary sense — so is
+`Statement`, so is any produced thing — which is the point: a URI that
+fits every produced thing distinguishes none of them, and asserting it
+on two classes either merges their shapes or asserts a falsehood.
+`foaf:Document` is the term that says something. The PROV relationship
+is recorded here, in prose, rather than as an equivalence the tooling
+would have to be lied to about.
+
+**ADR-002's table is amended in the same pass**, so the row a reader
+inherits matches this decision.
+
+**Guarded rather than remembered:** the `shared-uri` rule fails on two
+classes sharing a `class_uri`, with `shared-class-uri.yaml` carrying the
+case. **Its slot branch had no fixture until 2026-08-02** — deleting
+that branch changed no outcome while the report read 8/8. Now
+mutation-covered on both branches at 33 pairs.
 
 ## Consequences
 
 - `crs` leaves the write list; `asWKT`'s range constraint enters P6a's
   definition of done.
-- `assertedTime` leaves the write list and binds `prov:generatedAtTime`.
-- The surface is **23 bind / 9 write of 32**, per the table above.
+- `assertedTime` leaves the local-slot list and binds
+  `prov:generatedAtTime`.
+- **The surface is the four populations in the partition above, not a
+  pair of totals.** An earlier draft of this line read *"23 bind / 9
+  write of 32"* — the figure this same ADR declares unrecoverable sixty
+  lines earlier. Withdrawn 2026-08-02.
 - `Statement` enters Part 0. **Part 0 is 9 classes; the unit is 15**, recorded here
   because `docs/measure/measure-01-part2-part0.md` is a closed measure
   document and is not edited at a design gate.
