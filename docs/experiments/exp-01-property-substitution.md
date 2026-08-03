@@ -75,9 +75,21 @@ nothing**, exit 0, no warning. So:
   local range may contradict it (A34)
 - **axis 3 — LinkML accepts a constraint expression and emits no shape
   for it**
+- **axis 4 — the same, for a *conditional* specifically**, recorded
+  2026-08-02 from O's B6 run: class-level `rules:` with real
+  preconditions and postconditions, and `annotations:` carrying the same
+  conditional, both **exit 0 with empty stderr** and emit
+  `sh:condition`, `sh:sparql` and `sh:equals` **zero times**
 
-All three fail toward "pass". The third is the one where the author has
-done the work, believes the constraint is in force, and is wrong.
+All four fail toward "pass". The third and fourth are the ones where the
+author has done the work, believes the constraint is in force, and is
+wrong.
+
+**Axis 4 matters beyond axis 3 because ADR-003 depends on it.** Every
+affirmative result in this record is an *equality*. Misassignment of
+`epistemicKind` is a **conditional**, so nothing here establishes that
+it is catchable — which is why ADR-005 records misassignment as
+unenforced **indefinitely** rather than until P19.
 
 **3. Invariant 4 has a gap in its wording.** *"Only SHACL-expressible
 constraints belong in LinkML"* sets the bar at SHACL-expressibility.

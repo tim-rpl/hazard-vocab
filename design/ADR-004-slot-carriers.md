@@ -37,10 +37,11 @@ CRS rather than reading a property. That is a real cost and it is
 narrower than it sounds: the CRS is needed for reprojection, and
 anything reprojecting is already parsing the geometry.
 
-**Consequence:** see the reconciliation below — the figure is not
-23/9 of 32 for the reason this section originally gave.
+**Consequence:** `crs` leaves the local-slot list. **No total is
+asserted here** — see the partition below, and the note that no number
+in this ADR is the unit's slot total.
 
-## Decision B — a `Statement` class. A1 moves 14 → 15
+## Decision B — a `Statement` class
 
 Four slots have no carrier among A1's eight Part 0 classes —
 `sourceVerificationTier` (A24), and `operatingMode`, `modelVersion`,
@@ -50,8 +51,19 @@ ADR-002 recorded `Statement` as *"the sixth [entity], but is already
 covered by the provenance layer and needs no new class."* **That was
 right when nothing hung off it and is wrong now.**
 
-**Decision: `Statement` is a Part 0 class binding `prov:Entity`.
-A1's Part 0 class count moves 14 → 15.**
+**Decision: `Statement` is a Part 0 class binding `prov:Entity`.**
+
+**Counts, stated precisely, because an earlier draft of this line
+mislabelled them and the corrected version landed only in the table
+sixty lines below.** It read *"A1's Part 0 class count moves 14 → 15"* —
+14 is the **unit** total, not a Part 0 count.
+
+- **This unit's Part 0 fragment: 8 → 9 classes.**
+- **The unit: 14 → 15 classes.**
+- **Part 0 itself is larger than either** and is not counted here. A8
+  pulls 8 elements into this unit and **defers `Document`**, which
+  ADR-002 lists as a Part 0 entity. A number describing the fragment is
+  not a number describing Part 0.
 
 **Why not `Activity`, which was the alternative.** `prov:Activity` is
 the *act* — the retrieval, the observation, the derivation.
@@ -201,7 +213,7 @@ graph.
 |---|---|---|
 | ADR-001 Consequences | *"Part 0 gains four classes rather than one"* | **Wrong.** That is the *literal transcription* figure, which this ADR's own *translate, don't transcribe* rule rejects two sections earlier. Corrected in ADR-001 |
 | A31 | the translation is *"the same class count and +2 slots"* | Correct — `NameType` became a code list, `NamingAuthority` became `Agent` |
-| ADR-004, as first written | *"A1's **Part 0** class count moves 14 → 15"* | **Mislabelled.** 14 is the *unit* total. **Part 0 goes 8 → 9**; the unit goes 14 → 15 |
+| ADR-004, as first written | *"A1's **Part 0** class count moves 14 → 15"* | **Mislabelled**, and it survived in Decision B until 2026-08-02 after being corrected here. 14 is the *unit* total. **This unit's Part 0 fragment goes 8 → 9**; the unit goes 14 → 15; **Part 0 itself is larger and neither figure describes it** |
 
 The mislabel matters because this ADR declares itself the superseding
 authority on the count, so the wrong label is what the next reader
@@ -278,9 +290,12 @@ mutation-covered on both branches at 33 pairs.
   pair of totals.** An earlier draft of this line read *"23 bind / 9
   write of 32"* — the figure this same ADR declares unrecoverable sixty
   lines earlier. Withdrawn 2026-08-02.
-- `Statement` enters Part 0. **Part 0 is 9 classes; the unit is 15**, recorded here
-  because `docs/measure/measure-01-part2-part0.md` is a closed measure
-  document and is not edited at a design gate.
+- `Statement` enters Part 0. **This unit's Part 0 fragment is 9
+  classes; the unit is 15.** Part 0 itself is larger — `Document` is a
+  Part 0 entity per ADR-002 and is deferred by A8 — so neither figure
+  describes Part 0. Recorded here because
+  `docs/measure/measure-01-part2-part0.md` is a closed measure document
+  and is not edited at a design gate.
 - P6a is unblocked on both counts.
 - ADR-002's Decision A table is amended to carry `Statement` as a sixth
   entity rather than as a note saying it needs no class.
