@@ -139,8 +139,15 @@ decision — establishes that such a constraint is not generable from
 LinkML.** This ADR discharged by validation what its sibling says
 validation cannot do.
 
-**B still stands, on A29, A5, T4 and A7.** Those four are independent of
-this argument and of the bar. What does not stand is the claim that
+**B still stands, on A29, A5 and A7 — three, not four.** An earlier
+draft listed **T4**, and T4 does not discriminate between the options:
+its own evidence row above reads *"Under B it cannot be required; under
+A it can"*, and `claims.md` agrees. **T4's falsification establishes
+that the A/B choice cannot be deferred, not which choice to make.**
+`A5` alone carries A's inexecutability. Corrected 2026-08-02.
+
+The three that remain are independent of this argument and of the
+bar. What does not stand is the claim that
 option B *enforces* what option A's module boundary enforced. It does
 not, and the Obligation section records that as a permanent gap rather
 than a discharged obligation.

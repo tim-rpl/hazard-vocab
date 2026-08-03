@@ -99,13 +99,17 @@ bind or a write. It is a bind.
 **It adds a bound slot and no new external URI.** Those are different
 populations and an earlier draft conflated them — the sentence read
 *"it does not add to the bind count"*, which contradicts the table
-below showing bound slots moving 16 → 17.
+below, which shows the bound-slot count **unchanged at 16**.
 
 Precisely: `prov:generatedAtTime` was already among the external URIs
-A3 enumerated, so **no new URI enters**. But `assertedTime` was on the
-local-slot list and is now a slot carrying a `slot_uri`, so **the bound
-*slot* count moves 16 → 17** and the local-slot count moves 10 → 9.
-The URI population is unchanged; the slot partition is not.
+A3 enumerated, **and the slot binding it was already counted in the 16
+under the URI's name rather than ours.** The bound-slot count is
+therefore **unchanged at 16**; the local-slot count goes **10 → 9** at
+this decision, and **→ 8** once Decision A removes `crs`.
+
+An earlier draft said the bound count moved 16 → 17. It does not — that
+counted one slot twice, which is the defect this ADR's own partition
+section is about.
 
 ## Reconciliation of the surface figure — the partition, and what it found
 
@@ -152,8 +156,21 @@ defect this whole section is about.
 | Slot population | Count |
 |---|---|
 | Slots carrying an external `slot_uri` | **16** |
-| Slots with no external term, defined locally | **9** |
-| **Distinct total of A1's enumerated slots** | **25** |
+| Slots with no external term, defined locally | **8** |
+| **Distinct total of A1's enumerated slots** | **24** |
+
+**Two removals, not one.** Decision A removes `crs` and Decision C
+removes `assertedTime`, both from A1's ten: `10 − 2 = 8`, total **24**.
+An earlier draft carried 9 and 25 — it applied one removal and then
+**added `epistemicKind`, which A1 never enumerated**, into a row labelled
+*A1's enumerated slots*.
+
+**`epistemicKind` is a slot this unit needs that A1 did not enumerate.**
+It belongs beside the list, not inside it — and it is the first
+demonstrated member of a class this ADR has been asserting exists.
+**D10's nominated falsifier — *the enumerated list is itself
+incomplete* — has therefore already fired**, by at least one, on
+evidence this ADR was carrying without drawing the conclusion.
 
 **`assertedTime` does not move the first row, and an earlier draft said
 it did.** That draft read **17**, adding `assertedTime` to a set that
@@ -184,19 +201,18 @@ will assert.
 
 **The unit's slot total is unknown, and P5's first output is the
 authoritative count.** That quantity has taken four values across four
-gates — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, and now `25` — and
-each was arithmetic over a population nobody had fixed. **The
+gates — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, `25`, and now `24` —
+and each was arithmetic over a population nobody had fixed. **The
 replacement baseline is the enumerated list, not a number**; the number
 comes from the artifact.
 
-**What P5 works from:** the 16 bound slots and the 9 local ones by name,
-the 13 class bindings, the 6 verified value URIs, and the 6 that need
-verifying first. Not a total.
+**What P5 works from:** the **16** bound slots and the **8** local ones
+by name, the 13 class bindings, the 6 verified value URIs, the 6 that
+need verifying first, and **`epistemicKind`**. Not a total.
 
-**Slots: 17 bound + 9 local = 26 enumerated.** That is not the unit's
-slot total and is not claimed to be one — A1 enumerated external URIs
-and local terms, which are two populations that do not sum to the
-schema.
+**Slots: 16 bound + 8 local = 24 of A1's enumerated slots**, plus
+`epistemicKind` outside that list. It is not the unit's slot total and
+is not claimed to be one.
 
 **`23 bind / 10 write of 33` and `35–36` are both retired rather than
 reconciled.** Neither is recoverable, and carrying either forward would

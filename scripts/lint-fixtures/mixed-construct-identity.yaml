@@ -1,0 +1,32 @@
+# DELIBERATELY VIOLATING — O's exact probe. Document claims prov:Entity
+# through exact_mappings while Statement claims it through class_uri, so
+# the two are asserted equivalent. Every rule reported ok at exit 0:
+# `shared-uri` compared class_uri only, and `exact-mappings` checks
+# len > 1 within ONE element.
+#
+# This was the repository's actual state until 2026-08-02, and an ADR
+# summary line called it guarded.
+# See [O -> H] design gate block verification 3, BV3-3.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_mixed_construct_identity
+prefixes:
+  linkml: https://w3id.org/linkml/
+  prov:   http://www.w3.org/ns/prov#
+  foaf:   http://xmlns.com/foaf/0.1/
+default_range: string
+imports: [linkml:types]
+slots:
+  title:
+    description: A human-readable title.
+    examples: [{value: "Incident Action Plan, operational period 3"}]
+classes:
+  Document:
+    description: A written instrument such as a plan or an order.
+    examples: [{value: a delegation of authority letter}]
+    class_uri: foaf:Document
+    exact_mappings: [prov:Entity]
+    slots: [title]
+  Statement:
+    description: A reified assertion carrying its own provenance.
+    examples: [{value: "this perimeter was reported by agency X at time T"}]
+    class_uri: prov:Entity

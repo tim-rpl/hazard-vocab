@@ -1,5 +1,15 @@
-// Structural claims about profiles and parts.
-// See claims.md T2, C1, C2.
+// Structural claims about profiles.
+// See claims.md T2.
+//
+// C1 and C2 were listed here and are NOT tested by this model.
+// `sig Part` and `fact partsAcyclic` are referenced by no assertion and
+// delete with byte-identical output (F10/M1) — so the header asserted
+// coverage of two claims nothing touches. Struck 2026-08-02 rather than
+// left for the rebuild: P4 owns replacing this model, and a header that
+// lies until then lies for as long as P4 is unscheduled.
+//
+// claims.md T2 has recorded this correctly since 2026-08-01. The
+// register was right; only this line was wrong.
 //
 // Deliberately tiny — abstraction, not translation. If this grows past
 // ~10 signatures you have translated the schema and it will rot.

@@ -52,6 +52,8 @@ CASES = [
     ("documented",        "own-namespace",       False, "precision — a documented file with examples"),
     ("shared-uri",        "shared-class-uri",    True,  "recall — C21/B4, two classes on one class_uri"),
     ("shared-uri",        "shared-slot-uri",     True,  "recall — the slot branch, which no fixture reached"),
+    ("shared-uri",        "mixed-construct-identity", True, "recall — BV3-3, exact_mappings vs another class_uri"),
+    ("exact-mappings",    "mixed-construct-identity", False, "precision — one exact_mappings each, not a len>1 case"),
     ("shared-uri",        "own-namespace",       False, "precision — distinct URIs"),
     ("shared-uri",        "bound-vocabularies",  False, "precision — one class, external bindings"),
 ]

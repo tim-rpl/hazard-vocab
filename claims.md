@@ -508,7 +508,20 @@ only add constraints, never relax them.
   relation and the acyclicity fact are referenced by no assertion in the
   file. The header cites "claims.md T2, C1, C2"; **C1 and C2 are tested
   by nothing there.**
-- **Updated:** 2026-08-01
+
+  **Re-run 2026-08-02, block verification 3 — still inert.** Mutation
+  applied to a copy with a fail-loud guard on the target string, then
+  confirmed absent by `grep -c` before running. All three commands return
+  identical results with the signature and fact deleted:
+  `check_restrictionSound` UNSAT at scope 6,
+  `demo_droppingBreaksSoundness` SAT as intended,
+  `check_compositionPreservesSoundness` UNSAT at scope 6.
+  `design/alloy/parts.als:2` still reads *"See claims.md T2, C1, C2."*
+  Status unchanged. Recorded as a finding at the design gate (F-1) rather
+  than as a block: this entry has carried the correct account since
+  2026-08-01, so the register is right and only the artifact header is
+  stale.
+- **Updated:** 2026-08-02
 
 ### T4 — The binding surface is decidable before either open ADR
 Neither ADR-001's resolution nor ADR-003's changes the form of any of
@@ -682,6 +695,35 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
   subject population is retired either way, and which of 16 or 17 is
   right — like whether the replacement baseline should be a slot
   partition at all — is H's to decide, not mine to narrow.
+
+  **2026-08-02, block verification 3 — the replacement partition is
+  itself wrong, and the entry above got it wrong in the same direction.**
+  ADR-004 decides **two** removals from A1's ten local slots and applies
+  **one**. `crs` is item 6 of the ten (`measure-01:100-110`, stated in
+  bold there) and Decision A `:40` removes it; `assertedTime` is item 5
+  and Decision C `:107` removes it. Both are restated in Consequences at
+  `:285` and `:287`. But `:107` reports the arithmetic as *"the
+  local-slot count moves 10 → 9"* — one decrement, attributed solely to
+  `assertedTime` — and the partition table at `:155` inherits the 9.
+
+  **10 − `crs` − `assertedTime` = 8**, the bound row stays **16**, and
+  the distinct total is **24**. No compensating addition exists inside
+  the population: Decision B's `operatingMode`, `modelVersion` and
+  `profileConformance` are not among A1's ten, and the partition is
+  explicitly *"the slots A1 enumerated."*
+
+  **The block-verification-2 paragraph above is corrected by this one.**
+  It removed the `assertedTime` double-count and concluded 25, never
+  applying Decision A's removal of `crs` — the same class of error it was
+  filing, one population narrower. Recorded rather than rewritten,
+  because a register that shows only where the reviewer was right is
+  worth less than one that shows where it was not.
+
+  This is the fifth value the quantity has taken: `23/9 of 32`,
+  `24/9 of 33`, `17 + 9 = 26`, `25`, `24`. Status stays `scoped-down`:
+  the subject population is still retired, and **which figure is right
+  remains H's to decide** — 24 is what ADR-004's own two decisions imply,
+  not a number O is substituting.
 - **Updated:** 2026-08-02
 
 ### C1 — Parts are jurisdiction-neutral
@@ -1044,6 +1086,18 @@ answered today and that the canonical layer answers.
   unchanged. It does mean the enlargement recorded above is not a
   scheduling problem that P19 dissolves — nothing in the source language
   currently expresses the constraint at all.
+
+  **2026-08-02, block verification 3 — re-run by a second O session, and
+  the falsifier still does not fire. Status unchanged.** Both routes
+  reproduce at exit 0 with empty stderr and all three constructs at zero,
+  with the annotation carried at slot level as well as class level. One
+  addition to the record: enumerating the emitted predicates rather than
+  counting named ones shows the annotation leaves **no trace whatever**
+  in the generated Turtle. That bears on P19's shape — the generator
+  ADR-005 decides on cannot be a post-processor over `build/shapes.ttl`,
+  because its input is not present there; it must read the LinkML source.
+  Stated as a measured consequence of the decision, not as a proposal
+  about how to build it.
 - **Updated:** 2026-08-02
 
 ### C6 — The vocabulary is LLM-legible
@@ -1707,6 +1761,20 @@ does not declare.
   with word boundaries, every count is 0. That is the
   instrument-reports-something-it-did-not-inspect shape in my own
   measurement, caught before it reached this register.
+
+  **Replicated 2026-08-02, block verification 3, by a second O session
+  that did not inherit the run above.** Both routes reproduce exactly —
+  exit 0, empty stderr, `sh:condition` / `sh:sparql` / `sh:equals` all
+  **0** — with the annotation carried at **class level and slot level**
+  rather than class level alone. Enumerating the emitted predicates
+  rather than counting named ones: the graph contains only
+  `sh:targetClass`, `sh:property`, `sh:path`, `sh:datatype`,
+  `sh:maxCount`, `sh:nodeKind`, `sh:order`, `sh:closed`,
+  `sh:ignoredProperties` and `sh:description`. Grepping the Turtle for
+  the constraint text returns one hit and it is an unrelated slot
+  `description`. Replication recorded because the axis is what ADR-003's
+  Obligation and ADR-005's third test both rest on, and it had been
+  measured once by one session.
 - **Updated:** 2026-08-02
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
@@ -2339,6 +2407,35 @@ expressed by something other than assigning both that class's URI.
   against a generated `build/shapes.ttl`. What changed is that the guard
   is now demonstrated on both branches and the design it guards no
   longer contains a known counterexample.
+
+  **2026-08-02, block verification 3 — the design is resolved, the guard
+  is not, and ADR-004 says it is.** Re-ran the mixed-construct probe
+  against the shipped linter with a control, on schemas complete enough
+  that no unrelated rule fires:
+
+  | Schema | `scripts/drift-lint.py` |
+  |---|---|
+  | `class_uri: prov:Entity` on **both** `Document` and `Statement` *(control)* | **FAIL `[shared-uri]`**, exit 1 |
+  | `Document`: `class_uri: foaf:Document` **+ `exact_mappings: [prov:Entity]`**; `Statement`: `class_uri: prov:Entity` | **exit 0 — all seven rules `ok`** |
+
+  The cause is structural rather than a recall failure, read from source:
+  `rule_exact_mappings` (`scripts/drift-lint.py:237-255`) fires only on
+  `len(m) > 1`, and `shared-uri` compares `class_uri` values only.
+  **No rule compares an `exact_mappings` target against another class's
+  `class_uri`**, so the reversion route is invisible to the whole guard
+  set.
+
+  This matters because ADR-004 Decision D closes at `:277` with
+  *"**Guarded rather than remembered**"*, while `:258-261` of the same
+  decision records that the mixed construct passes both rules. The
+  artifact contains both statements; the summary is the one that
+  overreaches, and it is the sentence a reader takes the decision from.
+  Filed as blocking finding BV3-3.
+
+  Status stays `asserted` for the reason above — nothing is authored, so
+  the claim is still untested against material. What is now measured is
+  that the state this entry was written about is reachable without any
+  instrument objecting.
 - **Updated:** 2026-08-02
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the

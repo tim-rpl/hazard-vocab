@@ -431,41 +431,95 @@ def rule_documented(path, doc):
 
 
 def rule_shared_uri(path, doc):
-    """C21: no two classes carry the same external `class_uri`.
+    """C21: no external URI is claimed as an identity by two elements.
 
-    `exact-mappings` is per-class by construction, so a URI shared
-    ACROSS classes is outside its subject rather than a recall failure
-    of it. Measured (B4): two classes with `class_uri: prov:Entity`
-    generate ONE NodeShape with `sh:targetClass prov:Entity` carrying
-    the UNION of both classes' property shapes, each `sh:minCount 1` —
-    exit 0, empty stderr. The classes become indistinguishable to
-    validation and each inherits the other's required slots.
+    An element asserts identity with a URI two ways, and BOTH count:
+    `class_uri`/`slot_uri`, and `exact_mappings` — which asserts
+    equivalence, per ADR-002's addendum naming that "the false claim".
 
-    Slots are checked too and reported separately. Two slots sharing a
-    `slot_uri` produce two property shapes on one `sh:path`, which is
-    less destructive than a class merge but is the same shape. Reported
-    as a warning-level finding in the message text rather than treated
-    as a distinct rule, so C21's subject stays what C21 says it is.
+    THE FIRST VERSION COMPARED `class_uri` ONLY, and `exact-mappings`
+    checks `len(m) > 1` within one element. So a mixed construct passed
+    every rule at exit 0:
+
+        Document:  class_uri: foaf:Document
+                   exact_mappings: [prov:Entity]
+        Statement: class_uri: prov:Entity
+
+    That asserts Document is equivalent to Statement's type. It is not
+    hypothetical — it is the state this repository was in until
+    2026-08-02, and an ADR summary line called it guarded while it was
+    not. See [O -> H] design gate block verification 3, BV3-3.
+
+    Measured for `class_uri` collisions: gen-shacl emits ONE NodeShape
+    carrying the union of both elements' property shapes, each with
+    sh:minCount 1, at exit 0.
+
+    `close_mappings`, `related_mappings` and `narrow_mappings` are NOT
+    identity assertions and are deliberately not collected.
     """
     bad = []
 
-    def dupes(kind, items, field):
-        seen = {}
+    def collect(kind, items, uri_field):
+        claims = {}
         for name, body in (items or {}).items():
             if not isinstance(body, dict):
                 continue
-            uri = body.get(field)
-            if uri:
-                seen.setdefault(str(uri), []).append(name)
-        for uri, names in seen.items():
-            if len(names) > 1:
-                bad.append(f"{path}: {kind} {', '.join(sorted(names))} all "
-                           f"declare `{field}: {uri}` — they merge into one "
-                           f"shape carrying the union of their required "
-                           f"slots, at exit 0 (claims.md C21)")
+            uris = []
+            if body.get(uri_field):
+                uris.append((str(body[uri_field]), uri_field))
+            for m in (body.get("exact_mappings") or []):
+                uris.append((str(m), "exact_mappings"))
+            for uri, via in uris:
+                claims.setdefault(uri, []).append((name, via))
+        for uri, holders in claims.items():
+            if len(holders) > 1:
+                where = ", ".join(f"`{n}` (via {v})" for n, v in sorted(holders))
+                bad.append(f"{path}: {kind} {where} each claim `{uri}` as an "
+                           f"identity. Two elements asserting one URI assert "
+                           f"they are equivalent, which is almost never true "
+                           f"and generates one merged shape at exit 0 "
+                           f"(claims.md C21). Use close_ or related_mappings "
+                           f"for anything short of equivalence")
 
-    dupes("classes", doc.get("classes"), "class_uri")
-    dupes("slots", doc.get("slots"), "slot_uri")
+    collect("classes", doc.get("classes"), "class_uri")
+    collect("slots", doc.get("slots"), "slot_uri")
+    return bad
+
+
+PLACEHOLDER = {"", "todo", "tbd", "fixme", "xxx", "tk", "n/a", "-", "..."}
+
+
+def rule_documented(path, doc):
+    """Invariant 7: every class and slot carries a `description` and at
+    least one `examples` entry.
+
+    `CLAUDE.md` invariant 7 said "Lint enforces it" and nothing did. A
+    schema with eight classes, twelve slots, every description the
+    literal string TODO and zero examples passed clean and generated its
+    shapes at exit 0. See claims.md C20.
+
+    This matters beyond documentation: C6 (LLM-legibility) rests on
+    invariant 7 and has no other guard.
+    """
+    bad = []
+
+    def check(kind, name, body):
+        if not isinstance(body, dict):
+            body = {}
+        d = str(body.get("description") or "").strip()
+        if d.lower().rstrip(".") in PLACEHOLDER:
+            bad.append(f"{path}: {kind} `{name}` has "
+                       f"{'no description' if not d else f'a placeholder description ({d!r})'}"
+                       f" — invariant 7")
+        if not body.get("examples"):
+            bad.append(f"{path}: {kind} `{name}` has no `examples` entry — "
+                       f"invariant 7. One example grounds a reader, human "
+                       f"or model, better than three sentences")
+
+    for n, c in (doc.get("classes") or {}).items():
+        check("class", n, c)
+    for n, sl in (doc.get("slots") or {}).items():
+        check("slot", n, sl)
     return bad
 
 
