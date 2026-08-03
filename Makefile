@@ -14,8 +14,29 @@ gen:
 	$(BIN)gen-shacl vocab/core/vocabulary.yaml > build/shapes.ttl
 	@echo "generated -> build/"
 
+# Instance validation. Enumerated with `find`, not a glob.
+#
+# `fixtures/**/*.jsonld` is expanded by sh, which has no `**` — it matches
+# exactly one directory level, so a fixture written to `fixtures/x.jsonld`
+# or `fixtures/a/b/x.jsonld` is SILENTLY SKIPPED and this target reports
+# success. Measured. That is the C17 shape in the one target whose whole
+# job is to inspect instances.
+#
+# The count is printed for the same reason `make lint` prints what it
+# inspected: a validator that passes over zero files must not look like a
+# validator that passed.
 check:
-	$(BIN)pyshacl -s build/shapes.ttl -df json-ld fixtures/**/*.jsonld
+	@test -f build/shapes.ttl || \
+		(echo "FAIL: build/shapes.ttl does not exist. Run 'make gen' first."; exit 1)
+	@n=$$(find fixtures -name '*.jsonld' 2>/dev/null | wc -l | tr -d ' '); \
+	if [ "$$n" -eq 0 ]; then \
+		echo "FAIL: no *.jsonld under fixtures/ — this target inspected nothing."; \
+		echo "      An empty pass is not a pass. See claims.md C17."; \
+		exit 1; \
+	fi; \
+	echo "checking $$n instance file(s) against build/shapes.ttl"; \
+	find fixtures -name '*.jsonld' -print0 \
+		| xargs -0 $(BIN)pyshacl -s build/shapes.ttl -df json-ld
 
 lint:
 	@echo "C4: no LinkML-only constructs"

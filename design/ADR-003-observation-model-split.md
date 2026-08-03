@@ -107,7 +107,13 @@ query cost.
 **A module boundary is checkable by a human reading a file tree; a
 required slot is checkable only by running validation.** Under A, a
 Part 3 fact in a Part 2 file is visible on inspection. Under B, an
-`epistemicKind` of the wrong value is visible only to the lint. That is
+`epistemicKind` of the wrong value is visible only to **instance
+validation** — `make check`, not `make lint`. An earlier draft named the
+lint here; that was wrong twice over. `make lint` reads schema files and
+has never inspected an instance, and `make check` **always could** —
+so the instrument was never the missing piece. **What is missing is the
+cross-slot constraint between `epistemicKind` and `procedure`, which is
+ADR-005's P19.** Corrected 2026-08-02. That is
 a real reduction in inspectability and it is the price.
 
 The mitigation is the lint rule this ADR already required, and it is now
