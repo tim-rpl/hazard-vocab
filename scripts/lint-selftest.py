@@ -50,6 +50,9 @@ CASES = [
     ("jurisdiction",      "id-branch-only",      True,  "recall — BV25, the ONLY case reaching the id: gate"),
     ("documented",        "undocumented",        True,  "recall — C20, placeholder descriptions and no examples"),
     ("documented",        "own-namespace",       False, "precision — a documented file with examples"),
+    ("shared-uri",        "shared-class-uri",    True,  "recall — C21/B4, two classes on one class_uri"),
+    ("shared-uri",        "own-namespace",       False, "precision — distinct URIs"),
+    ("shared-uri",        "bound-vocabularies",  False, "precision — one class, external bindings"),
 ]
 
 

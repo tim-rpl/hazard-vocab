@@ -430,6 +430,45 @@ def rule_documented(path, doc):
     return bad
 
 
+def rule_shared_uri(path, doc):
+    """C21: no two classes carry the same external `class_uri`.
+
+    `exact-mappings` is per-class by construction, so a URI shared
+    ACROSS classes is outside its subject rather than a recall failure
+    of it. Measured (B4): two classes with `class_uri: prov:Entity`
+    generate ONE NodeShape with `sh:targetClass prov:Entity` carrying
+    the UNION of both classes' property shapes, each `sh:minCount 1` —
+    exit 0, empty stderr. The classes become indistinguishable to
+    validation and each inherits the other's required slots.
+
+    Slots are checked too and reported separately. Two slots sharing a
+    `slot_uri` produce two property shapes on one `sh:path`, which is
+    less destructive than a class merge but is the same shape. Reported
+    as a warning-level finding in the message text rather than treated
+    as a distinct rule, so C21's subject stays what C21 says it is.
+    """
+    bad = []
+
+    def dupes(kind, items, field):
+        seen = {}
+        for name, body in (items or {}).items():
+            if not isinstance(body, dict):
+                continue
+            uri = body.get(field)
+            if uri:
+                seen.setdefault(str(uri), []).append(name)
+        for uri, names in seen.items():
+            if len(names) > 1:
+                bad.append(f"{path}: {kind} {', '.join(sorted(names))} all "
+                           f"declare `{field}: {uri}` — they merge into one "
+                           f"shape carrying the union of their required "
+                           f"slots, at exit 0 (claims.md C21)")
+
+    dupes("classes", doc.get("classes"), "class_uri")
+    dupes("slots", doc.get("slots"), "slot_uri")
+    return bad
+
+
 RULES = {
     "inline-attributes": rule_inline_attributes,
     "is-a-depth": rule_is_a_depth,
@@ -437,6 +476,7 @@ RULES = {
     "role-named": rule_role_named,
     "jurisdiction": rule_jurisdiction,
     "documented": rule_documented,
+    "shared-uri": rule_shared_uri,
 }
 
 

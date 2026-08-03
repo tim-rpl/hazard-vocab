@@ -142,14 +142,27 @@ defect.
 
 | Capability | Control-centre analogue | Home | Status |
 |---|---|---|---|
-| Gap filling / interpolation | State estimation | Part 2, `epistemicKind: modelled` | `covered` |
+| Gap filling / interpolation | State estimation | Part 2 — **`epistemicKind` undecided** | **`GAP`** |
 | Forecast | Load / generation forecast | Part 2, `epistemicKind: modelled` | `covered` |
 | Derived indices | Calculated points | Part 2, `epistemicKind: modelled` | `covered` |
 | **Limit and threshold definition** | `OperationalLimit` | — | **`GAP`** |
 | **Violation detection** | Limit violation | — | **`GAP`** |
 | **Alarm state, acknowledgement, suppression** | Alarm list | — | **`GAP`** |
-| Uncertainty representation | — | Part 2 | `partial` — no mature standard |
+| Uncertainty representation | — | Part 2, `epistemicKind: modelled` | `partial` — no mature standard |
 | **Cascade / interdependency analysis** | Contingency analysis | — | **`GAP`** — requires network topology |
+
+> **Gap-filled readings are not adjudicated, and marking them
+> `epistemicKind: modelled` adjudicated them.** L6's Watch records that
+> QC'd and gap-filled monitor readings are model-touched but
+> **legitimately observations**, and that the stratum assignment is a
+> judgement call at exactly this boundary. ADR-003 defeated option A
+> partly by citing those boundary cases — and then option B inherited
+> them unaddressed, because a required slot forces a value where the
+> module boundary at least made the difficulty visible. Status moved to
+> **`GAP`** on 2026-08-02: the case is real, the model has no answer,
+> and `covered` was a claim about a decision nobody made. **Deciding it
+> belongs to whichever ADR gives `epistemicKind` its permissible
+> values.**
 
 > **Part 3 no longer exists.** ADR-003 chose option B on 2026-08-02:
 > Parts 2 and 3 are one `Observation` class distinguished by a required
@@ -253,7 +266,7 @@ defect.
 | Provenance | — | Part 0 (PROV-O) | `covered` |
 | Audit trail | `ActivityRecord` | Part 0 `Activity` + CAS versioning | `covered` |
 | Documents | `Document` | Part 0 `Document` | `covered` (ADR-002) |
-| **Curated / testimonial content** *(register)* | Operator standing notes | — | **`GAP`** — pending C10 |
+| **Curated / testimonial content** *(register)* | Operator standing notes | — | **`GAP`** — pending C10, and **no carrier under any of the four design-gate decisions** |
 | Cost tracking | Financial systems | — | `out of scope` |
 | After-action / lessons | — | — | `out of scope` |
 

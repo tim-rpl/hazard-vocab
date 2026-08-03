@@ -88,31 +88,98 @@ bind or a write. It is a bind.
 already among A3's five PROV terms, so the URI was counted; what changes
 is that the *slot* leaves the write list.
 
-## Reconciliation of the surface figure
+## Reconciliation of the surface figure — the partition, and what it found
 
-Two corrections were outstanding and they move in opposite directions,
-so the arithmetic must be shown rather than asserted.
+O asked for an explicit slot partition rather than another restatement.
+It does not reconcile, and the reason is the finding.
 
-| Step | Bind | Write | Total |
-|---|---|---|---|
-| A1 as restated at the measure gate | 23 | 10 | 33 |
-| **ADR-004 A** — `crs` is not a slot | 23 | 9 | **32** |
-| **ADR-004 C** — `assertedTime` is a bind, and its URI was already counted | 23 | 8 | **31** |
-| **ADR-003 B** — `epistemicKind` is a new local slot | 23 | **9** | **32** |
+**The `23` was never a count of slots.** A3's enumeration reads *"21
+external slot URIs"* and then lists 35 terms of three different kinds:
 
-**Final: 23 bind / 9 write of 32.**
+| Kind | Terms | Count |
+|---|---|---|
+| **`slot_uri`** — a bound slot | `observedProperty`, `hasFeatureOfInterest`, `hasResult`, `hasSimpleResult`, `resultTime`, `phenomenonTime`, `madeBySensor`, `usedProcedure`, `isHostedBy`, `hasMember`, `wasAttributedTo`, `generatedAtTime`, `hasGeometry`, `asWKT`, `hasUnit`, `numericValue` | **16** |
+| **`class_uri`** — a bound class | `Observation`, `Sensor`, `Platform`, `FeatureOfInterest`, `Procedure`, `ObservableProperty`, `ObservationCollection`, `prov:Agent`, `prov:Activity`, `prov:Entity`, `org:Organization`, `geo:Geometry`, `qudt:QuantityValue` | **13** |
+| **`meaning`** — a permissible-value URI, not a schema element at all | 6 QUDT units, 6 NVS2 P07 standard names | **12** |
 
-**That is the same figure this ADR first stated, and it was right by
-coincidence.** The `crs` removal and the `epistemicKind` addition
-cancel, and the `assertedTime` identification is a third change that
-happened to land back on the total. A figure that survives for the wrong
-reasons is not a verified figure — recorded because this project has
-spent four gates on numbers that agreed by accident.
+**41 external URIs of three kinds, reported as one number.** `23` is
+none of them.
 
-**The enum ADR-003 adds is not a slot** and does not enter this count.
+**And `33` inherits the same defect**, because it was `23 + 10` — a
+mixed-kind URI count added to a local-slot count. A31's `35–36` counts
+something else again: the unit's slots after the alias translation.
+**The two baselines are not comparable, so the reconciliation table this
+section previously carried was arithmetic over incommensurable
+quantities**, and its agreement with the earlier figure was the
+coincidence it admitted to being.
 
-`docs/measure/measure-01-part2-part0.md` is a closed measure document
-and is not edited at a design gate; this table supersedes A1's figure.
+### What P5 actually has to do
+
+This is the figure P5 needs, and it is a work list rather than a total:
+
+| Population | Count | After the four decisions |
+|---|---|---|
+| Slots carrying an external `slot_uri` | 16 | **17** — `assertedTime` joins it (Decision C) |
+| Classes carrying an external `class_uri` | 13 | 13 |
+| Permissible-value URIs to bind | 12 | 12 |
+| Slots with no external term, to define locally | 10 | **9** — minus `crs` (Decision A), minus `assertedTime` (Decision C), plus `epistemicKind` (ADR-003 B) |
+
+**Slots: 17 bound + 9 local = 26 enumerated.** That is not the unit's
+slot total and is not claimed to be one — A1 enumerated external URIs
+and local terms, which are two populations that do not sum to the
+schema.
+
+**`23 bind / 10 write of 33` and `35–36` are both retired rather than
+reconciled.** Neither is recoverable, and carrying either forward would
+be a fifth figure agreeing with a fourth by accident. The four counts
+above are what P5 works from.
+
+**Falsifier:** a term in the `slot_uri` row that is a class, or in the
+`class_uri` row that is a property, on inspection of its published
+graph.
+
+## Class counts — three documents, three numbers, and a mislabel
+
+| Source | Says | Verdict |
+|---|---|---|
+| ADR-001 Consequences | *"Part 0 gains four classes rather than one"* | **Wrong.** That is the *literal transcription* figure, which this ADR's own *translate, don't transcribe* rule rejects two sections earlier. Corrected in ADR-001 |
+| A31 | the translation is *"the same class count and +2 slots"* | Correct — `NameType` became a code list, `NamingAuthority` became `Agent` |
+| ADR-004, as first written | *"A1's **Part 0** class count moves 14 → 15"* | **Mislabelled.** 14 is the *unit* total. **Part 0 goes 8 → 9**; the unit goes 14 → 15 |
+
+The mislabel matters because this ADR declares itself the superseding
+authority on the count, so the wrong label is what the next reader
+inherits.
+
+**Corrected: Part 0 is 8 classes → 9 with `Statement`. The unit is 14 →
+15.**
+
+## Decision D — the binding construct where two classes share a URI (B4)
+
+`Statement` binds `prov:Entity`. Our abstract `Entity` must not also
+bind it, and the choice of construct is not neutral:
+
+- **`class_uri` on both** merges them into **one SHACL node shape
+  carrying the union of their required slots** — every `Entity` would
+  inherit `Statement`'s obligations.
+- **`exact_mappings` on both** asserts the equivalence ADR-002's own
+  addendum names as the false claim, and is what the `exact-mappings`
+  lint rule exists to catch.
+
+**Decision: `Statement` carries `class_uri: prov:Entity`. Our `Entity`
+carries no external `class_uri` at all.**
+
+Our `Entity` is an abstraction over `Agent`, `Asset`, `Place`,
+`Activity`, `Document` and `Statement` — a local convenience for slot
+reuse. It is not `prov:Entity`, which is specifically *a thing produced*
+and which `prov:Activity` is explicitly not. Binding our abstraction to
+it would have been convenience mistaken for identity.
+
+`Entity` may carry `close_mappings` to nothing in particular; it needs
+no external term, and a class without one is not a defect.
+
+**This is now guarded rather than remembered:** the `shared-uri` rule
+added for C21 fails on two classes sharing a `class_uri`, with
+`shared-class-uri.yaml` carrying this exact case.
 
 ## Consequences
 
@@ -120,7 +187,7 @@ and is not edited at a design gate; this table supersedes A1's figure.
   definition of done.
 - `assertedTime` leaves the write list and binds `prov:generatedAtTime`.
 - The surface is **23 bind / 9 write of 32**, per the table above.
-- `Statement` enters Part 0. A1's class count is **15**, recorded here
+- `Statement` enters Part 0. **Part 0 is 9 classes; the unit is 15**, recorded here
   because `docs/measure/measure-01-part2-part0.md` is a closed measure
   document and is not edited at a design gate.
 - P6a is unblocked on both counts.

@@ -141,10 +141,30 @@ remains, all of it required:
   `Part 2, epistemicKind: modelled`; ADR-002's modality table is
   amended; `README.md` is the human's and the change is reported there
   rather than made.
-- **A claim for the property the module boundary used to carry.**
-  Proposed: *no instance carries an `epistemicKind` inconsistent with
-  its `procedure`.* Falsifier: one that does. This is the obligation A
-  discharged structurally and B must discharge by validation.
+- **A claim for the property the module boundary used to carry, filed
+  as an open gap rather than a discharged obligation.** Proposed: *no
+  instance carries an `epistemicKind` inconsistent with its
+  `procedure`.* Falsifier: one that does. **Nothing enforces this
+  today** — the cross-slot constraint is ADR-005's P19, and no
+  instrument in this repository inspects an instance. Until P19,
+  misassignment is caught by review or not at all, and that is the
+  price of option B rather than a temporary state.
+
+- **The boundary cases are inherited, not resolved.** ADR-003 cited
+  QC'd and gap-filled readings, data assimilation, and interpolated
+  contours published as observational products as evidence against A's
+  enforceability. **Option B does not answer them either** — it forces a
+  value where A at least made the difficulty visible as a filing
+  decision. `docs/coverage.md`'s gap-filling row moved to `GAP` on
+  2026-08-02 for this reason. **Whichever ADR gives `epistemicKind` its
+  permissible values must adjudicate them**, and that ADR does not exist
+  yet.
+
+- **Curated narrative content has no carrier.** `epistemicKind ∈
+  {observed, modelled}` and a written narrative is neither. This is not
+  a defect in ADR-003 — C10 already records the question as
+  underdetermined — but the closed vocabulary makes it a decision that
+  must be taken rather than an absence that can be tolerated.
 
 ## Consequences
 

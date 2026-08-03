@@ -33,6 +33,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import shlex
 import sys
 
@@ -83,13 +84,37 @@ def is_blocked(path: str) -> bool:
     return True
 
 
+HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?.*?^\1\s*$",
+                     re.S | re.M)
+PATHISH = re.compile(r"[\w./~-]+")
+
+
+def strip_heredocs(command: str) -> str:
+    """Remove heredoc BODIES, keeping the command that introduces them.
+
+    A heredoc body is content being written, not a path being read --
+    that is F7. Stripping it lets the rest of the command be parsed
+    normally instead of defeating the parser.
+    """
+    return HEREDOC.sub("<<HEREDOC", command)
+
+
 def blocked_reads(command: str) -> list[str]:
-    """Blocked paths appearing as arguments to a reading command."""
+    """Blocked paths appearing as arguments to a reading command.
+
+    FAILS CLOSED. The first version returned [] when shlex raised --
+    which it does on any unbalanced quote, including an ordinary
+    apostrophe in a comment -- so `cat design/ADR-000-rationale.md # it's
+    blocked` passed. A guard that gives up on hard input is a guard with
+    a one-character bypass.
+    """
+    command = strip_heredocs(command)
     try:
         tokens = shlex.split(command, comments=False, posix=True)
     except ValueError:
-        # Unbalanced quotes -- typically a heredoc. Do not guess.
-        return []
+        # Unparseable after heredoc stripping. Do NOT give up: scan every
+        # path-like token. Coarser, and errs toward blocking.
+        return [t for t in PATHISH.findall(command) if is_blocked(t)]
     hits, cmd_position = [], True
     for tok in tokens:
         if tok in SEPARATORS:

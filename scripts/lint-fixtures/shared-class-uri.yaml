@@ -1,0 +1,32 @@
+# DELIBERATELY VIOLATING — two classes binding one external URI.
+# Measured: gen-shacl emits ONE NodeShape with sh:targetClass prov:Entity
+# carrying the union of both classes' property shapes, each with
+# sh:minCount 1. Exit 0, empty stderr. Every Document must then carry
+# sourceVerificationTier and every Statement must carry title, and the
+# two classes are indistinguishable to validation.
+# See [O -> H] design gate, B4; claims.md C21.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_shared_class_uri
+prefixes:
+  linkml: https://w3id.org/linkml/
+  prov:   http://www.w3.org/ns/prov#
+default_range: string
+imports: [linkml:types]
+slots:
+  title:
+    description: A human-readable title.
+    examples: [{value: "Incident Action Plan, operational period 3"}]
+  sourceVerificationTier:
+    description: How far the source behind an assertion was verified.
+    examples: [{value: confirmed-live}]
+classes:
+  Document:
+    description: A written instrument such as a plan or an order.
+    examples: [{value: a delegation of authority letter}]
+    class_uri: prov:Entity
+    slots: [title]
+  Statement:
+    description: A reified assertion carrying its own provenance.
+    examples: [{value: "this perimeter was reported by agency X at time T"}]
+    class_uri: prov:Entity
+    slots: [sourceVerificationTier]

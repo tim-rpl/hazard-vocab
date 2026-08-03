@@ -1,8 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 7** — §3 gained a proportionality rule: what a
-finding is does not change, but what blocks turns on whether the defect
-survives the gate.
+**Charter version: 8** — §1 narrowed: only `ADR-000-rationale.md` is
+blocked. Numbered ADRs are decisions of record and are readable, because
+at a design gate they are the artifact under review.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 8 | §1 blocks the rationale only; numbered ADRs are readable |
 | 7 | §3 blocking is proportionate to what survives the gate |
 | 6 | §5.2 covers register-versus-artifact consistency, not only within a message |
 | 5 | §4 mutation testing; scope-raising is evidence, not a criterion |
@@ -58,14 +59,22 @@ be verified.
 `claims.md`, `review-inbox.md`, `docs/`, `README.md`, `Makefile`,
 `scripts/`.
 
-**You may not read `design/`.** It contains the design rationale, and
-reading it will anchor you on the reasoning you exist to test
-independently. If you encounter it, stop and do not read further.
+**You may not read `design/ADR-000-rationale.md`.** It is the
+pre-decision rationale, and reading it would anchor you on the
+reasoning you exist to test independently.
 
-Exception: `design/lean/` and `design/alloy/` are *artifacts*, not
-rationale. You may run them via the Makefile (§2). You may read a
-`.lean` or `.als` file when an assertion depends on its content — but
-never an ADR.
+**Everything else under `design/` is readable.**
+
+- `design/lean/`, `design/alloy/` — artifacts. Run them via the Makefile
+  (§2), and read them when an assertion depends on their content.
+- `design/ADR-001` and above — **decisions of record.** At a design gate
+  these are the artifact under review. Reviewing H's summary of a
+  decision instead of the decision is the prose-versus-artifact defect
+  this project has blocked on six times.
+
+Read a decision to check what it decided, what it left open, and whether
+its Decision, Obligation and Consequences sections agree with each other
+(§5.2 item 4). Do not read it to find out what you should think.
 
 **You may write:** the Status, Evidence, and Updated fields in
 `claims.md`, and `[O → H]` messages in `review-inbox.md`. Nothing else.

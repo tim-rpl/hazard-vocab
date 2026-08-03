@@ -611,6 +611,26 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
   under the opposite ADR outcome. Nothing here is evidence for the
   claim; it removes an inconsistency between the claim and the plan
   resting on it.
+
+  **The scope boundary is reopened by the design gate, 2026-08-02.
+  Status unchanged; the number this claim is about may not be 23.**
+  ADR-004 Decision C decides that `assertedTime` and
+  `prov:generatedAtTime` are one slot. `assertedTime` was item 5 of the
+  **ten** local terms, so on that decision it moves from the write list
+  to the bind list and the bound set becomes **24**.
+  `docs/plan/plan-01-part2-part0.md:855-861` (PA25) states this
+  outright — *"if they are the same slot the surface is 24 bind / 9
+  write, not 23/10"* — and declined to move the count because it was a
+  design-gate question. It has now been decided, and ADR-004's
+  reconciliation table instead removed the slot from `write` without
+  adding it to `bind`, dropping its total from 32 to 31.
+
+  Consequence for this entry: T4a is stated over "the 23", and P5's
+  definition of done covers "the 23 external identities only". If the
+  decision stands, both are 24 and the mismatch this Evidence field
+  recorded as *"closed on the plan's side"* is open again on the other
+  side. Filed as blocking finding B1 at the design gate; not resolved
+  here, because which figure is right is H's to decide.
 - **Updated:** 2026-08-02
 
 ### C1 — Parts are jurisdiction-neutral
@@ -905,6 +925,31 @@ answered today and that the canonical layer answers.
   done, because P18 has no definition of done (BV17). Status untouched
   in either direction.
 
+  **Carrier decided, 2026-08-02 (design gate). Status unchanged, and it
+  is the first time that is a statement about a schedule rather than
+  about an unknown.** ADR-005 decides P18 as **option B**: cross-slot
+  constraints are declared in LinkML `annotations:` and emitted as SHACL
+  by a project generator running after `gen-shacl`. Option A was
+  rejected on invariant 1, option C on the ground that it discards this
+  claim's only affirmative evidence. So the shape that would satisfy C5
+  is now decided and owned.
+
+  **It is still not built, and the ADR records that rather than
+  smoothing it.** The generator falls outside plan 01's scope statement
+  and is filed as item **P19** with that reason stated. Until it exists,
+  `exp-01`'s demonstrated answer stays unreachable through the pipeline,
+  which is the condition recorded above and the reason the status does
+  not move. Verified this gate that the gap is real rather than
+  inherited: a class-level `rules:` block still emits zero cross-slot
+  constructs at exit 0, run in ADR-003's shape (see C17, fourth
+  measurement of axis 3).
+
+  ADR-005 also states three testable properties for the resulting
+  two-producer `build/shapes.ttl` — additive, order-independent,
+  byte-deterministic — with `make gen` twice plus `diff` as the test.
+  Those are obligations of P19, not evidence for C5.
+- **Updated:** 2026-08-02
+
 ### C6 — The vocabulary is LLM-legible
 A model given only `vocab/` and a raw source payload, with no other
 context, produces a conformant canonical instance.
@@ -1088,6 +1133,33 @@ statement an emergency management system makes.
 
   Counterfactual analysis, the third candidate listed, is the one that
   looks hardest under the restatement and is worth attempting first.
+
+  **A fourth candidate, named 2026-08-02 (design gate), and it is the
+  first one grounded in material rather than in argument. Status
+  unchanged, deliberately.** `FALSIFIER.md` §5.1 question 11 asks
+  whether a narrative statement curated by a person is distinguishable
+  from an observation. `docs/sources/HDC-data-source-register.html`
+  **category 10 — "Curated content — written, not fetched"** is exactly
+  that: `places.js` carries 27 burn-scar narratives, 10 year narratives,
+  15 great burns and named landscapes, under the rule *"Honest data,
+  never fabricated … researched and written, never invented to fill a
+  gap."*
+
+  A curated narrative fits none of observed, modelled, intended or
+  mandated. It is not a prediction, not an order, not a plan, and not a
+  sensing result — it is a person's researched interpretation, and its
+  governing rule is a *sourcing* discipline rather than a modality.
+
+  **Status is not moved, and the reason is the defect this entry already
+  records.** Whether a curated narrative is an "operational statement an
+  emergency management system makes" is precisely the adjudication C10
+  supplies no procedure for. Ruling it in would falsify C10 by a
+  judgement the claim leaves to whoever is defending it, which is
+  requirement 2 failing in the falsifier's favour instead of against it.
+  Filed as a named candidate so the next attempt starts from material.
+  Under the restatement proposed above, the test is whether the
+  narrative decomposes into modality-carrying statements; my reading is
+  that it does not, and that is an argument, not an experiment.
 - **Updated:** 2026-08-02
 
 ### C11 — Absent is distinguishable from zero
@@ -1448,6 +1520,36 @@ does not declare.
   `DatatypeConstraintComponent` — *"Value is not Literal with datatype
   xsd:float"*, pointing at the datatype rather than at the `@context`
   that caused it. P8a authors that context by hand.
+
+  **Fourth measurement of axis 3, 2026-08-02 (design gate). Status
+  unchanged; what is new is that the constraint is now a *decided*
+  design rather than a probe.** ADR-003 chose option B and made a
+  required `epistemicKind` slot the replacement for the Part 2 / Part 3
+  module boundary, with an obligation reading *"no instance carries an
+  `epistemicKind` inconsistent with its `procedure`."* That is a
+  cross-slot constraint. Run in exactly that shape — one `Observation`
+  class, required `epistemicKind` with a closed enum, `procedure` bound
+  to `sosa:usedProcedure`, and a class-level `rules:` block requiring a
+  simulation procedure to carry `modelled`:
+
+  | Construct | Emitted |
+  |---|---|
+  | required slot + closed enum | `sh:minCount 1`, `sh:in ( "observed" "modelled" )` |
+  | `rules:` tying `procedure` → `epistemicKind` | `sh:equals` 0, `sh:sparql` 0, `sh:lessThan` 0, `sh:disjoint` 0, `sh:condition` 0 |
+
+  Exit 0, empty stderr, no warning (linkml 1.11.1 from `.venv`). Then
+  both instances through pyshacl 0.40.1 against those generated shapes:
+  an instance carrying `epistemicKind "observed"` with
+  `usedProcedure "simulation"` **conforms**; only the omission case
+  raises `MinCountConstraintComponent`.
+
+  **So the generated shape catches omission and not misassignment**, and
+  misassignment is the property the module boundary carried — ADR-003's
+  own words, *"under A, a Part 3 fact in a Part 2 file is visible on
+  inspection."* ADR-005, accepted in the same gate, defers the generator
+  that would emit the cross-slot form to P19, outside plan 01. Recorded
+  because axis 3 has until now been measured on throwaway schemas; this
+  is the first time a decision of record depends on it.
 - **Updated:** 2026-08-02
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
@@ -1926,3 +2028,101 @@ Every class and slot in `vocab/` carries a `description` and an
   rather than left silent. **`CLAUDE.md` is human-owned — invariant 7 is
   reported, not edited.**
 - **Updated:** 2026-08-02
+
+---
+
+## External class bindings
+
+*(added by O at the design gate, 2026-08-02)*
+
+### C21 — Distinct core classes bind distinct external class URIs
+No two classes in `vocab/core/` carry the same `class_uri`. Where two
+core classes are both kinds of one external class, the relationship is
+expressed by something other than assigning both that class's URI.
+
+- **Status:** `asserted`
+- **Falsifier:** two classes in `vocab/core/` carrying the same
+  `class_uri`; or a generated `build/shapes.ttl` containing one
+  `sh:NodeShape` whose `sh:targetClass` is an external URI and whose
+  property shapes come from more than one declared class.
+- **Cheapest test:** `gen-shacl`, then count `sh:NodeShape` against
+  count of `classes:`. Seconds, once `vocab/core/` has content.
+- **Evidence:** 2026-08-02 — **the claim is untested against the
+  material, because `vocab/core/` holds one `.gitkeep`. What is measured
+  is the consequence of violating it, and it is why this entry exists.**
+
+  Two classes declared with `class_uri: prov:Entity`, everything else
+  distinct, through `gen-shacl` (linkml 1.11.1, `.venv`):
+
+  ```
+  prov:Entity a sh:NodeShape ;
+      sh:property [ sh:minCount 1 ; sh:path ex:sourceVerificationTier ],
+                  [ sh:minCount 1 ; sh:path ex:title ] ;
+      sh:targetClass prov:Entity .
+  ```
+
+  **One shape, carrying the union of both classes' property shapes, each
+  still `sh:minCount 1`.** Exit 0, empty stderr, no warning. The two
+  classes are indistinguishable to validation, and each class's required
+  slots become required of the other's instances. The same file with
+  `exact_mappings: [prov:Entity]` instead emits two shapes with local
+  `sh:targetClass` — but that is the construct ADR-002's own addendum
+  identifies as *"assert[ing] class equivalence, which is the false
+  claim"*.
+
+  **Nothing in the guard set inspects this.**
+  `scripts/drift-lint.py:238` documents `exact-mappings` as *"at most
+  one `exact_mappings` per class"* — per-class by construction, so one
+  URI shared by two classes is outside its subject rather than a recall
+  failure of it. Run against both probes: `ok [exact-mappings]
+  2 file(s)`.
+
+  **Live at the design gate, which is why this is promoted rather than
+  left as a gate finding.** ADR-002 Decision A binds `Document` to
+  `prov:Entity`; ADR-004 Decision B binds `Statement` to `prov:Entity`.
+  Neither states which LinkML construct *"binds to"* denotes, and
+  `measure-01` A2 records that *"LinkML takes one `class_uri`"*. P6a
+  authors Part 0 next and must choose; one choice fails silently.
+
+  **A guard for this landed mid-review, 2026-08-02, and is verified.**
+  `scripts/drift-lint.py` gained an eighth rule, `shared-uri`, with
+  `scripts/lint-fixtures/shared-class-uri.yaml`; `make lint-selftest`
+  reports **32 rule/fixture pairs, 8/8 rules with demonstrated recall**
+  (the 29 / 7-of-7 figure recorded elsewhere is superseded, not wrong
+  when written). Verified by running each direction separately rather
+  than through the selftest: it FAILs on two classes sharing
+  `class_uri: prov:Entity`, reports `ok` when one is moved to
+  `prov:Bundle`, and its slot branch FAILs on two slots sharing
+  `slot_uri: sosa:observedProperty`. `scripts/` is human-owned;
+  discovered rather than declared, and reported, not edited.
+
+  **The slot branch has no fixture.** Every file in
+  `scripts/lint-fixtures/` was parsed and its `class_uri` and `slot_uri`
+  values counted: exactly one duplicate exists in the suite, and it is a
+  `class_uri` duplicate. No fixture carries a duplicate `slot_uri`, so
+  no pair exercises that branch and its deletion would change no
+  reported result while `lint-selftest` continued to print 8/8. Same
+  family as C18 rounds 5–8 — coverage claimed at rule granularity that
+  does not hold at branch granularity.
+
+  **Status stays `asserted`.** The guard means a violation would now be
+  caught rather than silent; it is not evidence that the claim holds,
+  because `vocab/core/` still has no classes to check and the design as
+  accepted currently plans to violate it.
+- **Updated:** 2026-08-02
+- **Promotion note:** promoted by O under FALSIFIER §6 at the design
+  gate, 2026-08-02. It generalises beyond the gate — it is about the
+  vocabulary and its generator rather than about these four decisions,
+  and it binds on every future external class binding, not only on
+  `prov:Entity`. No existing entry covers it: C7 is about class *names*
+  that denote roles, C18's falsifier names C1, C4 and the vacuity rule,
+  and the `exact-mappings` rule is scoped per-class. Enters as
+  `asserted` per the register rule, since no counterexample exists in
+  `vocab/core/` yet — unlike C17, T3, T4 and C20, this is not a
+  deviation.
+- **Note:** the claim as stated forbids the collision and does not
+  prescribe the alternative. Whether two core classes that are both
+  `prov:Entity` should relate to it by `is_a`, by a mixin, by
+  `exact_mappings`, or by one of them not binding it at all is a design
+  question and is H's. This entry only asserts that assigning both the
+  same `class_uri` is not it.

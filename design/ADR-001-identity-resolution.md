@@ -255,10 +255,16 @@ it no longer gates anything here.**
 
 ## Consequences
 
-- **Part 0 gains four classes rather than one**, and the alias structure
-  stops being a flat tuple. ADR-000 D3 is superseded on this point and
-  is left unedited, per the rule that ADRs record what was believed when
-  accepted.
+- **Part 0's class count does not change, and the alias structure stops
+  being a flat tuple.** An earlier draft of this section read *"Part 0
+  gains four classes rather than one"* — that is the **literal
+  transcription** figure, and it contradicts the *translate, don't
+  transcribe* rule stated two sections above it in this same file.
+  A31 measures the translation as **the same class count plus two
+  slots**: `NameType` becomes a SKOS code list and `NamingAuthority`
+  becomes `Agent`, so neither is a new class. Corrected 2026-08-02;
+  ADR-004 carries the authoritative counts. ADR-000 D3 is superseded on
+  this point and left unedited.
 - **Identity is never established heuristically.** A record with no
   authority identifier stands alone. Downstream, that is visible as a
   refusal rather than as a guess — the behaviour the reference
