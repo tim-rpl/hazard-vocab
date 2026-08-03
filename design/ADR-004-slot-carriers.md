@@ -132,13 +132,54 @@ coincidence it admitted to being.
 
 This is the figure P5 needs, and it is a work list rather than a total:
 
-| Population | Count | After the four decisions |
-|---|---|---|
-| Slots carrying an external `slot_uri` | 16 | **17** — `assertedTime` joins it (Decision C) |
-| Classes carrying an external `class_uri` | 13 | 13 |
-| Permissible-value URIs, content-verified (QUDT units) | 6 | 6 |
-| Permissible-value URIs, **status-code only** (NVS2 P07) | 6 | 6 — **verify before binding** |
-| Slots with no external term, to define locally | 10 | **9** — minus `crs` (Decision A), minus `assertedTime` (Decision C), plus `epistemicKind` (ADR-003 B) |
+**A slot partition, stated as slots.** Two disjoint sets over the slots
+A1 enumerated. Classes and permissible values are **separate
+populations and are never summed with slots** — that summing is the
+defect this whole section is about.
+
+| Slot population | Count |
+|---|---|
+| Slots carrying an external `slot_uri` | **16** |
+| Slots with no external term, defined locally | **9** |
+| **Distinct total of A1's enumerated slots** | **25** |
+
+**`assertedTime` does not move the first row, and an earlier draft said
+it did.** That draft read **17**, adding `assertedTime` to a set that
+**already contained `prov:generatedAtTime`** — the URI it binds. One
+slot counted under two names. Decision C settles that they are one slot;
+it does not create a second.
+
+`17 + 9 = 26` was therefore the same defect this section diagnoses four
+lines above it, in this ADR's own words: *"33 inherits the same defect,
+because it was 23 + 10 — a mixed-kind URI count added to a local-slot
+count."* Corrected 2026-08-02. **The distinct total is 25.**
+
+Separate populations, listed and not added:
+
+| Population | Count |
+|---|---|
+| Classes carrying an external `class_uri` | 13 |
+| Permissible-value URIs, content-verified (QUDT units) | 6 |
+| Permissible-value URIs, **status-code only** (NVS2 P07) | 6 — verify before binding |
+
+### 25 is not the unit's slot total, and no number here is
+
+**A1 never enumerated the schema's slots.** It enumerated *external
+URIs* and *local terms* — two populations that do not sum to a schema,
+which is why every total derived from it has been wrong. `25` is the
+count of **the slots A1 enumerated**, and it is the last figure this ADR
+will assert.
+
+**The unit's slot total is unknown, and P5's first output is the
+authoritative count.** That quantity has taken four values across four
+gates — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, and now `25` — and
+each was arithmetic over a population nobody had fixed. **The
+replacement baseline is the enumerated list, not a number**; the number
+comes from the artifact.
+
+**What P5 works from:** the 16 bound slots and the 9 local ones by name,
+the 13 class bindings, the 6 verified value URIs, and the 6 that need
+verifying first. Not a total.
 
 **Slots: 17 bound + 9 local = 26 enumerated.** That is not the unit's
 slot total and is not claimed to be one — A1 enumerated external URIs

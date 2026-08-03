@@ -190,9 +190,18 @@ as relations, with `AliasKind` carrying the label/identifier
 distinction, plus `ObjectType` and `assertedTime` from PROV-O. Bind
 versus copy pending the dereference test.
 
-Open within question 1: whether precedence attaches to `AliasKind` or
-`NameType`, and whether `NameType` is a class or a SKOS concept scheme
-(see ADR-000 D5).
+**Both halves of this are settled above, and this line filed them as
+open inside the Decision section itself.** Corrected 2026-08-02.
+
+- **Precedence attaches to `NameType`**, as a `skos:OrderedCollection`
+  in the code list — decided above, and T2 does not protect the
+  ordering.
+- **`NameType` is a SKOS concept scheme, not a class** — A38, adopted
+  in this ADR's structure section. Its content is identity plus label
+  plus definition, its values are governed at profile level, and the
+  sample instance is `EIC`, a scheme identifier.
+
+Nothing within question 1 remains open.
 
 **Question 2 — decided: B.** Heuristic matches are recorded as
 `candidateMatch` facts, never as identity facts. Identity is established

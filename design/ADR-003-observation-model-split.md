@@ -200,11 +200,28 @@ remains, all of it required:
 - **A claim for the property the module boundary used to carry, filed
   as an open gap rather than a discharged obligation.** Proposed: *no
   instance carries an `epistemicKind` inconsistent with its
-  `procedure`.* Falsifier: one that does. **Nothing enforces this
-  today** — the cross-slot constraint is ADR-005's P19, and no
-  instrument in this repository inspects an instance. Until P19,
-  misassignment is caught by review or not at all, and that is the
-  price of option B rather than a temporary state.
+  `procedure`.* Falsifier: one that does.
+
+  **Nothing enforces this today, and nothing is scheduled to.**
+  Corrected 2026-08-02, twice over — this paragraph survived both
+  commits that exist to retract it, because each searched for the text
+  it had written rather than the text it was retracting.
+
+  - It read *"no instrument in this repository inspects an instance."*
+    **`make check` does, and always could.** `make lint` reads schema
+    files and was never a candidate. The instrument is not what is
+    missing.
+  - It read *"Until P19."* **ADR-005 no longer supports that**, and a
+    measurement makes it sharply false: every affirmative result behind
+    ADR-005 is `sh:equals`, misassignment is a **conditional**, and
+    `rules:` and `annotations:` carrying one both emit `sh:condition`,
+    `sh:sparql` and `sh:equals` **zero times**, exit 0, empty stderr.
+
+  **Misassignment is unenforced indefinitely.** P19 is a candidate
+  remedy whose third obligation — a conditional emitted and firing — is
+  unmet and may be unmeetable. Until it is met, misassignment is caught
+  by review or not at all, and that is **the price of option B rather
+  than a temporary state.**
 
 - **The boundary cases are inherited, not resolved.** ADR-003 cited
   QC'd and gap-filled readings, data assimilation, and interpolated

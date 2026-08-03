@@ -112,6 +112,31 @@ H asks in the gate rather than assuming.
 make the change and must verify rather than trust it; O verifies
 deliberately rather than discovering it several gates later.
 
+**A declared change is verified by a second instrument, never by the
+one that made it.** An editing script reporting success is not evidence
+the edit landed — a bare `str.replace` against a string that has moved
+matches nothing, returns silently, and lets the script print that it
+succeeded. That has now shipped twice from two independent workers,
+including once in a repair for the same defect.
+
+So: the editing step must **fail loudly on a missed target**, and the
+result must then be confirmed by something else — `grep` the file,
+`git diff` the commit, mutate and re-run. Confirming that a file is
+*present* is what a declaration already asserts. Confirming what is
+*in* it is the check.
+
+**For a retraction, search for the retracted string, not the
+replacement.** Grepping for the text you just wrote proves the new text
+is present. It cannot see the old claim still standing three sections
+down, and a statement withdrawn in one place and surviving in another is
+worse than one never withdrawn — the document now disagrees with itself
+and the reader has no way to tell which is current.
+
+This has produced three residues across three accepted ADRs in one
+round, each in a section a reader takes as authoritative. The check that
+finds them costs one `grep -n` per retracted phrase, against every file
+that could carry it — not only the file you edited.
+
 `make lint-selftest` enumerates every rule/fixture pair by name and
 fails on any fixture no case references, so the tooling's own coverage
 is inspectable rather than asserted. See

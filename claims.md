@@ -654,6 +654,34 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
   Decision C says the identification *"does not add to the bind
   count"*, and the reconciliation table adds it, citing Decision C.
   Filed as B1 at the block-verification gate.
+
+  **2026-08-02, block verification 2 — the self-contradiction is gone
+  and the arithmetic underneath it is still wrong.** Verified by diff on
+  `520ddde`: Decision C now reads *"it adds a bound slot and no new
+  external URI"* and distinguishes the two populations explicitly, which
+  agrees with the reconciliation table's 16 → 17. The contradiction I
+  filed is genuinely closed.
+
+  But the two rows the table adds are drawn from different populations.
+  Row 1's baseline **16** is the `slot_uri` count from the partition,
+  which ADR-004 itself labels *"41 external URIs of three kinds"* — a
+  count of **URIs**, and `generatedAtTime` is in its enumerated list.
+  Row 5's baseline **10** is the local-slot count from
+  `measure-01:100-110`, a count of **slots**, and `assertedTime` is item
+  5 of it. **ADR-004 Decision C decides those are one slot.** So the two
+  rows overlap by one member and `17 + 9 = 26` counts it twice; the
+  distinct total is 25.
+
+  This is the defect ADR-004 diagnoses four lines earlier in its own
+  words — *"`33` inherits the same defect, because it was `23 + 10` — a
+  mixed-kind URI count added to a local-slot count"* — reproduced in the
+  figure written to replace it. It is the third value this quantity has
+  taken (`23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`).
+
+  T4a's status stays `scoped-down` for the reason recorded above: its
+  subject population is retired either way, and which of 16 or 17 is
+  right — like whether the replacement baseline should be a slot
+  partition at all — is H's to decide, not mine to narrow.
 - **Updated:** 2026-08-02
 
 ### C1 — Parts are jurisdiction-neutral
@@ -993,6 +1021,29 @@ answered today and that the canonical layer answers.
   carrier whose demonstrated capability does not cover it. Filed as B6
   at the block-verification gate. This does not falsify C5 and is not
   evidence for it; it enlarges what P19 must do before C5 can move.
+
+  **2026-08-02, block verification 2 — I tried to break the disposition
+  and could not. B6's answer is now measured rather than inferred.**
+  ADR-005 was amended to record that misassignment is unenforced
+  **indefinitely**, with P19 a *candidate* remedy rather than a
+  scheduled one, and to require a third test — a conditional between two
+  slots, declared in `annotations:`, emitted and firing under
+  `make check`. H nominated that "indefinitely" as the most attackable
+  thing in its message, on the ground that if a conditional **is**
+  emittable then P19 is a real remedy and the word is too strong.
+
+  I ran it. Both routes — a class-level `rules:` block with a genuine
+  `preconditions` / `postconditions` pair, and the `annotations:` carrier
+  ADR-005 names — produce **exit 0, empty stderr, and zero
+  `sh:condition`, zero `sh:sparql`, zero `sh:equals`** in the generated
+  Turtle. See C17's fourth axis for the measurement. **The falsifier H
+  named does not fire**, so "indefinitely" survives as stated and the
+  third test is a real obligation rather than a formality.
+
+  This is evidence *about P19's difficulty*, not evidence for C5. Status
+  unchanged. It does mean the enlargement recorded above is not a
+  scheduling problem that P19 dissolves — nothing in the source language
+  currently expresses the constraint at all.
 - **Updated:** 2026-08-02
 
 ### C6 — The vocabulary is LLM-legible
@@ -1295,6 +1346,21 @@ consumer can render exercise or test data as actual.
   The `GAP` statuses are right; the four `—` Home columns contradict a
   decision accepted in the commit that last edited the file. Filed as B5
   at the block-verification gate.
+
+  **B5 cleared 2026-08-02, verified by diff on `520ddde`.** All four
+  rows now carry `Part 0 Statement (ADR-004 B)` in the `Home` column and
+  read **`GAP` — carrier decided, slot not authored**, including `:303`,
+  which is this claim's own row. `docs/coverage.md` also gained a note
+  stating that a carrier is not a slot and that *"reading a Home column
+  as evidence of a slot is how `covered` got applied to the gap-filling
+  row."* Checked that the four slots the note names —
+  `sourceVerificationTier`, `operatingMode`, `modelVersion`,
+  `profileConformance` — are exactly the four ADR-004 Decision B names.
+  They are.
+
+  **Status stays `falsified`.** `vocab/core/` holds one `.gitkeep`; no
+  `operatingMode` field exists, so the Evidence above is still literally
+  true. The bookkeeping defect is closed; the gap is not.
 - **Updated:** 2026-08-02
 - **Consequence:** ranked gap #1. Safety-critical and free to fix.
 
@@ -1614,6 +1680,33 @@ does not declare.
   that would emit the cross-slot form to P19, outside plan 01. Recorded
   because axis 3 has until now been measured on throwaway schemas; this
   is the first time a decision of record depends on it.
+
+  **Fourth axis, 2026-08-02, block verification 2 — the conditional
+  specifically, on both routes ADR-005 names.** Axis 3 measured
+  `equals_expression` and a `rules:` block carrying a postcondition.
+  This measures the exact constraint ADR-003 now depends on — *if
+  `procedure` is simulation-typed then `epistemicKind` must be
+  `modelled`* — declared as a class-level `rules:` block with a real
+  `preconditions` / `postconditions` pair, and separately in
+  `annotations:`, which is the carrier ADR-005's Obligation names:
+
+  | Source construct | `gen-shacl` | stderr | `sh:condition` | `sh:sparql` | `sh:equals` |
+  |---|---|---|---|---|---|
+  | `rules:` with `preconditions` + `postconditions` | **exit 0** | empty | **0** | **0** | **0** |
+  | `annotations:` carrying the conditional as text | **exit 0** | empty | **0** | **0** | **0** |
+
+  In both cases the generated `NodeShape` carries only the two property
+  shapes with `sh:datatype`, `sh:maxCount` and `sh:path`. **The rule
+  vanishes with no warning**, and the annotation text does not survive
+  into the shapes file at all. linkml 1.11.1, `gen-shacl`, verified by
+  reading the emitted Turtle rather than by exit code.
+
+  **Method note against myself.** My first pass counted `sh:or` and
+  `sh:node` with a substring grep and got 2 each — both artifacts:
+  `sh:or` matched `sh:order` and `sh:node` matched `sh:nodeKind`. Re-run
+  with word boundaries, every count is 0. That is the
+  instrument-reports-something-it-did-not-inspect shape in my own
+  measurement, caught before it reached this register.
 - **Updated:** 2026-08-02
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
@@ -2211,6 +2304,41 @@ expressed by something other than assigning both that class's URI.
   the construct ADR-002's own addendum calls *"the false claim."* The
   sentence above — *"the design as accepted currently plans to violate
   it"* — is unchanged by this gate.
+
+  **2026-08-02, block verification 2 — both halves of the entry above
+  are now superseded, and one of them was mine and wrong.**
+
+  *The slot branch is covered.* `scripts/lint-fixtures/shared-slot-uri.yaml`
+  exists and declares two slots — `assertedTime` and `recordedTime` —
+  both carrying `slot_uri: prov:generatedAtTime`. Re-ran the mutation on
+  a fresh copy of `scripts/`, which reproduces `33 rule/fixture pairs,
+  8/8` before mutation:
+
+  | Mutation | `lint-selftest` on the copy |
+  |---|---|
+  | delete `dupes("classes", …, "class_uri")` | **FAILED** — `FAIL [shared-uri] shared-class-uri.yaml` |
+  | delete `dupes("slots", …, "slot_uri")` | **FAILED** — `FAIL [shared-uri] shared-slot-uri.yaml` |
+
+  The table recorded above — slot branch deletable with no effect — is
+  **no longer true of the shipped linter**, and the row reading
+  `ok — 32 pairs, 8/8` is superseded rather than corrected, because it
+  was an accurate measurement of a tool that has since changed. Both
+  branches now fail a **named** test when deleted, which is what
+  `lint-fixtures/README.md`'s convention asks for.
+
+  *The design no longer plans to violate the claim.* ADR-004 Decision D
+  decides `Document` carries `class_uri: foaf:Document` and nothing
+  else, and **ADR-002's table row was amended in the same commit**
+  (`520ddde`) — verified by diff, not by report: the row now reads
+  `foaf:Document` where it read `prov:Entity, foaf:Document`. The
+  `Document` / `Statement` collision this entry recorded is resolved in
+  the design, with `prov:Entity` on `Statement` alone.
+
+  Status stays `asserted`: `vocab/core/` still holds one `.gitkeep`, so
+  there is still no vocabulary to check and nothing has been verified
+  against a generated `build/shapes.ttl`. What changed is that the guard
+  is now demonstrated on both branches and the design it guards no
+  longer contains a known counterexample.
 - **Updated:** 2026-08-02
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the
