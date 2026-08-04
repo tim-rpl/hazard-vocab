@@ -56,7 +56,7 @@ items:
   P5:
     item: "`vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached"
     produces: "the binding surface \u2014 **external identity only** (PA25)"
-    blocks_start: "\u2014"
+    blocks_start: "P20"
     blocks_trust: "\u2014"
     done_when: "`prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** \u2014 clause 3 removed, see PA25"
     size: "**L**"
@@ -223,6 +223,16 @@ items:
     excused_because: "decided at the design gate 2026-08-02 (ADR-005)"
     latency: "long"
     latency_because: "a design-gate decision"
+  P20:
+    item: "Restate P5 and the four prose passages over ADR-004's generated worklist"
+    produces: "a plan of record whose live sites name the enumerated list, not a retired count"
+    blocks_start: "—"
+    blocks_trust: "—"
+    done_when: "P5's item and `done_when`, and PA5, PA19, T4 and T4a, name **ADR-004's generated worklist** and state no count; `derive-waves.py --check` and `derive-surface.py --check` both pass; and a retired-figure guard fails on `23 external terms`, `23 binding`, `23 bindings` and `ten|10 local terms` reintroduced anywhere in `docs/plan/`, **verified by putting one back** — not by observing that the guard exists. Historical sites stay: the closed measure document, quoted originals, amendment records"
+    size: "S"
+    notes: "**Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. Eight live sites censused 2026-08-03: `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), and PA5, T4a, PA19, T4. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident"
+    in_unit: "required"
+    latency: "short"
   P19:
     item: "Cross-slot constraint generator"
     produces: "SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl`"

@@ -226,7 +226,7 @@ dependency was the largest defect in the first draft of this section:
 | **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | excused — decided at the design gate 2026-08-02 (ADR-001) | Blocks **P6b only**, not P6a — see PA11 |
 | **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | excused — decided at the design gate 2026-08-02 (ADR-003) | Blocks P7 |
 | **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | excused — serves the first profile, a later unit | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
-| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | — | — | **required** | Blocks P6a, P7, P10 |
+| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | P20 | — | **required** | Blocks P6a, P7, P10 |
 | **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | **required** | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
 | **P6b** | `candidateMatch` relation — Part 0 | a Part 0 relation binding two `Entity` instances, with provenance | P2 | P10 | **required** | **Non-empty.** ADR-001 chose option B, under which heuristic matches are recorded as `candidateMatch` facts. The deriving rule is `transform/`; the relation is Part 0 (ADR-000 D4) |
 | **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | **required** | Slot count depends on P9's boundary — see PA12 |
@@ -243,6 +243,7 @@ dependency was the largest defect in the first draft of this section:
 | **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | excused — decided at the design gate 2026-08-02 (ADR-004) | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
 | **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
+| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. Eight live sites censused 2026-08-03: `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), and PA5, T4a, PA19, T4. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
 
 <!-- END GENERATED:items -->
 
@@ -265,12 +266,13 @@ fourth. `derive-waves.py --check` fails if this block is stale.
 
 | Wave | Items |
 |---|---|
-| **1** | **P1**, **P3**, **P4**, **P5**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18**, **P19** |
-| **2** | **P2**, **P6a**, **P10**, **P14** |
-| **3** | **P6b**, **P7** |
-| **4** | **P8a** |
-| **5** | **P9** |
-| **6** | **P8b** |
+| **1** | **P1**, **P3**, **P4**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18**, **P19**, **P20** |
+| **2** | **P2**, **P5**, **P14** |
+| **3** | **P6a**, **P6b**, **P10** |
+| **4** | **P7** |
+| **5** | **P8a** |
+| **6** | **P9** |
+| **7** | **P8b** |
 | **—** | **P12** — not startable here: source access this repo lacks |
 
 <!-- END GENERATED:waves -->
@@ -352,9 +354,20 @@ check is cheap: it is the first clause of P6a's done-criterion below.
 **Falsifier for PA19:** a clause of P5's done-criterion that cannot be
 satisfied without choosing a cardinality or a range.
 
-**PA5 — P5 is the long pole and is startable today.** It has no
-predecessor, it is the widest item, and everything in wave 3 waits on
-it. The 23 bindings are content-verified (A3 as amended, S4) and the 10
+**PA5 — P5 is the long pole. It is no longer startable today.** This
+read *"startable today … it has no predecessor"* until 2026-08-03, when
+**P20** was added and P5 gained a `blocks-start` edge on it: P5's own
+definition of done is stated over a population ADR-004 retired, so the
+restatement precedes the work. P5 is now wave 2. It is still the widest
+item and everything in wave 3 still waits on it.
+
+Amended for the dependency only. **The rest of this paragraph is P20's
+subject and is deliberately untouched** — the sentence below still reads
+over `23` and `10`, and correcting it here while seven other live sites
+stand is the partial retraction this project has been bitten by three
+times. It goes in one pass or not at all.
+
+The 23 bindings are content-verified (A3 as amended, S4) and the 10
 local terms are enumerated (A1 as restated).
 
 **Justification corrected — this rested on T4, which is falsified.** It
@@ -563,6 +576,7 @@ condition.
 | **P17** | **MET 2026-08-02.** ADR-004: no `crs` slot (`asWKT` range constrained to `geo:wktLiteral`); `Statement` is a Part 0 class binding `prov:Entity`; A1's class count moves **14 to 15** | S |
 | **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
+| **P20** | P5's item and `done_when`, and PA5, PA19, T4 and T4a, name **ADR-004's generated worklist** and state no count; `derive-waves.py --check` and `derive-surface.py --check` both pass; and a retired-figure guard fails on `23 external terms`, `23 binding`, `23 bindings` and `ten|10 local terms` reintroduced anywhere in `docs/plan/`, **verified by putting one back** — not by observing that the guard exists. Historical sites stay: the closed measure document, quoted originals, amendment records | S |
 
 <!-- END GENERATED:done -->
 
@@ -583,8 +597,11 @@ on someone else**: P1 cannot close without an O session changing L2's
 status, and P3 is a design-gate decision. P4 is H's but produces a
 claims change that O must record.
 
-Ranking wave 1 by size puts P5 first and leaves P1's O-turnaround
-un-started, so the wall clock pays for it serially at the end. Ranking
+Ranking wave 1 by size put P5 first and left P1's O-turnaround
+un-started, so the wall clock paid for it serially at the end.
+**P5 left wave 1 on 2026-08-03** when P20 became its predecessor, which
+strengthens this argument rather than weakening it: the size-first
+ranking would now start an item that cannot start. Ranking
 by latency starts the externally-blocked items first and does P5's work
 *while* they are pending:
 
@@ -597,12 +614,12 @@ by latency starts the externally-blocked items first and does P5's work
 | 3 | **P17** | **long** — a design-gate decision; start it so the wait runs alongside |
 | 4 | **P18** | **long** — a design-gate decision; start it so the wait runs alongside |
 | 5 | **P4** | short — fills the wait |
-| 6 | **P5** | short — fills the wait |
-| 7 | **P11** | short — fills the wait |
-| 8 | **P13** | short — fills the wait |
-| 9 | **P15** | short — fills the wait |
-| 10 | **P16** | short — fills the wait |
-| 11 | **P19** | short — fills the wait |
+| 6 | **P11** | short — fills the wait |
+| 7 | **P13** | short — fills the wait |
+| 8 | **P15** | short — fills the wait |
+| 9 | **P16** | short — fills the wait |
+| 10 | **P19** | short — fills the wait |
+| 11 | **P20** | short — fills the wait |
 
 <!-- END GENERATED:latency -->
 
@@ -656,7 +673,7 @@ something rather than stopping for it.
 
 <!-- BEGIN GENERATED:membership - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
-**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**.
+**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P20**.
 
 **Excused, each with its reason:**
 
@@ -672,7 +689,7 @@ something rather than stopping for it.
 - **P18** — decided at the design gate 2026-08-02 (ADR-005)
 - **P19** — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists
 
-*10 required, 11 excused, 21 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
+*11 required, 11 excused, 22 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
 
 <!-- END GENERATED:membership -->
 
