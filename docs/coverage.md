@@ -33,8 +33,13 @@ curated content that no feed supplies, and readings that are
 structurally invalid at a location rather than merely uncertain. None
 of these is a capability anyone sets out to build; each is something a
 feed did. That is a different blindness from the response-orientation
-that hid the lifecycle phases, and it is the reason the five rows below
-marked *(register)* exist. Under the C16 reformulation this is frame
+that hid the lifecycle phases, and it is the reason the rows below
+marked *(register)* exist. **The count is not stated here.** It read
+*"the five rows below"* while four rows carried the marker and the
+fifth capability in this very sentence — the property-substitution
+defect — **had no row at all**, from the day F5 was written until
+2026-08-03. A frame that names a capability and a matrix that omits it
+is the exact defect the paragraph above calls the real one. Under the C16 reformulation this is frame
 F5, and it is the first frame in the list that is falsifiable by
 inspection rather than by reading a standard.
 
@@ -57,6 +62,7 @@ defect.
 | **Source verification status** *(register)* | Source quality flag on a point | Part 0 `Statement` (ADR-004 B) | **`GAP`** — carrier decided, slot not authored |
 | **Provider-level fallback chains** *(register)* | Primary / backup RTU path | — | **`GAP`** |
 | **Observation validity conditioned on geometry** *(register)* | Point invalid for its location | — | **`GAP`** |
+| **Comparison well-typedness — the property a threshold is evaluated against** *(register)* | A trip setting compared against the wrong analogue point | Part 2 (`observedProperty`) | **`GAP`** — named in F5 since this frame was written and had no row until 2026-08-03. The register's own defect: a statutory trigger evaluated against a composite index where the rule names a component. `sh:equals` expresses it and **linkml 1.11.1 generates nothing** — exp-01, and ADR-005's unmet third obligation |
 | Coverage / field-valued results | Contour and profile data | Part 0 (ISO 19123, CIS) | `partial` — primitive named, not modelled |
 | Historical archive | Historian | Temporal axis + CAS versioning | `covered` |
 

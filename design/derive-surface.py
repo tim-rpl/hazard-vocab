@@ -166,6 +166,38 @@ def main():
         for m in re.finditer(pat, outside):
             restated.append("a LIVE generated count is restated by hand "
                             "outside the blocks: %r" % m.group(0))
+
+    # BV5-1, second instance. The patterns above match DIGITS, so a
+    # cardinality written as a WORD was outside this guard's subject by
+    # construction — the same defect shape as `rule_shared_uri` building
+    # two maps that never met. Two survived the commit that claimed to
+    # have deleted the last hand-typed copy: "the four counts above"
+    # against a five-bullet block, and "the four populations in the
+    # partition above" against a three-row one. Both were wrong, and
+    # neither was reachable by a digit pattern.
+    #
+    # This targets one narrow shape: a cardinality qualifying a deictic
+    # reference to a generated block. Unlike a figure, there is no reason
+    # to record how many rows a table used to have, so the ban is total
+    # rather than live-only.
+    #
+    # Quoted text is exempt, because that is how this project writes a
+    # retraction — *"an earlier draft read four populations above"* must
+    # survive. Probed against exactly that case; see the tooling
+    # declaration. RESIDUAL: an unquoted retraction still fires, and the
+    # message says so rather than leaving the author to guess.
+    unquoted = re.sub(r'\*?"[^"\n]{0,200}"\*?', "", outside)
+    unquoted = "\n".join(l for l in unquoted.splitlines()
+                         if not l.lstrip().startswith(">"))
+    WORDS = r"(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
+    NOUNS = r"(?:counts?|populations?|figures?|rows?|bullets?|blocks?|items?)"
+    DEIXIS = r"(?:above|below|in the (?:partition|generated|worklist|table))"
+    for m in re.finditer(r"\b%s\s+%s\b[^.\n]{0,40}?\b%s\b"
+                         % (WORDS, NOUNS, DEIXIS), unquoted, re.I):
+        restated.append("a hand-typed CARDINALITY of a generated block: "
+                        "%r — delete it, or quote it if it is a retraction"
+                        % " ".join(m.group(0).split()))
+
     if restated:
         print("FAIL\n  " + "\n  ".join(sorted(set(restated))), file=sys.stderr)
         return 1

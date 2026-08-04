@@ -134,7 +134,8 @@ NVS2 P07 standard names apart deliberately: they returned 200 on
 per-term paths and **their payloads were never inspected**, where the
 six QUDT units were content-verified. Folding them into one `12` would
 hand P5 a single work list over two evidence tiers — the finding of this
-section applied to its own repair. They are two rows above.
+section applied to its own repair. They are separate rows in the
+generated population block, which is where their count lives.
 
 **And `33` inherits the same defect**, because it was `23 + 10` — a
 mixed-kind URI count added to a local-slot count. A31's `35–36` counts
@@ -194,7 +195,7 @@ figure this ADR asserts by hand — **it is generated from
 `design/surface.yaml` and checked, not typed.**
 
 **The unit's slot total is unknown, and P5's first output is the
-authoritative count.** That quantity has taken four values across four
+authoritative count.** That quantity has taken these values across the
 block rounds — `23/9 of 32`, `24/9 of 33`, `17 + 9 = 26`, `25`, `24` —
 each arithmetic over a population nobody had fixed, and **every residue
 sat at a decision or summary line while the correction sat in an
@@ -228,8 +229,12 @@ claimed to be one.
 
 **`23 bind / 10 write of 33` and `35–36` are both retired rather than
 reconciled.** Neither is recoverable, and carrying either forward would
-be a fifth figure agreeing with a fourth by accident. The four counts
-above are what P5 works from.
+be one more figure agreeing with an earlier one by accident. **The
+generated worklist above is what P5 works from**, and its length is not
+restated here — a hand-typed cardinality of a generated block is the
+same copy as a hand-typed figure, and this line carried one (`four`,
+against five bullets) through the commit that claimed to have deleted
+the last of them.
 
 **Falsifier:** a term in the `slot_uri` row that is a class, or in the
 `class_uri` row that is a property, on inspection of its published
@@ -328,10 +333,13 @@ commit beside the sweep that declared the re-sweep clean.
   definition of done.
 - `assertedTime` leaves the local-slot list and binds
   `prov:generatedAtTime`.
-- **The surface is the four populations in the partition above, not a
-  pair of totals.** An earlier draft of this line read *"23 bind / 9
-  write of 32"* — the figure this same ADR declares unrecoverable sixty
-  lines earlier. Withdrawn 2026-08-02.
+- **The surface is the generated partition and population blocks above,
+  not a pair of totals.** An earlier draft of this line read *"23 bind /
+  9 write of 32"* — the figure this same ADR declares unrecoverable
+  sixty lines earlier. Withdrawn 2026-08-02. A later draft read *"the
+  four populations"* against a generated block of three; a cardinality
+  of a generated block is a copy of it, so no cardinality is stated
+  here.
 - `Statement` enters Part 0. **This unit's Part 0 fragment is 9
   classes; the unit is 15.** Part 0 itself is larger — `Document` is a
   Part 0 entity per ADR-002 and is deferred by A8 — so neither figure
