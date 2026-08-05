@@ -23,9 +23,9 @@ Everything in `build/` is generated. The source of truth is `vocab/`.
 yet; the repository holds the design record, the claims register, and
 the toolchain.
 
-See `claims.md`. Roughly a third of its entries are `falsified` with
-evidence attached, and **none is `tested`**. That is the intended
-state — a register recording only successes would be worthless.
+See `claims.md`. Many entries are `falsified` with evidence attached,
+and **none is `tested`**. That is the intended state — a register
+recording only successes would be worthless.
 
 ## Method
 
@@ -82,12 +82,24 @@ never >.
 
 ### Entity core
 
-Part 0 declares five abstract entities. Parts 1–7 assign them **roles
-in relations** — no entity is subtyped by a role it plays, so a fire
+Part 0 declares six abstract entities. Parts 1–7 assign them **roles in
+relations** — no entity is subtyped by a role it plays, so a fire
 station is one `Asset` appearing in both an exposure relation and an
 assignment relation rather than two objects joined by `sameAs`.
 
-`Agent` · `Asset` · `Place` · `Activity` · `Document`
+`Agent` · `Asset` · `Place` · `Activity` · `Document` · `Statement`
+
+`Statement` is the reified assertion. It was recorded as needing no
+class until four slots hung off it — source verification tier, operating
+mode, model version, profile conformance — and a discriminator that must
+sit on *every* assertion needs a class that **is** the assertion. See
+ADR-004.
+
+**The core is known to be incomplete.** Two subjects appear as arguments
+in the relation signatures below and are declared nowhere:
+`HazardEvent`, `Incident`, and — in `authority` — `HazardType`. They are
+Part 1 content and Part 1 is not in the current unit, so they are
+recorded rather than declared. See the open questions.
 
 Three Part 0 relations carry the structure the parts share:
 `partOf(Whole, Part, Interval)` for crews, incident complexes and
@@ -130,7 +142,9 @@ codelists/           SKOS concept schemes (Turtle)
 transform/           Mangle/Datalog rules
 fixtures/            real captured payloads
 
-design/ADR-*.md      decision records — O may not read these
+design/ADR-000-*     the rationale — the only file O may not read
+design/ADR-NNN-*     decisions of record — readable; at a design gate
+                     they are the artifact under review
 design/lean/         proofs; never extracted to executable code
 design/alloy/        structural models
 
@@ -196,13 +210,25 @@ Recorded rather than deferred, each with an ADR or a claim behind it:
   relations with opposite truth values. The decision was chosen for
   being invariant under that ambiguity rather than for resolving it.
 - **Whether the four modalities are exhaustive.** Curated narrative
-  content is a live candidate falsifier.
+  content is a live candidate falsifier: it is neither observed,
+  modelled, intended nor mandated, and `epistemicKind` admits only the
+  first two.
+- **What carries a hazard.** Nothing in the entity core is a thing that
+  happens in the world — every entity is a participant in data
+  collection or a data artifact. A hazard process, a hazard event, and
+  the managed occurrence that has a name, a lifecycle and an authority
+  are three different subjects, and none is declared.
+- **Whether the parts segment by one axis.** Parts 2, 3, 5 and 6 segment
+  by epistemic kind, as stated. Parts 1, 4 and 7 are named for subject
+  matter. A part is a kind of statement and a hazard is a subject; the
+  two are different axes and Part 1 stands on both.
 
-Four questions that were open here have been decided: the observation
-and model split (ADR-003, merged), identity resolution (ADR-001,
-authority-only), slot carriers (ADR-004), and how cross-slot constraints
-reach validation (ADR-005, a generator over `annotations:` — decided and
-not yet built).
+Five questions that were open here have been decided: the observation
+and model split (ADR-003, merged — with its stated ground since
+restated), identity resolution (ADR-001, authority-only), slot carriers
+(ADR-004), how cross-slot constraints reach validation (ADR-005, a
+generator over `annotations:` — decided and not yet built), and two role
+classes removed from the entity core (ADR-006).
 
 ## License
 

@@ -431,58 +431,75 @@ def rule_documented(path, doc):
 
 
 def rule_shared_uri(path, doc):
-    """C21: no external URI is claimed as an identity by two elements.
+    """C21: no two schema elements assert identity to the same external
+    URI, by any construct.
 
-    An element asserts identity with a URI two ways, and BOTH count:
-    `class_uri`/`slot_uri`, and `exact_mappings` — which asserts
-    equivalence, per ADR-002's addendum naming that "the false claim".
+    Identity-asserting constructs, all collected into ONE map:
 
-    THE FIRST VERSION COMPARED `class_uri` ONLY, and `exact-mappings`
-    checks `len(m) > 1` within one element. So a mixed construct passed
-    every rule at exit 0:
+      classes  — `class_uri`, `exact_mappings`, `same_as`
+      slots    — `slot_uri`,  `exact_mappings`, `same_as`
+      enums    — `PermissibleValue.meaning`
 
-        Document:  class_uri: foaf:Document
-                   exact_mappings: [prov:Entity]
-        Statement: class_uri: prov:Entity
+    `close_mappings`, `related_mappings` and `narrow_mappings` are NOT
+    identity assertions and are deliberately not collected.
 
-    That asserts Document is equivalent to Statement's type. It is not
-    hypothetical — it is the state this repository was in until
-    2026-08-02, and an ADR summary line called it guarded while it was
-    not. See [O -> H] design gate block verification 3, BV3-3.
+    THE FIRST VERSION CALLED collect() TWICE WITH A FRESH MAP EACH TIME,
+    classes then slots, so the two never met and three constructs were
+    outside its subject by construction — verified by probe:
+
+      class via class_uri + SLOT via exact_mappings   -> passed
+      class via class_uri + class via same_as         -> passed
+      two PermissibleValue.meaning on one URI         -> passed
+
+    The third is the one that matters: `meaning` is the route CLAUDE.md
+    names to every SKOS code list. See [O -> H] design gate block
+    verification 5, "Your C21 restatement — adopted, with the ground
+    corrected."
 
     Measured for `class_uri` collisions: gen-shacl emits ONE NodeShape
     carrying the union of both elements' property shapes, each with
     sh:minCount 1, at exit 0.
-
-    `close_mappings`, `related_mappings` and `narrow_mappings` are NOT
-    identity assertions and are deliberately not collected.
     """
     bad = []
+    claims = {}
 
-    def collect(kind, items, uri_field):
-        claims = {}
+    def claim(kind, name, uri, via):
+        claims.setdefault(str(uri), []).append((kind, name, via))
+
+    def scan(kind, items, uri_field):
         for name, body in (items or {}).items():
             if not isinstance(body, dict):
                 continue
-            uris = []
             if body.get(uri_field):
-                uris.append((str(body[uri_field]), uri_field))
+                claim(kind, name, body[uri_field], uri_field)
             for m in (body.get("exact_mappings") or []):
-                uris.append((str(m), "exact_mappings"))
-            for uri, via in uris:
-                claims.setdefault(uri, []).append((name, via))
-        for uri, holders in claims.items():
-            if len(holders) > 1:
-                where = ", ".join(f"`{n}` (via {v})" for n, v in sorted(holders))
-                bad.append(f"{path}: {kind} {where} each claim `{uri}` as an "
-                           f"identity. Two elements asserting one URI assert "
-                           f"they are equivalent, which is almost never true "
-                           f"and generates one merged shape at exit 0 "
-                           f"(claims.md C21). Use close_ or related_mappings "
-                           f"for anything short of equivalence")
+                claim(kind, name, m, "exact_mappings")
+            sa = body.get("same_as")
+            for m in ([sa] if isinstance(sa, str) else (sa or [])):
+                claim(kind, name, m, "same_as")
 
-    collect("classes", doc.get("classes"), "class_uri")
-    collect("slots", doc.get("slots"), "slot_uri")
+    scan("class", doc.get("classes"), "class_uri")
+    scan("slot", doc.get("slots"), "slot_uri")
+    for ename, e in (doc.get("enums") or {}).items():
+        for pv, body in ((e or {}).get("permissible_values") or {}).items():
+            if isinstance(body, dict) and body.get("meaning"):
+                claim("permissible value", f"{ename}.{pv}", body["meaning"],
+                      "meaning")
+
+    for uri, holders in claims.items():
+        # Distinct ELEMENTS, not distinct claims. One element naming the
+        # same URI through two constructs is redundant, not a collision —
+        # it asserts identity with itself. Flagging it was a precision
+        # failure found by the near-miss control.
+        if len({(k, n) for k, n, _ in holders}) > 1:
+            where = ", ".join(f"{k} `{n}` (via {v})"
+                              for k, n, v in sorted(holders))
+            bad.append(f"{path}: {where} each claim `{uri}` as an identity. "
+                       f"Two elements asserting one URI assert they are "
+                       f"equivalent, which is almost never true and "
+                       f"generates one merged shape at exit 0 (claims.md "
+                       f"C21). Use close_ or related_mappings for anything "
+                       f"short of equivalence")
     return bad
 
 

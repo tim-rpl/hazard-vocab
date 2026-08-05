@@ -1,0 +1,19 @@
+# DELIBERATELY VIOLATING — ONE collision, reached only through `same_as`.
+# Deleting the same_as collection makes this stop firing.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_collision_same_as
+prefixes:
+  linkml: https://w3id.org/linkml/
+  sosa:   http://www.w3.org/ns/sosa/
+default_range: string
+imports: [linkml:types]
+slots:
+  observedProperty:
+    description: The property an observation is about.
+    examples: [{value: "PM2.5 mass concentration"}]
+    slot_uri: sosa:observedProperty
+classes:
+  Observation:
+    description: An act of determining a value for a property.
+    examples: [{value: "a PM2.5 reading from a monitoring site"}]
+    same_as: ['sosa:observedProperty']

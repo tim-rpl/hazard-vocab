@@ -1,0 +1,22 @@
+# DELIBERATELY VIOLATING — ONE collision, intra-population: two
+# PermissibleValue.meaning on one URI. `meaning` is the route CLAUDE.md
+# names to every SKOS code list. Deleting the enum loop makes this stop
+# firing; the one-map repair is irrelevant to it, which is precisely why
+# bundling it with cross-population cases masked three branch mutations.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_collision_permissible_meaning
+prefixes:
+  linkml: https://w3id.org/linkml/
+  ex:     https://example.org/scheme/
+default_range: string
+imports: [linkml:types]
+enums:
+  VerificationTierEnum:
+    description: How far a source behind an assertion was verified.
+    permissible_values:
+      confirmedLive:
+        description: Observed returning data in the running system.
+        meaning: ex:verified
+      documented:
+        description: Verified against publisher documentation only.
+        meaning: ex:verified

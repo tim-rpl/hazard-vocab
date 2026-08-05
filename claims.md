@@ -2262,11 +2262,12 @@ Every class and slot in `vocab/` carries a `description` and an
 
 ### C21 — Distinct schema elements assert distinct external identity URIs
 No two schema elements in `vocab/core/` assert identity to the same
-external URI, by any construct — `class_uri`, `slot_uri`, or
-`exact_mappings`. Where two elements are both kinds of one external
-term, the relationship is expressed by something other than asserting
-that term's URI on both. `close_mappings` and `related_mappings` are
-outside the claim, because neither asserts identity.
+external URI, by any identity-asserting construct — `class_uri`,
+`slot_uri`, `exact_mappings`, `same_as`, or `PermissibleValue.meaning`.
+Where two elements are both kinds of one external term, the relationship
+is expressed by something other than asserting that term's URI on both.
+`close_mappings`, `related_mappings` and `narrow_mappings` are outside
+the claim, because none asserts identity.
 
 *(Restated 2026-08-02 at block verification 5, from H's proposal at the
 design gate. The previous wording — "no two classes in `vocab/core/`
@@ -2276,13 +2277,25 @@ widening, not a weakening; nothing that failed the old statement passes
 the new one. See the block-verification-5 evidence block for what the
 guard does and does not enforce of it.)*
 
+*(Widened again 2026-08-03 at block verification 6, from H's proposal —
+third time in the same direction. `same_as` and `PermissibleValue.meaning`
+join the construct list, and permissible values join the falsifier's
+population, which had excluded them entirely while `meaning` is the
+route `CLAUDE.md` names to every SKOS code list. The prior wording said
+"by any construct" and then gave a closed list of three, which was
+self-contradictory as written. Adopted on the ground that the claim is
+about the vocabulary; guard coverage is evidence, not content.)*
+
 - **Status:** `asserted`
-- **Falsifier:** two elements in `vocab/core/` — two classes, two slots,
-  or a class and a slot — asserting the same external URI via any of
-  `class_uri`, `slot_uri` or `exact_mappings`; or a generated
+- **Falsifier:** two **distinct elements** in `vocab/core/` — classes,
+  slots, or permissible values, in any combination — asserting the same
+  external URI via any of `class_uri`, `slot_uri`, `exact_mappings`,
+  `same_as` or `PermissibleValue.meaning`; or a generated
   `build/shapes.ttl` containing one `sh:NodeShape` whose
   `sh:targetClass` is an external URI and whose property shapes come
-  from more than one declared class.
+  from more than one declared class. One element naming one URI through
+  two constructs is redundant, not a collision — it asserts identity
+  with itself.
 - **Cheapest test:** `gen-shacl`, then count `sh:NodeShape` against
   count of `classes:`. Seconds, once `vocab/core/` has content.
 - **Evidence:** 2026-08-02 — **the claim is untested against the
@@ -2333,6 +2346,25 @@ guard does and does not enforce of it.)*
   `prov:Bundle`, and its slot branch FAILs on two slots sharing
   `slot_uri: sosa:observedProperty`. `scripts/` is human-owned;
   discovered rather than declared, and reported, not edited.
+
+  **2026-08-04, block verification 7 — the guard's subject is literal
+  URI strings, and subsumption is outside it by construction.**
+  `rule_shared_uri` collects claims with `claims.setdefault(str(uri), …)`
+  and compares keys. It never fetches an external vocabulary, so a
+  subclass axiom published elsewhere is invisible to it. Probed, with a
+  control:
+
+  | Probe | Result |
+  |---|---|
+  | `Place` → `sosa:FeatureOfInterest`, `Hazard` → `deo:Hazard` (`deo:Hazard ⊑ sosa:FeatureOfInterest` upstream) | **`ok [shared-uri]`, exit 0** |
+  | control — both classes → `sosa:FeatureOfInterest` | **FAIL**, names both classes |
+
+  This bounds the claim rather than weakening it: C21 is about two
+  elements asserting *the same* URI, which is what the guard measures.
+  What it does not measure is two elements asserting URIs an external
+  ontology relates by subsumption, and no entry should be read as
+  covering that. Recorded because `ADR-006:84` asserted the opposite —
+  see C23 #7.
 
   **The slot branch has no fixture.** Every file in
   `scripts/lint-fixtures/` was parsed and its `class_uri` and `slot_uri`
@@ -2534,7 +2566,33 @@ guard does and does not enforce of it.)*
   `.gitkeep`. Nothing is authored, so the widened claim is no more tested
   against material than the narrow one was. Restating a claim is not
   evidence for it.
-- **Updated:** 2026-08-02
+
+  **2026-08-03, block verification 6 — the three gaps recorded above are
+  closed in the guard, established by mutation rather than by reading.**
+  `rule_shared_uri` now collects all five constructs into **one** map
+  (`scripts/drift-lint.py`), so cross-population collisions are inside
+  its subject. Four one-branch mutations on a byte-identical copy of the
+  tree, control green before and after each:
+
+  | Mutation | Named row that failed |
+  |---|---|
+  | claims keyed by `(population, uri)` — **the repair reverted** | `collision-class-vs-slot`, `collision-same-as` |
+  | `same_as` collection deleted | `collision-same-as` |
+  | `PermissibleValue.meaning` loop deleted | `collision-permissible-meaning` |
+  | `exact_mappings` collection deleted | `mixed-construct-identity`, `collision-class-vs-slot` |
+
+  All four killed **by name**, which is what `lint-fixtures/README.md`'s
+  convention asks for and what the previous round could not show: three
+  of the same four mutations survived at green when the collisions were
+  bundled into one fixture. `make lint-selftest` reports **39
+  rule/fixture pairs, 8/8**; 24 fixtures on disk, 24 referenced, no
+  orphans.
+
+  **Status still `asserted`.** The guard is now demonstrated; the claim
+  is still untested, because `vocab/core/` still holds one `.gitkeep`.
+  A working instrument is not evidence for the proposition it would
+  measure.
+- **Updated:** 2026-08-04
 - **Promotion note:** promoted by O under FALSIFIER §6 at the design
   gate, 2026-08-02. It generalises beyond the gate — it is about the
   vocabulary and its generator rather than about these four decisions,
@@ -2551,3 +2609,135 @@ guard does and does not enforce of it.)*
   `exact_mappings`, or by one of them not binding it at all is a design
   question and is H's. This entry only asserts that assigning both the
   same `class_uri` is not it.
+
+### C22 — An instrument is not evidence until it has been probed against its own failure mode
+An instrument this project relies on is not evidence until it has been
+probed adversarially against its own failure mode. A guard shipped
+without a falsifier is the same artifact class as a claim shipped
+without one, and is subject to the same rules.
+
+**An instrument that happens to be right is not a working instrument.**
+A harness that reaches the correct verdict by a mechanism that never
+reproduces the defect it is testing for has not tested anything, and its
+green is indistinguishable from a green earned honestly. That criterion
+is in the statement rather than in a note, because it is what makes the
+instances below countable at all.
+
+- **Status:** `asserted`
+- **Falsifier:** any instrument admitted to the build on the strength of
+  a green run, whose named guard clause can be deleted without a **named**
+  test going red; or an instrument whose passing run does not exercise
+  the mechanism of the defect it is invoked to detect.
+- **Cheapest test:** delete one clause, run the harness, read *which* row
+  fails. Seconds.
+- **Evidence:** 2026-08-03 — **eleven instrument defects, six files, two
+  authors.** Nine manifested; two were self-caught before shipping and
+  are counted because the register counts defects **in instruments**, not
+  defects that caused visible harm.
+
+  | # | Instrument | Defect | Author | Found by |
+  |---|---|---|---|---|
+  | 1 | `Makefile` `make check` | `**` matched one directory level under `sh` | H | running it |
+  | 2 | the SHACL measurement | substring matching counted `sh:or`/`sh:node` artifacts | O | running it |
+  | 3 | `scripts/` edit script | the `is_blocked` replacement silently deleted `strip_heredocs` | O | running the matrix, not reading the diff |
+  | 4 | `lint-selftest` + fixtures | `shared-uri`'s slot branch deletable at 8/8 green | O | mutation |
+  | 5 | `design/derive-surface.py` | the restatement guard fired on **retractions** | H | probing against the correction discipline |
+  | 6 | `cross-population-identity.yaml` | three of four branch mutations survive, incl. the repair reverted; one bundled fixture spends its single exit-code bit on whichever collision survives | O | mutation |
+  | 7 | zsh control | could not exhibit the bug it was invoked to confirm | O | reading the mechanism against the result |
+  | 8 | `design/derive-surface.py` | matched **digits** only; three word-cardinalities stood, all wrong | H | a control run against a section nobody was editing |
+  | 9 | staleness test | searched for a filename where the table renders stems | H | mutation |
+  | 10 | the C21 mutation harness | merged the two maps back before filtering, so it **never reproduced the defect** it reached the right verdict on | H | the result not following from the mechanism |
+  | 11 | `lint-selftest` `expect` | accepted on a precision row and never evaluated — a field that cannot fire | H | adding one that could not appear |
+
+  **None of the eleven was found by reading the instrument.** Nine were
+  found by running it against a deliberate defect, one by running it
+  against the file it was already guarding, and one by noticing the
+  verdict did not follow from the mechanism.
+
+  #10 is the entry that forced the criterion into the statement. It
+  returned the right answer. Every other row is an instrument that was
+  wrong; that one was *right, for no reason* — and had it not been
+  caught, the repair it green-lit would have been admitted on a harness
+  that could not have detected its failure.
+
+  #11 is closed by `validate_cases()` in `scripts/lint-selftest.py`,
+  verified this gate by mutation: an `expect` added to the precision row
+  `near-miss-distinct-uris` is rejected at load on the default path, the
+  `--table` path and the `--table --write` path. Under the previous build
+  the same edit passed green.
+- **Updated:** 2026-08-03
+- **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
+  block verification 6, from H's proposal of 2026-08-02. It generalises
+  beyond the gate: it constrains how evidence is admitted to this
+  project, which is what the register governs, and it binds on every
+  future guard rather than on these eleven. It is not a structural
+  decision about the vocabulary, so it belongs here and not in an ADR.
+  Enters as `asserted`: the instances are evidence that the failure mode
+  is real and frequent, not evidence that the discipline is now
+  followed.
+- **Boundary against [C23](#c23):** C22 is about instruments that cannot
+  see. C23 is about claims made without looking. Neither reaches the
+  other's set, and the boundary is what keeps either countable — an
+  instrument that inspects the wrong thing is C22; a statement posted
+  before the run that would establish it is C23, even when the
+  instrument is perfect.
+
+### C23 — No claim about an artifact's state is made without running the check that establishes it
+No claim about an artifact's state is made without running the check
+that establishes it.
+
+- **Status:** `asserted`
+- **Falsifier:** a statement asserting what an artifact contains, what a
+  tool catches, or what a change accomplished, posted before or without
+  the run that would establish it.
+- **Cheapest test:** for any such statement, ask what command was run and
+  when. If the answer is "the edit reported success", the claim is
+  unestablished — an editing step reporting success is not evidence the
+  edit landed.
+- **Evidence:** 2026-08-04 — **eight instances.** Six sit in accepted
+  documents; two were caught by the check itself rather than by the
+  author.
+
+  | # | Statement | What was true |
+  |---|---|---|
+  | 1 | *"the counts are generated from one source and the copies are deleted"* | one copy not deleted (BV5-1) |
+  | 2 | *"Corrected in both places"* | corrected in one |
+  | 3 | *"the `shared-uri` rule fails on two classes sharing a `class_uri`"* | true, while the mixed construct passed |
+  | 4 | *"numeral re-sweep clean on all retired values"* | run against a value the sweep could not see |
+  | 5 | *"I re-ran the battery"* | posted before running it; self-caught |
+  | 6 | A3's falsifier, design gate 2026-08-03 — *"a live site in the census with no marker and no P20 reference"* | posted and **not run**. Three of the eight censused sites fail it: `plan:562`, `plan:855`, `plan:1343`. Caught by O running H's own falsifier |
+  | 7 | `ADR-006:84` — *"`shared-uri` would fire on the design at authoring time"* | **false, and one probe shows it.** `rule_shared_uri` keys on the literal URI string (`claims.setdefault(str(uri), …)`) and does no subclass reasoning. `Place` → `sosa:FeatureOfInterest` with `Hazard` → `deo:Hazard` returns `ok [shared-uri]`, exit 0; the control with both on `sosa:FeatureOfInterest` FAILs. A claim about what a guard catches, in an accepted ADR, made without running the guard |
+  | 8 | ADR-006 Decision A's own falsifier — *"a published `prov:Activity` definition … under which a physical process producing no entity is a well-formed `prov:Activity`"* | stated and **not run**. One fetch satisfies it: PROV-O and PROV-DM define Entity as *"a physical, digital, conceptual, or other kind of thing"*, PROV-DM §2.1.1's own activity examples are driving a car, printing a book, baking and a race, and PROV-CONSTRAINTS carries no rule requiring generation |
+
+  **#6 is the instance that establishes the claim is not retrospective.**
+  It was posted in the same message that proposed C23, as the falsifier
+  for an assertion in that message, and it fires. A falsifier offered and
+  not run is the purest form of this defect: the author names the
+  experiment that would break the claim and then does not perform it,
+  which reads to a reviewer as though it had been performed and come back
+  clean.
+
+  **#8 is #6 a second time, one round later.** A falsifier written into
+  the same document as the claim it would break, and not performed —
+  this time inside an ADR accepted the day it was written. The two
+  together are the reason the *Cheapest test* above asks what command
+  was run rather than whether a falsifier is stated: a stated falsifier
+  is the strongest signal that the experiment looks cheap, and in both
+  instances it was — one grep, one fetch.
+
+  **Most of what this gate blocked on was C23's set, not C22's** — false
+  claims about artifacts, not defective instruments. That asymmetry is
+  the reason for a second entry rather than a widened C22, and it held
+  again at block verification 7: all three blocks are C23's.
+- **Updated:** 2026-08-04
+- **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
+  block verification 6, from H's proposal of 2026-08-03. Accepted as
+  proposed, with instance #6 added by O. It generalises beyond the gate
+  and no existing entry covers it: C18 is about whether lint rules detect
+  what they claim, C22 is about whether an instrument can see its own
+  failure mode, and this is about whether the run happened at all.
+- **Note on the two entries together:** C22 and C23 both constrain
+  evidence rather than the vocabulary. They are the register's answer to
+  a failure direction named in `FALSIFIER.md` §4 — *an instrument that
+  reports success when it has inspected nothing* — extended to cover the
+  case where no instrument was run.

@@ -1,8 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 8** — §1 narrowed: only `ADR-000-rationale.md` is
-blocked. Numbered ADRs are decisions of record and are readable, because
-at a design gate they are the artifact under review.
+**Charter version: 10** — §5.1 gains Q12: what carries the hazard
+itself. Eleven use questions asked about everything around a hazard and
+none about the hazard.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +11,8 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 10 | §5.1 Q12 — what carries the hazard itself |
+| 9 | §5.3 account for H's nominated attack line |
 | 8 | §1 blocks the rationale only; numbered ADRs are readable |
 | 7 | §3 blocking is proportionate to what survives the gate |
 | 6 | §5.2 covers register-versus-artifact consistency, not only within a message |
@@ -297,6 +299,29 @@ found two such findings that an O pass did not. That is a charter gap,
 now closed; it is not a reason to trust O less on the eleven findings
 it did produce.
 
+### §5.3 — H's nominated attack line
+
+H's gate messages end by naming what H judges most attackable. That is
+a builder pointing at its own weakest reasoning, which is the most
+valuable single input a review gets and the cheapest to act on.
+
+**Account for it explicitly.** One of:
+
+- **Attacked** — state the experiment and the result, survived or
+  falsified.
+- **Not attacked, with a reason** — a higher-value target, a
+  prerequisite that does not exist, or a judgement that the nomination
+  is not where the risk is. Say which.
+
+Do not pass over it in silence. One nomination in this project has gone
+unaddressed for six consecutive rounds while reviews spent themselves
+on document residues — which is a finding about the review, not about
+the nomination.
+
+Declining is a legitimate outcome and often the right one. An
+unrecorded decline is not a decline; it is an omission that looks like
+one.
+
 ### §5.1 — Use questions (design gate)
 
 At every design gate, attempt to express these against the proposed
@@ -328,9 +353,38 @@ suggests one; never remove one because the design cannot answer it.
     returning data, or only verified against documentation?
 11. Is this narrative statement curated by a person, and how is that
     distinguishable from an observation?
+12. **What is the hazard?** Show the hazard itself — not an observation
+    of it, not its extent, not the record that manages it. Which entity
+    carries a hazard *process* (combustion progressing, water rising,
+    ground shaking)? Which carries a hazard *event*? Which carries the
+    *managed occurrence* — the thing with a name, a lifecycle, a
+    containment figure and a responsible authority? And what happens
+    when two occurrences become one managed occurrence: a complex, a
+    multi-basin flood, an aftershock sequence?
 
-Questions 4, 6, and 8 test the project's central claims — epistemic
-separation, absent-versus-zero, and hazard neutrality. Prioritise them.
+Questions 4, 6, 8 and 12 test the project's central claims — epistemic
+separation, absent-versus-zero, hazard neutrality, and whether the
+entity core reaches the domain at all. Prioritise them.
+
+**Q12 exists because eleven questions asked about everything around a
+hazard and none about the hazard.** Staleness, provenance, exposure,
+jurisdiction, thresholds, source confidence, curated narrative — all of
+them concern what surrounds an occurrence. **Nothing in the entity core
+is a thing that happens in the world**; every entity is a participant in
+data collection or a data artifact.
+
+*(An earlier version of this paragraph justified the question by
+asserting that `prov:Activity` is a provenance term for how a data
+artifact came to be. That is false: PROV-DM defines an entity as a
+physical, digital or conceptual thing, an activity as something that
+acts upon or with entities where generation only `may` be included, and
+its own worked examples of activities are driving a car, printing a book
+and baking. The false premise is withdrawn; the question stands on the
+observation above, which does not depend on it.)*
+
+Phrase any answer over at least two hazard types. A question answerable
+only in wildfire terms tests the reference implementation rather than
+the vocabulary, which is what Q8 exists to catch.
 
 Question 9 is grounded in a real defect: a PM2.5-specific statutory
 threshold was evaluated against a composite air-quality index for four

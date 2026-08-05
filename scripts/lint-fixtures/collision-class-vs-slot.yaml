@@ -1,0 +1,26 @@
+# DELIBERATELY VIOLATING — ONE collision: a class via class_uri against
+# a SLOT via exact_mappings. Kills the one-map repair: key claims by
+# (population, uri) and the two never meet.
+#
+# Split out of a bundled three-collision fixture that could not
+# distinguish branches, because the harness asserts on the FILE's exit
+# code and one intra-population collision held the row green while three
+# of four branch mutations survived. See lint-fixtures/README.md,
+# "Mutation, not just coverage".
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_collision_class_vs_slot
+prefixes:
+  linkml: https://w3id.org/linkml/
+  prov:   http://www.w3.org/ns/prov#
+default_range: string
+imports: [linkml:types]
+slots:
+  wasAttributedTo:
+    description: The agent an assertion is attributed to.
+    examples: [{value: "an issuing authority"}]
+    exact_mappings: ['prov:Entity']
+classes:
+  Statement:
+    description: A reified assertion carrying its own provenance.
+    examples: [{value: "this perimeter was reported by agency X at time T"}]
+    class_uri: prov:Entity

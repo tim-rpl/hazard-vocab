@@ -1,0 +1,21 @@
+# DELIBERATELY CLEAN — the near-miss control. Two classes, two DIFFERENT
+# external URIs, one of them reached via exact_mappings. Nothing here
+# asserts identity twice, so shared-uri must not fire.
+id: https://w3id.org/hazard-vocab/core
+name: lint_fixture_near_miss_distinct_uris
+prefixes:
+  linkml: https://w3id.org/linkml/
+  prov:   http://www.w3.org/ns/prov#
+  foaf:   http://xmlns.com/foaf/0.1/
+default_range: string
+imports: [linkml:types]
+classes:
+  Statement:
+    description: A reified assertion carrying its own provenance.
+    examples: [{value: "this perimeter was reported by agency X at time T"}]
+    class_uri: prov:Entity
+  Document:
+    description: A written instrument such as a plan or an order.
+    examples: [{value: a delegation of authority letter}]
+    class_uri: foaf:Document
+    exact_mappings: ['foaf:Document']

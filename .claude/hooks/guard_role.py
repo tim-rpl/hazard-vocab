@@ -132,9 +132,21 @@ def blocked_reads(command: str) -> list[str]:
     # file of patterns, which is itself a read.
     PATTERN_FLAGS = {"-e", "--regexp"}
     FILE_FLAGS = {"-f", "--file"}
+    RECURSIVE_FLAGS = {"-r", "-R", "--recursive", "-rn", "-rl", "-ri",
+                       "-rni", "-rin", "-rnE", "-rE", "-rh", "-roh",
+                       "-rhE", "-rohE", "-rc"}
+    ALWAYS_RECURSIVE = {"rg", "ag", "ack"}
 
     hits, cmd_position, pattern_pending, reading = [], True, False, False
     expect = None
+    # A recursive search reaches the rationale by DIRECTORY TRAVERSAL and
+    # never names it, so no token is inspectable. Disclosed by O after a
+    # root-level `grep -r` returned a line of the blocked file. Require
+    # an explicit exclusion instead; the block names the fix.
+    recursive = False
+    excluded = False
+    base_cmd = ""
+    roots = []
     for tok in tokens:
         if tok in SEPARATORS:
             cmd_position, reading, pattern_pending, expect = True, False, False, None
@@ -144,6 +156,9 @@ def blocked_reads(command: str) -> list[str]:
             base = pathlib.PurePath(tok).name
             reading = base in READERS
             pattern_pending = base in PATTERN_FIRST
+            base_cmd = base
+            if base in ALWAYS_RECURSIVE:
+                recursive = True
             continue
         if expect == "pattern":
             expect, pattern_pending = None, False
@@ -158,6 +173,10 @@ def blocked_reads(command: str) -> list[str]:
                 expect = "pattern"
             elif tok in FILE_FLAGS:
                 expect = "file"
+            if base_cmd in PATTERN_FIRST and tok in RECURSIVE_FLAGS:
+                recursive = True
+            if "exclude" in tok or "design" in tok:
+                excluded = True
             continue
         if pattern_pending:
             # first positional of a grep-family command is the pattern
@@ -168,6 +187,19 @@ def blocked_reads(command: str) -> list[str]:
         # because `*` is a regex character and also a glob. BV5-2.
         if reading and is_blocked(tok):
             hits.append(tok)
+        if recursive:
+            roots.append(tok)
+
+    # A recursive search whose roots are all OUTSIDE design/ cannot reach
+    # the rationale, and blocking it would make the guard obstruct the
+    # searching O is required to do — which is F7's lesson.
+    def reaches_design(r: str) -> bool:
+        r = r.strip("'\"").rstrip("/")
+        return r in ("", ".", "..", "/") or r.split("/")[0] == "design"
+
+    if recursive and not excluded and not hits:
+        if not roots or any(reaches_design(r) for r in roots):
+            hits.append("<recursive search with no exclusion>")
     return hits
 
 
@@ -197,8 +229,20 @@ def main() -> int:
         return 2
 
     for hit in blocked_reads(command):
-        print(f"BLOCKED: role O may not read the design rationale "
-              f"(reading command targets {hit}). {charter}", file=sys.stderr)
+        if hit.startswith("<recursive"):
+            print("BLOCKED: a recursive search reaches the design rationale "
+                  "by directory traversal without naming it, so no path in "
+                  "this command is inspectable. Re-run with an explicit "
+                  "exclusion, e.g. --exclude-dir=design, or scope the "
+                  "search to a directory. "
+                  "NOTE: this covers grep-family recursion only — a "
+                  "traversal piped from find or ls remains outside the "
+                  "guard, which is friction, not a boundary.",
+                  file=sys.stderr)
+        else:
+            print(f"BLOCKED: role O may not read the design rationale "
+                  f"(reading command targets {hit}). {charter}",
+                  file=sys.stderr)
         return 2
 
     if tool in ("Write", "Edit", "NotebookEdit") and path:
