@@ -106,8 +106,15 @@ SOURCES = [
     # until 2026-08-05 and never probed, so the modelling argument was
     # running ahead of the measurement. F1's lesson applies: test for a
     # DEFINED term, not a 200.
+    # Fetched from the GitHub source, not from
+    # `schema.org/version/latest/schemaorg-current-https.ttl`. That URL
+    # served a **260 KB payload with 0 of 3 bound terms** on 2026-08-05
+    # and a valid 1.1 MB payload minutes later — a transient at a
+    # published .ttl URL, which is exactly why the manifest records a
+    # SHA-256 rather than a byte count. The GitHub raw file is 506,121
+    # bytes and checksum-identical to the copy verified by hand.
     ("schema", "https://schema.org/",
-     "https://schema.org/version/latest/schemaorg-current-https.ttl",
+     "https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/schema.ttl",
      ["GovernmentOrganization", "NGO", "Organization"]),
     ("sioc", "http://rdfs.org/sioc/ns#",
      "http://rdfs.org/sioc/ns#",
