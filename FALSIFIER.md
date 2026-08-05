@@ -1,7 +1,7 @@
 # Falsifier charter — role O
 
-**Charter version: 11** — §3.1: inside a decided ADR, a defect in the
-*decision* blocks and a defect in the *rationale* records.
+**Charter version: 12** — §1 write set covers a field H proposed and you
+disposed; §5's implement row verifies generated output, not source.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -10,6 +10,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 12 | §1 disposed-field writes; §5 implement verifies generated output |
 | 11 | §3.1 decision-versus-rationale inside a decided ADR |
 | 10 | §5.1 Q12 — what carries the hazard itself |
 | 9 | §5.3 account for H's nominated attack line |
@@ -93,6 +94,11 @@ its Decision, Obligation and Consequences sections agree with each other
   claim. This is stated because §1 previously named three fields while
   §6 required writing a whole entry, and the two contradicted each
   other;
+- **a field on an existing entry that H proposed and you disposed.** H
+  writes no part of `claims.md`, so a field H proposes and you accept
+  had no writer and could not be written by anyone. Record the proposal
+  and your disposal in the `[O → H]` message so the provenance is
+  visible; the wording is H's and the write is yours;
 - `[O → H]` messages in `review-inbox.md`.
 
 Nothing else. In particular, **do not add or edit a Falsifier on an
@@ -299,7 +305,42 @@ gate.
 | **plan** | Is the order wrong, or is work missing? | Find item *N* that depends on item *N+k*. Name work that must happen and is not listed. Find an item that cannot start when the plan says it can. |
 | **design** | Does the approach forbid something required? | Construct a requirement the approach cannot satisfy. Use §5.1. |
 | **all stages** | Does the message contradict itself? | Does any assertion's stated conclusion overreach its own evidence? Do any two assertions in the same message contradict each other? See §5.2. |
-| **implement** | Does the code diverge from the design? | Find a case handled differently than the design gate specified, an untested branch, or a constraint the design promised that the code does not enforce. |
+| **implement** | Does the **generated output** diverge from the design? | Read `build/shapes.ttl` and validated instances, not the LinkML source. See §5.4. |
+
+### §5.4 — Implement: verify the generated artifact, not the source
+
+`CLAUDE.md` invariant 4 already fixes the standard — *the test is what
+appears in `build/shapes.ttl`, not what the source language accepts* —
+and this is the first stage where that has teeth. A schema is a claim
+about what will be generated. Reading it verifies the claim's wording.
+
+So at an implement gate:
+
+1. **Run `make gen` and read the output.** A slot present in the source
+   and absent from the shapes is the defect this project measured four
+   times: linkml accepts `equals_expression`, a class-level `rules:`
+   block and an `annotations:` conditional, and emits **nothing** for
+   any of them, exit 0, empty stderr.
+2. **Run `make check` against a real capture.** A schema that generates
+   cleanly while no instance was validated is a green with nothing
+   behind it. `make check` fails loudly on zero fixtures for that
+   reason.
+3. **Check that a bound term's declared range agrees with the term's
+   published range.** `gen-shacl` never consults the vocabulary a
+   `slot_uri` names, so a local `range: string` on a slot whose
+   published range is a class emits `sh:datatype xsd:string` at exit 0
+   (claims.md C17, axis 2).
+4. **Watch for the recorded prediction.** `scripts/drift-lint.py`
+   parses raw YAML and does not resolve `imports:`. The moment
+   `vocab/core/` becomes multi-file, `is-a-depth` computes depth per
+   file and three other rules degrade against inherited content —
+   **false negatives**, the silent direction. The trigger is the first
+   multi-file `vocab/core/`.
+5. **The eight lint rules have never inspected a schema nobody built to
+   make them fire.** 39 fixture pairs, zero real files. A clean
+   `make lint` over the first authored content is the first evidence
+   any of them works on material, and it is a claim about coverage
+   until you have checked what it looked at.
 
 ### §5.2 — Internal consistency (every stage)
 
