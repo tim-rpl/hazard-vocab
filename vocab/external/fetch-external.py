@@ -309,10 +309,23 @@ def main():
            "the payload arrived. A 200 proves a server answered; three of",
            "this project's bindings were falsified by a term that was",
            "absent behind one.", "",
-           "| Vocabulary | Namespace | HTTP | Bytes | SHA-256 | Type | Content check | Namespace dereferences |",
-           "|---|---|---|---|---|---|---|---|"]
+           "**Every row describes TWO fetches, and they are different",
+           "documents.** The *cached* columns come from the fetch URL; the",
+           "*namespace* column comes from a separate live fetch of the",
+           "namespace itself. GeoSPARQL is why the distinction is on the",
+           "page: `:Geometry` is defined at line 1013 of the cached file",
+           "and is undefined in what the namespace serves — 40,988 bytes",
+           "against 20,397, `text/turtle` against `text/anot+turtle`, 65",
+           "minted terms against zero `owl:Class` declarations. Both are",
+           "true. A row that showed only one verdict read as a document",
+           "disagreeing with itself.", "",
+           "| Vocabulary | Fetch URL (cached) | HTTP | Bytes | SHA-256 | Type | Content check | Namespace | Namespace serves |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    src = {k: u for k, _n, u, _t in SOURCES}
     for r in rows:
-        out.append("| `%s` | `%s` | %s | %s | `%s` | %s | %s | %s |" % r)
+        out.append("| `%s` | <%s> | %s | %s | `%s` | %s | %s | <%s> | %s |"
+                   % (r[0], src.get(r[0], "-"), r[2], r[3], r[4], r[5],
+                      r[6], r[1], r[7]))
     out += ["", "## Problems", ""]
     out += (["*(none)*"] if not problems else
             ["- %s" % p for p in problems])

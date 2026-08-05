@@ -7,26 +7,37 @@ the payload arrived. A 200 proves a server answered; three of
 this project's bindings were falsified by a term that was
 absent behind one.
 
-| Vocabulary | Namespace | HTTP | Bytes | SHA-256 | Type | Content check | Namespace dereferences |
-|---|---|---|---|---|---|---|---|
-| `sosa` | `http://www.w3.org/ns/sosa/` | 200 | 27326 | `c70b0d1c843c` | text/turtle | 15/15 terms present | **yes** — 200 text/turtle, `Observation` defined |
-| `ssn` | `http://www.w3.org/ns/ssn/` | 200 | 22714 | `184d86189191` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `System` defined |
-| `ssn-ext` | `http://www.w3.org/ns/ssn/ext/` | 200 | 8115 | `0b8fdef9a06a` | text/turtle | 2/2 terms present | **document** — 200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere |
-| `ssn-system` | `http://www.w3.org/ns/ssn/systems/` | 200 | 27565 | `1750d2b3bb56` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `SystemCapability` defined |
-| `prov-o` | `http://www.w3.org/ns/prov#` | 200 | 68795 | `7d203989f67b` | text/turtle | 5/5 terms present | **yes** — 200 text/turtle, `Entity` defined |
-| `org` | `http://www.w3.org/ns/org#` | 200 | 84162 | `3e01f89a1747` | text/turtle | 1/1 terms present | **yes** — 200 text/turtle, `Organization` defined |
-| `geosparql` | `http://www.opengis.net/ont/geosparql#` | 200 | 40988 | `7a8028dba554` | text/turtle | 4/4 terms present | **no** — 200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined |
-| `qudt-schema` | `http://qudt.org/schema/qudt/` | 200 | 115706 | `91dee20dbfe8` | text/turtle | 3/3 terms present | **yes** — 200 text/turtle, `QuantityValue` defined |
-| `qudt-units` | `http://qudt.org/vocab/unit/` | 200 | 4073002 | `a1b1f4854eb7` | text/turtle | 6/6 terms present | **yes** — 200 text/turtle, `M-PER-SEC` defined |
-| `skos` | `http://www.w3.org/2004/02/skos/core#` | 200 | 28966 | `e79633b8d056` | application/rdf+xml | 4/4 terms present | **yes** — 200 application/rdf+xml, `Concept` defined |
-| `owl-time` | `http://www.w3.org/2006/time#` | 200 | 101486 | `251bd6970b0d` | text/turtle | 4/4 terms present | **yes** — 200 text/turtle, `Interval` defined |
-| `foaf` | `http://xmlns.com/foaf/0.1/` | 200 | 44209 | `3d859b5d92a2` | application/rdf+xml | 1/1 terms present | **yes** — 200 application/rdf+xml, `Document` defined |
-| `dqv` | `http://www.w3.org/ns/dqv#` | 200 | 12246 | `cc333223d13c` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `QualityMeasurement` defined |
-| `adms` | `http://www.w3.org/ns/adms#` | 200 | 11134 | `634d8bfa4a98` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `Identifier` defined |
-| `dcterms` | `http://purl.org/dc/terms/` | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `conformsTo` defined |
-| `shacl` | `http://www.w3.org/ns/shacl#` | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 terms present | **yes** — 200 text/turtle, `NodeShape` defined |
-| `nvs-p07` | `http://vocab.nerc.ac.uk/collection/P07/current/` | 200 | 11568143 | `b55868b6d586` | text/turtle | 6/6 terms present | **untested** — no probe term declared |
-| `deo` | `http://schema.knowwheregraph.org/` | 000 | 0 | `-` | - | no payload | **no** — no payload |
+**Every row describes TWO fetches, and they are different
+documents.** The *cached* columns come from the fetch URL; the
+*namespace* column comes from a separate live fetch of the
+namespace itself. GeoSPARQL is why the distinction is on the
+page: `:Geometry` is defined at line 1013 of the cached file
+and is undefined in what the namespace serves — 40,988 bytes
+against 20,397, `text/turtle` against `text/anot+turtle`, 65
+minted terms against zero `owl:Class` declarations. Both are
+true. A row that showed only one verdict read as a document
+disagreeing with itself.
+
+| Vocabulary | Fetch URL (cached) | HTTP | Bytes | SHA-256 | Type | Content check | Namespace | Namespace serves |
+|---|---|---|---|---|---|---|---|---|
+| `sosa` | <http://www.w3.org/ns/sosa/> | 200 | 27326 | `c70b0d1c843c` | text/turtle | 15/15 terms present | <http://www.w3.org/ns/sosa/> | **yes** — 200 text/turtle, `Observation` defined |
+| `ssn` | <http://www.w3.org/ns/ssn/> | 200 | 22714 | `184d86189191` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/> | **yes** — 200 text/turtle, `System` defined |
+| `ssn-ext` | <https://www.w3.org/ns/ssn/ext/> | 200 | 8115 | `0b8fdef9a06a` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/ext/> | **document** — 200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere |
+| `ssn-system` | <http://www.w3.org/ns/ssn/systems/> | 200 | 27565 | `1750d2b3bb56` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/systems/> | **yes** — 200 text/turtle, `SystemCapability` defined |
+| `prov-o` | <http://www.w3.org/ns/prov-o#> | 200 | 68795 | `7d203989f67b` | text/turtle | 5/5 terms present | <http://www.w3.org/ns/prov#> | **yes** — 200 text/turtle, `Entity` defined |
+| `org` | <http://www.w3.org/ns/org#> | 200 | 84162 | `3e01f89a1747` | text/turtle | 1/1 terms present | <http://www.w3.org/ns/org#> | **yes** — 200 text/turtle, `Organization` defined |
+| `geosparql` | <https://opengeospatial.github.io/ogc-geosparql/geosparql11/geo.ttl> | 200 | 40988 | `7a8028dba554` | text/turtle | 4/4 terms present | <http://www.opengis.net/ont/geosparql#> | **no** — 200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined |
+| `qudt-schema` | <http://qudt.org/schema/qudt/> | 200 | 115706 | `91dee20dbfe8` | text/turtle | 3/3 terms present | <http://qudt.org/schema/qudt/> | **yes** — 200 text/turtle, `QuantityValue` defined |
+| `qudt-units` | <http://qudt.org/vocab/unit/> | 200 | 4073002 | `a1b1f4854eb7` | text/turtle | 6/6 terms present | <http://qudt.org/vocab/unit/> | **yes** — 200 text/turtle, `M-PER-SEC` defined |
+| `skos` | <http://www.w3.org/2004/02/skos/core> | 200 | 28966 | `e79633b8d056` | application/rdf+xml | 4/4 terms present | <http://www.w3.org/2004/02/skos/core#> | **yes** — 200 application/rdf+xml, `Concept` defined |
+| `owl-time` | <http://www.w3.org/2006/time> | 200 | 101486 | `251bd6970b0d` | text/turtle | 4/4 terms present | <http://www.w3.org/2006/time#> | **yes** — 200 text/turtle, `Interval` defined |
+| `foaf` | <http://xmlns.com/foaf/0.1/> | 200 | 44209 | `3d859b5d92a2` | application/rdf+xml | 1/1 terms present | <http://xmlns.com/foaf/0.1/> | **yes** — 200 application/rdf+xml, `Document` defined |
+| `dqv` | <https://www.w3.org/ns/dqv.ttl> | 200 | 12246 | `cc333223d13c` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/dqv#> | **yes** — 200 text/turtle, `QualityMeasurement` defined |
+| `adms` | <https://www.w3.org/ns/adms.ttl> | 200 | 11134 | `634d8bfa4a98` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/adms#> | **yes** — 200 text/turtle, `Identifier` defined |
+| `dcterms` | <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl> | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 terms present | <http://purl.org/dc/terms/> | **yes** — 200 text/turtle, `conformsTo` defined |
+| `shacl` | <https://www.w3.org/ns/shacl.ttl> | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 terms present | <http://www.w3.org/ns/shacl#> | **yes** — 200 text/turtle, `NodeShape` defined |
+| `nvs-p07` | <http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle> | 200 | 11568143 | `b55868b6d586` | text/turtle | 6/6 terms present | <http://vocab.nerc.ac.uk/collection/P07/current/> | **untested** — no probe term declared |
+| `deo` | <http://schema.knowwheregraph.org/lod/ontology/> | 000 | 0 | `-` | - | no payload | <http://schema.knowwheregraph.org/> | **no** — no payload |
 
 ## Problems
 
