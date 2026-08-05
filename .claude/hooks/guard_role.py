@@ -239,9 +239,12 @@ def main() -> int:
     path = ti.get("file_path") or ti.get("path") or ""
     command = ti.get("command") or ""
 
-    charter = ("See FALSIFIER.md §1 (charter v8). Only "
-               "design/ADR-000-rationale.md is blocked — numbered ADRs, "
-               "design/lean/ and design/alloy/ are all permitted.")
+    # No version number: a citation that names one goes stale on the
+    # next charter change, which it did (v8 quoted while the charter was
+    # at v11). The rule is stated instead.
+    charter = ("See FALSIFIER.md §1. Only design/ADR-000-rationale.md is "
+               "blocked — numbered ADRs, design/lean/ and design/alloy/ "
+               "are all permitted.")
 
     if path and is_blocked(path):
         print(f"BLOCKED: role O may not read the design rationale. {charter}",

@@ -174,10 +174,14 @@ being guided by it, that is a finding.** Report it in the gate. Do not
 work around it silently, and do not treat a convention as load-bearing
 because it is written down.
 
-The Part 2 / Part 3 split is the one most likely to break first: it
-contradicts ISO 19156, which treats a simulation result as an
-`Observation` with a simulation-typed procedure. See ADR-003, which is
-open.
+The Part 2 / Part 3 split was the one flagged as most likely to break
+first, because it contradicts ISO 19156, which treats a simulation
+result as an `Observation` with a simulation-typed procedure. **ADR-003
+is accepted — option B: the parts are merged, and `epistemicKind`
+carries the distinction.** Its stated ground was falsified twice and
+restated, and the ADR now records that no stated ground discriminates
+option B from option A. The decision stands; read the ADR before relying
+on any reason for it.
 
 ## Before implementing
 

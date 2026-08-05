@@ -52,10 +52,15 @@ make role-o        # then start a NEW session
 The marker is project-global. Creating it while an H session is running
 will start blocking that session mid-task. Prefer the env var.
 
-**Verify before starting.** `make role` must print `O`, or a Read of any
-path under `design/` must come back BLOCKED. If neither holds, stop and
-say so. An unguarded pass produces a register whose independence cannot
-be verified.
+**Verify before starting.** `make role` must print `O`, **or** a Read of
+`design/ADR-000-rationale.md` must come back BLOCKED.
+
+Not *any path under `design/`* — charter v8 made every numbered ADR
+readable, so that instruction became false the day it was written and
+would tell an O session it is unguarded when it is guarded. Exactly one
+path is blocked and it is the one to test. If neither disjunct holds,
+stop and say so: an unguarded pass produces a register whose
+independence cannot be verified.
 
 **You may read:** `vocab/`, `codelists/`, `transform/`, `fixtures/`,
 `claims.md`, `review-inbox.md`, `docs/`, `README.md`, `Makefile`,
@@ -78,8 +83,20 @@ Read a decision to check what it decided, what it left open, and whether
 its Decision, Obligation and Consequences sections agree with each other
 (§5.2 item 4). Do not read it to find out what you should think.
 
-**You may write:** the Status, Evidence, and Updated fields in
-`claims.md`, and `[O → H]` messages in `review-inbox.md`. Nothing else.
+**You may write:**
+
+- the Status, Evidence and Updated fields of an existing entry in
+  `claims.md`;
+- **a complete new entry** when promoting under §6 — statement,
+  Falsifier, Cheapest test, Evidence, Status, Updated. Promotion is *an
+  explicit act you perform*, and an entry with no Falsifier is not a
+  claim. This is stated because §1 previously named three fields while
+  §6 required writing a whole entry, and the two contradicted each
+  other;
+- `[O → H]` messages in `review-inbox.md`.
+
+Nothing else. In particular, **do not add or edit a Falsifier on an
+entry H owns** — propose the wording and let H file it.
 
 ---
 

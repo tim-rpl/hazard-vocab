@@ -2630,10 +2630,10 @@ instances below countable at all.
   the mechanism of the defect it is invoked to detect.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
-- **Evidence:** 2026-08-03 — **eleven instrument defects, six files, two
-  authors.** Nine manifested; two were self-caught before shipping and
-  are counted because the register counts defects **in instruments**, not
-  defects that caused visible harm.
+- **Evidence:** 2026-08-04 — **thirteen instrument defects, seven files,
+  three authors.** Eleven manifested; two were self-caught before
+  shipping and are counted because the register counts defects **in
+  instruments**, not defects that caused visible harm.
 
   | # | Instrument | Defect | Author | Found by |
   |---|---|---|---|---|
@@ -2648,11 +2648,16 @@ instances below countable at all.
   | 9 | staleness test | searched for a filename where the table renders stems | H | mutation |
   | 10 | the C21 mutation harness | merged the two maps back before filtering, so it **never reproduced the defect** it reached the right verdict on | H | the result not following from the mechanism |
   | 11 | `lint-selftest` `expect` | accepted on a precision row and never evaluated — a field that cannot fire | H | adding one that could not appear |
+  | 12 | the retracted-string sweep | keys on the **sentence**, not the proposition. Invoked to detect a withdrawn claim still standing elsewhere; a claim **restated in different words** is its failure mode. **Three** shipped past a green run — `ADR-003:34-39`, `ADR-006:284-288` and `ADR-003:188-192`, all in accepted ADRs, all at lines a reader takes as authoritative | H | the first two by O reading the retracted claims against the files rather than against the strings; the third by the **paraphrase sweep** proposed to replace it, on its first run |
+  | 13 | `.claude/hooks/guard_role.py` recursive-traversal fix | admitted on a green run against `grep -r .`; **three invocations of the grep family it names walk through it** — `grep -R`, `rg` with no root argument, and any absolute-path root. None is the disclosed `find`-pipe residual | human | O, by mutation with `-l` output |
 
-  **None of the eleven was found by reading the instrument.** Nine were
+  **None of the thirteen was found by reading the instrument.** Ten were
   found by running it against a deliberate defect, one by running it
-  against the file it was already guarding, and one by noticing the
-  verdict did not follow from the mechanism.
+  against the file it was already guarding, one by noticing the verdict
+  did not follow from the mechanism, and one — #12 — by checking the
+  instrument's *subject* rather than its output: the sweep reported
+  correctly on the strings it was given, and the claim it existed to
+  find was standing in different words.
 
   #10 is the entry that forced the criterion into the statement. It
   returned the right answer. Every other row is an instrument that was
@@ -2665,7 +2670,35 @@ instances below countable at all.
   `near-miss-distinct-uris` is rejected at load on the default path, the
   `--table` path and the `--table --write` path. Under the previous build
   the same edit passed green.
-- **Updated:** 2026-08-03
+
+  **#12 and #13 are the first two entries whose instrument is a
+  *search*, and they fail the same way.** Both were admitted on a green
+  run over the case their author had in mind — one retracted sentence,
+  one `grep -r .` — and both are defeated by an ordinary variation of
+  their input: the same claim in different words, the same recursion
+  under a different flag. Neither was reached by reading the instrument;
+  both were reached by asking what the instrument's subject is and then
+  handing it something outside it. #13 is the register's first entry
+  authored by the human, which is the reason the tooling-declaration
+  rule requires a **second** instrument: the run that admitted it was
+  the run that defined its coverage.
+
+  **#12's third site, added 2026-08-04 at block verification 9.**
+  `ADR-003:188-192` — *"That is what option B rests on"* — restates the
+  proposition BV7-3 withdrew 40 lines below, shares no string with it,
+  and survived three string sweeps. It was found by the **replacement**
+  instrument on that instrument's first run, in the pass that proposed
+  it, in text by the author proposing it. O re-ran the sweep
+  independently over `design/ADR-00[1-6]`, `docs/` and this file — the
+  content words surviving the paraphrase are `strongest`, `argues`,
+  `rests`, `discriminat` — and it returned the two sites already marked
+  and nothing further. **That run is a green, and a green is not
+  evidence under this claim**: the paraphrase sweep is itself an
+  instrument admitted on a run over the case its author had in mind, and
+  its own failure mode — a restatement sharing no *content word* either,
+  by synonym substitution — has not been probed. It is a candidate row
+  14, not a discharge of row 12.
+- **Updated:** 2026-08-04
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-02. It generalises
   beyond the gate: it constrains how evidence is admitted to this
@@ -2741,3 +2774,94 @@ that establishes it.
   a failure direction named in `FALSIFIER.md` §4 — *an instrument that
   reports success when it has inspected nothing* — extended to cover the
   case where no instrument was run.
+
+### C24 — Every type named in a relation signature carries the declaration its kind calls for
+Every type named as an argument in a relation signature carries the
+declaration its kind calls for: a **subject** is a row in the Part 0
+entity table, a **structural primitive** is an external binding, a
+**code-list reference** is a SKOS concept scheme (ADR-000 D5), and a
+**role variable** requires none because it ranges over any entity.
+
+- **Status:** `falsified`
+- **Falsifier:** a type named as an argument in any relation signature
+  whose kind's declaration does not exist — a subject with no entity
+  table row, a primitive bound to nothing, a code-list reference naming
+  no scheme.
+- **Cheapest test:** enumerate every relation signature in the tree,
+  extract the argument names from the signatures rather than from a list
+  already in hand, and word-boundary grep each across `design/`,
+  `docs/`, `vocab/`, `codelists/`, `transform/`, `fixtures/` and
+  `README.md`. Under ten minutes.
+- **Evidence:** 2026-08-04 — **born `falsified`. Eight counterexamples,
+  all inside one accepted ADR.**
+
+  Five relation signatures exist in `design/ADR-002-entity-core.md`,
+  naming **thirteen** argument types. Three are declared entities —
+  `Agent`, `Asset`, `Place`. Two are role variables and need no
+  declaration. The remaining **eight have none**.
+
+  | Kind | Names | The declaration its kind calls for | State |
+  |---|---|---|---|
+  | **Subject** | `HazardEvent`, `Incident` | a Part 0 entity table row | **undeclared** — Part 1, deferred by ADR-006 |
+  | **Structural primitive** | `Interval`, `Measure`, `Level` | an external binding — OWL-Time, QUDT | **used, bound nowhere** |
+  | **Code-list reference** | `HazardType`, `CapabilityType`, `Function` | a SKOS concept scheme | **named, no scheme exists** |
+  | **Role variable** | `Whole`, `Part` | none — ranges over any entity | correct as-is |
+
+  **`Interval` is the strongest instance.** It appears in **four of the
+  five** signatures. Re-derived by O rather than accepted: word-boundary
+  grep across the readable tree returns `ADR-002`, `ADR-006`,
+  `measure-01`, `README.md` and `docs/coverage.md:192` — every one a
+  *use* in a signature, none a declaration. `owl-time`, `time:Interval`
+  and `w3.org/2006/time` return **one hit in the entire tree**:
+  `ADR-006:228`, the cell asserting it is unbound. `CapabilityType` is
+  second: ADR-002 Decision F says it is a SKOS scheme and never names
+  one, and until 2026-08-04 it had exactly one occurrence in the tree.
+
+  **The section whose first line is *"Entities are declared once in Part
+  0"* makes its forcing argument with subjects it never declares, and
+  quantifies four of its five relations over a type nothing binds.**
+
+  **The entity core is short by two subjects, not by eight.** Three
+  primitives and three code-list references with no binding are a
+  different defect with a different repair, and collapsing them is how
+  an entity table becomes a type registry. The kernel stays six.
+
+  **Why this stayed invisible is structural.** ADR-000 D1 segments the
+  parts by epistemic kind, and Parts 2, 3, 5 and 6 do. Parts 1, 4 and 7
+  are named for **subjects**. So the entity core caught the subjects
+  with no part named after them and left the ones that had one, on the
+  assumption that the part *was* the home. A part is a statement kind; a
+  hazard is a subject.
+
+  **`sosa:Procedure` confirms the rule rather than breaking it.** It
+  appears in Part 2's observation relation and in no entity table,
+  correctly: a procedure is an IR flight protocol, a digitisation method
+  or a simulation model — a `Document`, or an `Asset` when it is
+  software. A role filled by an existing entity, which is
+  role-not-subtype holding where nobody consciously applied it.
+- **Updated:** 2026-08-04
+- **Promotion note:** minted by O under FALSIFIER §6 at design-gate
+  block verification 8, from the human's draft of 2026-08-04 and H's
+  proposal of the same day. **Filed `falsified`, not `asserted`,** under
+  §6's *do not weaken a claim to make it pass*: it is false today, its
+  counterexamples are enumerable, and a claim born falsified with its
+  counterexamples listed is the entry that would later justify writing
+  the lint rule. Aspirational entries are not what this register is for.
+- **Statement corrected on minting, and the correction recorded rather
+  than made silently.** H proposed *"every type named in a relation
+  signature has **a declaration of its kind**."* On a literal reading
+  `ADR-006:226-231` **is** such a declaration for all thirteen names,
+  including the eight — it assigns each a kind — so the claim would be
+  *satisfied*, with its own evidence table the thing satisfying it.
+  What is absent is not a statement of which kind a name is but **the
+  declaration that kind calls for**, which is what H's own fourth column
+  measures. Statement and falsifier disagreed; the falsifier and the
+  eight counterexamples were right and the statement was rewritten to
+  them. **No counterexample was dropped and the population is
+  identical.** This is the fourth round in which a proposed claim's
+  statement and falsifier tested different things — see C21 — and it is
+  recorded here so the register shows where that was caught.
+- **Boundary against [C22](#c22) and [C23](#c23):** those two constrain
+  **evidence**. C24 constrains the **vocabulary** — it is about what the
+  artifact declares, not about how a claim was established. It is the
+  first entry in that set since C21.

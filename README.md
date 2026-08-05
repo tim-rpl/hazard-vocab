@@ -23,6 +23,17 @@ Everything in `build/` is generated. The source of truth is `vocab/`.
 yet; the repository holds the design record, the claims register, and
 the toolchain.
 
+**The work is scoped in units, and unit 01 is Part 2 plus the fragment
+of Part 0 it depends on.** Its design gate is closed and implementation
+is open. **Part 0 is therefore authored to the extent Part 2 needs it,
+and later units will extend it** — LinkML is additive, so a class added
+for Part 1 does not invalidate one authored for Part 2. Read "the design
+gate passed" as *settled for this unit*, not as *the foundation is
+complete*.
+
+**Part 1 has not been measured, planned or designed.** It gets its own
+cycle.
+
 See `claims.md`. Many entries are `falsified` with evidence attached,
 and **none is `tested`**. That is the intended state — a register
 recording only successes would be worthless.
@@ -68,7 +79,7 @@ Part 3 as forecasts: the same class with different procedures.
 | Part | Scope |
 |---|---|
 | 0 | Foundation — entity core, identity, time, geometry, coverage, sampling, provenance |
-| 1 | Hazard — process, event, area, intensity, cascade relations |
+| 1 | Hazard — process, event, area, intensity, cascade relations *(not yet started; a later unit)* |
 | 2 | Observation — sensed and modelled state, distinguished by `procedure` and a required `epistemicKind` |
 | 3 | *vacant* — merged into Part 2 by ADR-003; the number is retained rather than renumbered |
 | 4 | Exposure — exposed elements, vulnerability, risk |
@@ -95,11 +106,29 @@ mode, model version, profile conformance — and a discriminator that must
 sit on *every* assertion needs a class that **is** the assertion. See
 ADR-004.
 
-**The core is known to be incomplete.** Two subjects appear as arguments
-in the relation signatures below and are declared nowhere:
-`HazardEvent`, `Incident`, and — in `authority` — `HazardType`. They are
-Part 1 content and Part 1 is not in the current unit, so they are
-recorded rather than declared. See the open questions.
+**The core is known to be incomplete, deliberately.** Subjects appear as
+arguments in the relation signatures below and are declared nowhere —
+`HazardEvent`, `Incident`, and in `authority`, `HazardType` — along with
+structural primitives (`Interval`, `Measure`, `Level`) that nothing
+binds and code-list references (`CapabilityType`, `Function`) with no
+scheme. See `claims.md` C24, filed `falsified` with all eight.
+
+`HazardEvent` and `Incident` are the two that matter most, and they are
+distinct: the **hazard** is the phenomenon, the **incident** is the
+managed occurrence with a name, a lifecycle, an authority and a
+containment figure. Two hazards can be one incident, which is what
+`partOf` was written for.
+
+Both are Part 1 content. Unit 01's Part 2 observations — air quality and
+weather — take a *site* as their feature of interest, not a hazard, so
+declaring them now would expand this unit's surface for content it does
+not use. The line held throughout: **correct what would land wrong in
+`vocab/core/`; defer what would only make it larger.**
+
+ADR-006 removed a wrong carrier (hazard events were listed under
+`Activity`) and deliberately added none. The question *what carries the
+hazard* is therefore **unanswered rather than wrongly answered**, which
+is the better of the two states and is not the same as answered.
 
 Three Part 0 relations carry the structure the parts share:
 `partOf(Whole, Part, Interval)` for crews, incident complexes and
