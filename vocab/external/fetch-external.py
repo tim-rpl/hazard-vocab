@@ -62,7 +62,8 @@ SOURCES = [
      ["SystemCapability", "OperatingRange"]),
     ("prov-o", "http://www.w3.org/ns/prov#",
      "http://www.w3.org/ns/prov-o#",
-     ["wasAttributedTo", "generatedAtTime", "Agent", "Activity", "Entity"]),
+     ["wasAttributedTo", "generatedAtTime", "Agent", "Activity", "Entity",
+      "SoftwareAgent"]),
     ("org", "http://www.w3.org/ns/org#",
      "http://www.w3.org/ns/org#",
      ["Organization"]),
@@ -101,6 +102,16 @@ SOURCES = [
     ("shacl", "http://www.w3.org/ns/shacl#",
      "https://www.w3.org/ns/shacl.ttl",
      ["NodeShape", "path", "equals", "condition", "sparql"]),
+    # Candidates for the origin-type question (agent kind). Not cached
+    # until 2026-08-05 and never probed, so the modelling argument was
+    # running ahead of the measurement. F1's lesson applies: test for a
+    # DEFINED term, not a 200.
+    ("schema", "https://schema.org/",
+     "https://schema.org/version/latest/schemaorg-current-https.ttl",
+     ["GovernmentOrganization", "NGO", "Organization"]),
+    ("sioc", "http://rdfs.org/sioc/ns#",
+     "http://rdfs.org/sioc/ns#",
+     ["Community"]),
     # CF Standard Names. `CLAUDE.md` names this in its conventions, it is
     # a standing precision fixture in `bound-vocabularies.yaml`, and it is
     # the binding exp-01 showed would have turned the composite-versus-PM2.5
@@ -222,6 +233,8 @@ PROBE = {
     "adms": "http://www.w3.org/ns/adms#Identifier",
     "dcterms": "http://purl.org/dc/terms/conformsTo",
     "shacl": "http://www.w3.org/ns/shacl#NodeShape",
+    "schema": "https://schema.org/GovernmentOrganization",
+    "sioc": "http://rdfs.org/sioc/ns#Community",
     # F1's lesson: probe for a DEFINED term, not a 200.
     "undrr-isc-hazard-classification": "https://undrr-hip.org/MH0001",
 }

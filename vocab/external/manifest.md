@@ -24,7 +24,7 @@ disagreeing with itself.
 | `ssn` | <http://www.w3.org/ns/ssn/> | 200 | 22714 | `184d86189191` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/> | **yes** — 200 text/turtle, `System` defined |
 | `ssn-ext` | <https://www.w3.org/ns/ssn/ext/> | 200 | 8115 | `0b8fdef9a06a` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/ext/> | **document** — 200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere |
 | `ssn-system` | <http://www.w3.org/ns/ssn/systems/> | 200 | 27565 | `1750d2b3bb56` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/ssn/systems/> | **yes** — 200 text/turtle, `SystemCapability` defined |
-| `prov-o` | <http://www.w3.org/ns/prov-o#> | 200 | 68795 | `7d203989f67b` | text/turtle | 5/5 terms present | <http://www.w3.org/ns/prov#> | **yes** — 200 text/turtle, `Entity` defined |
+| `prov-o` | <http://www.w3.org/ns/prov-o#> | 200 | 68795 | `7d203989f67b` | text/turtle | 6/6 terms present | <http://www.w3.org/ns/prov#> | **yes** — 200 text/turtle, `Entity` defined |
 | `org` | <http://www.w3.org/ns/org#> | 200 | 84162 | `3e01f89a1747` | text/turtle | 1/1 terms present | <http://www.w3.org/ns/org#> | **yes** — 200 text/turtle, `Organization` defined |
 | `geosparql` | <https://opengeospatial.github.io/ogc-geosparql/geosparql11/geo.ttl> | 200 | 40988 | `7a8028dba554` | text/turtle | 4/4 terms present | <http://www.opengis.net/ont/geosparql#> | **no** — 200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined |
 | `qudt-schema` | <http://qudt.org/schema/qudt/> | 200 | 115706 | `91dee20dbfe8` | text/turtle | 3/3 terms present | <http://qudt.org/schema/qudt/> | **yes** — 200 text/turtle, `QuantityValue` defined |
@@ -36,6 +36,8 @@ disagreeing with itself.
 | `adms` | <https://www.w3.org/ns/adms.ttl> | 200 | 11134 | `634d8bfa4a98` | text/turtle | 2/2 terms present | <http://www.w3.org/ns/adms#> | **yes** — 200 text/turtle, `Identifier` defined |
 | `dcterms` | <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl> | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 terms present | <http://purl.org/dc/terms/> | **yes** — 200 text/turtle, `conformsTo` defined |
 | `shacl` | <https://www.w3.org/ns/shacl.ttl> | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 terms present | <http://www.w3.org/ns/shacl#> | **yes** — 200 text/turtle, `NodeShape` defined |
+| `schema` | <https://schema.org/version/latest/schemaorg-current-https.ttl> | 200 | 260463 | `c1998d790ae4` | text/turtle | 0/3 terms present | <https://schema.org/> | **no** — 200 text/html, unparseable |
+| `sioc` | <http://rdfs.org/sioc/ns#> | 200 | 54624 | `8935462c4a8a` | application/rdf+xml | 1/1 terms present | <http://rdfs.org/sioc/ns#> | **yes** — 200 application/rdf+xml, `Community` defined |
 | `nvs-p07` | <http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle> | 200 | 11568143 | `b55868b6d586` | text/turtle | 6/6 terms present | <http://vocab.nerc.ac.uk/collection/P07/current/> | **untested** — no probe term declared |
 | `disaster-event-module-generalized` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-generalized.ttl> | 200 | 16259 | `a0bdffeb8cd0` | text/plain | 4/4 terms present | <http://knowwheregraph/ontology/deo#> | **no** — host `knowwheregraph` has no TLD — cannot resolve for anyone |
 | `disaster-event-module-extensions` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-extensions.ttl> | 200 | 18328 | `1d90bb72c683` | text/plain | 1/1 terms present | <http://knowwheregraph/ontology/deo#> | **no** — host `knowwheregraph` has no TLD — cannot resolve for anyone |
@@ -46,6 +48,8 @@ disagreeing with itself.
 
 - ssn-ext: namespace returns a graph but mints no term of its own (200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere) — a URI built from this namespace is a URI nobody declares
 - geosparql: namespace does not dereference to a graph (200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined) — bindable only as BORROWED
+- schema: 3/3 terms MISSING from the payload: GovernmentOrganization, NGO, Organization
+- schema: namespace does not dereference to a graph (200 text/html, unparseable) — bindable only as BORROWED
 - disaster-event-module-generalized: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED
 - disaster-event-module-extensions: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED
 - disaster-properties-ontology: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED

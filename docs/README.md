@@ -4,6 +4,7 @@
 |---|---|---|
 | `measure/` | measure-stage documents — blast radius, surface, bindings, fixtures, cost | H |
 | `plan/` | plan-stage documents — items, dependencies, topological order | H |
+| `measure/part1-carried-findings.md` | findings produced in one unit that belong to a later one — recorded, never decided there | H |
 | `experiments/` | experiment records — setup, prediction stated in advance, result, falsifier | H |
 | `coverage.md` | the capability matrix | H |
 | `sources/` | the authoritative source register | human |
