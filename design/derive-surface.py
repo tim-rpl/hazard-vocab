@@ -202,6 +202,40 @@ def main():
         print("FAIL\n  " + "\n  ".join(sorted(set(restated))), file=sys.stderr)
         return 1
 
+    # I1: COMPLETENESS. Everything above counts what this file already
+    # holds — `len(d["slot_uri"])`, `len(d["local_slots"])` — so
+    # `16 + 8 = 24` was true of the file and said nothing about whether
+    # the file was right. `operatingMode`, `modelVersion` and
+    # `profileConformance` were required by an accepted ADR, named in
+    # P6a's definition of done, and absent from every population here,
+    # and `--check` was green throughout. §4's shape: an instrument
+    # reporting success having inspected nothing about the question.
+    #
+    # The test is against the OTHER artifact: every slot the plan's P6a
+    # criterion names must appear somewhere in this file. A generator
+    # cannot validate its own source; it can be held against a document
+    # that was written independently.
+    known = (set(d["slot_uri"]) | set(d["local_slots"])
+             | set(d.get("removed_from_local") or {})
+             | set(d.get("not_enumerated_by_a1") or {}))
+    items = HERE.parent / "docs" / "plan" / "items.yaml"
+    if items.exists():
+        import yaml as _y
+        p6a = ((_y.safe_load(items.read_text())["items"].get("P6a") or {})
+               .get("done_when", ""))
+        named = set(re.findall(r"`([a-z][A-Za-z]+)`", p6a))
+        # names in that criterion that are not slots
+        noise = {"make", "gen", "lint", "sh", "path"}
+        missing = sorted(n for n in named - known - noise
+                         if not n.startswith(("build", "vocab")))
+        if missing:
+            print("FAIL\n  P6a's definition of done names slot(s) this "
+                  "surface does not carry: %s\n  Either the surface is "
+                  "short or the criterion names something that is not a "
+                  "slot. Both are findings; neither is a counting error."
+                  % ", ".join("`%s`" % m for m in missing), file=sys.stderr)
+            return 1
+
     stale = []
     for name, lines in blocks.items():
         beg, end = BEGIN % name, END % name

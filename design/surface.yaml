@@ -80,3 +80,6 @@ removed_from_local:
 # folding one in is exactly how the arithmetic looked closed at 25.
 not_enumerated_by_a1:
   epistemicKind: "ADR-003 B. NOT enumerated by A1 \u2014 see not_enumerated_by_a1"
+  operatingMode: "ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)"
+  modelVersion: "ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)"
+  profileConformance: "ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)"

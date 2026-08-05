@@ -170,6 +170,9 @@ defect this whole section is about.
 **Needed by this unit and NOT enumerated by A1** — reported separately and never counted in a row labelled *A1's enumerated slots*, which is exactly how the arithmetic looked closed at 25:
 
 - `epistemicKind` — ADR-003 B. NOT enumerated by A1 — see not_enumerated_by_a1
+- `operatingMode` — ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)
+- `modelVersion` — ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)
+- `profileConformance` — ADR-004 Decision B / PG5. Hangs off Statement; A1 did not enumerate it (I1)
 
 <!-- END GENERATED:partition -->
 
@@ -213,7 +216,7 @@ comes from the artifact.
 - **8 local slots:** `id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `elevation`, `procedureKind`, `observingSystemStatus`, `sourceVerificationTier`
 - **13 class bindings:** `Observation`, `Sensor`, `Platform`, `FeatureOfInterest`, `Procedure`, `ObservableProperty`, `ObservationCollection`, `prov:Agent`, `prov:Activity`, `prov:Entity`, `org:Organization`, `geo:Geometry`, `qudt:QuantityValue`
 - **6 value URIs verified**, **6 to verify first**
-- **plus `epistemicKind`**, which A1 did not enumerate
+- **plus `epistemicKind`, `operatingMode`, `modelVersion`, `profileConformance`**, which A1 did not enumerate
 
 <!-- END GENERATED:worklist -->
 
