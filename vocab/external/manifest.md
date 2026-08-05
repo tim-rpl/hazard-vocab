@@ -25,6 +25,7 @@ absent behind one.
 | `adms` | `http://www.w3.org/ns/adms#` | 200 | 11134 | `634d8bfa4a98` | text/turtle | 2/2 terms present |
 | `dcterms` | `http://purl.org/dc/terms/` | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 terms present |
 | `shacl` | `http://www.w3.org/ns/shacl#` | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 terms present |
+| `nvs-p07` | `http://vocab.nerc.ac.uk/collection/P07/current/` | 200 | 11568143 | `b55868b6d586` | text/turtle | 6/6 terms present |
 | `deo` | `http://schema.knowwheregraph.org/` | 000 | 0 | `-` | - | no payload |
 
 ## Problems

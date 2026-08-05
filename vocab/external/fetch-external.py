@@ -18,8 +18,13 @@ bindings were falsified that way. So every entry below carries the terms
 it is bound for, and the manifest records **which terms were found in
 the payload**, not that the payload arrived.
 
-A term recorded as MISSING is not a bug in this script. It is the
-finding, and it belongs in the gate.
+A term recorded as MISSING is a claim about the payload, and it is
+checked before it is reported. This line first read *"a term recorded as
+MISSING is not a bug in this script — it is the finding"*, and the next
+run produced two false MISSINGs from this file's own `\\b` anchoring
+against names containing underscores. **The matcher is a suspect like
+any other instrument.** Grep the payload for the real name before
+reporting an absence.
 """
 import argparse
 import hashlib
@@ -96,6 +101,30 @@ SOURCES = [
     ("shacl", "http://www.w3.org/ns/shacl#",
      "https://www.w3.org/ns/shacl.ttl",
      ["NodeShape", "path", "equals", "condition", "sparql"]),
+    # CF Standard Names. `CLAUDE.md` names this in its conventions, it is
+    # a standing precision fixture in `bound-vocabularies.yaml`, and it is
+    # the binding exp-01 showed would have turned the composite-versus-PM2.5
+    # substitution into a validation failure. It was the one convention-named
+    # vocabulary the cache did not hold.
+    #
+    # The NAMESPACE serves text/html; only the profile URL serves the graph
+    # (200, text/turtle, 11.5 MB). That gap is precisely what the register's
+    # `dereferences` column is for, and it is why the fetch URL and the
+    # namespace are separate fields rather than one.
+    ("nvs-p07", "http://vocab.nerc.ac.uk/collection/P07/current/",
+     "http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle",
+     ["air_temperature", "wind_speed", "mole_fraction_of_ozone_in_air",
+      "atmosphere_boundary_layer_thickness",
+      # FULL CF names. The first probe used the stems
+      # `mass_concentration_of_pm2p5` / `_pm10` and both came back
+      # MISSING — because `terms_found` anchors on `\b`, and the
+      # character after the stem is `_`, which is a word character. The
+      # terms are present under their full names. A false MISSING, from
+      # this file's own matcher, on the two terms A3 had flagged as
+      # unverified — the reading it would have supported is that CF does
+      # not carry PM2.5.
+      "mass_concentration_of_pm2p5_ambient_aerosol_particles_in_air",
+      "mass_concentration_of_pm10_ambient_aerosol_particles_in_air"]),
     # The Part 1 lead. UNVERIFIED by design — ADR-006 records three
     # questions to answer by fetch when Part 1 comes up, and whether the
     # namespace dereferences at all is the first of them.
@@ -132,6 +161,51 @@ def fetch(url):
     finally:
         tmp.unlink(missing_ok=True)
     return status, final, ctype, body
+
+
+# A namespace "dereferences" only if resolving it returns a graph in
+# which a known term is DEFINED. GeoSPARQL's namespace URI returns a
+# Prez description document carrying all four bound terms and defining
+# none — a 200, the right terms, and nothing to bind against. So the
+# test is: fetch the namespace, parse it, ask whether the probe term has
+# an rdf:type triple.
+PROBE = {
+    "sosa": "Observation", "ssn": "System", "ssn-ext": "ObservationCollection",
+    "ssn-system": "SystemCapability", "prov-o": "Entity",
+    "org": "Organization", "geosparql": "Geometry",
+    "qudt-schema": "QuantityValue", "qudt-units": "M-PER-SEC",
+    "skos": "Concept", "owl-time": "Interval", "foaf": "Document",
+    "dqv": "QualityMeasurement", "adms": "Identifier",
+    "dcterms": "conformsTo", "shacl": "NodeShape",
+}
+
+
+def dereferences(ns, key):
+    """(verdict, detail) — what a consumer resolving the namespace gets."""
+    probe = PROBE.get(key)
+    if not probe:
+        return "untested", "no probe term declared"
+    status, final, ctype, body = fetch(ns)
+    if status != "200" or not body:
+        return "no", "HTTP %s" % status
+    try:
+        from rdflib import Graph, RDF, URIRef
+    except ImportError:
+        return "untested", "rdflib unavailable"
+    g = Graph()
+    for fmt in ("turtle", "xml"):
+        try:
+            g.parse(data=body, format=fmt)
+            break
+        except Exception:
+            g = Graph()
+    else:
+        return "no", "200 %s, unparseable" % ctype.split(";")[0]
+    base = ns if ns.endswith(("/", "#")) else ns + "#"
+    if list(g.objects(URIRef(base + probe), RDF.type)):
+        return "yes", "200 %s, `%s` defined" % (ctype.split(";")[0], probe)
+    return "no", "200 %s, %d triples, `%s` NOT defined" % (
+        ctype.split(";")[0], len(g), probe)
 
 
 def terms_found(body, terms):

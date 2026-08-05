@@ -2884,3 +2884,49 @@ entity table, a **structural primitive** is an external binding, a
   **evidence**. C24 constrains the **vocabulary** — it is about what the
   artifact declares, not about how a claim was established. It is the
   first entry in that set since C21.
+
+### C25 — The alias decomposition is exercised
+Every class in ADR-001's identity structure — `IdentifiedObject`,
+`Name`, `NameType`, `NamingAuthority`, `ObjectType` — carries data that
+no simpler mechanism could hold.
+
+- **Status:** `asserted`
+- **Falsifier:** a working alignment over the reference
+  implementation's own feeds that resolves the same incidents, using
+  only a minted identity plus an ordered list of schemes, with no
+  `NameType`, `NamingAuthority` or `ObjectType` instance. If that
+  reproduces the same partition, the classes it omits are unexercised.
+- **Cheapest test:** at P6b, resolve one day of captured WFIGS and
+  perimeter records twice — once through the four-class structure, once
+  through `{minted_id, scheme_rank}` alone — and diff the resulting
+  partitions. Under an hour once fixtures exist. A difference falsifies
+  the simpler mechanism; an identical partition falsifies this claim.
+- **Note — the two systems answer different questions, and that is the
+  argument this claim rests on.** KnowWhereGraph's alignment is
+  *retrospective and curated*: Hurricane Katrina is one event because a
+  person decided so once, and the URI records the decision. This
+  project's is *live and automated*: several perimeter services publish
+  one fire under different names within minutes, and something must
+  decide without a human whether two records are one incident. That
+  decision can be wrong, so it must be auditable and reversible —
+  `candidateMatch` records a suspicion without asserting identity,
+  precedence records which scheme won, `NamingAuthority` records who
+  issued the identifier that decided it. KWG needs none of this because
+  its alignment is a fact rather than an inference. **If that
+  distinction does not hold, most of the decomposition is decoration.**
+- **Watch — standing evidence against, from a working system.**
+  KnowWhereGraph aligns named events across NOAA Storm Events, FEMA
+  Disaster Declarations Summaries and NOAA Historical Hurricane Tracks
+  with **zero identity constructs in its schema**: `owl:sameAs`,
+  `skos:exactMatch`, `prov:alternateOf`, `prov:specializationOf`,
+  `dcterms:identifier` and `schema:identifier` all occur 0 times across
+  all four cached DMDO graphs, and nothing matching `*name*`, `*align*`,
+  `*match*` or `*identif*` is declared. Measured, not inferred. It is
+  the only working system in this domain either way.
+- **Scope — this is about cost, not correctness.** ADR-001 question 1
+  is recorded as *settled*, and the structure may be right. C25 asks
+  whether it is **paid for**. An absence of published alternatives is
+  weak support for a design; a deployed system that does the job without
+  it is evidence about price.
+- **Evidence:** —
+- **Updated:** —
