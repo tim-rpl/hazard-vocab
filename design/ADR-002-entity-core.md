@@ -29,8 +29,8 @@ carefully separated only two.
 |---|---|---|
 | `Agent` | Person, Organization, Crew/Team, Automated System | `prov:Agent`, `org:Organization` |
 | `Asset` | Equipment, vehicles, aircraft, sensors, facilities, infrastructure | **contested — see Decision B addendum** |
-| `Place` | Zones, jurisdictions, facilities, sampling locations | `sosa:FeatureOfInterest`, ISO 19112 |
-| `Activity` | Observation acts, assignments, hazard events, warning issuances | `prov:Activity` |
+| `Place` | Zones, jurisdictions, facilities, sampling locations | ISO 19112 — **amended 2026-08-04 by ADR-006 Decision B.** This read `sosa:FeatureOfInterest, ISO 19112`; `FeatureOfInterest` is a **role class**, like `Platform` and `Sensor`, which this ADR's own addendum flags on the two adjacent rows and missed here |
+| `Activity` | Observation acts, assignments, warning issuances | `prov:Activity` — **amended 2026-08-04 by ADR-006 Decision A.** This row also listed **hazard events**; `prov:Activity` is a provenance term for how a *data artifact* came to be, and a hazard produces none. What carries a hazard is Part 1 and is not decided |
 | `Document` | IAPs, situation reports, delegation letters, orders as legal instruments | `foaf:Document` — **amended 2026-08-02 by ADR-004 Decision D.** This read `prov:Entity, foaf:Document`; `prov:Entity` is `Statement`'s alone, and two classes carrying it either merge their shapes or assert a falsehood |
 
 `Statement` — the reified assertion with provenance — is the sixth.

@@ -243,7 +243,7 @@ dependency was the largest defect in the first draft of this section:
 | **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | excused — decided at the design gate 2026-08-02 (ADR-004) | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
 | **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
-| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. Eight live sites censused 2026-08-03: `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), and PA5, T4a, PA19, T4. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
+| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. Eight live sites censused 2026-08-03, all marked 2026-08-04 and none corrected: `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
 
 <!-- END GENERATED:items -->
 
@@ -361,11 +361,14 @@ definition of done is stated over a population ADR-004 retired, so the
 restatement precedes the work. P5 is now wave 2. It is still the widest
 item and everything in wave 3 still waits on it.
 
-Amended for the dependency only. **The rest of this paragraph is P20's
-subject and is deliberately untouched** — the sentence below still reads
-over `23` and `10`, and correcting it here while seven other live sites
-stand is the partial retraction this project has been bitten by three
-times. It goes in one pass or not at all.
+Amended for the dependency only. **Every figure from here to the end of
+PA5's justification — including the T4a paragraph below — is P20's
+subject and is deliberately untouched.** Scope widened 2026-08-04: this
+read *"the rest of this paragraph"* and *"the sentence below"*, both
+singular, which did not obviously reach a passage two paragraphs down.
+`23` and `10` here are the retired population; correcting them while
+seven other live sites stand is the partial retraction this project has
+been bitten by three times. It goes in one pass or not at all.
 
 The 23 bindings are content-verified (A3 as amended, S4) and the 10
 local terms are enumerated (A1 as restated).
@@ -559,7 +562,7 @@ condition.
 | **P2** | **MET 2026-08-02.** ADR-001 records option **B** with its reason: B is the only option whose correctness does not depend on resolving L2 | S |
 | **P3** | **MET 2026-08-02.** ADR-003 records option **B**; `docs/coverage.md` and ADR-002's modality table amended in the same pass | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
-| **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25 | **L** |
+| **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25. **[Marked 2026-08-04, figure untouched: `23 external terms` and `the ten local terms` are the population ADR-004 retires as unrecoverable; its generated worklist replaces them, and **P20** owns the restatement. A marker is not a retraction — the censused sites go in one pass.]** | **L** |
 | **P6a** | **P17 answers PA29 and PA30's decisions first** (a blocks-start edge, not a sentence — BV12). Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `assertedTime`, `elevation`, `sourceVerificationTier`**, and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each of those seven, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` (P16 is **done**, BV13); `flat-siblings.yaml` still passes | M |
 | **P6b** | `build/shapes.ttl` carries an `sh:path` for the `candidateMatch` relation's slots, and no heuristic match appears as an identity fact | S–0 |
 | **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error, **and it carries an `sh:path` for `procedureKind`** — or ADR-003's record states the slot does not exist (PA28) | M |
@@ -576,7 +579,7 @@ condition.
 | **P17** | **MET 2026-08-02.** ADR-004: no `crs` slot (`asWKT` range constrained to `geo:wktLiteral`); `Statement` is a Part 0 class binding `prov:Entity`; A1's class count moves **14 to 15** | S |
 | **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
-| **P20** | P5's item and `done_when`, and PA5, PA19, T4 and T4a, name **ADR-004's generated worklist** and state no count; `derive-waves.py --check` and `derive-surface.py --check` both pass; and a retired-figure guard fails on `23 external terms`, `23 binding`, `23 bindings` and `ten|10 local terms` reintroduced anywhere in `docs/plan/`, **verified by putting one back** — not by observing that the guard exists. Historical sites stay: the closed measure document, quoted originals, amendment records | S |
+| **P20** | Every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
 
 <!-- END GENERATED:done -->
 
@@ -741,9 +744,26 @@ disagree by an hour, seasonally — and deferred writing it to this gate.
 It was not written. **Collecting 24 snapshots under an unstated ordering
 convention is the cheapest way to have to collect them twice.**
 
-Two new items, both wave 1:
+Two new items — **P13 in wave 1, P14 in wave 2**:
 
 *(Both items' criteria are now rows in the generated table above.)*
+
+> **Corrected 2026-08-04 (BV6-3). This read *"both wave 1"*, and it is
+> BV17/BV24's surviving half.** That defect was *"P14 was in wave 1 while
+> its own row gives it `blocks-start: P13`"*; the item table was
+> corrected and **this sentence — the one the assertion originally came
+> from — was not.** The generator then removed the drifting table from
+> under the claim and left the claim, so nothing disagreed with it any
+> more.
+>
+> **The argument survives, and it is worth stating why rather than
+> asserting it.** PA22's point is the ~24h irreducible floor: the capture
+> must be *started* early or the wall clock pays for it at the end. The
+> floor belongs to **P14**, whose predecessor **P13 is in wave 1 and is
+> S-sized**. So the capture is startable as early as PA22 requires — P13
+> then P14, both inside the wait that P1's O-turnaround and P3's
+> design-gate decision already impose. **What is false is "both wave 1",
+> not "start it early".**
 
 `fixtures/README.md` is H's under the ownership table, so P13 is H's to
 write.
@@ -855,6 +875,12 @@ ten have no external identity to resolve; a term with no external URI
 its class is authored. P5 resolves the 23 external identities, declares
 prefixes, and caches graphs. That is the resolve-and-cache reading
 applied consistently instead of applied to three clauses out of four.
+
+> **`23 external identities` is the retired population. P20 owns the
+> restatement.** ADR-004 retires `23 bind / 10 write of 33` as
+> unrecoverable; the replacement is its generated worklist, not another
+> total. Marked 2026-08-04, figure deliberately untouched — a marker is
+> not a retraction, and the eight censused sites go in one pass.
 
 O pre-empted the weaker repair — reading "declared" as *enumerated* —
 and was right that it fails: a clause satisfiable by transcription is
@@ -1337,6 +1363,17 @@ generated block → exit 1 each.
 ---
 
 ### Claim proposed
+
+> **Read this before the claim below. `23 external bindings` is the
+> retired population, and P20 owns the restatement.** ADR-004 retires
+> `23 bind / 10 write of 33` as unrecoverable and replaces it with its
+> generated worklist. The marker sits **above** the claim rather than
+> after it because this passage is under *Claim proposed* — a reader
+> arriving here takes the figure as the live population of a claim being
+> made, which is the site most likely to be read as current. Marked
+> 2026-08-04; figure untouched, because a marker is not a retraction and
+> the eight censused sites go in one pass. `claims.md` T4a's Evidence
+> already carries the register-side note.
 
 **T4 — the binding surface is decidable before either open ADR.**
 Neither ADR-001's resolution nor ADR-003's changes the form of any of

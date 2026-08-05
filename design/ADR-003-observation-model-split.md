@@ -101,19 +101,30 @@ alone."*
 > *"that alone settles it"* does not follow.
 >
 > **The decision stands on the evidence table below**, which is
-> independent of the bar: **A29, A5, T4 and A7**. A5 and T4 in
-> particular make option A *not executable as scoped*, which is forced
-> by the payloads rather than chosen.
+> independent of the bar: **A29, A5, T4 and A7**.
+>
+> **Further corrected 2026-08-04, BV6-5.** The sentence that stood here
+> read *"A5 and T4 in particular make option A not executable as
+> scoped, which is forced by the payloads rather than chosen."* **A5
+> prices option A; it does not make it inexecutable** — O ruled exactly
+> that at the measure gate, and the plan of record carries the
+> executable path under A at P8a's row. T4 does not discriminate. The
+> ground is stated in *What the three legs establish* below and is not
+> stated here.
 
-The evidence accumulated since is one-directional:
+**This section read *"the evidence accumulated since is
+one-directional."* That is false, withdrawn 2026-08-04 under BV6-5**,
+and the table below is rewritten to say what each finding establishes
+and what it does not. Two of the three legs the decision was stated on
+do not carry the weight put on them.
 
-| Finding | Bears on |
-|---|---|
-| **A29 / S8** — SOSA's own `sosa:Sensor` definition reads *"Device, agent (including humans), or **software (simulation)**"*, verified verbatim at `sosa.ttl:154` | The standard we bind classes a simulation as a sensor. A is fighting the vocabulary it imports, not only the one it cites |
-| **A5**, survived under experiment | Under A this unit is **not executable as scoped** — Open-Meteo publishes no instrument (S10 probed for one and found none), so it has no Part 2 shape |
-| **T4**, falsified by experiment | `sosa:madeBySensor`'s cardinality differs by outcome. Under B it *cannot* be required; under A it can. The A/B choice is forced by the payloads, not chosen |
-| **A7** | B costs **+1 slot and +1 enum**. A costs a Part 3 that re-declares the observation shape, plus a union query on every consumer, forever |
-| **L6**, weakened on its own terms | Stratification constrains *derivation only, not presentation*, and the stratum assignment is a judgment call at exactly the boundary cases — QC'd and gap-filled readings, data assimilation, EPA's interpolated contours published as observational products |
+| Finding | What it establishes | What it does **not** |
+|---|---|---|
+| **A29 / S8** — SOSA's own `sosa:Sensor` definition reads *"Device, agent (including humans), or **software (simulation)**"*, verified verbatim at `sosa.ttl:154` | The vocabulary this project binds classes a simulation as a sensor, so B is **not** in conflict with SOSA. Removes an objection to B | **Permissive, not exclusive.** It creates no objection to A. A vocabulary may bind SOSA and still split its own parts |
+| **A5**, survived under experiment | **A cost measurement of option A.** Open-Meteo publishes no instrument (S10 probed and found none), so under A it has no Part 2 shape and its captures become Part 3 fixtures for a later unit | **Does not choose B.** O ruled *"A5 prices option A; it does not choose B"* at the measure gate, and the plan already carries the path: `plan` P8a, *"Under option A: AirNow only… the Open-Meteo captures are retained as Part 3 fixtures"*, with PA21 stating *"nothing is discarded; the boundary moves."* A5's own text offers a disjunction and the plan took the second horn |
+| **T4**, falsified by experiment | That the A/B choice **cannot be deferred** — `sosa:madeBySensor`'s cardinality differs by outcome | **Does not discriminate.** Its own row reads *"Under B it cannot be required; under A it can"* |
+| **A7** | The **schema** delta: B costs +1 slot and +1 enum; A costs a Part 3 re-declaring the observation shape plus a union query on every consumer | **Undercounts, one-sidedly.** It prices the schema delta and calls it the cost of the decision. The Obligation section below records four further costs, **all of them B's** — the omission lint, the cross-slot constraint whose third obligation is *"unmet and may be unmeetable"*, the ADR that must adjudicate the boundary cases and does not exist, and curated narrative content that `{observed, modelled}` cannot carry. Its own words: *"Misassignment is unenforced indefinitely… that is the price of option B rather than a temporary state."* And under B every consumer wanting observed-only pays a filter predicate whose reliability is exactly what is unenforced |
+| **L6**, weakened on its own terms | Stratification constrains *derivation only, not presentation*, and the stratum assignment is a judgment call at exactly the boundary cases — QC'd and gap-filled readings, data assimilation, EPA's interpolated contours published as observational products | — |
 
 ### The enforcement argument, withdrawn
 
@@ -139,14 +150,42 @@ decision — establishes that such a constraint is not generable from
 LinkML.** This ADR discharged by validation what its sibling says
 validation cannot do.
 
-**B still stands, on A29, A5 and A7 — three, not four.** An earlier
-draft listed **T4**, and T4 does not discriminate between the options:
-its own evidence row above reads *"Under B it cannot be required; under
-A it can"*, and `claims.md` agrees. **T4's falsification establishes
-that the A/B choice cannot be deferred, not which choice to make.**
-`A5` alone carries A's inexecutability. Corrected 2026-08-02.
+### What the three legs establish — restated 2026-08-04 under BV6-5
 
-The three that remain are independent of this argument and of the
+This section read: *"B still stands, on A29, A5 and A7 — three, not
+four."* **Two of those three do not carry the weight, and the sentence
+`A5` alone carries A's inexecutability is withdrawn.**
+
+- **A5 prices A. It does not choose B.** O ruled that at the measure
+  gate in those words, and the plan of record demonstrates it: P8a's row
+  carries the executable path under A, and PA21 says *"nothing is
+  discarded; the boundary moves."* A5's own text is a disjunction —
+  *"already presupposes B, **or** it silently drops half its fixtures"* —
+  and the plan took the second horn at a cost of one sentence.
+- **A7 undercounts, and one-sidedly.** See its row above. It prices the
+  schema delta while the Obligation section records four further costs,
+  all of them B's.
+- **A29 survives, and is permissive rather than exclusive.** It removes
+  an objection to B and creates none against A.
+- **T4 does not discriminate**, which this ADR corrected on 2026-08-02
+  and which still holds. **T4's falsification establishes that the A/B
+  choice cannot be deferred, not which choice to make.**
+
+**The ground that survives is the interoperability argument, and it is
+already stated in this file.** *SOSA dereferences and follows this
+pattern; OMS publishes no dereferenceable ontology* — the section below
+titled *Note on the interoperability argument*, which nothing in BV6-5
+touches. That is what option B rests on.
+
+**Option B is not reversed and nothing downstream moves.** ADR-004,
+ADR-005 and the whole of plan 01 rest on B, and B stands. What was
+falsified is the **stated ground** of a decision of record, not the
+decision. Recording the difference explicitly because a falsified ground
+read as a threat to the decision would expand this gate, and read as a
+wording fix would leave a false claim at the most-read line of an
+accepted ADR.
+
+The legs above are independent of the enforcement argument and of the
 bar. What does not stand is the claim that
 option B *enforces* what option A's module boundary enforced. It does
 not, and the Obligation section records that as a permanent gap rather

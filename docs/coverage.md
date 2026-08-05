@@ -189,7 +189,7 @@ defect.
 | Incident record and lifecycle | Part 1 | `covered` |
 | Hazard classification | Part 1 (UNDRR HIP) | `covered` |
 | Hazard intensity / magnitude | Part 1 (slot), profile (filler) | `covered` |
-| Incident aggregation (complexes) | Part 0 `partOf` | `covered` (ADR-002) |
+| Incident aggregation (complexes) | Part 0 `partOf` | **`partial`** — `partOf(Whole, Part, Interval)` is declared; **the thing it ranges over is not.** `Incident` is undeclared by any entity table, ADR or schema. Was `covered` (ADR-002); **falsified by O 2026-08-04**, applied by H, see ADR-006 |
 | Cascading hazards | Part 1 cascade relations | `partial` — named, not modelled |
 | **Operational periods** | — | **`GAP`** — the primary temporal unit in ICS |
 | Situation reporting | Part 5 (EDXL-SitRep) | `partial` |
