@@ -223,8 +223,62 @@ and the ISO TC211 URI 404s (A24). So "interoperate with ISO 19156" is
 not a binding relationship; it is a shape we are borrowing.
 
 **SOSA does dereference, and SOSA follows the same pattern.** That is
-the interoperability argument that survives, and it is the one this
-decision rests on.
+the interoperability argument that survives.
+
+> **This sentence used to end *"and it is the one this decision rests
+> on."* That clause is withdrawn 2026-08-04 under BV7-3, and it is the
+> wrong half of the pair — A29's third column is right.**
+>
+> The two said the same thing with opposite verdicts, a hundred lines
+> apart, both written in the same pass. *SOSA follows the same pattern*
+> **is** A29's content: SOSA classes a simulation as a `Sensor` and so
+> does not split observed from modelled. A29's third column rules that
+> **permissive, not exclusive — a vocabulary may bind SOSA and still
+> split its own parts** — and that ruling is correct. Nothing in this
+> ADR asserts a principle that binding a vocabulary obliges mirroring
+> its partition, and A29's column denies exactly such a principle.
+>
+> The other half does not close the gap either. *OMS publishes no
+> dereferenceable ontology* is an argument about **which vocabulary to
+> bind** — bind SOSA, not OMS. It is not an argument about **whether
+> Parts 2 and 3 are one module.**
+>
+> And this section's own heading has said so all along: *which is weaker
+> than it reads.*
+
+### Option B has no stated ground that discriminates it from A
+
+**Recorded rather than papered over.** After two rounds of falsification
+this is what the file actually contains:
+
+| Leg | What it does |
+|---|---|
+| **T4** | establishes the choice **cannot be deferred** — not which choice |
+| **A5** | **prices option A** — and the plan carries A's executable path |
+| **A7** | **undercounts, in B's favour**, and its omitted costs are all B's |
+| **A29** | **permissive** — removes an objection to B, creates none against A |
+| **interoperability note** | says which vocabulary to bind, not how to partition |
+
+**What is missing is a reason for B rather than A, and this ADR does not
+contain one.** Writing one that is not yet believed would be worse than
+recording the absence, so the absence is recorded.
+
+**This does not reverse option B.** The decision stands as the decision
+of record; ADR-004, ADR-005 and the whole of plan 01 rest on it and none
+of them moves. What is stated here is that **the decision may be correct
+on grounds nobody has yet written down**, and that the grounds currently
+written down do not discriminate.
+
+**`CLAUDE.md` already anticipates this** — *"the Part 2 / Part 3 split is
+the one most likely to break first"* — and the honest position at this
+gate is that the split survives on a decision, not on an argument.
+
+**What would close it:** a property of the material — a payload, a
+consumer query, a constraint that can be generated — that option A
+serves worse than option B, independent of the cost of authoring either.
+`exp-01` is the shape such a finding would take. None has been produced
+in six rounds of trying to falsify the alternatives, which is itself
+weak evidence and is not being counted as strong.
 
 ## Obligation
 

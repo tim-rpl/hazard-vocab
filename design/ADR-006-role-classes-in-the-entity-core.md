@@ -30,23 +30,79 @@ ADR-002's row reads:
 > | `Activity` | Observation acts, assignments, **hazard events**,
 > warning issuances | `prov:Activity` |
 
-**`prov:Activity` is a provenance term for how a data artifact came to
-be.** A hazard produces no data artifacts. It burns, floods or shakes.
-Observation acts, assignments and warning issuances are activities in
-exactly PROV's sense — each produces or transforms a record. A wildfire
-is not one of those, and binding it to `prov:Activity` asserts that it
-is.
+> **The ground stated here on 2026-08-04 was false, and the falsifier
+> that breaks it is the one this section wrote and did not run.**
+> Withdrawn the same day under BV7-1. It read:
+>
+> *"`prov:Activity` is a provenance term for how a data artifact came to
+> be. A hazard produces no data artifacts. It burns, floods or shakes.
+> Observation acts, assignments and warning issuances are activities in
+> exactly PROV's sense — each produces or transforms a record. A wildfire
+> is not one of those, and binding it to `prov:Activity` asserts that it
+> is."*
+>
+> **It is false in both halves**, and one fetch of the W3C
+> Recommendation settles it. Re-verified independently by H at
+> `https://www.w3.org/TR/prov-dm/`:
+>
+> - `prov:Entity` — *"An entity is a **physical**, digital, conceptual,
+>   or other kind of thing with some fixed aspects; entities may be real
+>   or imaginary."* Not restricted to data artifacts; physical is the
+>   first word in the list.
+> - `prov:Activity` — *"…acts upon or with entities; it **may** include
+>   consuming, processing, transforming, modifying, relocating, using,
+>   or **generating** entities."* Generation is one item in a `may`
+>   list, not a requirement.
+> - §2.1.1's worked examples include **driving a car between two
+>   locations**, a physical process producing no record.
+>
+> **So a wildfire is a well-formed `prov:Activity`** — it consumes,
+> transforms and relocates physical entities. The removal below is a
+> modelling choice this project makes, **not** a conformance
+> requirement, and nothing in PROV forbids Part 1 from binding
+> `prov:Activity` to a hazard class later.
+>
+> This is the error this ADR's own Context section names — *a term that
+> resolves, means something adjacent, and is wrong* — committed by this
+> ADR two paragraphs after naming it, against `prov:Activity` instead of
+> against `qudt:unit`. The reading was of the term's **name**, not its
+> **definition**.
+
+**The ground, rebuilt on the entity core's own axis.**
+
+`Activity` in ADR-002's table is not "anything PROV would class as an
+activity". It is this project's entity kind for **acts performed in
+producing, handling and issuing data and decisions** — its members are
+observation acts, assignments and warning issuances, and every one of
+them is something a responder or a system *does*.
+
+**A hazard event is a subject, not one of those acts.** It is what
+Parts 1, 2, 4 and 6 make statements *about*: a thing observed, a thing
+assets are exposed to, a thing warnings are issued for. Grouping it with
+the acts that produce those statements puts the subject of the record
+and the making of the record in one class, which is the distinction the
+whole part structure is built on.
 
 **Decision: `hazard events` leaves the `Activity` row.** The row keeps
 observation acts, assignments and warning issuances, and keeps
 `prov:Activity`.
 
 **What carries a hazard is deliberately not decided here.** That is Part
-1 and out of this unit — see *Recorded, not decided* below.
+1 and out of this unit — see *Recorded, not decided* below. **Decision A
+removes a carrier and adds none**, so Q12 is now *unanswered* rather
+than *wrongly answered*; that is recorded as a finding rather than
+presented as an improvement.
 
-**Falsifier:** a published `prov:Activity` definition, or a PROV
-constraint document, under which a physical process producing no entity
-is a well-formed `prov:Activity`.
+**Falsifier, restated so it tests the ground now given:** a statement
+this unit needs to make about a hazard event that `Activity`'s slots, as
+authored at P6a, serve as well as they serve an observation act — i.e.
+evidence that the class is homogeneous on the axis this decision uses.
+Testable at P6a, against a real file, and it does not depend on reading
+`prov:Activity` narrowly.
+
+**Not a falsifier of this decision:** any PROV definition or constraint
+document. PROV permits it either way, which is exactly what the
+withdrawal above establishes.
 
 ## Decision B — `Place` does not bind `sosa:FeatureOfInterest`
 
@@ -77,14 +133,41 @@ kind of thing rather than a role — one that does not equally make
 `Platform` and `Sensor` kinds of things, since ADR-002 already rejects
 that for those two.
 
-**Second reason this is due now rather than at P6a.** If the Part 1
-binding candidate holds — `deo:Hazard ⊑ sosa:FeatureOfInterest` in the
-Disaster Event Ontology — then a `Place` bound to
-`sosa:FeatureOfInterest` collides with it under C21, two classes
-claiming one external URI. `shared-uri` would fire on the design at
-authoring time. That is the guard working on a real decision rather than
-a fixture, and it is an argument for removing the binding before the
-collision rather than after.
+> **WITHDRAWN 2026-08-04 under BV7-2. This section claimed a guard would
+> catch something it cannot see, in the dangerous direction.** It read:
+>
+> *"If the Part 1 binding candidate holds — `deo:Hazard ⊑
+> sosa:FeatureOfInterest` — then a `Place` bound to
+> `sosa:FeatureOfInterest` collides with it under C21… **`shared-uri`
+> would fire on the design at authoring time.**"*
+>
+> **It would not.** `rule_shared_uri` keys on **literal URI strings** —
+> `claims.setdefault(str(uri), …)` at `scripts/drift-lint.py:467` — and
+> never fetches an external vocabulary, so a subsumption axiom published
+> in DEO is outside its subject by construction. C21 is about two
+> elements asserting **the same** URI, and the register says so.
+>
+> Re-run by H on the shipped linter, with a control:
+>
+> | Probe | Result |
+> |---|---|
+> | the scenario above — `Place` → `sosa:FeatureOfInterest`, `Hazard` → `deo:Hazard` | **`ok   [shared-uri] 1 file(s)`, exit 0** |
+> | control — both classes → `sosa:FeatureOfInterest` | **FAIL**, naming both classes, exit 1 |
+>
+> The collision exists only where `Hazard` binds
+> `sosa:FeatureOfInterest` **directly**, which is not the candidate
+> named. **An accepted ADR telling a reader at P6a that a check will
+> happen, when it cannot, is worse than saying nothing** — the check
+> would be skipped and nothing would report it. C21's evidence now
+> carries the bound.
+
+**Second reason this is due now rather than at P6a — restated, and it is
+not a guard.** If the Part 1 candidate holds, `deo:Hazard` is declared
+a subclass of `sosa:FeatureOfInterest`, and a `Place` also bound to
+`sosa:FeatureOfInterest` puts a hazard and a place under one external
+class. **Nothing in this repository detects that**, now or at P6a. It is
+caught by reading the ADR or not at all, which is the reason for
+deciding it here rather than deferring it to authoring time.
 
 ## Consequences
 
@@ -116,19 +199,50 @@ falsify it.
 
 ## Recorded, not decided — Part 1
 
-**ADR-002 Decision B's exemplar relations are stated over three
-undeclared types.** Grepped across `design/ADR-001..005`,
-`docs/coverage.md` and `vocab/`, the only occurrences of `HazardEvent`,
-`Incident` and `HazardType` in the readable tree are these three lines:
+**ADR-002 Decision B's exemplar relations are stated over eight
+undeclared types, and an earlier version of this section said three.**
+Corrected 2026-08-04. *"Three"* came from a grep for a list already in
+hand rather than from the signatures, and this ADR carried it verbatim —
+the subject narrower than the claim, one document downstream.
+
+**Derived rather than remembered**, by extracting every argument name
+from every signature in `ADR-002` and checking each against the entity
+table. **Five signatures, not the two quoted before:**
 
 ```
 exposure(Asset, HazardEvent, Measure)                         :57
 assignment(Asset, Incident, Agent, Interval)                  :58
+partOf(Whole, Part, Interval)                                 :110
 authority(Agent, Place, HazardType, Function, Interval)       :182
+capability(Agent | Asset, CapabilityType, Level, Interval)    :193
 ```
 
+**Thirteen argument types. Three are declared entities** — `Agent`,
+`Asset`, `Place`. The other ten are **four different kinds of thing**,
+and "declared" means something different for each. Collapsing them is
+how an entity table becomes a type registry:
+
+| Kind | Names | Declared by | State |
+|---|---|---|---|
+| **Subjects** | `HazardEvent`, `Incident` | the entity table | **the two the `[HUMAN]` finding named** — Part 1, deferred |
+| **Structural primitives** | `Interval`, `Measure`, `Level` | a binding — OWL-Time, QUDT | **used, bound nowhere** |
+| **Code-list references** | `HazardType`, `CapabilityType`, `Function` | a SKOS concept scheme, per ADR-000 D5 | **named, no scheme exists** |
+| **Role variables** | `Whole`, `Part` | nothing — they range over any entity | correct as-is |
+
+**So the entity core is not short by eight. It is short by two
+subjects**, and three primitives and three code lists are used without
+being bound anywhere. Different defects, different repairs. **The kernel
+stays six.**
+
+**`Interval` is the sharpest of them.** It appears in **four of the five
+signatures**, nothing binds it — not an entity table, not an ADR, not
+OWL-Time — and the temporal axis is discussed throughout
+`docs/coverage.md`. `CapabilityType` is the other worth naming: ADR-002
+Decision F already says it is a SKOS scheme and then never names one.
+
 The section whose first line is *"Entities are declared once in Part 0"*
-makes its forcing argument with subjects it never declares.
+makes its forcing argument with subjects it never declares — and
+quantifies four of its five relations over a type nothing binds.
 
 **Why it stayed invisible is structural and is worth recording.**
 ADR-000 D1 says the parts segment by epistemic kind. Parts 2, 3, 5 and 6

@@ -243,7 +243,7 @@ dependency was the largest defect in the first draft of this section:
 | **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | excused — decided at the design gate 2026-08-02 (ADR-004) | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
 | **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
-| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. Eight live sites censused 2026-08-03, all marked 2026-08-04 and none corrected: `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
+| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. **Twelve live sites, and the number has moved twice in two days — treat the census as dated, never as fixed.** Eight censused 2026-08-03 — `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4 — plus two found by O on 2026-08-04 (BV7-4): PA25's *'PA19 was right about the 23'*, 27 lines above PA19's own marker, and PA25's `assertedTime` paragraph, whose `the 23 —` an em-dash hides from the enumeration. Plus **two more H found on 2026-08-04** by widening its own marker checker to anchor on the determiner (`the 23`, `the ten`) instead of on a following noun: PA28's *'every one of the ten'* and *'nine of the ten'*. All twelve are marked and none corrected. **The second of those two also asserted a decided question was open** — ADR-004 Decision C — and that half is withdrawn in place rather than deferred, because a stale figure misleads about a quantity while a stale open-question misleads about what is settled. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
 
 <!-- END GENERATED:items -->
 
@@ -579,7 +579,7 @@ condition.
 | **P17** | **MET 2026-08-02.** ADR-004: no `crs` slot (`asWKT` range constrained to `geo:wktLiteral`); `Statement` is a Part 0 class binding `prov:Entity`; A1's class count moves **14 to 15** | S |
 | **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
-| **P20** | Every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
+| **P20** | **Re-derive the census first; do not carry the one in `notes`.** A 2026-08-03 census bounded a 2026-08-04 criterion and two live sites fell outside it (BV7-4) — one because an em-dash defeats the enumeration's pattern, one because its hit was filtered as noise. The census is a measurement with a date, not a definition. Then: every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
 
 <!-- END GENERATED:done -->
 
@@ -852,6 +852,12 @@ terms are declared"* — is authoring form, and PA19's identity/form split
 does not reach the ten. PA19 was right about the 23 and wrong to let
 clause 3 ride on the same argument.
 
+> **`the 23` and `the ten` here are the retired population; P20 owns the
+> restatement.** Marked 2026-08-04. This site is 27 lines above PA19's
+> own marker, so a reader arriving here has not passed one — which is
+> why the census that bounded P20 needed widening rather than the marker
+> moving.
+
 | # | Term | Class · Part | Authored at | ADR-dependent? |
 |---|---|---|---|---|
 | 1 | `id` | `Entity` · 0 | **P6a** | No. The *minting rule* is open (A10) but the form is 1..1 under every option |
@@ -894,6 +900,22 @@ defect. The reason is that **once clause 3 is removed, every
 ADR-dependent term is authored behind its ADR's edge**: `procedureKind`
 at P7, and P7 waits on P3. The Part 2 exemption is sound; PA19's
 justification for it was not.
+
+> **The design-gate question this paragraph calls open was decided, and
+> this is the worse of BV7-4's two sites because it is not only a
+> figure.** `ADR-004` **Decision C** settled it and `claims.md:630`
+> records it: **`assertedTime` and `prov:generatedAtTime` are one
+> slot.** So *"whether `assertedTime` binds `prov:generatedAtTime`
+> specifically is a design-gate question"* and *"I am not moving the
+> count"* now tell a reader a decided question is open. Marked
+> 2026-08-04; the figures stay for **P20**, but **the openness claim is
+> withdrawn here rather than deferred**, because a stale figure
+> misleads about a quantity and a stale open-question misleads about
+> what is settled.
+>
+> `24 bind / 9 write` is itself a retired figure — ADR-004 retires the
+> whole `bind / write of N` family and replaces it with a generated
+> worklist. P20 owns that half.
 
 **A third double-count, found while building the table.**
 `assertedTime` is item 5 of the ten *and* `prov:generatedAtTime` is
@@ -958,6 +980,10 @@ leave the finding open if the reason it was added lives only in prose.**
 fewer than 24 snapshots once the edge is in place.
 
 ---
+
+> **`the ten` here and below is the retired population — P20 owns the
+> restatement, and this passage was outside the census until
+> 2026-08-04.** Marked, figure untouched.
 
 **PA28 — Block A. Every one of the ten is now named in a definition of
 done, and the criteria are stated against generated output rather than
