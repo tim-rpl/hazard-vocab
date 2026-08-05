@@ -129,8 +129,14 @@ See ADR-001.
 | **Cited** | irrelevant | documentation only, by intent |
 
 Record which of the three every external vocabulary is, with the
-dereference result behind it. `docs/vocabularies/README.md` is the
-register.
+dereference result behind it. **`vocab/external/README.md` is the
+register**, beside the cached graphs in `vocab/external/graphs/`.
+
+**Keep the cache outside anything the lints scan.** `vocab/core/` and
+`vocab/profiles/` are the authored vocabulary; `vocab/external/` is
+borrowed material and is not subject to C1, C4, C7, C19, C20 or C21 —
+those rules are about what this project declares, not about what other
+projects declared. The lint targets are scoped accordingly.
 
 ## Checks
 

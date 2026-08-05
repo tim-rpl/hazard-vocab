@@ -40,7 +40,11 @@ check:
 
 lint:
 	@echo "C4: no LinkML-only constructs"
-	@! grep -rnE --include='*.yaml' --include='*.yml' 'structured_pattern|classification_rules' vocab/ \
+	@# vocab/core/ and vocab/profiles/ only. Scanning vocab/ reaches
+	@# vocab/external/, where cached graphs and their .yaml provenance
+	@# sidecars live — content this rule is not about.
+	@! grep -rnE --include='*.yaml' --include='*.yml' 'structured_pattern|classification_rules' \
+		vocab/core/ vocab/profiles/ 2>/dev/null \
 		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
 	@echo "L: no vacuous theorems in design/lean"
 	@$(BIN)python scripts/lean-lint.py design/lean
