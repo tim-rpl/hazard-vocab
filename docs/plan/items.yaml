@@ -223,6 +223,16 @@ items:
     excused_because: "decided at the design gate 2026-08-02 (ADR-005)"
     latency: "long"
     latency_because: "a design-gate decision"
+  P22:
+    item: "Retarget Part 2 to earthquake — C2's own cheapest test, on a throwaway schema"
+    produces: "a scratch Part 2 for USGS ComCat/ShakeMap, and a `git diff --stat` against the wildfire Part 2"
+    blocks_start: "P7"
+    blocks_trust: "—"
+    done_when: "A scratch Part 2 validates ≥1 real USGS ComCat capture, and **`git diff --stat` between it and P7's Part 2 is reported whatever it shows**. C2's falsifier is *structural change to Parts 2, 3, 5 or 6*, so the result is read against that and **not** against the *touching Parts 4 and 7 lightly* half, which C2's own evidence records as unfalsifiable. Two outcomes are both success for this item: no structural change, or a named one. **A pass that reports no diff without running `make check` against a real capture is not a result** — C2's suspected counterexample is that the ShakeMap area is *modelled*, and under ADR-003 option B that lands on `epistemicKind`, which only an instance exercises"
+    size: "S"
+    notes: "**C2's cheapest test, and C2 is the claim the whole project rests on.** Its own entry names it: *write Parts 2, 3 and 6 for earthquake; do not use flood — too similar to wildfire.* **Part 2 is this unit**, so the test is available now at one feed and a throwaway schema. **Nothing lands in `vocab/core/`** — this item authors no canonical content and is deleted after it reports. Earthquake is the case C2 flags against itself: the event is point-like and instantaneous and its extent is a ShakeMap, which is **modelled**, so the Part 1 / Part 3 boundary may sit elsewhere than wildfire puts it. **If it fails, that is worth knowing before Part 1's ARC rather than during it.** Only Part 2 is retargeted here; Parts 3 and 6 are later units, so this is a partial run of C2's test and says so"
+    in_unit: "required"
+    latency: "short"
   P20:
     item: "Restate P5 and the four prose passages over ADR-004's generated worklist"
     produces: "a plan of record whose live sites name the enumerated list, not a retired count"

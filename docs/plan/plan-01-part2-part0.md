@@ -13,6 +13,16 @@ Sequenced work items in topological order for the unit measured in
 [`measure-01-part2-part0.md`](../measure/measure-01-part2-part0.md).
 Items, dependencies and ordering only — *how* is the design stage.
 
+> **Read *"the design gate passed"* as settled for this unit, not as
+> *the foundation is complete*.** Part 0 is authored here **only to the
+> extent Part 2 needs it**, and later units will extend it — LinkML is
+> additive, so a class added for Part 1 does not invalidate one authored
+> for Part 2. **Part 1 has not been measured, planned or designed**, and
+> ADR-006 left *what carries the hazard* **unanswered rather than
+> wrongly answered**. Mirrored from `README.md` 2026-08-04, because a
+> reader arriving at a closed gate takes the surface it settled for
+> complete unless told otherwise.
+
 Assertions are numbered **PA1–PA42** to avoid collision with the measure
 document's A1–A40. Items live in [`items.yaml`](items.yaml); every item-keyed table below
 is generated from it by [`derive-waves.py`](derive-waves.py) and checked
@@ -257,6 +267,7 @@ dependency was the largest defect in the first draft of this section:
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
 | **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. **Twelve live sites, and the number has moved twice in two days — treat the census as dated, never as fixed.** Eight censused 2026-08-03 — `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4 — plus two found by O on 2026-08-04 (BV7-4): PA25's *'PA19 was right about the 23'*, 27 lines above PA19's own marker, and PA25's `assertedTime` paragraph, whose `the 23 —` an em-dash hides from the enumeration. Plus **two more H found on 2026-08-04** by widening its own marker checker to anchor on the determiner (`the 23`, `the ten`) instead of on a following noun: PA28's *'every one of the ten'* and *'nine of the ten'*. All twelve are marked and none corrected. **The second of those two also asserted a decided question was open** — ADR-004 Decision C — and that half is withdrawn in place rather than deferred, because a stale figure misleads about a quantity while a stale open-question misleads about what is settled. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
 | **P21** | Clear the design-gate rationale residues, in one pass | `docs/residuals-01-design-gate.md` with every entry moved to Cleared | — | — | **required** | **`FALSIFIER.md` §3.1.** A rationale defect inside a decided ADR records; a decision defect blocks. Eight gate rounds produced eight partial passes, and a partial retraction is worse than none — withdrawn at one site, standing at another, the document disagreeing with itself. Same repair shape as **P20**: one pass over a written list. **A marker is not a repair** — marked sites tell a reader the passage is stale and name the owner; restating them is this item's work |
+| **P22** | Retarget Part 2 to earthquake — C2's own cheapest test, on a throwaway schema | a scratch Part 2 for USGS ComCat/ShakeMap, and a `git diff --stat` against the wildfire Part 2 | P7 | — | **required** | **C2's cheapest test, and C2 is the claim the whole project rests on.** Its own entry names it: *write Parts 2, 3 and 6 for earthquake; do not use flood — too similar to wildfire.* **Part 2 is this unit**, so the test is available now at one feed and a throwaway schema. **Nothing lands in `vocab/core/`** — this item authors no canonical content and is deleted after it reports. Earthquake is the case C2 flags against itself: the event is point-like and instantaneous and its extent is a ShakeMap, which is **modelled**, so the Part 1 / Part 3 boundary may sit elsewhere than wildfire puts it. **If it fails, that is worth knowing before Part 1's ARC rather than during it.** Only Part 2 is retargeted here; Parts 3 and 6 are later units, so this is a partial run of C2's test and says so |
 
 <!-- END GENERATED:items -->
 
@@ -283,7 +294,7 @@ fourth. `derive-waves.py --check` fails if this block is stale.
 | **2** | **P2**, **P5**, **P14** |
 | **3** | **P6a**, **P6b**, **P10** |
 | **4** | **P7** |
-| **5** | **P8a** |
+| **5** | **P8a**, **P22** |
 | **6** | **P9** |
 | **7** | **P8b** |
 | **—** | **P12** — not startable here: source access this repo lacks |
@@ -594,6 +605,7 @@ condition.
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
 | **P20** | **Re-derive the census first; do not carry the one in `notes`.** A 2026-08-03 census bounded a 2026-08-04 criterion and two live sites fell outside it (BV7-4) — one because an em-dash defeats the enumeration's pattern, one because its hit was filtered as noise. The census is a measurement with a date, not a definition. Then: every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
 | **P21** | Every entry in `docs/residuals-01-design-gate.md` is under **Cleared** with the repair named and the marker removed, and each cleared entry's own falsifier has been **run** and returns nothing. Then: the ADR states its ground in one section and references it elsewhere, per `ADR-template.md`. **Verified by the paraphrase sweep, not a string sweep** — restate each withdrawn claim without reusing its wording and grep the content words that survive, which is the instrument that would have caught R1 and the one a string sweep cannot be | S |
+| **P22** | A scratch Part 2 validates ≥1 real USGS ComCat capture, and **`git diff --stat` between it and P7's Part 2 is reported whatever it shows**. C2's falsifier is *structural change to Parts 2, 3, 5 or 6*, so the result is read against that and **not** against the *touching Parts 4 and 7 lightly* half, which C2's own evidence records as unfalsifiable. Two outcomes are both success for this item: no structural change, or a named one. **A pass that reports no diff without running `make check` against a real capture is not a result** — C2's suspected counterexample is that the ShakeMap area is *modelled*, and under ADR-003 option B that lands on `epistemicKind`, which only an instance exercises | S |
 
 <!-- END GENERATED:done -->
 
@@ -691,7 +703,7 @@ something rather than stopping for it.
 
 <!-- BEGIN GENERATED:membership - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
-**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P20**, **P21**.
+**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P20**, **P21**, **P22**.
 
 **Excused, each with its reason:**
 
@@ -707,7 +719,7 @@ something rather than stopping for it.
 - **P18** — decided at the design gate 2026-08-02 (ADR-005)
 - **P19** — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists
 
-*12 required, 11 excused, 23 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
+*13 required, 11 excused, 24 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
 
 <!-- END GENERATED:membership -->
 
