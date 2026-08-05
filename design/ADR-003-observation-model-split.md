@@ -38,6 +38,20 @@ vocabulary that *does* dereference. This argues for option B from
 inside the artifact rather than from the paper standard, and it is the
 strongest evidence currently available on this question.
 
+> **The verdict in the two sentences above is superseded and this
+> passage is stale. Marked 2026-08-04 (BV8-1); it is `R1` in
+> `docs/residuals-01-design-gate.md` and **P21** owns the restatement.**
+> The *observation* stands — SOSA does class simulation software as a
+> `Sensor`. The verdicts *argues for option B* and *the strongest
+> evidence on this question* do not: the evidence table's third column
+> rules the same fact **permissive, not exclusive**, and *Option B has
+> no stated ground that discriminates it from A*, below, is current.
+> **Do not read this passage as authority for choosing B.**
+>
+> Marked rather than restated, because a marker is not a repair and the
+> residues clear in one pass. A reader is told it is stale and who owns
+> it, which is the one thing a bare stale sentence cannot do.
+
 ## Options
 
 | Option | Shape | Cost |
@@ -176,6 +190,19 @@ already stated in this file.** *SOSA dereferences and follows this
 pattern; OMS publishes no dereferenceable ontology* — the section below
 titled *Note on the interoperability argument*, which nothing in BV6-5
 touches. That is what option B rests on.
+
+> **Superseded. This paragraph is stale — `R2` in
+> `docs/residuals-01-design-gate.md`, **P21** owns it. Marked
+> 2026-08-04.** BV7-3 withdrew exactly this claim at *Note on the
+> interoperability argument* below: A29's third column is right, the
+> interoperability argument is **permissive**, and *Option B has no
+> stated ground that discriminates it from A* is current.
+>
+> **Found by the paraphrase sweep proposed in the same pass, in text H
+> wrote one round earlier.** The BV7-3 repair withdrew the clause at one
+> site and left this one — R1's defect, second instance, same file, same
+> day, different author. A string sweep for *"it is the one this
+> decision rests on"* cannot see *"that is what option B rests on"*.
 
 **Option B is not reversed and nothing downstream moves.** ADR-004,
 ADR-005 and the whole of plan 01 rest on B, and B stands. What was

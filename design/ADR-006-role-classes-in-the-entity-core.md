@@ -284,5 +284,16 @@ structure and SBVR's alethic/deontic split.
 ## What this forecloses
 
 Binding `Place` to `sosa:FeatureOfInterest` later without reopening this
-ADR, and treating a hazard as a provenance activity. Nothing else — no
-slot, no class and no count changes.
+ADR. Nothing else — no slot, no class and no count changes.
+
+**`treating a hazard as a provenance activity` was foreclosed here and
+is not. Deleted 2026-08-04 under BV8-2.** It entered at `0603002` with
+the false PROV ground and the BV7-1 repair did not reach it — a residue,
+not a new error. **Part 1 remains free to bind `prov:Activity` to a
+hazard class**, per the withdrawal in Decision A: PROV permits it either
+way, and *what carries a hazard is deliberately not decided here.* This
+section binds future work, so a foreclosure stated on a withdrawn ground
+would have told Part 1 an option was closed that is open.
+
+The single ground for Decision A is stated in Decision A and nowhere
+else, per `ADR-template.md`.

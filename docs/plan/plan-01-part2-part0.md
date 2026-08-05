@@ -244,6 +244,7 @@ dependency was the largest defect in the first draft of this section:
 | **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
 | **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. **Twelve live sites, and the number has moved twice in two days — treat the census as dated, never as fixed.** Eight censused 2026-08-03 — `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4 — plus two found by O on 2026-08-04 (BV7-4): PA25's *'PA19 was right about the 23'*, 27 lines above PA19's own marker, and PA25's `assertedTime` paragraph, whose `the 23 —` an em-dash hides from the enumeration. Plus **two more H found on 2026-08-04** by widening its own marker checker to anchor on the determiner (`the 23`, `the ten`) instead of on a following noun: PA28's *'every one of the ten'* and *'nine of the ten'*. All twelve are marked and none corrected. **The second of those two also asserted a decided question was open** — ADR-004 Decision C — and that half is withdrawn in place rather than deferred, because a stale figure misleads about a quantity while a stale open-question misleads about what is settled. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
+| **P21** | Clear the design-gate rationale residues, in one pass | `docs/residuals-01-design-gate.md` with every entry moved to Cleared | — | — | **required** | **`FALSIFIER.md` §3.1.** A rationale defect inside a decided ADR records; a decision defect blocks. Eight gate rounds produced eight partial passes, and a partial retraction is worse than none — withdrawn at one site, standing at another, the document disagreeing with itself. Same repair shape as **P20**: one pass over a written list. **A marker is not a repair** — marked sites tell a reader the passage is stale and name the owner; restating them is this item's work |
 
 <!-- END GENERATED:items -->
 
@@ -266,7 +267,7 @@ fourth. `derive-waves.py --check` fails if this block is stale.
 
 | Wave | Items |
 |---|---|
-| **1** | **P1**, **P3**, **P4**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18**, **P19**, **P20** |
+| **1** | **P1**, **P3**, **P4**, **P11**, **P13**, **P15**, **P16**, **P17**, **P18**, **P19**, **P20**, **P21** |
 | **2** | **P2**, **P5**, **P14** |
 | **3** | **P6a**, **P6b**, **P10** |
 | **4** | **P7** |
@@ -580,6 +581,7 @@ condition.
 | **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
 | **P20** | **Re-derive the census first; do not carry the one in `notes`.** A 2026-08-03 census bounded a 2026-08-04 criterion and two live sites fell outside it (BV7-4) — one because an em-dash defeats the enumeration's pattern, one because its hit was filtered as noise. The census is a measurement with a date, not a definition. Then: every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
+| **P21** | Every entry in `docs/residuals-01-design-gate.md` is under **Cleared** with the repair named and the marker removed, and each cleared entry's own falsifier has been **run** and returns nothing. Then: the ADR states its ground in one section and references it elsewhere, per `ADR-template.md`. **Verified by the paraphrase sweep, not a string sweep** — restate each withdrawn claim without reusing its wording and grep the content words that survive, which is the instrument that would have caught R1 and the one a string sweep cannot be | S |
 
 <!-- END GENERATED:done -->
 
@@ -623,6 +625,7 @@ by latency starts the externally-blocked items first and does P5's work
 | 9 | **P16** | short — fills the wait |
 | 10 | **P19** | short — fills the wait |
 | 11 | **P20** | short — fills the wait |
+| 12 | **P21** | short — fills the wait |
 
 <!-- END GENERATED:latency -->
 
@@ -676,7 +679,7 @@ something rather than stopping for it.
 
 <!-- BEGIN GENERATED:membership - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
-**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P20**.
+**Plan 01 is done when these meet their criteria:** **P5**, **P6a**, **P6b**, **P7**, **P8a**, **P8b**, **P9**, **P10**, **P13**, **P14**, **P20**, **P21**.
 
 **Excused, each with its reason:**
 
@@ -692,7 +695,7 @@ something rather than stopping for it.
 - **P18** — decided at the design gate 2026-08-02 (ADR-005)
 - **P19** — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists
 
-*11 required, 11 excused, 22 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
+*12 required, 11 excused, 23 items. Both lists are projections of one field, so the set difference cannot disagree (BV21).*
 
 <!-- END GENERATED:membership -->
 
