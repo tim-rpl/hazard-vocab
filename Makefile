@@ -43,9 +43,24 @@ lint:
 	@# vocab/core/ and vocab/profiles/ only. Scanning vocab/ reaches
 	@# vocab/external/, where cached graphs and their .yaml provenance
 	@# sidecars live — content this rule is not about.
-	@! grep -rnE --include='*.yaml' --include='*.yml' 'structured_pattern|classification_rules' \
-		vocab/core/ vocab/profiles/ 2>/dev/null \
-		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
+	@#
+	@# grep has THREE exit codes and `! grep ... 2>/dev/null` conflates
+	@# them: 1 is no-match (pass), 2 is an error (must fail), and
+	@# suppressing stderr then inverting turns an error into a pass
+	@# having inspected nothing. Rename a target directory and the rule
+	@# goes green. Same shape as the ** glob in make check.
+	@for d in vocab/core vocab/profiles; do \
+		test -d "$$d" || { echo "FAIL: $$d is missing — C4 inspected nothing"; exit 1; }; \
+	done
+	@out=$$(grep -rnE --include='*.yaml' --include='*.yml' \
+			'structured_pattern|classification_rules' \
+			vocab/core/ vocab/profiles/); rc=$$?; \
+	if [ $$rc -eq 2 ]; then \
+		echo "FAIL: grep errored — C4 inspected nothing"; exit 1; \
+	elif [ $$rc -eq 0 ]; then \
+		echo "$$out"; \
+		echo "FAIL: non-portable construct (see claims.md C4)"; exit 1; \
+	fi
 	@echo "L: no vacuous theorems in design/lean"
 	@$(BIN)python scripts/lean-lint.py design/lean
 	@echo "jurisdiction and declarative-drift rules — C1, C7, C20, C21"
