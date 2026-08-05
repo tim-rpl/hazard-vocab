@@ -1,0 +1,20 @@
+# Cached external graphs.
+#
+# What is re-derivable is not committed; what is not, is.
+#
+# `fetch-external.py` re-fetches every row in `manifest.md`, and the
+# manifest records each payload's SHA-256 — so a checkout can rebuild
+# the cache and prove byte-identity with what was audited. Committing
+# 4 MB of qudt-units.ttl to assert what a hash already asserts is the
+# copy-of-a-copy defect this project keeps closing.
+#
+# The exceptions are the graphs that CANNOT be re-fetched from here:
+# `schema.knowwheregraph.org` does not resolve and the UCSB host's
+# certificate has expired, so the DEO and UNDRR-HIP files were supplied
+# by hand. Losing them on a clean checkout would lose the only copy.
+graphs/*.ttl
+
+!graphs/disaster-event-module-generalized.ttl
+!graphs/disaster-event-module-extensions.ttl
+!graphs/disaster-properties-ontology.ttl
+!graphs/undrr-isc-hazard-classification.ttl
