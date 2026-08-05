@@ -173,6 +173,53 @@ against a charter at v11; the substance matches v11.
 derived from the old rule not reached — found in the charter, by the
 role it constrains.
 
+### R6 — the charter changed and its version did not
+
+**Found:** 2026-08-04, verifying R5's fix · **Owner:** the human ·
+**Kind:** decision-adjacent — see below
+
+`FALSIFIER.md` changed 29 lines in the pass that closed R5, including
+**§1's write set**, which now permits O to write *a complete new entry
+when promoting under §6*. `**Charter version: 11**` and the version
+table were not touched.
+
+**That is the failure the header exists to detect.** Its own rule:
+*"State the charter version in your first response. If it does not match
+what the human expects, you are running on a stale copy."* Two O
+sessions, one holding the copy from before this edit and one after, both
+report **v11** and have **different write sets**. The check cannot
+discriminate them.
+
+**Same class as R1, R2 and BV9-2** — a rule changed and the statement
+derived from it not reached — **fourth instance, third file, and this
+one is inside the fix for the third.**
+
+**Not filed as rationale.** A stale write set is what a role *does*, not
+why. It records here only because `FALSIFIER.md` is the human's and H
+cannot fix it; if it were H's it would block.
+
+**Cheapest fix:** a `12` row — *§1 verification instruction corrected;
+write set widened for §6 promotion* — and the header bumped.
+
+### R7 — `CLAUDE.md` and `FALSIFIER.md` disagree about who files a `Falsifier`
+
+**Found:** 2026-08-04 · **Owner:** the human · **Kind:** ownership
+
+- `FALSIFIER.md` §1, as amended: *"do not add or edit a Falsifier on an
+  entry H owns — **propose the wording and let H file it**."*
+- `CLAUDE.md`'s ownership table: `claims.md` — writer **O**; H proposes
+  new claims in gate messages.
+
+The first says H writes `Falsifier` lines into `claims.md`; the second
+says H does not write `claims.md` at all.
+
+**Consequence, live right now:** BV9-3's field for C11–C17 is accepted
+in substance by O, cannot be written by O under §1, and cannot be
+written by H under `CLAUDE.md`. **It has no owner.** H is proposing the
+wording and stopping there rather than resolving an ownership question
+by inference — which is the *default deny* rule doing its job, and also
+the reason the field is still not written.
+
 ---
 
 ## Cleared
