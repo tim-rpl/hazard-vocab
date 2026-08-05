@@ -105,8 +105,8 @@ Three Part 0 relations carry the structure the parts share:
 `partOf(Whole, Part, Interval)` for crews, incident complexes and
 sub-sampling; `authority(Agent, Place, HazardType, Function, Interval)`
 for jurisdiction, mutual aid and delegation; and
-`capability(Agent|Asset, Type, Level, Interval)` for qualifications and
-resource typing.
+`capability(Agent | Asset, CapabilityType, Level, Interval)` for
+qualifications and resource typing.
 
 ### Modalities
 
