@@ -175,6 +175,62 @@ def splice(text, name, body):
     return text[:i] + beg + "\n\n" + body + "\n\n" + text[j:]
 
 
+
+RETIRED_ENUMERATION = (
+    "grep -ohE '(23|ten|10|24|33|32) [a-z]+( [a-z]+)?' docs/plan/ -r "
+    "| sort | uniq -c | sort -rn")
+
+# P20's guard. The phrasings are DERIVED, by the command above, run
+# 2026-08-05 — not remembered. BV6-1 named four literal strings, covered
+# three phrasings and missed two of the six that occur; BV7-4 then found
+# two more that no noun-anchored pattern could see, because `the 23 —`
+# ends in an em dash and `the 23 and` has no noun at all. So this anchors
+# on the DETERMINER as well.
+RETIRED_PHRASES = re.compile(
+    r"\b23 (bind|bindings?|external terms|external identities|external bindings)\b"
+    r"|\b(ten|10) local( terms)?\b|\b10 write of\b|\bthe 23\b|\bthe ten\b"
+    r"|\b24 bind\b|\b23/10\b|\b23/9\b|\b24/9\b|\bof 32\b|\bof 33\b")
+
+# Sizing claims about an item. Subject B, added 2026-08-05: the census
+# matches numerals and "P5 is the long pole" is not one.
+SIZING_PHRASES = re.compile(
+    r"\blong pole\b|\bL-sized\b|\bwidest item\b|\bstartable today\b", re.I)
+
+# A retraction is allowed to name what it retracts — that is the whole
+# correction discipline. RESIDUAL, stated: a genuine reintroduction that
+# happens to contain one of these cues passes. The check is deliberately
+# permissive in that one direction rather than forbidding the historical
+# record, which is the defect a stricter version of this guard shipped
+# with and had to be narrowed out of.
+RETRACTION_CUES = ("read ", "restated", "retire", "retired", "withdraw",
+                   "corrected", "earlier draft", "until 2026", "was, until",
+                   "no count is stated", "census", "amended",
+                   # A NEGATED claim is not an assertion of it. "P5 is no
+                   # longer the long pole" is the correction, and a guard
+                   # that fires on it forbids stating the repair.
+                   "no longer", "not the long pole")
+
+
+def check_retired(paths):
+    bad = []
+    for path in paths:
+        is_yaml = path.suffix in (".yaml", ".yml")
+        for i, line in enumerate(path.read_text().splitlines(), 1):
+            if line.lstrip().startswith(">"):
+                continue
+            probe = line if is_yaml else re.sub(r'\*?"[^"\n]{0,300}"?\*?', "", line)
+            hit = RETIRED_PHRASES.search(probe) or SIZING_PHRASES.search(probe)
+            if not hit:
+                continue
+            if any(c in line.lower() for c in RETRACTION_CUES):
+                continue
+            bad.append("%s:%d — %r is a retired figure or a sizing claim, "
+                       "outside a retraction. ADR-004's generated worklist is "
+                       "the replacement and it states no total."
+                       % (path.name, i, hit.group(0)))
+    return bad
+
+
 def main():
     items, ferrs = load()
     # Bail before rendering. A missing field must be reported, not
@@ -197,6 +253,11 @@ def main():
         DOC.write_text(text)
         print("wrote %d blocks" % len(blocks), file=sys.stderr)
         return 1 if errors else 0
+
+    retired = check_retired([SRC, DOC])
+    if retired and "--check" in sys.argv:
+        print("FAIL\n  " + "\n  ".join(retired), file=sys.stderr)
+        return 1
 
     if "--check" not in sys.argv:
         for name, lines in blocks.items():

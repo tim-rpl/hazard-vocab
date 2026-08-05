@@ -248,7 +248,7 @@ dependency was the largest defect in the first draft of this section:
 | **P2** | Decide ADR-001 question 2 | design gate; A/B/C chosen or explicitly deferred | P1 | — | excused — decided at the design gate 2026-08-02 (ADR-001) | Blocks **P6b only**, not P6a — see PA11 |
 | **P3** | Decide ADR-003 | design gate; Part 2's shape | — | — | excused — decided at the design gate 2026-08-02 (ADR-003) | Blocks P7 |
 | **P4** | Rebuild `parts.als` under F10 | constraints by extension; T2 gets evidence or is recorded as unevidenced | — | — | excused — serves the first profile, a later unit | Blocks **nothing in this unit**; blocks the first profile, which is a later unit — see PA8 |
-| **P5** | `vocab/prefixes.yaml`, 23 binding **identities**, external graphs cached | the binding surface — **external identity only** (PA25) | P20 | — | **required** | Blocks P6a, P7, P10. **Clauses 2 and 3 are discharged early, 2026-08-04**, by `vocab/external/`: 21 graphs cached, every bound term content-verified by fetch-and-grep, and each term's definition read out of the cached graph — `vocab/external/manifest.md`, `vocab/external/bound-terms.md`. **What remains of P5 is clause 1, `vocab/prefixes.yaml`, which does not exist.** So the `L` size and the *long pole* claims are stale; **P20 owns restating them** and no new size is asserted here — replacing one hand-typed sizing figure with another is the defect, not the repair |
+| **P5** | `vocab/prefixes.yaml`, the bound **identities** in ADR-004's generated worklist, external graphs cached | the binding surface — **external identity only** (PA25) | P20 | — | **required** | Blocks P6a, P7, P10. **Clauses 2 and 3 are discharged, 2026-08-04**, by `vocab/external/`: 21 graphs cached, every bound term content-verified by fetch-and-grep, and each term's definition read out of the cached graph — `vocab/external/manifest.md`, `vocab/external/bound-terms.md`. **What remains of P5 is clause 1, `vocab/prefixes.yaml`, which does not exist.** **Size restated `L` → `S` by P20, 2026-08-05, and it is a measurement rather than a re-estimate:** two of three clauses are discharged artifacts on disk, so the remaining work is one file. **P5 is no longer the long pole**; PA5, PA17 and PA28's sizing claims are restated in the same pass |
 | **P6a** | Part 0 entity + alias core — the ADR-001 question-1 shape | `vocab/core/part0-*.yaml` | P5, P17 | P10 | **required** | Settled by ADR-001 Q1. Does **not** wait on P2. P17 carries PA29/PA30's preconditions, now an edge (BV12) |
 | **P6b** | `candidateMatch` relation — Part 0 | a Part 0 relation binding two `Entity` instances, with provenance | P2 | P10 | **required** | **Non-empty.** ADR-001 chose option B, under which heuristic matches are recorded as `candidateMatch` facts. The deriving rule is `transform/`; the relation is Part 0 (ADR-000 D4) |
 | **P7** | Part 2 — the observation shape, **excluding absence** | `vocab/core/part2-observation.yaml` | P3, P6a | P10 | **required** | Slot count depends on P9's boundary — see PA12 |
@@ -378,32 +378,39 @@ check is cheap: it is the first clause of P6a's done-criterion below.
 **Falsifier for PA19:** a clause of P5's done-criterion that cannot be
 satisfied without choosing a cardinality or a range.
 
-**PA5 — P5 is the long pole. It is no longer startable today.** This
+**PA5 — P5 is no longer the long pole, and it is no longer startable today.** This
 read *"startable today … it has no predecessor"* until 2026-08-03, when
 **P20** was added and P5 gained a `blocks-start` edge on it: P5's own
 definition of done is stated over a population ADR-004 retired, so the
 restatement precedes the work. P5 is now wave 2. It is still the widest
 item and everything in wave 3 still waits on it.
 
-> **Sizing claim, stale — `P20` owns it (widened 2026-08-05).** P5's
-> clauses 2 and 3 were discharged early on 2026-08-04 by
-> `vocab/external/`; what remains is `vocab/prefixes.yaml`. **No
-> replacement size is stated here** — swapping one hand-typed sizing
-> figure for another is the defect rather than the repair.
-Amended for the dependency only. **Every figure from here to the end of
-PA5's justification — including the T4a paragraph below — is P20's
-subject and is deliberately untouched.** Scope widened 2026-08-04: this
-read *"the rest of this paragraph"* and *"the sentence below"*, both
-singular, which did not obviously reach a passage two paragraphs down.
-`23` and `10` here are the retired population; correcting them while
-seven other live sites stand is the partial retraction this project has
-been bitten by three times. It goes in one pass or not at all.
+> **Restated by P20, 2026-08-05.** The retired population — the
+> `bind / write of N` family — is replaced throughout by
+> **ADR-004's generated worklist**, which states names and no total.
+> **P5's size is restated `L` → `S`** on a measurement: clauses 2 and
+> 3 are discharged artifacts on disk (`vocab/external/`), so one file
+> remains. Census re-derived at 24 live sites, not the 12 in P20's
+> notes — third time it has grown, which is why clause 1 forbids
+> carrying it.
 
-The 23 bindings are content-verified (A3 as amended, S4) and the 10
-local terms are enumerated (A1 as restated).
+
+The bindings in ADR-004's generated worklist are content-verified (A3
+as amended, S4) and the local slots are enumerated there too (A1 as
+restated). **No count is stated: the worklist is the count.**
+
+> **This sentence read *the 23 bindings* and *the 10 local terms*, and
+> it kept them one pass longer than it should have.** It was marked
+> on 2026-08-04 and deliberately deferred to P20. During P20 the
+> marker was cleared with the others **before this sentence was
+> restated**, leaving the figure standing with nothing pointing at it
+> — a partial retraction, produced inside the pass that exists to
+> prevent one. Caught by re-running the census after the edits rather
+> than before. Restated 2026-08-05.
+
 
 **Justification corrected — this rested on T4, which is falsified.** It
-now rests on **T4a**: the *identity* of the 23 bindings is decidable
+now rests on **T4a**: the *identity* of the bindings in ADR-004's generated worklist is decidable
 before either ADR; their *cardinality and range* are not. P5 resolves
 identity and caches graphs (PA19); it authors no cardinality. So PA5's
 conclusion survives on the narrower claim, and the part T4 was carrying
@@ -591,7 +598,7 @@ condition.
 | **P2** | **MET 2026-08-02.** ADR-001 records option **B** with its reason: B is the only option whose correctness does not depend on resolving L2 | S |
 | **P3** | **MET 2026-08-02.** ADR-003 records option **B**; `docs/coverage.md` and ADR-002's modality table amended in the same pass | S |
 | **P4** | `parts.als` models constraints by extension; **the M1 mutation changes the output**; the header's C1/C2 claims are true or removed | M |
-| **P5** | `prefixes.yaml` resolves every prefix used; all 23 external terms are content-verified by fetch-and-grep; external graphs are cached locally. **The ten local terms are NOT declared here** — clause 3 removed, see PA25. **[Marked 2026-08-04, figure untouched: `23 external terms` and `the ten local terms` are the population ADR-004 retires as unrecoverable; its generated worklist replaces them, and **P20** owns the restatement. A marker is not a retraction — the censused sites go in one pass.]** | **L** |
+| **P5** | `prefixes.yaml` resolves every prefix used; **every external term in ADR-004's generated worklist** is content-verified by fetch-and-grep; external graphs are cached locally. **The local slots are NOT declared here** — clause 3 removed, see PA25. **Restated by P20, 2026-08-05.** This read *23 external terms* and *the ten local terms*, the population ADR-004 retires as unrecoverable. The worklist is the replacement and **no count is stated here** — a new total would be one more figure agreeing with an earlier one by accident. **Clauses 2 and 3 are discharged** (see notes); what this criterion still asks for is clause 1 | S |
 | **P6a** | **P17 answers PA29 and PA30's decisions first** (a blocks-start edge, not a sentence — BV12). Then: `build/shapes.ttl` carries an `sh:path` for **`id`, `identifierValue`, `identifierScheme`, `issuingAuthority`, `elevation`, `sourceVerificationTier`** and for **`prov:generatedAtTime`** — *not* `assertedTime` (I2), and for `crs` or PA29's substitute (**PA28**); `operatingMode`, `modelVersion`, `profileConformance` likewise (PG5); **for each slot named above, cardinality and range are identical under both ADR-003 options**; `make gen` runs to completion, which requires `vocab/core/vocabulary.yaml` (PG11); the core validates under `make lint` (P16 is **done**, BV13); `flat-siblings.yaml` still passes. **A bound slot is asserted by its URI, not by its local name.** This criterion named `assertedTime`; ADR-004 Decision C gives it `slot_uri: prov:generatedAtTime`, and `gen-shacl` (linkml 1.11.1) then emits `sh:path prov:generatedAtTime` with the string `assertedTime` appearing **0 times** in the output — re-run by H 2026-08-04, exit 0. **The criterion was satisfiable only by omitting the `slot_uri`, i.e. by violating the ADR it implements.** The same correction applies to any future name in this list that acquires a `slot_uri` | M |
 | **P6b** | `build/shapes.ttl` carries an `sh:path` for the `candidateMatch` relation's slots, and no heuristic match appears as an identity fact | S–0 |
 | **P7** | `make gen` produces `build/shapes.ttl` from Part 2 + P6a with no LinkML error, **and it carries an `sh:path` for `procedureKind`** — or ADR-003's record states the slot does not exist (PA28) | M |
@@ -608,7 +615,7 @@ condition.
 | **P17** | **MET 2026-08-02.** ADR-004: no `crs` slot (`asWKT` range constrained to `geo:wktLiteral`); `Statement` is a Part 0 class binding `prov:Entity`; A1's class count moves **14 to 15** | S |
 | **P18** | **MET 2026-08-02.** ADR-005 picks option **B** — cross-slot constraints declared in LinkML `annotations:` and emitted by a project generator — and states why A and C were rejected | S |
 | **P19** | `exp-01`'s case A raises a violation under `make check`, and the `sosa:observedProperty` case from A34 does too — both from `annotations:` in the source, with nothing hand-written under `build/` | M |
-| **P20** | **Re-derive the census first; do not carry the one in `notes`.** A 2026-08-03 census bounded a 2026-08-04 criterion and two live sites fell outside it (BV7-4) — one because an em-dash defeats the enumeration's pattern, one because its hit was filtered as noise. The census is a measurement with a date, not a definition. Then: every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
+| **P20** | **MET 2026-08-05.** Census re-derived at **24 live sites**, not the 12 carried in notes — third growth, which is why clause 1 forbids carrying it. All restated over ADR-004's generated worklist with no count stated; P5 size `L` → `S` on measurement. Guard in `derive-waves.py`, wired into `make lint`, **probed 12/12 reintroductions caught and 3/3 retractions survive**. Original criterion: **Re-derive the census first; do not carry the one in `notes`.** A 2026-08-03 census bounded a 2026-08-04 criterion and two live sites fell outside it (BV7-4) — one because an em-dash defeats the enumeration's pattern, one because its hit was filtered as noise. The census is a measurement with a date, not a definition. Then: every censused site names **ADR-004's generated worklist** and states no count — P5's item and `done_when`, and **the plan's copies** of PA5, PA19, T4 and T4a. The register copies at `claims.md` are **out of scope**: restating a register claim is a proposal H makes and O disposes, and T4a's Evidence already carries the note. **The guard is derived, not remembered:** re-run `grep -ohE '(23|ten|10) [a-z]+( [a-z]+)?' docs/plan/ -r | sort | uniq -c | sort -rn` **before writing it**, and build the pattern from what it returns. As of 2026-08-04 that is six phrasings for `23` — `bind`, `binding`, `bindings`, `external terms`, `external identities`, `external bindings` — plus `(ten|10) local( terms)?` and `10 write of`. **Verified by putting each measured phrasing back one at a time and watching the guard fail**, not by observing that the guard exists. Quoted (`*"…"*`) and blockquoted (`>`) text is exempt, as in `derive-surface.py`, and **the exemption is probed against a retraction before shipping** — historical sites stay: the closed measure document, quoted originals, amendment records. `derive-waves.py --check` and `derive-surface.py --check` both pass | S |
 | **P21** | Every entry in `docs/residuals-01-design-gate.md` is under **Cleared** with the repair named and the marker removed, and each cleared entry's own falsifier has been **run** and returns nothing. Then: the ADR states its ground in one section and references it elsewhere, per `ADR-template.md`. **Verified by the paraphrase sweep, not a string sweep** — restate each withdrawn claim without reusing its wording and grep the content words that survive, which is the instrument that would have caught R1 and the one a string sweep cannot be | S |
 | **P22** | A scratch Part 2 validates ≥1 real USGS ComCat capture, and **`git diff --stat` between it and P7's Part 2 is reported whatever it shows**. C2's falsifier is *structural change to Parts 2, 3, 5 or 6*, so the result is read against that and **not** against the *touching Parts 4 and 7 lightly* half, which C2's own evidence records as unfalsifiable. Two outcomes are both success for this item: no structural change, or a named one. **A pass that reports no diff without running `make check` against a real capture is not a result** — C2's suspected counterexample is that the ShakeMap area is *modelled*, and under ADR-003 option B that lands on `epistemicKind`, which only an instance exercises | S |
 
@@ -626,23 +633,11 @@ item then has to reopen. P8a is the deliberate exception (PA15).
 
 **PA17 — wave 1 should be started in order of *external* latency, not
 in order of size, and this changes what is done first.** PA5 says P5 is
-the long pole, and it is — in H's own work. But **P1 and P3 both block
+the long pole, and **it was, until 2026-08-05** — see below. But
+**P1 and P3 both block
 on someone else**: P1 cannot close without an O session changing L2's
 status, and P3 is a design-gate decision. P4 is H's but produces a
 claims change that O must record.
-
-> **Sizing claim, stale — `P20` owns it (widened 2026-08-05).** P5's
-> clauses 2 and 3 were discharged early on 2026-08-04 by
-> `vocab/external/`; what remains is `vocab/prefixes.yaml`. **No
-> replacement size is stated here** — swapping one hand-typed sizing
-> figure for another is the defect rather than the repair.
-Ranking wave 1 by size put P5 first and left P1's O-turnaround
-un-started, so the wall clock paid for it serially at the end.
-**P5 left wave 1 on 2026-08-03** when P20 became its predecessor, which
-strengthens this argument rather than weakening it: the size-first
-ranking would now start an item that cannot start. Ranking
-by latency starts the externally-blocked items first and does P5's work
-*while* they are pending:
 
 <!-- BEGIN GENERATED:latency - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
@@ -886,14 +881,8 @@ O's experiment reproduces here: a LinkML slot with no `range`, no
 `multivalued: true` removes it. **Declaring a slot chooses a
 cardinality, silently.** So clause 3 of P5's criterion — *"the 10 local
 terms are declared"* — is authoring form, and PA19's identity/form split
-does not reach the ten. PA19 was right about the 23 and wrong to let
+does not reach the local slots. PA19 was right about the bound terms and wrong to let
 clause 3 ride on the same argument.
-
-> **`the 23` and `the ten` here are the retired population; P20 owns the
-> restatement.** Marked 2026-08-04. This site is 27 lines above PA19's
-> own marker, so a reader arriving here has not passed one — which is
-> why the census that bounded P20 needed widening rather than the marker
-> moving.
 
 | # | Term | Class · Part | Authored at | ADR-dependent? |
 |---|---|---|---|---|
@@ -915,20 +904,14 @@ of those is ADR-dependent.
 **The repair: clause 3 leaves P5 entirely.** Not narrowed — removed. The
 ten have no external identity to resolve; a term with no external URI
 *is* its name, and everything else about it is local form authored where
-its class is authored. P5 resolves the 23 external identities, declares
+its class is authored. P5 resolves the external identities in ADR-004's generated worklist, declares
 prefixes, and caches graphs. That is the resolve-and-cache reading
 applied consistently instead of applied to three clauses out of four.
-
-> **`23 external identities` is the retired population. P20 owns the
-> restatement.** ADR-004 retires `23 bind / 10 write of 33` as
-> unrecoverable; the replacement is its generated worklist, not another
-> total. Marked 2026-08-04, figure deliberately untouched — a marker is
-> not a retraction, and the eight censused sites go in one pass.
 
 O pre-empted the weaker repair — reading "declared" as *enumerated* —
 and was right that it fails: a clause satisfiable by transcription is
 not a definition of done. **Removal is the repair that survives that
-objection**, because the ten are then covered by items whose criteria
+objection**, because the local slots are then covered by items whose criteria
 already bite.
 
 **PA18's abort still does not fire, but for a different reason than
@@ -938,28 +921,13 @@ ADR-dependent term is authored behind its ADR's edge**: `procedureKind`
 at P7, and P7 waits on P3. The Part 2 exemption is sound; PA19's
 justification for it was not.
 
-> **The design-gate question this paragraph calls open was decided, and
-> this is the worse of BV7-4's two sites because it is not only a
-> figure.** `ADR-004` **Decision C** settled it and `claims.md:630`
-> records it: **`assertedTime` and `prov:generatedAtTime` are one
-> slot.** So *"whether `assertedTime` binds `prov:generatedAtTime`
-> specifically is a design-gate question"* and *"I am not moving the
-> count"* now tell a reader a decided question is open. Marked
-> 2026-08-04; the figures stay for **P20**, but **the openness claim is
-> withdrawn here rather than deferred**, because a stale figure
-> misleads about a quantity and a stale open-question misleads about
-> what is settled.
->
-> `24 bind / 9 write` is itself a retired figure — ADR-004 retires the
-> whole `bind / write of N` family and replaces it with a generated
-> worklist. P20 owns that half.
-
 **A third double-count, found while building the table.**
-`assertedTime` is item 5 of the ten *and* `prov:generatedAtTime` is
-among A3's five PROV terms in the 23 — and ADR-001 §4 states plainly
-that "`assertedTime` comes from PROV-O." If they are the same slot the
-surface is **24 bind / 9 write**, not 23/10. **I am not moving the
-count**: A1 is the measure document's and whether `assertedTime` binds
+`assertedTime` was listed both as a local slot *and* as one of A3's
+PROV terms — and ADR-001 §4 states plainly that "`assertedTime` comes
+from PROV-O." **They are one slot: ADR-004 Decision C settled it, and
+`surface.yaml` files it under `removed_from_local`.** No count is
+restated here; ADR-004's generated worklist is the count. **The question this paragraph called
+open is closed**: A1 is the measure document's and whether `assertedTime` binds
 `prov:generatedAtTime` specifically is a design-gate question. Recorded
 here because it is the third instance this week of one slot claimed
 twice — after `observingSystemStatus` (P5/P9, PG7) and PA12's P7/P9.
@@ -973,19 +941,10 @@ three times in three amendments, and it is now labelled non-normative.**
 PG1's third rendering was wrong the same way as the first two. The item
 table gives P6b exactly one blocks-start edge — **P2** — and no
 dependency on P6a. "Branching off P6a" still asserts P6a precedes it,
-and P6a waits on P5, the L-sized long pole, so the rendering put P6b
+and P6a waits on P5, which was L-sized until 2026-08-05, so
+the rendering put P6b
 behind work it does not wait on. PA11's entire point is that P6b's
 dependencies are *narrower* than first claimed.
-
-> **Sizing claim, stale — `P20` owns it (widened 2026-08-05).** P5's
-> clauses 2 and 3 were discharged early on 2026-08-04 by
-> `vocab/external/`; what remains is `vocab/prefixes.yaml`. **No
-> replacement size is stated here** — swapping one hand-typed sizing
-> figure for another is the defect rather than the repair.
-O's diagnosis is the one that matters: **the wave table has no cell for
-an item whose predecessor finished two waves earlier.** The abstraction
-does not fit the graph, and I have now bent it three times rather than
-saying so.
 
 Two changes:
 
@@ -1023,16 +982,12 @@ fewer than 24 snapshots once the edge is in place.
 
 ---
 
-> **`the ten` here and below is the retired population — P20 owns the
-> restatement, and this passage was outside the census until
-> 2026-08-04.** Marked, figure untouched.
-
-**PA28 — Block A. Every one of the ten is now named in a definition of
+**PA28 — Block A. Every local slot is now named in a definition of
 done, and the criteria are stated against generated output rather than
 against prose.**
 
 BV4 is accepted in full. Removing clause 3 fixed the ADR-ordering defect
-and created a worse one: **nine of the ten had no owner at all**, and
+and created a worse one: **all but one of the local slots had no owner at all**, and
 your probe proves P6a was declarable done with none of its eight. My
 "the criteria already bite" was an assertion, and you checked it instead
 of arguing with it.
@@ -1079,7 +1034,8 @@ Stated to the standard PG6 set:
 - **If it is not** — because GeoSPARQL puts the CRS inside the
   `wktLiteral` (A26) — P6a's criterion instead requires that
   **`asWKT`'s range is `geo:wktLiteral`**, so the CRS has a documented
-  carrier rather than silently none. **The surface is then 23/9 of 32**,
+  carrier rather than silently none. **The surface is ADR-004's generated worklist**, which states
+no total,
   per A1's own arithmetic.
 - **The decision belongs to the design gate** and is now recorded as a
   P6a precondition rather than as an unowned aside.
@@ -1432,20 +1388,9 @@ generated block → exit 1 each.
 
 ### Claim proposed
 
-> **Read this before the claim below. `23 external bindings` is the
-> retired population, and P20 owns the restatement.** ADR-004 retires
-> `23 bind / 10 write of 33` as unrecoverable and replaces it with its
-> generated worklist. The marker sits **above** the claim rather than
-> after it because this passage is under *Claim proposed* — a reader
-> arriving here takes the figure as the live population of a claim being
-> made, which is the site most likely to be read as current. Marked
-> 2026-08-04; figure untouched, because a marker is not a retraction and
-> the eight censused sites go in one pass. `claims.md` T4a's Evidence
-> already carries the register-side note.
-
 **T4 — the binding surface is decidable before either open ADR.**
 Neither ADR-001's resolution nor ADR-003's changes the form of any of
-the 23 external bindings; both add or relocate local slots only.
+the external bindings in ADR-004's generated worklist; both add or relocate local slots only.
 
 - **Falsifier:** an external binding whose `slot_uri`, range or
   cardinality differs between ADR-003 option A and option B, or between
