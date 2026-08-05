@@ -1,4 +1,4 @@
-\#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Role-based access guard (PreToolUse).
 
 The session is O (Overseer) when either HV_ROLE=O is set or a .role-O

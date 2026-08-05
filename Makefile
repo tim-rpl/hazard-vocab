@@ -44,7 +44,10 @@ lint:
 		|| (echo "FAIL: non-portable construct (see claims.md C4)"; exit 1)
 	@echo "L: no vacuous theorems in design/lean"
 	@$(BIN)python scripts/lean-lint.py design/lean
-	@echo "C1 + C19: jurisdiction and declarative-drift rules"
+	@echo "jurisdiction and declarative-drift rules — C1, C7, C20, C21"
+	@# C19 was never filed. This label cited it for several gates; the
+	@# rules serve the four claims above. A tool citing a claim that
+	@# does not exist sends a reader nowhere.
 	@$(BIN)python scripts/drift-lint.py vocab/core/
 	@echo "P: the wave view is derived from the item table"
 	@if [ -f docs/plan/derive-waves.py ]; then \

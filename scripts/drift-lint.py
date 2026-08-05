@@ -196,7 +196,14 @@ def schema_files(paths):
 # --------------------------------------------------------------- rules
 
 def rule_inline_attributes(path, doc):
-    """C19: slots are first-class. No inline `attributes:` on a class."""
+    """Slots are first-class. No inline `attributes:` on a class.
+
+    NO CLAIM COVERS THIS RULE. It was labelled C19 for several gates and
+    C19 was never filed — the register goes C18 to C20. A guard citing a
+    claim that does not exist sends a reader nowhere, and it means the
+    property has no falsifier and no status. Propose the claim or drop
+    the rule; do not leave it citing a number.
+    """
     bad = []
     for name, cls in (doc.get("classes") or {}).items():
         if isinstance(cls, dict) and cls.get("attributes"):
@@ -206,7 +213,8 @@ def rule_inline_attributes(path, doc):
 
 
 def rule_is_a_depth(path, doc):
-    """C19: `is_a` CHAIN DEPTH <= 2.
+    """`is_a` CHAIN DEPTH <= 2. No claim covers this rule — see
+    rule_inline_attributes.
 
     F2: the previous rule counted `is_a` declarations per file. Three
     siblings under one abstract base is depth 1 and was rejected — the
@@ -235,7 +243,7 @@ def rule_is_a_depth(path, doc):
 
 
 def rule_exact_mappings(path, doc):
-    """C19: at most one `exact_mappings` per class.
+    """At most one `exact_mappings` per class. Serves C21.
 
     Two assert the targets are equivalent to each other — the
     sosa:Platform == sosa:Sensor bug in ADR-002.
