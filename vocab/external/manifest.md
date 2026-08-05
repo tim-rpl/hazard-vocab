@@ -11,11 +11,11 @@ absent behind one.
 |---|---|---|---|---|---|---|---|
 | `sosa` | `http://www.w3.org/ns/sosa/` | 200 | 27326 | `c70b0d1c843c` | text/turtle | 15/15 terms present | **yes** — 200 text/turtle, `Observation` defined |
 | `ssn` | `http://www.w3.org/ns/ssn/` | 200 | 22714 | `184d86189191` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `System` defined |
-| `ssn-ext` | `http://www.w3.org/ns/ssn/ext/` | 200 | 8115 | `0b8fdef9a06a` | text/turtle | 2/2 terms present | **no** — 200 text/turtle, 145 triples, `ObservationCollection` NOT defined |
+| `ssn-ext` | `http://www.w3.org/ns/ssn/ext/` | 200 | 8115 | `0b8fdef9a06a` | text/turtle | 2/2 terms present | **document** — 200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere |
 | `ssn-system` | `http://www.w3.org/ns/ssn/systems/` | 200 | 27565 | `1750d2b3bb56` | text/turtle | 2/2 terms present | **yes** — 200 text/turtle, `SystemCapability` defined |
 | `prov-o` | `http://www.w3.org/ns/prov#` | 200 | 68795 | `7d203989f67b` | text/turtle | 5/5 terms present | **yes** — 200 text/turtle, `Entity` defined |
 | `org` | `http://www.w3.org/ns/org#` | 200 | 84162 | `3e01f89a1747` | text/turtle | 1/1 terms present | **yes** — 200 text/turtle, `Organization` defined |
-| `geosparql` | `http://www.opengis.net/ont/geosparql#` | 200 | 40988 | `7a8028dba554` | text/turtle | 4/4 terms present | **no** — 200 text/anot+turtle, 306 triples, `Geometry` NOT defined |
+| `geosparql` | `http://www.opengis.net/ont/geosparql#` | 200 | 40988 | `7a8028dba554` | text/turtle | 4/4 terms present | **no** — 200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined |
 | `qudt-schema` | `http://qudt.org/schema/qudt/` | 200 | 115706 | `91dee20dbfe8` | text/turtle | 3/3 terms present | **yes** — 200 text/turtle, `QuantityValue` defined |
 | `qudt-units` | `http://qudt.org/vocab/unit/` | 200 | 4073002 | `a1b1f4854eb7` | text/turtle | 6/6 terms present | **yes** — 200 text/turtle, `M-PER-SEC` defined |
 | `skos` | `http://www.w3.org/2004/02/skos/core#` | 200 | 28966 | `e79633b8d056` | application/rdf+xml | 4/4 terms present | **yes** — 200 application/rdf+xml, `Concept` defined |
@@ -30,6 +30,6 @@ absent behind one.
 
 ## Problems
 
-- ssn-ext: namespace does not dereference to a graph (200 text/turtle, 145 triples, `ObservationCollection` NOT defined) — bindable only as BORROWED
-- geosparql: namespace does not dereference to a graph (200 text/anot+turtle, 306 triples, `Geometry` NOT defined) — bindable only as BORROWED
+- ssn-ext: namespace returns a graph but mints no term of its own (200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere) — a URI built from this namespace is a URI nobody declares
+- geosparql: namespace does not dereference to a graph (200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined) — bindable only as BORROWED
 - deo: HTTP 000 from http://schema.knowwheregraph.org/lod/ontology/

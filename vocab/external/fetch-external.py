@@ -169,14 +169,37 @@ def fetch(url):
 # none — a 200, the right terms, and nothing to bind against. So the
 # test is: fetch the namespace, parse it, ask whether the probe term has
 # an rdf:type triple.
+# FULL TERM URIs, not local names appended to the namespace.
+#
+# The first version stored local names and built `namespace + name`.
+# That asks the wrong question of any document whose terms are minted
+# elsewhere: `ssn/ext/` was probed for
+# `http://www.w3.org/ns/ssn/ext/ObservationCollection`, which nobody
+# declares — the term is `sosa:ObservationCollection`, at line 40 of the
+# very file being probed — and the run reported *the namespace does not
+# dereference*, which is false. It returns a 145-triple graph.
+#
+# **This is the second instance of one defect.** The same assumption was
+# corrected in `audit-bound-terms.py` earlier in this session and left
+# standing here: fixed in one file, live in another, one directory apart.
 PROBE = {
-    "sosa": "Observation", "ssn": "System", "ssn-ext": "ObservationCollection",
-    "ssn-system": "SystemCapability", "prov-o": "Entity",
-    "org": "Organization", "geosparql": "Geometry",
-    "qudt-schema": "QuantityValue", "qudt-units": "M-PER-SEC",
-    "skos": "Concept", "owl-time": "Interval", "foaf": "Document",
-    "dqv": "QualityMeasurement", "adms": "Identifier",
-    "dcterms": "conformsTo", "shacl": "NodeShape",
+    "sosa": "http://www.w3.org/ns/sosa/Observation",
+    "ssn": "http://www.w3.org/ns/ssn/System",
+    # minted in SOSA by the SSN-ext Note; see MINTS_NOTHING below
+    "ssn-ext": "http://www.w3.org/ns/sosa/ObservationCollection",
+    "ssn-system": "http://www.w3.org/ns/ssn/systems/SystemCapability",
+    "prov-o": "http://www.w3.org/ns/prov#Entity",
+    "org": "http://www.w3.org/ns/org#Organization",
+    "geosparql": "http://www.opengis.net/ont/geosparql#Geometry",
+    "qudt-schema": "http://qudt.org/schema/qudt/QuantityValue",
+    "qudt-units": "http://qudt.org/vocab/unit/M-PER-SEC",
+    "skos": "http://www.w3.org/2004/02/skos/core#Concept",
+    "owl-time": "http://www.w3.org/2006/time#Interval",
+    "foaf": "http://xmlns.com/foaf/0.1/Document",
+    "dqv": "http://www.w3.org/ns/dqv#QualityMeasurement",
+    "adms": "http://www.w3.org/ns/adms#Identifier",
+    "dcterms": "http://purl.org/dc/terms/conformsTo",
+    "shacl": "http://www.w3.org/ns/shacl#NodeShape",
 }
 
 
@@ -201,11 +224,20 @@ def dereferences(ns, key):
             g = Graph()
     else:
         return "no", "200 %s, unparseable" % ctype.split(";")[0]
-    base = ns if ns.endswith(("/", "#")) else ns + "#"
-    if list(g.objects(URIRef(base + probe), RDF.type)):
-        return "yes", "200 %s, `%s` defined" % (ctype.split(";")[0], probe)
-    return "no", "200 %s, %d triples, `%s` NOT defined" % (
-        ctype.split(";")[0], len(g), probe)
+    ct = ctype.split(";")[0]
+    # Does this namespace mint ANY term of its own? A document that
+    # returns a graph while declaring nothing under its own namespace is
+    # a document, not a term namespace, and a URI built from it is a URI
+    # nobody declares. `ssn/ext/` is exactly that.
+    own = {s for s in g.subjects(RDF.type, None)
+           if str(s).startswith(ns) and str(s) != ns}
+    if list(g.objects(URIRef(probe), RDF.type)):
+        if not own:
+            return ("document", "200 %s, %d triples, mints **no term of its "
+                    "own** — `%s` is defined here but minted elsewhere"
+                    % (ct, len(g), probe.rsplit("/", 1)[-1]))
+        return "yes", "200 %s, `%s` defined" % (ct, probe.rsplit("/", 1)[-1].rsplit("#", 1)[-1])
+    return "no", "200 %s, %d triples, `%s` NOT defined" % (ct, len(g), probe)
 
 
 def terms_found(body, terms):
@@ -262,6 +294,10 @@ def main():
         if deref == "no":
             problems.append("%s: namespace does not dereference to a graph "
                             "(%s) — bindable only as BORROWED" % (key, detail))
+        elif deref == "document":
+            problems.append("%s: namespace returns a graph but mints no term "
+                            "of its own (%s) — a URI built from this namespace "
+                            "is a URI nobody declares" % (key, detail))
         rows.append((key, ns, status, len(body),
                      hashlib.sha256(body).hexdigest()[:12],
                      ctype.split(";")[0] or "-", verdict,
