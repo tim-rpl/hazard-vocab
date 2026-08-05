@@ -1,8 +1,7 @@
 # Falsifier charter — role O
 
-**Charter version: 10** — §5.1 gains Q12: what carries the hazard
-itself. Eleven use questions asked about everything around a hazard and
-none about the hazard.
+**Charter version: 11** — §3.1: inside a decided ADR, a defect in the
+*decision* blocks and a defect in the *rationale* records.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +10,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 11 | §3.1 decision-versus-rationale inside a decided ADR |
 | 10 | §5.1 Q12 — what carries the hazard itself |
 | 9 | §5.3 account for H's nominated attack line |
 | 8 | §1 blocks the rationale only; numbered ADRs are readable |
@@ -155,6 +155,39 @@ Weight this by stage. A measure or plan gate produces a scheduling
 artifact. A design gate produces decisions that outlive it. An
 implement gate produces the vocabulary itself, where the rule barely
 bites — almost everything there survives.
+
+#### §3.1 — inside a decided ADR, decision and rationale weigh differently
+
+An ADR carries two kinds of content and they fail differently.
+
+**The decision blocks.** What was chosen, what it forecloses, what
+obligations it creates, and any figure or binding a later stage reads
+to do its work. A defect here propagates into `vocab/` — wrong work
+starts, which is §3's test.
+
+**The rationale records.** Why it was chosen, evidence tables,
+restatements of a ground, withdrawn claims surviving elsewhere in the
+prose. A defect here misleads a reader of the reasoning. It is real, it
+outlives the gate, and it does **not** let wrong work start, because the
+decision beside it is unambiguous.
+
+So: file rationale defects as findings under `pass-with-findings`, with
+the sites named, and let one pass clear them. **Do not hold a gate open
+on them.**
+
+Two limits, because this is the rule most open to abuse:
+
+- **Ambiguity about the decision is a decision defect.** If a reader
+  could take the wrong option away, that blocks, however prose-shaped
+  the sentence is.
+- **A defect in what the ADR says a later stage must do** — an
+  obligation, a binding, a criterion, a claim about what a guard
+  catches — is decision content. Those are consumed by work.
+
+This exists because a design gate ran eight rounds in which no decision
+was reversed and every block after the fourth was a ground restated in
+a second section. The findings were real; holding the gate on them was
+not, and it delayed the work the decisions were made for.
 
 **This governs the default, not your judgement.** If you hold a defect
 blocking that this rule would record, block, and say why. An

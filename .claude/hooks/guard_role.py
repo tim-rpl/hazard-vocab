@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+\#!/usr/bin/env python3
 """Role-based access guard (PreToolUse).
 
 The session is O (Overseer) when either HV_ROLE=O is set or a .role-O
@@ -132,9 +132,14 @@ def blocked_reads(command: str) -> list[str]:
     # file of patterns, which is itself a read.
     PATTERN_FLAGS = {"-e", "--regexp"}
     FILE_FLAGS = {"-f", "--file"}
-    RECURSIVE_FLAGS = {"-r", "-R", "--recursive", "-rn", "-rl", "-ri",
-                       "-rni", "-rin", "-rnE", "-rE", "-rh", "-roh",
-                       "-rhE", "-rohE", "-rc"}
+    # Any short-flag cluster containing r or R. Enumerating clusters
+    # missed `-R` and `-Rl` — three rounds of holes from a list where a
+    # predicate was needed.
+    def is_recursive_flag(tok: str) -> bool:
+        if tok in ("--recursive", "--dereference-recursive", "-R", "-r"):
+            return True
+        return (tok.startswith("-") and not tok.startswith("--")
+                and ("r" in tok[1:] or "R" in tok[1:]))
     ALWAYS_RECURSIVE = {"rg", "ag", "ack"}
 
     hits, cmd_position, pattern_pending, reading = [], True, False, False
@@ -173,7 +178,7 @@ def blocked_reads(command: str) -> list[str]:
                 expect = "pattern"
             elif tok in FILE_FLAGS:
                 expect = "file"
-            if base_cmd in PATTERN_FIRST and tok in RECURSIVE_FLAGS:
+            if base_cmd in PATTERN_FIRST and is_recursive_flag(tok):
                 recursive = True
             if "exclude" in tok or "design" in tok:
                 excluded = True
@@ -194,8 +199,23 @@ def blocked_reads(command: str) -> list[str]:
     # the rationale, and blocking it would make the guard obstruct the
     # searching O is required to do — which is F7's lesson.
     def reaches_design(r: str) -> bool:
+        """A root reaches design/ unless it is demonstrably elsewhere.
+
+        An ABSOLUTE path to the repository root walked through the
+        previous version, which only recognised `.` and `./`. Anything
+        not clearly scoped to a sibling directory is treated as
+        reaching — the guard errs toward blocking and names the fix.
+        """
         r = r.strip("'\"").rstrip("/")
-        return r in ("", ".", "..", "/") or r.split("/")[0] == "design"
+        if r in ("", ".", "..", "/", "~"):
+            return True
+        head = r.lstrip("./").split("/")[0]
+        if head == "design":
+            return True
+        # a relative root naming a known sibling cannot reach design/
+        SIBLINGS = {"vocab", "docs", "scripts", "codelists", "transform",
+                    "fixtures", "build", ".claude"}
+        return head not in SIBLINGS
 
     if recursive and not excluded and not hits:
         if not roots or any(reaches_design(r) for r in roots):
