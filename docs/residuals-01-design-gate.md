@@ -5,6 +5,17 @@
 **Governing rule:** `FALSIFIER.md` §3.1 — inside a decided ADR, a defect
 in the **rationale** records; a defect in the **decision** blocks.
 
+**Scope, widened 2026-08-04.** Rationale defects found at the design
+gate, **wherever they sit** — the original scoping to *inside a decided
+ADR* was the shape of the first two entries, not a principle, and BV9-1
+produced one in the plan. A defect that misleads a reader of the
+reasoning is the same defect in `plan-01` as in `ADR-003`. What decides
+whether an entry records or blocks is §3.1's test — can a reader take
+the wrong option away — not which file it is in.
+
+Sites outside H's write set are **filed here and not fixed**, with the
+owner named.
+
 Rationale defects found at the design gate and deliberately **not**
 repaired one at a time. Each is real, each outlives the gate, and none
 lets wrong work start — the decision beside it is unambiguous in every
@@ -119,6 +130,71 @@ design/ADR-003*` returns `:39` on the first try.
 
 ---
 
+## Filed, not H's to fix
+
+### R4 — `CLAUDE.md` says ADR-003 is open; `ADR-003:3` says accepted
+
+**Found:** BV9-1, 2026-08-04 · **Owner:** the human · **Kind:** rationale
+
+> *"the Part 2 / Part 3 split is the one most likely to break first …
+> **See ADR-003, which is open.**"*
+
+`CLAUDE.md` is injected at the start of every session, which makes it
+the most-read sentence in the project about ADR-003, and it contradicts
+the ADR's status line. **Records rather than blocks on the same test
+that cleared R1 and R2:** the ADR is one file away and unambiguous.
+
+H reports rather than fixes — `CLAUDE.md` is the human's under the
+ownership table.
+
+**The surrounding claim is not affected and should survive the fix.**
+*The Part 2 / Part 3 split is the one most likely to break first* is
+**better supported now than when it was written**: ADR-003 records that
+option B has no stated ground discriminating it from A.
+
+### R5 — `FALSIFIER.md` §1's verification instruction is false by design
+
+**Found:** BV9-2, 2026-08-04 · **Owner:** the human · **Kind:** rationale
+
+§1: *"`make role` must print `O`, **or** a Read of any path under
+`design/` must come back BLOCKED."* Charter v8 made every numbered ADR
+readable, so the second disjunct now holds for exactly one path —
+`ADR-000-rationale.md`. An O session using it as the check concludes it
+is **unguarded when it is guarded.**
+
+Second site, same finding: §1 gives O *Status, Evidence and Updated*
+while §6's promotion necessarily writes a whole entry. That is why
+BV9-3's field could not be written by O.
+
+*Cosmetic, same area:* `guard_role.py`'s block message cites charter v8
+against a charter at v11; the substance matches v11.
+
+**Same class as R1 and R2** — a rule changed at v8, two sentences
+derived from the old rule not reached — found in the charter, by the
+role it constrains.
+
+---
+
 ## Cleared
 
-*(none yet — P21 has not run)*
+### R3 — `plan-01:189` said ADR-003 is open. Withdrawn in place, 2026-08-04
+
+**Found:** BV9-1 · **Kind:** rationale · **Cleared on sight, not at P21**
+
+*"**ADR-003 is open and determines Part 2's shape.** Confirmed"* —
+unmarked, in the document the implement stage reads. The item table at
+`:227` and `:564` carries P3 as `MET`, so an item-by-item reader was
+safe and a narrative reader was not.
+
+**Why this one was not deferred**, on the precedent set at BV7-4 and
+accepted: **a stale figure misleads about a quantity; a stale
+open-question misleads about what is settled.** The second is the more
+dangerous kind, the repair is one sentence with no ground to restate,
+and nothing else in the passage depends on it. Deferring it would have
+left the plan telling its own reader that a decided ADR is undecided for
+the length of a pass.
+
+**Verified:** `grep -rn "ADR-003 is open" docs/ design/` returns the
+withdrawal record and nothing else.
+
+*(P21 has not run. R1 and R2 remain open.)*

@@ -186,10 +186,22 @@ and was not named.**
   P1 and unblocks ADR-001. The second is P12 and may never be
   answerable. **Conflating them is what made L2 unfalsifiable in the
   first place**, so the plan separates them permanently.
-- **ADR-003 is open and determines Part 2's shape.** Confirmed, and the
-  measured delta is +0 classes / +2 slots translated (A7). That number
-  is why ADR-003 does **not** gate Part 0 and does gate Part 2 — the
-  cost of deciding late is two slots and one enum, not a rebuild.
+- **ADR-003 determines Part 2's shape.** Confirmed, and the measured
+  delta is +0 classes / +2 slots translated (A7). That number is why
+  ADR-003 does **not** gate Part 0 and does gate Part 2 — the cost of
+  deciding late is two slots and one enum, not a rebuild.
+
+  **This read *"ADR-003 is open"*. Withdrawn 2026-08-04 (BV9-1):
+  `ADR-003:3` is `Status: accepted — option B`, decided 2026-08-02, and
+  ADR-004, ADR-005 and P3's `MET` row all rest on it.** The item table
+  at `:227` and `:564` was right; this narrative sentence was not, so an
+  item-by-item reader was safe and a narrative reader was not.
+
+  **Withdrawn in place rather than deferred to P21**, on the precedent
+  set at BV7-4 and accepted: a stale figure misleads about a quantity,
+  and a stale open-question misleads about **what is settled**. The
+  second is the more dangerous kind and is cheap to close. The reasoning
+  around it is untouched.
 - **T3 falsified, T3a has no tiebreak, so L4's precondition is
   unestablished.** Confirmed. Everything depending on merge-as-join is
   downstream of P11.
