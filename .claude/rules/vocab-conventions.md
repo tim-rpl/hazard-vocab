@@ -66,15 +66,71 @@ value. See the `ObjectType` pattern in ADR-001.
 
 ## Before binding any external term
 
-1. Fetch the graph and grep for the term. A 200 on a slash namespace
+1. **Fetch the graph and grep for the term.** A 200 on a slash namespace
    proves nothing — the whole ontology document is returned for every
    path under it.
-2. Does the term's definition match the intended use, or only its name?
-3. Is it a role class? If so, do not bind an entity to it.
-4. Does it declare a domain and range? A property with neither
+2. **Does the term's definition match the intended use, or only its
+   name?** `sosa:hasMember` reads like a mereological relation and its
+   published definition carries no interval, which ADR-002 Decision C
+   says is wrong in every case `partOf` covers.
+3. **Is it a role class?** If so, do not bind an entity to it.
+4. **Does it declare a domain and range?** A property with neither
    constrains nothing in generated SHACL.
-5. Record what you verified and how. Status-code-only is not
+5. **Record what you verified and how.** Status-code-only is not
    content-verified and must not be recorded as such.
+
+### Five failure modes measured in published vocabularies
+
+Each of these was found in a real vocabulary this project considered.
+None announced itself.
+
+**The namespace has no TLD.** `http://knowwheregraph/ontology/deo#`
+resolves for nobody, ever. A vocabulary whose namespace cannot
+dereference can only be **borrowed** — copy the structure, cite the
+source, author locally, and record that no consumer can fetch it. This
+is CIM's position, and it is a property of the namespace rather than a
+judgement about the vocabulary's quality.
+
+**The CURIE in the paper is not the URI in the graph.** DMDO's prefix
+expands with `#` while every core class is declared with `/`, so
+`deo:Hazard` — the form in the published diagram — is declared nowhere,
+in any file. **Bind what `grep` finds declared, never a CURIE read from
+a diagram, a paper or a table.** Third instance of this shape here: the
+SOSA slash-namespace, an `sh:or` count that was a substring of
+`sh:order`, and this.
+
+**One concept, two URIs.** `.../deo/Hazard` and `.../dmdo/Hazard` are
+the same class in two modules of one release. Check for this before
+binding either, and record which one you chose and why — that decision
+is not recoverable from the schema later.
+
+**SKOS annotations are not a SKOS concept scheme.** A vocabulary can use
+`skos:definition` several hundred times and declare no `skos:Concept`,
+no `skos:inScheme` and no `skos:exactMatch`. ADR-000 D5 chose SKOS for
+four properties — hierarchy, cross-scheme mapping, per-concept
+deprecation, independent versioning — and annotation-only use delivers
+at most the first. **Cross-scheme mapping is the one that bites**, since
+alignment is the usual reason to adopt an authoritative taxonomy at all.
+
+**A vocabulary may declare a term it does not own.** DMDO declares
+`sosa:hasUltimateFeatureOfInterest` as a bare `owl:ObjectProperty`. That
+is a stub for local reasoning, not the definition — fetch the owning
+namespace for the real one.
+
+### Borrowed, bound, cited
+
+Three relationships, and the distinction decides what a binding is worth.
+See ADR-001.
+
+| | Namespace | What it constrains |
+|---|---|---|
+| **Bound** | dereferences | still only what the local declaration says — `gen-shacl` never consults the term |
+| **Borrowed** | does not dereference | nothing. Copy the structure, cite the source |
+| **Cited** | irrelevant | documentation only, by intent |
+
+Record which of the three every external vocabulary is, with the
+dereference result behind it. `docs/vocabularies/README.md` is the
+register.
 
 ## Checks
 

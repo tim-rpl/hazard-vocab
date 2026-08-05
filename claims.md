@@ -1201,7 +1201,26 @@ outside Part 0.
   membership and not a homonym.
 - **Evidence:** — *(untested; Part 0 does not exist. Statement audited
   2026-08-02. **Not evidence for C8.**)*
-- **Updated:** 2026-08-02
+
+  2026-08-04, implement gate — **a counterexample to the second clause is
+  scheduled, not yet present. Status unchanged because nothing is defined
+  yet.** `design/surface.yaml:25` binds `sosa:hasMember`, and `:39` binds
+  `sosa:ObservationCollection`; both are in ADR-004's generated worklist
+  (16 bound slots, 13 class bindings) and land in **Part 2** at P7.
+  Fetched from `https://www.w3.org/TR/vocab-ssn-ext/`: `sosa:hasMember`
+  has domain `ObservationCollection`, range `Observation` **or**
+  `ObservationCollection`, and is a **sub-property of `rdfs:member`** —
+  a whole-to-member relation that nests. It carries **no interval**,
+  which ADR-002 Decision C calls non-negotiable for `partOf`.
+
+  So on the day Part 2 is authored, a part-whole relation is defined
+  outside Part 0 unless someone decides it is not one. **Nothing in the
+  readable tree has looked:** `hasMember` occurs three times in total —
+  `surface.yaml` and ADR-004's two generated lists — and is discussed
+  nowhere. This is the homonym question C8's own **Watch** field raises,
+  arriving from an external vocabulary rather than from a hand-written
+  signature, which is why a signature-name grep could not see it.
+- **Updated:** 2026-08-04
 - **Audit note, 2026-08-02 — survives the audit, with one soft edge.**
   The claim is two statements and both are checkable by a third party.
   The second ("no part-whole relation is defined outside Part 0") is a

@@ -1,7 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 12** — §1 write set covers a field H proposed and you
-disposed; §5's implement row verifies generated output, not source.
+**Charter version: 13** — §1: a `Falsifier` is written like any other
+disposed field. The previous text routed it to a role that cannot write
+`claims.md` at all.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -10,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 13 | §1 Falsifier writes follow the disposed-field rule |
 | 12 | §1 disposed-field writes; §5 implement verifies generated output |
 | 11 | §3.1 decision-versus-rationale inside a decided ADR |
 | 10 | §5.1 Q12 — what carries the hazard itself |
@@ -101,8 +103,20 @@ its Decision, Obligation and Consequences sections agree with each other
   visible; the wording is H's and the write is yours;
 - `[O → H]` messages in `review-inbox.md`.
 
-Nothing else. In particular, **do not add or edit a Falsifier on an
-entry H owns** — propose the wording and let H file it.
+Nothing else.
+
+**A `Falsifier` is not exempt from the bullet above.** An earlier
+version of this section said to *"propose the wording and let H file
+it"* — which was impossible, because H writes no part of `claims.md`.
+The result was that C11 through C17, seven entries filed directly as
+`falsified`, could receive a `Falsifier` from neither role and have gone
+without one since. Treat a `Falsifier` exactly as any other field: H
+proposes, you dispose, you write, and the provenance goes in the
+`[O → H]` message.
+
+What is still forbidden is **inventing one**. A `Falsifier` you authored
+for a claim H owns is your statement of what would break H's claim, and
+it would be tested against itself.
 
 ---
 
