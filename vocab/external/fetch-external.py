@@ -125,12 +125,34 @@ SOURCES = [
       # not carry PM2.5.
       "mass_concentration_of_pm2p5_ambient_aerosol_particles_in_air",
       "mass_concentration_of_pm10_ambient_aerosol_particles_in_air"]),
+    # DMDO / KnowWhereGraph. Supplied by hand first because no namespace
+    # here dereferences; now fetched from the repository so the sidecars
+    # carry a measured http_status, content_type and fetched, and so the
+    # cached bytes can be diffed against what the source serves today.
+    #
+    # The namespaces have **no TLD** — `http://knowwheregraph/ontology/deo#`
+    # has a host with no dot — so `dereferences` is `no` for anyone, ever,
+    # and the disposition is BORROWED as a property of the URI rather than
+    # a judgement about the vocabulary.
+    ("disaster-event-module-generalized", "http://knowwheregraph/ontology/deo#",
+     "https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-generalized.ttl",
+     ["Hazard", "Event", "Disaster", "DisasterImpact"]),
+    ("disaster-event-module-extensions", "http://knowwheregraph/ontology/deo#",
+     "https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-extensions.ttl",
+     ["hasUltimateFeatureOfInterest"]),
+    ("disaster-properties-ontology", "http://knowwheregraph/ontology/dpo#",
+     "https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-properties-module/disaster-properties-ontology.ttl",
+     ["ElementAtRisk"]),
+    ("undrr-isc-hazard-classification", "https://undrr-hip.org/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/undrr-isc-hazard-classification.ttl",
+     ["broader", "definition"]),
     # The Part 1 lead. UNVERIFIED by design — ADR-006 records three
     # questions to answer by fetch when Part 1 comes up, and whether the
     # namespace dereferences at all is the first of them.
-    ("deo", "http://schema.knowwheregraph.org/",
-     "http://schema.knowwheregraph.org/lod/ontology/",
-     []),
+    # The `deo` row is deleted, not kept as a failing probe.
+    # `schema.knowwheregraph.org` does not resolve; the four rows above
+    # are the actual artifacts and they are fetched from the repository.
+
 ]
 
 
@@ -200,11 +222,20 @@ PROBE = {
     "adms": "http://www.w3.org/ns/adms#Identifier",
     "dcterms": "http://purl.org/dc/terms/conformsTo",
     "shacl": "http://www.w3.org/ns/shacl#NodeShape",
+    # F1's lesson: probe for a DEFINED term, not a 200.
+    "undrr-isc-hazard-classification": "https://undrr-hip.org/MH0001",
 }
 
 
 def dereferences(ns, key):
     """(verdict, detail) — what a consumer resolving the namespace gets."""
+    # Derivable from the URI alone, no fetch: a host with no dot has no
+    # TLD and cannot resolve for anyone, ever. `knowwheregraph` is such a
+    # host. This is a property of the URI, not a judgement about the
+    # vocabulary, and it makes the disposition BORROWED permanently.
+    host = ns.split("//")[-1].split("/")[0]
+    if "." not in host:
+        return "no", "host `%s` has no TLD — cannot resolve for anyone" % host
     probe = PROBE.get(key)
     if not probe:
         return "untested", "no probe term declared"

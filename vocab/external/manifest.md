@@ -37,10 +37,16 @@ disagreeing with itself.
 | `dcterms` | <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl> | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 terms present | <http://purl.org/dc/terms/> | **yes** — 200 text/turtle, `conformsTo` defined |
 | `shacl` | <https://www.w3.org/ns/shacl.ttl> | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 terms present | <http://www.w3.org/ns/shacl#> | **yes** — 200 text/turtle, `NodeShape` defined |
 | `nvs-p07` | <http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle> | 200 | 11568143 | `b55868b6d586` | text/turtle | 6/6 terms present | <http://vocab.nerc.ac.uk/collection/P07/current/> | **untested** — no probe term declared |
-| `deo` | <http://schema.knowwheregraph.org/lod/ontology/> | 000 | 0 | `-` | - | no payload | <http://schema.knowwheregraph.org/> | **no** — no payload |
+| `disaster-event-module-generalized` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-generalized.ttl> | 200 | 16259 | `a0bdffeb8cd0` | text/plain | 4/4 terms present | <http://knowwheregraph/ontology/deo#> | **no** — host `knowwheregraph` has no TLD — cannot resolve for anyone |
+| `disaster-event-module-extensions` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-event-module/disaster-event-module-extensions.ttl> | 200 | 18328 | `1d90bb72c683` | text/plain | 1/1 terms present | <http://knowwheregraph/ontology/deo#> | **no** — host `knowwheregraph` has no TLD — cannot resolve for anyone |
+| `disaster-properties-ontology` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/modules/disaster-properties-module/disaster-properties-ontology.ttl> | 200 | 29566 | `7e5fd60dcf6e` | text/plain | 1/1 terms present | <http://knowwheregraph/ontology/dpo#> | **no** — host `knowwheregraph` has no TLD — cannot resolve for anyone |
+| `undrr-isc-hazard-classification` | <https://raw.githubusercontent.com/KnowWhereGraph/dmdo/main/undrr-isc-hazard-classification.ttl> | 200 | 416237 | `c42170ffe042` | text/plain | 2/2 terms present | <https://undrr-hip.org/> | **no** — HTTP 000 |
 
 ## Problems
 
 - ssn-ext: namespace returns a graph but mints no term of its own (200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere) — a URI built from this namespace is a URI nobody declares
 - geosparql: namespace does not dereference to a graph (200 text/anot+turtle, 306 triples, `http://www.opengis.net/ont/geosparql#Geometry` NOT defined) — bindable only as BORROWED
-- deo: HTTP 000 from http://schema.knowwheregraph.org/lod/ontology/
+- disaster-event-module-generalized: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED
+- disaster-event-module-extensions: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED
+- disaster-properties-ontology: namespace does not dereference to a graph (host `knowwheregraph` has no TLD — cannot resolve for anyone) — bindable only as BORROWED
+- undrr-isc-hazard-classification: namespace does not dereference to a graph (HTTP 000) — bindable only as BORROWED
