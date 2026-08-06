@@ -16,7 +16,7 @@ import subprocess
 import sys
 import tempfile
 
-SRC = pathlib.Path(__file__).resolve().parent.parent
+SRC = pathlib.Path(__file__).resolve().parent
 
 MUTATIONS = [
     # Each mutation deletes ONE clause, faithfully. The first version of
