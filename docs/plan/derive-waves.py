@@ -212,6 +212,20 @@ RETRACTION_CUES = ("read ", "restated", "retire", "retired", "withdraw",
                    "no longer", "not the long pole")
 
 
+def sentence_of(text, pos):
+    """The retraction's scope is the sentence, not the block.
+
+    Boundaries: sentence punctuation, a table-cell pipe, and a YAML key.
+    A cue three table rows away, or in a different field of the same
+    file, does not retract anything here.
+    """
+    L = max((text.rfind(d, 0, pos) for d in (". ", "! ", "? ", "|", "; ")),
+            default=-1)
+    R = min((r for r in (text.find(d, pos) for d in (". ", "! ", "? ", "|", "; "))
+             if r != -1), default=len(text))
+    return text[L + 1:R]
+
+
 def check_retired(paths):
     """Two blind spots the 12/12 probe could not see, both fixed here.
 
@@ -246,39 +260,72 @@ def check_retired(paths):
     for path in paths:
         is_yaml = path.suffix in (".yaml", ".yml")
         lines = path.read_text().splitlines()
-        # Group into blocks so a phrase broken by a hard wrap is still one
-        # string. A blank line, or a change in blockquote status, ends a
-        # block — a `>` line must not merge with the prose beside it or the
-        # exemption would leak across the boundary.
-        blocks, cur, start = [], [], 1
+        # UNITS, not blocks. A unit is the smallest thing a retraction can
+        # scope over, and it differs by structure:
+        #
+        #   YAML       one line — each field is its own record, and
+        #              `items.yaml` has no blank line, so a paragraph rule
+        #              made the whole file one unit (B3)
+        #   table row  one line — a cue in row 3 does not retract row 20;
+        #              two 26-line generated tables went exempt end to end
+        #   prose      the paragraph, so a hard-wrapped phrase is still
+        #              found (B2, the half that was right)
+        #
+        # Offsets are kept so a hit reports ITS OWN line. The first version
+        # reported the unit's start, which put every `items.yaml` finding
+        # at line 1 — a guard whose output cannot be acted on.
+        units, cur = [], []
         for i, line in enumerate(lines, 1):
-            quoted = line.lstrip().startswith(">")
-            if not line.strip() or (cur and quoted != cur[0][1]):
+            solo = (is_yaml or line.lstrip().startswith("|")
+                    or line.lstrip().startswith(">"))
+            if solo or not line.strip():
                 if cur:
-                    blocks.append((start, cur)); cur = []
-                start = i + 1
+                    units.append(cur); cur = []
+                if solo and line.strip():
+                    units.append([(i, line)])
                 continue
-            if not cur:
-                start = i
-            cur.append((line, quoted))
+            cur.append((i, line))
         if cur:
-            blocks.append((start, cur))
+            units.append(cur)
 
-        for first, rows in blocks:
-            if rows[0][1]:            # blockquoted block — a retraction
-                continue
-            joined = re.sub(r"\s+", " ", " ".join(r[0] for r in rows))
-            probe = joined if is_yaml else re.sub(
-                r'\*?"[^"\n]{0,300}"?\*?', "", joined)
-            hit = RETIRED_PHRASES.search(probe) or SIZING_PHRASES.search(probe)
-            if not hit:
-                continue
-            if any(c in joined.lower() for c in RETRACTION_CUES):
-                continue
-            bad.append("%s:%d — %r is a retired figure or a sizing claim, "
-                       "outside a retraction. ADR-004's generated worklist is "
-                       "the replacement and it states no total."
-                       % (path.name, first, hit.group(0)))
+        for unit in units:
+            if unit[0][1].lstrip().startswith(">"):
+                continue          # blockquoted — a retraction
+            joined, offsets, at = "", [], 0
+            for ln, txt in unit:
+                txt = re.sub(r"\s+", " ", txt).strip()
+                offsets.append((at, ln))
+                joined += txt + " "
+                at = len(joined)
+            # An ASTERISK-WRAPPED quotation is rhetorical in either file
+            # type — `*"…"*` and `*'…'*` are emphasis plus quotation, and
+            # a document quoting the phrase it retracts uses them. YAML's
+            # own quotes are the OUTER `"` of the scalar, which is syntax,
+            # and stripping those is what exempted `items.yaml` wholesale
+            # before B3. So: strip the rhetorical form everywhere, and the
+            # bare form only where it cannot be syntax.
+            # MENTION vs USE. `backticks` and *'asterisk quotes'* mark a
+            # phrase being *talked about*; bare prose is a phrase being
+            # *asserted*. The exemption is about exactly that difference,
+            # so both mention forms are stripped before matching and a
+            # bare-prose reintroduction still fires — probed below.
+            probe = re.sub(r"`[^`\n]{0,300}`", "", joined)
+            probe = re.sub(r"\*['\"][^'\"\n]{0,300}['\"]\*", "", probe)
+            if not is_yaml:
+                probe = re.sub(r'\*?"[^"\n]{0,300}"?\*?', "", probe)
+            for hit in sorted(list(RETIRED_PHRASES.finditer(probe))
+                              + list(SIZING_PHRASES.finditer(probe)),
+                              key=lambda m: m.start()):
+                if any(c in sentence_of(probe, hit.start()).lower()
+                       for c in RETRACTION_CUES):
+                    continue
+                line_no = [ln for off, ln in offsets if off <= hit.start()][-1]
+                bad.append("%s:%d — %r is a retired figure or a sizing "
+                           "claim, outside a retraction. ADR-004's "
+                           "generated worklist is the replacement and it "
+                           "states no total."
+                           % (path.name, line_no, hit.group(0)))
+                break
     return bad
 
 
