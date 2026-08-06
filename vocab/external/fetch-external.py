@@ -72,8 +72,26 @@ SOURCES = [
     # Presence passed 4/4 and `audit-bound-terms.py` found zero
     # definitions — which is why term presence is necessary and not
     # sufficient. Fetching the OGC-published ontology instead.
+    # GeoSPARQL 1.1, from the RELEASED TAG rather than a moving branch.
+    # The previous URL pointed at `main` via GitHub Pages and began
+    # returning a 9 KB HTML 404, which then overwrote this sidecar with the
+    # 404 page's digest.
+    #
+    # 1.1 over 1.0, decided by measurement: all four bound terms and the
+    # `Feature owl:disjointWith Geometry` axiom are IDENTICAL in both, so
+    # ADR-004 Decision A holds either way. 1.1 mints 65 terms against 1.0's
+    # 39 — the extra 26 include `hasCentroid`, `hasBoundingBox` and
+    # `hasMetricArea`, which is where Part 2's coverage row would reach —
+    # and both versions share one namespace, so this is a source-file
+    # choice and not a rebinding.
+    #
+    # This file is not byte-identical to what the dead URL served (772 vs
+    # 796 triples) and the diff is ANNOTATION VOCABULARY only: the tag uses
+    # `skos:definition`/`prefLabel`/`example` where `main` used
+    # `schema.org/description`. Same 65 terms, same axioms on all five
+    # terms measured.
     ("geosparql", "http://www.opengis.net/ont/geosparql#",
-     "https://opengeospatial.github.io/ogc-geosparql/geosparql11/geo.ttl",
+     "https://raw.githubusercontent.com/opengeospatial/ogc-geosparql/1.1.0-ghpages/geosparql11/geo.ttl",
      ["hasGeometry", "asWKT", "Geometry", "wktLiteral"]),
     ("qudt-schema", "http://qudt.org/schema/qudt/",
      "http://qudt.org/schema/qudt/",
@@ -129,6 +147,66 @@ SOURCES = [
     # (200, text/turtle, 11.5 MB). That gap is precisely what the register's
     # `dereferences` column is for, and it is why the fetch URL and the
     # namespace are separate fields rather than one.
+    # The twelve KWG source-specific ontologies — one per dataset, and the
+    # profile-level artifacts `vocab/profiles/` exists for and has none of.
+    # DMDO is a domain model; these are worked examples of binding a real
+    # feed. Three are our own: wildfire-nifc, air-quality-epa,
+    # earthquake-usgs.
+    #
+    # Files are renamed on ingest from `<folder>/ontology.ttl`, because
+    # twelve files called `ontology.ttl` give twelve sidecars called
+    # `ontology.provenance.yaml`. **The rename is recoverable because the
+    # file's identity is its `source_url`**, which carries the full path
+    # including the `-documentation` folder.
+    #
+    # Each term list is ONE FILE-SPECIFIC term, derived by measurement:
+    # a name declared in exactly 1 of the 11 KWG ontologies. That makes
+    # the content check answer *did we get THIS dataset's ontology* rather
+    # than *did a payload arrive*. The first version guessed `Region` for
+    # all twelve and `wildfire-nifc` does not declare it.
+    ("wildfire-nifc", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/wildfire-nifc-documentation/ontology.ttl",
+     ["gacc"]),
+    ("air-quality-epa", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/air-quality-epa-documentation/ontology.ttl",
+     ["cbsaCode"]),
+    ("earthquake-usgs", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/earthquake-usgs-documentation/ontology.ttl",
+     ["Earthquake"]),
+    ("historical-fires-mtbs", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/historical-fires-mtbs-documentation/ontology.ttl",
+     ["fireName"]),
+    ("hurricane-tracks-noaa", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/hurricane-tracks-noaa-documentation/ontology.ttl",
+     ["stormID"]),
+    ("national-weather-zone-noaa", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/national-weather-zone-noaa-documentation/ontology.ttl",
+     ["zoneNumber"]),
+    ("climate-divisions-observations-noaa", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/climate-divisions-observations-noaa-documentation/ontology.ttl",
+     ["Geometry"]),
+    ("admin-regions-gadm", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/admin-regions-gadm-documentation/ontology.ttl",
+     ["hasGID"]),
+    ("census-uscb", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/census-uscb-documentation/ontology.ttl",
+     ["hasGEOID"]),
+    ("cropland-types-usda", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/cropland-types-usda-documentation/ontology.ttl",
+     ["Cell"]),
+    ("federal-judicial-district-doj", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/federal-judicial-district-doj-documentation/ontology.ttl",
+     ["heldBy"]),
+    # A VoID description of the collection — except it is not VoID.
+    # Measured: 982 triples, **zero `void#` predicates**, every type minted
+    # in KWG's own namespace (`kwg:Dataset` 31, `kwg:DatasetSubgraph` 24,
+    # `kwg:KnowledgeGraph` 1, `kwg:Team` 1, `kwg:Person` 47). The filename
+    # says VoID; the graph says KWG's own dataset vocabulary. A reader
+    # reaching for `void:triples`, `void:dataDump` or `void:sparqlEndpoint`
+    # finds none of them. Name-versus-content, in a filename.
+    ("void", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
+     "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/void.ttl",
+     ["Dataset", "KnowledgeGraph"]),
     ("nvs-p07", "http://vocab.nerc.ac.uk/collection/P07/current/",
      "http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle",
      ["air_temperature", "wind_speed", "mole_fraction_of_ozone_in_air",
@@ -243,6 +321,23 @@ PROBE = {
     "schema": "https://schema.org/GovernmentOrganization",
     "sioc": "http://rdfs.org/sioc/ns#Community",
     # F1's lesson: probe for a DEFINED term, not a 200.
+    # All twelve KWG files share ONE namespace, so they share one
+    # probe. `Region` is declared in 6 of the 11 ontologies, which is
+    # itself the row-spanning problem: the probe asks whether the
+    # NAMESPACE defines it, and the namespace is one host for all of
+    # them.
+    "wildfire-nifc": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "air-quality-epa": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "earthquake-usgs": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "historical-fires-mtbs": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "hurricane-tracks-noaa": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "national-weather-zone-noaa": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "climate-divisions-observations-noaa": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "admin-regions-gadm": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "census-uscb": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "cropland-types-usda": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "federal-judicial-district-doj": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
+    "void": "http://stko-kwg.geog.ucsb.edu/lod/ontology/Region",
     "undrr-isc-hazard-classification": "https://undrr-hip.org/MH0001",
 }
 
@@ -255,13 +350,22 @@ def dereferences(ns, key):
     # vocabulary, and it makes the disposition BORROWED permanently.
     host = ns.split("//")[-1].split("/")[0]
     if "." not in host:
-        return "no", "host `%s` has no TLD — cannot resolve for anyone" % host
+        return "no", "**structural** — host `%s` has no TLD, cannot resolve for anyone, ever" % host
     probe = PROBE.get(key)
     if not probe:
         return "untested", "no probe term declared"
     status, final, ctype, body = fetch(ns)
     if status != "200" or not body:
-        return "no", "HTTP %s" % status
+        # Three unrelated causes were all printing a bare `no`, and they
+        # DECAY DIFFERENTLY: a missing TLD is permanent, a 403 is access
+        # and could change from another network, a 000 is one observation.
+        # A column where one value covers three causes is C11's shape.
+        kind = {"403": "**access** — 403; a re-probe from another network "
+                       "could change this",
+                "404": "**access** — 404 at this path",
+                "000": "**single observation** — no response; one probe, not "
+                       "a property"}.get(status, "**HTTP %s**" % status)
+        return "no", kind
     try:
         from rdflib import Graph, RDF, URIRef
     except ImportError:
@@ -350,7 +454,8 @@ def sync_register():
             continue
         d = _y.safe_load(side.read_text())
         rows.append((g.stem, d.get("namespace", "-"),
-                     d.get("dereferences", "?"), d.get("disposition", "?")))
+                     d.get("dereferences", "?"), d.get("disposition", "?"),
+                     d.get("detail", "")))
 
     out = ["# External vocabulary register", "",
            "**Generated in full by `fetch-external.py` from the provenance",
@@ -362,12 +467,21 @@ def sync_register():
            "the cached file.** GeoSPARQL is why: `:Geometry` is defined in the",
            "cached graph and undefined in what the namespace serves. A",
            "vocabulary can be *bound* by name and *borrowed* in fact.", "",
-           "| Graph | Namespace | Dereferences | Disposition |",
-           "|---|---|---|---|"]
-    for k, ns, dr, disp in rows:
-        out.append("| `%s` | <%s> | **%s** | **%s** |" % (k, ns, dr, disp))
+           "**`dereferences` carries its REASON, not a bare verdict.** Three",
+           "unrelated causes were all printing `no` and they decay",
+           "differently: **structural** (no TLD) can never change,",
+           "**access** (403/404) could change from another network,",
+           "**single observation** (000) is one probe rather than a",
+           "property, and **content** (200 but the term is undefined) is",
+           "the GeoSPARQL case. One value covering four causes is C11's",
+           "shape.", "",
+           "| Graph | Namespace | Dereferences | Why | Disposition |",
+           "|---|---|---|---|---|"]
+    for k, ns, dr, disp, detail in rows:
+        out.append("| `%s` | <%s> | **%s** | %s | **%s** |"
+                   % (k, ns, dr, detail or "—", disp))
     tally = {}
-    for _k, _n, _d, disp in rows:
+    for _k, _n, _d, disp, _x in rows:
         tally[disp] = tally.get(disp, 0) + 1
     out += ["", "*%d graphs with a sidecar; %s. %d fetch(es) produced no "
             "graph at all.*"
@@ -423,6 +537,7 @@ def main():
                            capture_output=True, text=True).stdout.strip()
 
     rows, problems = [], []
+    CACHED_OK = set()
     for key, ns, url, terms in SOURCES:
         path = CACHE / ("%s.ttl" % key)
         if args.check:
@@ -434,8 +549,10 @@ def main():
             status, final, ctype, body = fetch(url)
             if status == "200" and body:
                 path.write_bytes(body)
+                CACHED_OK.add(key)
             else:
-                problems.append("%s: HTTP %s from %s" % (key, status, url))
+                problems.append("%s: HTTP %s from %s — cache and sidecar "
+                                "left untouched" % (key, status, url))
 
         if not body:
             rows.append((key, ns, status, 0, "-", "-", "no payload", "**no** — no payload"))
@@ -475,8 +592,56 @@ def main():
     # hand beside a generated table is the copy-of-a-copy defect.
     import json
     for r in rows:
-        key, ns = r[0], r[1]
+        key, ns, row_status = r[0], r[1], r[2]
         side = CACHE / ("%s.provenance.yaml" % key)
+        if not args.check and key not in CACHED_OK:
+            # The fetch failed. The cached `.ttl` is untouched, so its
+            # sidecar must stay untouched too — writing the failure's
+            # metadata here recorded `sha256: b620507312c5` (a 9 KB GitHub
+            # 404 page) against a file whose real digest is `7a8028dba554`
+            # and which contains all four bound terms.
+            #
+            # Same family as B5: the tool destroying the evidence it exists
+            # to keep, on the fetch path instead of the check path. A dead
+            # or transient URL silently invalidated the provenance of an
+            # intact file.
+            g = CACHE / ("%s.ttl" % key)
+            if side.exists() and g.exists():
+                # REPAIR, not merely keep. A previous run already wrote the
+                # failure's metadata here — `sha256: b620507312c5`, a 9 KB
+                # GitHub 404 page, against a file whose real digest is
+                # `7a8028dba554` and which carries all four bound terms.
+                # Keeping a corrupted sidecar is not better than rewriting
+                # it; what matters is that it describes THE CACHED BYTES.
+                #
+                # `http_status`, `content_type` and `fetched` are not
+                # recoverable for those bytes, so they say so rather than
+                # carry a value from a fetch that returned something else.
+                import hashlib as _h
+                d = _y_load(side)
+                have = _h.sha256(g.read_bytes()).hexdigest()[:12]
+                if d.get("sha256") != have:
+                    d["sha256"] = have
+                    for f in ("http_status", "content_type", "fetched"):
+                        # `status` here is leftover from another loop and
+                        # read 200 for a fetch that 404'd. Use the ROW's own
+                        # status — third variable-scope slip in this file,
+                        # same family as hashing `body` from the prior loop.
+                        d[f] = ("unrecoverable — the source URL returned "
+                                "HTTP %s; these bytes are from an earlier "
+                                "successful fetch" % row_status)
+                    side.write_text(
+                        "# Generated by fetch-external.py. Do not edit.\n"
+                        + "".join("%-14s %s\n" % (k + ":", json.dumps(str(v)))
+                                  for k, v in d.items()))
+                    problems.append("%s: sidecar REPAIRED to describe the "
+                                    "cached bytes (%s); it had recorded the "
+                                    "failed fetch's payload instead"
+                                    % (key, have))
+                else:
+                    problems.append("%s: fetch failed; sidecar already "
+                                    "describes the cached bytes" % key)
+            continue
         if args.check:
             # B5: `--check` is documented as *verify the cache only; no
             # network*, and it used to WRITE. Every sidecar was rewritten
