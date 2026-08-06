@@ -304,6 +304,11 @@ DISPOSITION = {"yes": "bound", "no": "borrowed", "document": "borrowed",
                "untested": "untested", "skipped": "untested"}
 
 
+def _y_load(path):
+    import yaml as _y
+    return _y.safe_load(path.read_text()) or {}
+
+
 def src_of(key):
     for k, _ns, u, _t in SOURCES:
         if k == key:
@@ -320,6 +325,9 @@ def src_of(key):
 # rewrites it has two writers by construction. `README.md` is prose and
 # hand-written; this file is generated and written by nothing else.
 REGISTER = HERE / "register.md"
+
+# set from argv in main(); a one-element list so the writers can read it
+CHECK_ONLY = [False]
 
 
 def sync_register():
@@ -377,6 +385,27 @@ def sync_register():
                 "apart.", "",
                 "| Attempted | Source | HTTP |", "|---|---|---|"]
         out += ["| `%s` | <%s> | %s |" % f for f in failed]
+    # F8: this function returned 0 on every path, so the caller's
+    # `if sync_register(): problems.append(...)` was unreachable — and the
+    # string it would have printed named the README marker block that the
+    # same commit withdrew. `CLAUDE.md`'s *search for the retracted
+    # string, not the replacement* rule, missed in the commit that
+    # installed the rule. The property held only because the write is
+    # unconditional; the branch claiming to implement it never ran.
+    #
+    # There is now a condition that can actually fail: no sidecars means
+    # nothing to generate from, and a register written from nothing would
+    # be an empty table reporting zero problems.
+    if not rows and not failed:
+        print("FAIL  no provenance sidecars under %s — register.md NOT "
+              "written. A register generated from nothing is an empty "
+              "table that reports no problems." % CACHE, file=sys.stderr)
+        return 1
+    if CHECK_ONLY[0]:
+        # B5: regenerating the register from check-mode rows is how the
+        # destruction reached a file of record. Check mode reads.
+        print("register.md: not rewritten (--check reads only)")
+        return 0
     REGISTER.write_text("\n".join(out) + "\n")
     print("register.md: %d rows, %d gaps, %d failed fetch(es)"
           % (len(rows), len(gaps), len(failed)))
@@ -388,6 +417,7 @@ def main():
     ap.add_argument("--check", action="store_true",
                     help="verify the cache on disk; no network")
     args = ap.parse_args()
+    CHECK_ONLY[0] = args.check
     CACHE.mkdir(parents=True, exist_ok=True)
     stamp = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
                            capture_output=True, text=True).stdout.strip()
@@ -447,6 +477,46 @@ def main():
     for r in rows:
         key, ns = r[0], r[1]
         side = CACHE / ("%s.provenance.yaml" % key)
+        if args.check:
+            # B5: `--check` is documented as *verify the cache only; no
+            # network*, and it used to WRITE. Every sidecar was rewritten
+            # to `http_status: cache`, `dereferences: skipped`,
+            # `disposition: untested`, and `register.md` was regenerated
+            # from them: 15 bound / 7 borrowed / 1 untested became **23
+            # untested**, exit 0, `Problems — (none)`. The dispositions
+            # are live-network measurements and the mode that destroyed
+            # them cannot recover them.
+            #
+            # C11's absent-versus-zero, written by the tool: a run of the
+            # documented verification command followed by a commit resets
+            # the project's external-binding evidence with nothing saying
+            # it was never measured.
+            #
+            # Check mode now compares and reports. It writes nothing.
+            if not side.exists():
+                problems.append("%s: no provenance sidecar" % key)
+            else:
+                import hashlib as _h
+                d = _y_load(side)
+                # `body` belongs to the PREVIOUS loop and holds whatever
+                # file it read last. Hashing it here compared every
+                # sidecar against one file — three DMDO rows reported the
+                # UNDRR hash. Caught because the output was absurd: three
+                # different files, one digest. Read the file for THIS key.
+                g = CACHE / ("%s.ttl" % key)
+                have = _h.sha256(g.read_bytes()).hexdigest()[:12] \
+                    if g.exists() else None
+                if have is None:
+                    problems.append("%s: sidecar present, no cached graph"
+                                    % key)
+                    continue
+                if d.get("sha256") not in (None, have):
+                    problems.append(
+                        "%s: cached bytes do not match the sidecar — "
+                        "sidecar %s, file %s. The cache drifted from what "
+                        "was measured, or the sidecar did."
+                        % (key, d.get("sha256"), have))
+            continue
         deref = r[7].split("—")[0].strip().strip("*")
         side.write_text(
             "# Generated by fetch-external.py. Do not edit.\n"
@@ -492,11 +562,14 @@ def main():
     out += (["*(none)*"] if not problems else
             ["- %s" % p for p in problems])
     out.append("")
-    MANIFEST.write_text("\n".join(out))
+    if not CHECK_ONLY[0]:
+        MANIFEST.write_text("\n".join(out))
+    else:
+        print("manifest.md: not rewritten (--check reads only)")
 
     print("\n".join(out[7:]))
     if sync_register():
-        problems.append('register block missing from README.md')
+        problems.append("register.md was not generated")
     if problems:
         print("\n%d problem(s) — these are findings, not script bugs"
               % len(problems), file=sys.stderr)
