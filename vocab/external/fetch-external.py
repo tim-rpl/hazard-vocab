@@ -491,6 +491,37 @@ def sync_register():
     if gaps:
         out += ["", "**Cached with no sidecar — not covered by the table "
                 "above:**", ""] + ["- `%s`" % g for g in gaps]
+    out += ["", "## A term's declaration may span rows — two different reasons",
+            "",
+            "The row-per-file shape breaks for the twelve KWG source",
+            "ontologies, and **it breaks in two ways that need different",
+            "remedies.** Measured across the eleven dataset ontologies: 444",
+            "distinct declared URIs, **46 in more than one file**.", "",
+            "**Ten are in KWG's own namespace, and their declaring file is",
+            "arbitrary.** `AdministrativeRegion_2` and `S2Cell_Level13` are",
+            "each declared in **10 of 11**; `Region`, `spatialRelation` and",
+            "`hasTemporalScope` in 6; `sfWithin` in 3; `hasFIPS`,",
+            "`stateName`, `countyName` and **`irwinID`** in 2. For these,",
+            "which row holds the declaration carries no meaning — read any",
+            "of them.", "",
+            "**`irwinID` is worth naming separately.** It is the only term",
+            "in this corpus touching ADR-001's identity apparatus, and a",
+            "scheme identifier whose declaring file is arbitrary is a",
+            "different kind of problem from a region class.", "",
+            "**Thirty-six are foreign, and are not a row-spanning problem at",
+            "all — the declaration is in the wrong file entirely.** They are",
+            "stub redeclarations of terms KWG does not own: **sosa 11,",
+            "geosparql 7, skos 6, dcterms 5, owl-time 5, schema.org 2**. For",
+            "these the register points at the OWNING namespace's row, which",
+            "this cache already holds. Anyone opening a KWG ontology for",
+            "`sosa:Observation`'s definition gets a bare `owl:Class` with no",
+            "axioms, while the real SOSA graph sits in this same directory.",
+            "",
+            "`vocab-conventions.md`'s fifth failure mode — *a vocabulary may",
+            "declare a term it does not own* — **at scale, and measured.**",
+            "Conflating the two halves would make this register say a SOSA",
+            "term's declaration is arbitrary among twelve files, when it is",
+            "not arbitrary at all."]
     if failed:
         out += ["", "## Fetched, produced no graph", "",
                 "A sidecar exists and there is no `.ttl` beside it. Listed "

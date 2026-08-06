@@ -68,6 +68,73 @@ carries it and `Function` is not a jurisdiction at all but an
 entitlement. That reading makes the argument names slightly wrong and
 the structure right, which is a better position than the reverse.
 
+## F-P1-3 — the Hazard/Incident distinction is an operational requirement, and a retrospective model shows why
+
+**Found:** 2026-08-05, from `vocab/external/graphs/wildfire-nifc.ttl`
+(KWG DMDO v3.0) · **Kind:** measured, from an artifact
+
+**KWG collapses hazard and incident, and loses nothing it needs.** Read
+out of the graph with rdflib, not off the names:
+
+| Measured | Value |
+|---|---|
+| `NIFC_Fire` | `owl:Class`, `subClassOf` **`geosparql:Feature`** and **`sosa:FeatureOfInterest`**, plus four restriction nodes |
+| `NIFC_FireObservation` | `subClassOf sosa:Observation` |
+| `NIFC_FireObservationCollection` | `subClassOf sosa:ObservationCollection` |
+| **`NIFC_IncidentComplexFire`** | **`subClassOf kwg:NIFC_Fire`** — a complex is a *kind of fire*, not a managed occurrence aggregating fires |
+| `incidentName` | `owl:DatatypeProperty`, **no domain and no range** |
+| `partOf` | **0 occurrences** |
+| `contain` (case-insensitive) | **0 occurrences** |
+
+**The missing attribute is the argument.** There is no containment
+percentage anywhere in v3.0. Containment is a statement about
+**suppression in progress**, and an archive of what happened does not
+track it. **OHIM does, and therefore cannot collapse the two.** Two
+hazards under one incident is the same shape: a managed occurrence
+aggregating phenomena, which `NIFC_IncidentComplexFire ⊑ NIFC_Fire`
+cannot express.
+
+**And they do not assert the collapse — they never make the
+distinction.** `incidentName` has **no domain**, so nothing in the axioms
+says it attaches to a fire at all. *An attribute of the fire* is
+convention, not a stated constraint. The distinction has no
+representation to be absent from, which is what a retrospective model can
+afford.
+
+**So the picture is: a retrospective model of fires with an incident name
+attached by habit** — and it is the right model for its purpose. The
+finding is not that KWG is wrong. It is that **the attribute forcing our
+distinction is exactly the one the retrospective model omits**, which
+makes the requirement operational rather than a modelling preference.
+
+**Falsifier:** a live, in-progress hazard-response system that tracks
+containment (or any suppression-progress measure) and expresses two
+hazards under one managed occurrence **without** distinguishing hazard
+from incident.
+
+### Two smaller things carried with it
+
+**`NIFC_Fire ⊑ sosa:FeatureOfInterest` is a second independent instance
+of the binding ADR-006 removed.** Two published ontologies bind an entity
+to a SOSA role class. That is evidence about **how natural the error is**,
+not evidence the decision was wrong — and it is the second reason
+`Place`'s binding was worth removing before P6a rather than after.
+
+**`S2Cell_Level13`** — KWG indexes spatially via S2 cells, which is
+DGGS-adjacent and bears on how a spatial partition gets keyed.
+**`AdministrativeRegion_2`** confirms **jurisdiction-as-region rather
+than jurisdiction-as-classifier**, which is F-P1-1 reached from someone
+else's artifact.
+
+**And it confirms the Part 2 reading independently.**
+`NIFC_FireObservation` is a `sosa:Observation`, `NIFC_Fire` is the
+feature of interest, and `NIFC_FirePointOfOrigin` is the ignition
+separately — **perimeter-is-an-observation, reached from the data by
+someone else**, which is a convergence on ADR-003's subject rather than
+on its option.
+
+---
+
 ---
 
 ## Related, and already recorded elsewhere
