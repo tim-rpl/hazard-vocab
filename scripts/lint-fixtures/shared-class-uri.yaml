@@ -5,7 +5,7 @@
 # sourceVerificationTier and every Statement must carry title, and the
 # two classes are indistinguishable to validation.
 # See [O -> H] design gate, B4; claims.md C21.
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_shared_class_uri
 prefixes:
   linkml: https://w3id.org/linkml/

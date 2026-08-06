@@ -1,0 +1,25 @@
+# DELIBERATELY CLEAN — and the ONLY fixture that reaches the POSITIVE
+# `default_prefix` branch of the self-reference exemption.
+#
+# The term's URI is under the project namespace but NOT under this
+# schema's `id:`, so the `id:` branch cannot exempt it and only
+# `default_prefix` can. Delete that branch and this fixture fires on the
+# shared-host rule, because w3id.org/ohim/extras is not an allowlisted
+# redirect path.
+#
+# Found by a rename accident: `own-namespace.yaml` passes on its `id:`
+# alone and `default-prefix-escape.yaml` still fires with the branch
+# gone, so nothing covered it. Same shape as BV25.
+id: https://w3id.org/ohim/core
+name: ohim_default_prefix_only_fixture
+default_prefix: ohimx
+prefixes:
+  linkml: https://w3id.org/linkml/
+  ohimx:  https://w3id.org/ohim/extras/
+default_range: string
+imports: [linkml:types]
+slots:
+  externalReference:
+    description: A reference to a term declared in a sibling module.
+    examples: [{value: "an extras-module identifier"}]
+    slot_uri: ohimx:externalReference

@@ -2,12 +2,12 @@
 # Before the self-reference exemption, no namespace this project could
 # choose passed the jurisdiction rule, so `make lint` rejected the first
 # file authored for the project itself. See [O -> H] plan gate, BV8.
-id: https://w3id.org/hazard-vocab/core
-name: hazard_vocab_core_fixture
-default_prefix: hv
+id: https://w3id.org/ohim/core
+name: ohim_core_fixture
+default_prefix: ohim
 prefixes:
   linkml: https://w3id.org/linkml/
-  hv:     https://w3id.org/hazard-vocab/core/
+  ohim:   https://w3id.org/ohim/core/
 default_range: string
 imports: [linkml:types]
 slots:
@@ -15,11 +15,11 @@ slots:
     description: The literal value of an identifier under some scheme.
     examples:
       - value: "2026-OR-ABC-000123"
-    slot_uri: hv:identifierValue
+    slot_uri: ohim:identifierValue
 classes:
   Asset:
     description: A thing that can be assigned, exposed, or observed with.
     examples:
       - value: an air-quality monitoring site
-    class_uri: hv:Asset
+    class_uri: ohim:Asset
     slots: [identifierValue]

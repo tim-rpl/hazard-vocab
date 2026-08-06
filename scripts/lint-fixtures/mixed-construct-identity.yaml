@@ -7,7 +7,7 @@
 # This was the repository's actual state until 2026-08-02, and an ADR
 # summary line called it guarded.
 # See [O -> H] design gate block verification 3, BV3-3.
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_mixed_construct_identity
 prefixes:
   linkml: https://w3id.org/linkml/

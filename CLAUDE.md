@@ -1,7 +1,11 @@
-# Canonical Hazard Vocabulary
+# OHIM — Operational Hazard Information Model
 
-A declarative, multi-hazard vocabulary for emergency and hazard data.
-LinkML for structure, SKOS for code lists, Datalog for transformation.
+A declarative, multi-hazard information model for **live** hazard and
+emergency data. LinkML for structure, SKOS for code lists, Datalog for
+transformation. Namespace `https://w3id.org/ohim/`.
+
+*"Operational" is the posture — live acquisition rather than
+retrospective integration — not the subject. See `README.md`.*
 
 This project is **falsification-driven**. `claims.md` is the source of truth
 for what is asserted versus what has been tested.
@@ -56,7 +60,7 @@ These are not preferences. Violating one is a bug.
 
 ## Roles and the ARC gate
 
-You are **H** (Hazard-Vocab builder) unless a `.role-O` marker file
+You are **H** (the OHIM builder) unless a `.role-O` marker file
 exists in the project root or `HV_ROLE=O` is set — in which case you are
 **O** (Overseer). Read `FALSIFIER.md`; it supersedes this file for your
 session.
@@ -106,11 +110,83 @@ The three READMEs under `vocab/profiles/`, `codelists/`, and
 **Default deny.** If a file is not in this table, it is the human's.
 H asks in the gate rather than assuming.
 
+**`review-inbox.md` is tracked, not ignored.** It is the gate
+protocol's only record, and a role that can read committed state but not
+your working tree cannot verify against it. That cost a disposal: two
+proposed claims could not be ruled on because the `[H → O]` message
+existed in neither the working tree nor git, so the wording was
+unavailable and §1 forbids O inventing it.
+
+Archiving is not a substitute. An archive holds what was rotated out; an
+untracked live file holds what is current, and any working-tree loss
+takes it with no recovery and no trace.
+
 **Tooling changes are declared, not discovered.** A change to
 `scripts/`, `Makefile`, or `.claude/` gets an assertion in the next
 `[H → O]` message naming what changed and what verifies it. H did not
 make the change and must verify rather than trust it; O verifies
 deliberately rather than discovering it several gates later.
+
+**A rename has as many subjects as the thing has names — and one of
+them may be a common noun that must not be renamed at all.**
+
+Measured on this project's own rename, from `hazard-vocab` to `ohim`:
+
+| Subject | Example | Action |
+|---|---|---|
+| the **URI** | `https://w3id.org/hazard-vocab/` | rename |
+| the **prefix** | `hv:` | rename — a separate substitution |
+| the **name** | `# Canonical Hazard Vocabulary` | rename |
+| the **self-description** | *"a declarative, multi-hazard **vocabulary**"* | rename — the project changed genre, so the word is stale |
+| the **common noun** | *"the one published hazard **vocabulary** advertising this"*, about someone else's artifact | **leave** — renaming it makes the sentence false |
+
+The URI and the prefix are two substitutions, not one. Applying the
+first and not the second left a `default_prefix` naming a prefix that no
+longer existed — the lookup failed open, the fixture passed on its `id:`
+alone, and the selftest still read 8/8. Silent in one file, cosmetic in
+another, green in both.
+
+The self-description is the one a census misclassifies as generic,
+because it uses the same word the common noun does. The test is not the
+word; it is **whether the sentence is about this artifact.**
+
+And exclude generated and archived material from the census population.
+`.lake/build/**` is gitignored and rewritten on the next build;
+`review-inbox-archive/**` is a historical record, and rewriting an
+archive makes it say something that was never said. Use `git ls-files`.
+
+**A generated artifact is a whole file, never a region inside one.**
+A generated block embedded in a hand-written document has two writers —
+a generator that owns the block and an author who rewrites the document
+— and the author wins silently. The register is now `register.md`,
+generated, with nothing else writing it.
+
+The instance behind the rule, stated so it is checkable:
+
+- A **working-tree** rewrite of `vocab/external/README.md` dropped its
+  `BEGIN/END GENERATED:register` markers. **It was never committed in
+  that state** — every committed revision that carried the register
+  carried the markers, with the block's row count tracking the sidecars
+  at each. So the loss is *invisible in git history*, and a reader
+  checking this account against the commits will find nothing. That is
+  the whole of what an untracked working-tree event looks like.
+- The row counts reported during the no-op period **did not come from
+  the generator's output.** The old `sync_register()` had its `print`
+  after its `return`, so a run with the markers absent produced no
+  output at all. They came from a **remembered earlier run** whose
+  numbers were true when printed and had since stopped being true — a
+  distinct and worse case than reading a stale file, because there was
+  no read.
+
+An earlier version of this paragraph said the counts came from the
+generator's output. That clause was not reproducible from the
+repository.
+
+Where a document must show generated content, it links to the generated
+file rather than embedding it. Any generator that cannot find its target
+**fails loudly** — a sync that returns quietly when its markers are
+absent is the "inspected nothing" shape inside a generator instead of a
+check.
 
 **A declared change is verified by a second instrument, never by the
 one that made it.** An editing script reporting success is not evidence

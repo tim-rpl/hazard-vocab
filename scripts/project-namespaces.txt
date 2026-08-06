@@ -18,4 +18,4 @@
 # project's own and every schema's own terms will fire. That is
 # deliberate: the guard fails loud rather than open.
 
-https://w3id.org/hazard-vocab/
+https://w3id.org/ohim/

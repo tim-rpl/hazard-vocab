@@ -1,6 +1,6 @@
 # DELIBERATELY VIOLATING — ONE collision, reached only through `same_as`.
 # Deleting the same_as collection makes this stop firing.
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_collision_same_as
 prefixes:
   linkml: https://w3id.org/linkml/

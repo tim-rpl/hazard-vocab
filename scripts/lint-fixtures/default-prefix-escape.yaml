@@ -3,12 +3,12 @@
 # jurisdiction namespace as the schema's own, reopening the c1
 # counterexample. Recall failure, introduced by the fix for a precision
 # failure. See [O -> H] plan gate block verification 3, BV14.
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_default_prefix_escape
 default_prefix: irwin
 prefixes:
   linkml: https://w3id.org/linkml/
-  hv:     https://w3id.org/hazard-vocab/core/
+  ohim:   https://w3id.org/ohim/core/
   irwin:  https://w3id.org/nwcg/irwin/
 default_range: string
 imports: [linkml:types]

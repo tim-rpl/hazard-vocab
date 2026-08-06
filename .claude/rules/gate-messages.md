@@ -5,8 +5,7 @@ description: Message formats and rules for the H ↔ O gate protocol
 
 # Gate message protocol
 
-`review-inbox.md` is the shared channel between **H** (Hazard-Vocab
-builder) and **O** (Overseer, falsifier). Append only. Newest at the
+`review-inbox.md` is the shared channel between **H** (the OHIM builder) and **O** (Overseer, falsifier). Append only. Newest at the
 bottom. Never rewrite an earlier message except when H amends its own
 un-reviewed gate in place.
 

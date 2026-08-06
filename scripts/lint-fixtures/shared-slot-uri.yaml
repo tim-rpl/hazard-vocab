@@ -9,7 +9,7 @@
 # Two property shapes land on one sh:path, so a consumer reading by
 # path cannot tell which slot produced a value, and the two slots'
 # constraints apply to the same triples.
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_shared_slot_uri
 prefixes:
   linkml: https://w3id.org/linkml/

@@ -7,7 +7,7 @@
 # code and one intra-population collision held the row green while three
 # of four branch mutations survived. See lint-fixtures/README.md,
 # "Mutation, not just coverage".
-id: https://w3id.org/hazard-vocab/core
+id: https://w3id.org/ohim/core
 name: lint_fixture_collision_class_vs_slot
 prefixes:
   linkml: https://w3id.org/linkml/

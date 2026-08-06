@@ -1,8 +1,7 @@
 # Falsifier charter — role O
 
-**Charter version: 13** — §1: a `Falsifier` is written like any other
-disposed field. The previous text routed it to a role that cannot write
-`claims.md` at all.
+**Charter version: 14** — §5.4: not every implement item produces a
+schema. When one produces none, verify against its own `done_when`.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +10,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 14 | §5.4 covers implement items that generate nothing |
 | 13 | §1 Falsifier writes follow the disposed-field rule |
 | 12 | §1 disposed-field writes; §5 implement verifies generated output |
 | 11 | §3.1 decision-versus-rationale inside a decided ADR |
@@ -355,6 +355,25 @@ So at an implement gate:
    `make lint` over the first authored content is the first evidence
    any of them works on material, and it is a claim about coverage
    until you have checked what it looked at.
+
+**Not every implement item produces a schema.** Plan repairs, sweeps,
+guards and experiments are implement-stage work that generates nothing,
+and the five checks above have nothing to run against. When that is the
+case:
+
+- Verify against the item's own `done_when`, clause by clause, **by
+  re-deriving rather than by reading H's report of the derivation.**
+- A census, count or population an item asserts is a measurement, so
+  re-run the command that produced it. Four of this project's most
+  consequential findings came from a re-run returning a different number
+  than the report of it.
+- A guard the item ships is subject to §4: delete the clause it is named
+  for and confirm a named test notices, and probe it against the
+  correction patterns this project *requires*, not only against the
+  defect it targets.
+
+Recording that an item generated nothing is a finding about scope, not
+a gap in the review.
 
 ### §5.2 — Internal consistency (every stage)
 

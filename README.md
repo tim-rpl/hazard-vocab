@@ -1,12 +1,42 @@
-# Canonical Hazard Vocabulary
+# OHIM — Operational Hazard Information Model
 
-A declarative, multi-hazard vocabulary for emergency and hazard data —
-the reference model that source feeds are transformed into.
+A declarative, multi-hazard information model for **live** hazard and
+emergency data — the canonical form that source feeds are transformed
+into.
+
+Namespace: `https://w3id.org/ohim/`
 
 There is no international standard for hazard data analogous to IEC CIM
 for electric utilities. What exists is a stack of partial standards,
 each covering one slice, with no unifying model. This project assembles
 one, and does not assume it is correct.
+
+## Where this sits
+
+The closest published work is the **Disaster Management Domain Ontology**
+(DMDO) from the KnowWhereGraph project. The relationship in one sentence:
+
+> DMDO integrates published data about **what happened**. OHIM
+> canonicalises live feeds about **what is happening**.
+
+That difference in tense, not in domain, is what OHIM's distinctive
+content is for. Source verification tier, absent-versus-zero, candidate
+matches that suggest identity without asserting it, an epistemic
+discriminator on every observation, and correction distinguished from
+supersession — every one is an operational-data concern a curated
+reference graph does not have, because a published dataset is labelled
+once, at publication, by someone who looked.
+
+**"Operational" here means the posture, not the subject.** DMDO uses the
+word for its operations domain — processes, tasks, resources. OHIM uses
+it for live acquisition as against retrospective integration. Part 5
+covers the operations subject, and DMDO's module for it is figures with
+no ontology.
+
+Borrowing note: DMDO's namespace, `http://knowwheregraph/ontology/deo#`,
+has no top-level domain and cannot resolve for anyone, so it can be
+**borrowed and cited but never bound**. Its last commit is April 2024.
+See `vocab/external/README.md`.
 
 | Layer | Technology |
 |---|---|
