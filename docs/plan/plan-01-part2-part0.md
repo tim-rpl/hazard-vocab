@@ -1111,7 +1111,7 @@ and by PA14 that makes it an item.**
 The jurisdiction rule runs `check_uri` over every `prefixes:` entry, and
 a Part 0 core file must declare this vocabulary's own namespace. Your
 three-host table reproduces: no namespace this project can choose is
-admitted — `w3id.org/hazard-vocab/` fails as an unallowlisted shared-redirect
+admitted — `w3id.org/ohim/` fails as an unallowlisted shared-redirect
 path, and any self-hosted or example host fails as an unknown host.
 
 So *"the entity and alias core validates under `make lint`"* cannot be

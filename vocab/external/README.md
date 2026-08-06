@@ -76,6 +76,23 @@ measured, not inferred.
 **DMDO** — `disaster-event-module-*.ttl`, `disaster-properties-ontology.ttl`
 Source: <https://github.com/KnowWhereGraph/dmdo>
 
+- **Last commit April 2024.** The repository is dormant, not in
+  progress. That converts the defects below from *current state of an
+  active project* into *permanent properties of the artifact* — the
+  no-TLD namespace, the `#`-versus-`/` mismatch and the duplicate
+  `Hazard` URIs will not be fixed. It also means the cached checksums
+  should hold indefinitely, and a checksum change would itself be news.
+
+- **The Operational Module has no ontology.** Its directory holds a
+  38-byte README containing only a title, one `.graphml` and PNG
+  figures; no `.ttl` exists under any plausible name. The root README's
+  image paths point at `modules/operational-module/` while the directory
+  is `disaster-operational-module/` — a broken path. So **DMDO covers
+  Parts 1, 2 and 4; Part 5 is figures.** An earlier note here said
+  otherwise, taken from a paper's description of the module rather than
+  from the artifact — the same diagram-over-graph gradient recorded
+  below, a fifth time.
+
 - Namespace is `http://knowwheregraph/ontology/deo#` — **no TLD**. Not
   resolvable by anyone. **Borrowed, not bound**, permanently.
 - The prefix expands with `#`; every core class is declared with `/`.
