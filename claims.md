@@ -1382,7 +1382,13 @@ is zero."
   Status unchanged: the cross-tabulation is internally consistent and
   the three absence states are independently describable, so the claim
   does not revert on this.
-- **Updated:** 2026-08-02
+- **Repair test:** P9's criterion, run: all three absence semantics and
+  all three sentinel channels round-trip distinguishably through
+  `make check` against a real capture. **A green `make check` with no
+  absent-valued fixture is not the test.**
+  *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
+  wording is H's. Filing it does not promise the repair.)*
+- **Updated:** 2026-08-05
 - **Consequence:** ranked gap #2. Must be closed before the model is
   used operationally.
 
@@ -1434,8 +1440,41 @@ consumer can render exercise or test data as actual.
   **Status stays `falsified`.** `vocab/core/` holds one `.gitkeep`; no
   `operatingMode` field exists, so the Evidence above is still literally
   true. The bookkeeping defect is closed; the gap is not.
-- **Updated:** 2026-08-02
-- **Consequence:** ranked gap #1. Safety-critical and free to fix.
+- **Known limitation, recorded 2026-08-05 — the second half of this
+  claim is out of reach of every instrument this project has.** *"No
+  consumer can render exercise or test data as actual"* is a
+  **presentation** property. Validation sees instances, not rendering,
+  so no `make check`, no SHACL shape and no Datalog stratum can observe
+  it. This is [L6](#l6)'s position exactly — L6 already carries *"this
+  covers derivation only, not presentation … do not cite this claim as
+  covering the product property"* — and C12 has made the same kind of
+  claim since 2026-07-31 without such a note. **Do not cite C12 as
+  covering the rendering property.**
+- **Repair test:** `build/shapes.ttl` carries an `sh:path` for
+  `operatingMode`, **and** a capture tagged exercise raises a violation
+  when validated as live. The slot alone is [C15](#c15)'s test, not
+  C12's. **This test reaches the first half only** — the discriminator
+  and the validation behaviour — and by the limitation above nothing
+  can reach the second.
+  *(H proposed 2026-08-05 and amended it the same day; O disposed and
+  wrote it. The wording is H's.)*
+- **Disposal 2026-08-05 — H proposed `scoped-down`; O holds
+  `falsified`, and the reason is the status definition rather than the
+  substance.** H's diagnosis is accepted in full and is what the
+  limitation above records. But `scoped-down` means *"falsified as
+  originally stated; **a narrower version survives**"* — and the
+  narrower version does not survive either. `vocab/core/` holds one
+  `.gitkeep`; no `operatingMode` field exists, so the surviving half is
+  **unbuilt, not tested**. Recording it as `scoped-down` would assert a
+  survival no run supports, which is the shape of H's own objection —
+  *filing a test that reaches half a claim and calling the claim
+  repaired* — moved up one level to the status field. C12 becomes
+  `scoped-down` when the first half passes its Repair test, not before.
+- **Updated:** 2026-08-05
+- **Consequence:** ranked gap #1. **Safety-critical and free to fix —
+  and this attaches to the discriminator half only.** The rendering
+  half is not free to fix and is not fixable here at all; it is a
+  consumer obligation this vocabulary can support but cannot enforce.
 
 ### C13 — Correction is distinguishable from supersession
 The model can express "the earlier fact was wrong" separately from
@@ -1602,7 +1641,13 @@ The model can express "the earlier fact was wrong" separately from
   exhibiting the condition for its own merge and its own relations, and
   `transform/` is one `.gitkeep`. That was equally true of attempts one
   and two.
-- **Updated:** 2026-08-02
+- **Repair test:** two instances differing only in whether the earlier
+  fact was wrong or the world changed validate to **different** shapes.
+  `design/lean/HazardVocab/Merge.lean` records C13 unclosable at its
+  abstraction, so this test is against the schema, not the proof.
+  *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
+  wording is H's.)*
+- **Updated:** 2026-08-05
 - **Note:** L5 is not wrong, but it is incomplete. Do not withdraw it —
   add correction as a second, distinct relation.
 
@@ -1613,7 +1658,13 @@ expressible.
 - **Status:** `falsified`
 - **Evidence:** no sensitivity dimension exists. Every fact implicitly
   assumes publishability.
-- **Updated:** 2026-07-31
+- **Repair test:** a capture carrying a sharing restriction round-trips
+  it through `make check`, and one violating it raises a violation.
+  **Expressible is not the claim** — the claim is that the
+  determination travels with the fact.
+  *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
+  wording is H's.)*
+- **Updated:** 2026-08-05
 - **Note:** this is a dimension, not a row. Likely a Part 0 relation
   over `Statement`, not a slot on each class.
 
@@ -1623,7 +1674,14 @@ and which profile it conforms to.
 
 - **Status:** `falsified`
 - **Evidence:** not modelled.
-- **Updated:** 2026-07-31
+- **Repair test:** `build/shapes.ttl` carries `sh:path` for
+  `modelVersion` and `profileConformance`, and an instance declaring a
+  profile it does not conform to **fails**. Both slots are in
+  `surface.yaml` under `not_enumerated_by_a1` as of I1.
+  *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
+  wording is H's. O confirmed both slots appear under
+  `not_enumerated_by_a1` — `make lint` reports `4 not enumerated`.)*
+- **Updated:** 2026-08-05
 - **Note:** costs nothing now, blocks everything at the first breaking
   change.
 
@@ -1661,6 +1719,22 @@ management system requires.
   days with nothing able to run it, and the entry did not say so.
   Status unchanged — C16 remains `falsified` as originally stated, and
   its replacement remains unrunnable rather than untested.
+- **Repair test — and it is a sweep, not a command.** C16 is discharged
+  by a sweep returning nothing, so **the field must name what was
+  swept**, not only that it came back empty: the payloads read, the
+  register categories covered, and the date. A discharge recorded as
+  *the sweep returned nothing* is indistinguishable from *the sweep
+  inspected nothing*, which is this register's most frequent finding
+  ([C22](#c22)) — and it is how C16 was falsified in the first place,
+  its three row sources being unable to see what they did not contain.
+  `make lint`'s own honest line is the model: *"no schema files found —
+  these rules inspected nothing."* The falsifying observation remains a
+  capability found in a real payload or in
+  `docs/sources/HDC-data-source-register.html` that `docs/coverage.md`
+  has no row for.
+  *(H proposed 2026-08-05 and amended it the same day after O ruled the
+  field could not be a command; O disposed and wrote it. The wording is
+  H's.)*
 
 ### C17 — Validation detects unmodelled fields in source payloads
 `make check` fails when a captured payload contains a field the model
@@ -1794,7 +1868,13 @@ does not declare.
   `description`. Replication recorded because the axis is what ADR-003's
   Obligation and ADR-005's third test both rest on, and it had been
   measured once by one session.
-- **Updated:** 2026-08-02
+- **Repair test:** `make check` raises a violation on a captured payload
+  carrying a field the model does not declare. `exp-01` measured the
+  four axes; **axis 2 is the one a repair must move**, and a pass on
+  axes 1, 3 and 4 is not C17.
+  *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
+  wording is H's.)*
+- **Updated:** 2026-08-05
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
   failure direction for a falsification-driven project.
@@ -1967,8 +2047,8 @@ rule, and does not fire on content that complies.
 
   | Declared namespace | `drift-lint.py` |
   |---|---|
-  | `https://w3id.org/hazard-vocab/` | exit **1** — shared redirect, path not allowlisted |
-  | `https://hazard-vocab.org/ns/` | exit **1** — host not a known generic vocabulary host |
+  | `https://w3id.org/ohim/` | exit **1** — shared redirect, path not allowlisted |
+  | `https://ohim.org/ns/` | exit **1** — host not a known generic vocabulary host |
   | `https://example.org/hv/` | exit **1** — same |
 
   That is a compliant file — jurisdiction-neutral core content, invariant
@@ -2001,7 +2081,7 @@ rule, and does not fire on content that complies.
   `lint-selftest` reports **23 rule/fixture pairs, 6/6 rules with
   demonstrated recall** (the 22 / 20 figures above are superseded, not
   wrong when written). Verified by running all three BV8 namespaces —
-  `w3id.org/hazard-vocab/`, `hazard-vocab.org/ns/`, `example.org/hv/` —
+  `w3id.org/ohim/`, `ohim.org/ns/`, `example.org/hv/` —
   which previously all fired and now all exit 0.
 
   **The exemption keys on `default_prefix`, and that is a recall hole
@@ -2649,10 +2729,11 @@ instances below countable at all.
   the mechanism of the defect it is invoked to detect.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
-- **Evidence:** 2026-08-04 — **thirteen instrument defects, seven files,
-  three authors.** Eleven manifested; two were self-caught before
-  shipping and are counted because the register counts defects **in
-  instruments**, not defects that caused visible harm.
+- **Evidence:** 2026-08-04, extended 2026-08-05 (twice) — **sixteen
+  instrument defects, nine files, three authors.** Fourteen manifested;
+  two were self-caught before shipping and are counted because the
+  register counts defects **in instruments**, not defects that caused
+  visible harm.
 
   | # | Instrument | Defect | Author | Found by |
   |---|---|---|---|---|
@@ -2669,12 +2750,15 @@ instances below countable at all.
   | 11 | `lint-selftest` `expect` | accepted on a precision row and never evaluated — a field that cannot fire | H | adding one that could not appear |
   | 12 | the retracted-string sweep | keys on the **sentence**, not the proposition. Invoked to detect a withdrawn claim still standing elsewhere; a claim **restated in different words** is its failure mode. **Three** shipped past a green run — `ADR-003:34-39`, `ADR-006:284-288` and `ADR-003:188-192`, all in accepted ADRs, all at lines a reader takes as authoritative | H | the first two by O reading the retracted claims against the files rather than against the strings; the third by the **paraphrase sweep** proposed to replace it, on its first run |
   | 13 | `.claude/hooks/guard_role.py` recursive-traversal fix | admitted on a green run against `grep -r .`; **three invocations of the grep family it names walk through it** — `grep -R`, `rg` with no root argument, and any absolute-path root. None is the disclosed `find`-pipe residual | human | O, by mutation with `-l` output |
+  | 14 | `docs/plan/derive-waves.py` `check_retired` — P20's retired-figure guard | admitted on a 12/12 hand probe, every probe **one line of lowercase prose**. Two ordinary variations of its input walk through it: the guard is **line-based** over a document hard-wrapped at ~72 columns (7 of 8 wrapped phrasings pass, including **all four** sizing phrases), and `RETIRED_PHRASES` carries **no `re.IGNORECASE`** while `SIZING_PHRASES` does, so sentence-initial `The 23`, `The ten` and `Ten local terms` pass. **Both manifested**: `plan:385` and `plan:876`/`:904` carry the retired population at a green `make lint` | H | O, by mutation — wrapping and capitalising the phrasings the 12/12 probe had run on one line |
+  | 15 | `docs/plan/derive-waves.py` `check_retired` — **the repair for #14** | joining wrapped lines into blocks fixed the shape blindness and moved the **exemption** to the block with it. `items.yaml` contains **no blank line**, so the whole file is one block, that block carries a retraction cue, and the guard now exempts **the entire source file**: 6 of 6 retired figures injected into it are caught by the pre-repair guard and **0 of 6** by the repaired one. In the plan document the same shift exempts both generated tables outright — cue-exempt lines rise 98 → 287 of 1174. A figure injected into `items.yaml`, propagated by `--write` into the item table of the plan of record, leaves `--check` reporting **ok** | H | O, by mutation — running both builds of the guard over the same injections |
+  | 16 | `vocab/external/fetch-external.py --check` — documented as *"verify the CACHE only; no network"* | the verification mode **overwrites the record it verifies.** It rewrites all 24 provenance sidecars with `http_status: cache`, `dereferences: skipped`, `disposition: untested` and a fresh `fetched:` stamp, then regenerates `register.md` from them: 15 bound / 7 borrowed / 1 untested becomes **23 untested**, exit 0, `## Problems — *(none)*`. The dispositions are network measurements and are not recoverable offline | H | O, by mutation — running the documented command against a copy and diffing the register against the committed one |
 
-  **None of the thirteen was found by reading the instrument.** Ten were
-  found by running it against a deliberate defect, one by running it
-  against the file it was already guarding, one by noticing the verdict
-  did not follow from the mechanism, and one — #12 — by checking the
-  instrument's *subject* rather than its output: the sweep reported
+  **None of the sixteen was found by reading the instrument.** Thirteen
+  were found by running it against a deliberate defect, one by running
+  it against the file it was already guarding, one by noticing the
+  verdict did not follow from the mechanism, and one — #12 — by checking
+  the instrument's *subject* rather than its output: the sweep reported
   correctly on the strings it was given, and the claim it existed to
   find was standing in different words.
 
@@ -2715,9 +2799,54 @@ instances below countable at all.
   evidence under this claim**: the paraphrase sweep is itself an
   instrument admitted on a run over the case its author had in mind, and
   its own failure mode — a restatement sharing no *content word* either,
-  by synonym substitution — has not been probed. It is a candidate row
-  14, not a discharge of row 12.
-- **Updated:** 2026-08-04
+  by synonym substitution — has not been probed. It is a candidate row,
+  not a discharge of row 12.
+
+  **Row 14, added 2026-08-05, is the third *search* instrument and it
+  fails exactly as #12 and #13 did.** All three were admitted on a green
+  run over the case their author had in mind — one retracted sentence,
+  one `grep -r .`, twelve single-line lowercase reintroductions — and
+  all three are defeated by an ordinary variation of their input. #14
+  sharpens the pattern in a way the earlier two do not: its author
+  **derived** the phrasings from a recorded enumeration command rather
+  than remembering them, which is the discipline this project added to
+  stop exactly this failure, and it still shipped blind — because the
+  derivation fixed *which phrases* to look for and nothing fixed *how
+  the document presents them*. **Deriving the subject of a search does
+  not derive the shape of its input.**
+
+  **It is also the first rule wired into `make lint` with no
+  `lint-selftest` pair.** `make lint-selftest` enumerates 39 rule/fixture
+  pairs across `drift-lint.py`'s 8 rules and reports `8/8 rules with
+  demonstrated recall`; `check_retired` is a ninth rule in the same
+  target and appears in none of them. Its 12/12 probe was a one-time
+  hand run that left no residue in the repository, so nothing re-probes
+  it and its coverage is asserted rather than inspectable — the
+  condition `CLAUDE.md` cites `lint-selftest` as existing to prevent.
+
+  **Row 15 is the first entry where the *repair* is the defect, and it
+  is the cost of that missing pair, paid one round later.** #14 was two
+  blind spots in what the guard could see; #15 is the fix for them
+  removing what the guard looks at. Both halves of the repair are real
+  — outside a cue-carrying block recall goes from 23/17/4/4 to **23/23
+  across all four input shapes** — and the same edit that bought it
+  silently converted the guard's other input file from full coverage to
+  none, because *joining lines to match on* and *joining lines to
+  exempt on* were made the same operation. A widened exemption leaves no
+  trace in the output: the run is green either way, which is why the
+  regression is invisible to every check now in the build and why it was
+  found only by running the old build and the new one over one set of
+  injections.
+
+  **The instrument that would have caught it is the one row 14 already
+  records as absent.** A `lint-selftest` pair for `check_retired` fixes
+  a fixture, and a fixture is a file — the first blank-line-free YAML
+  fixture would have failed on the day the block change landed. This is
+  the second consecutive round in which `check_retired`'s missing pair
+  is the proximate reason a defect shipped, and `make lint-selftest`
+  still reports `40 rule/fixture pairs, 8/8 rules` over a target that
+  now runs nine rules.
+- **Updated:** 2026-08-05
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-02. It generalises
   beyond the gate: it constrains how evidence is admitted to this
@@ -2746,8 +2875,9 @@ that establishes it.
   when. If the answer is "the edit reported success", the claim is
   unestablished — an editing step reporting success is not evidence the
   edit landed.
-- **Evidence:** 2026-08-04 — **eight instances.** Six sit in accepted
-  documents; two were caught by the check itself rather than by the
+- **Evidence:** 2026-08-04, extended 2026-08-05 — **ten instances.** Six
+  sit in accepted documents and two more in a plan of record and a
+  commit message; two were caught by the check itself rather than by the
   author.
 
   | # | Statement | What was true |
@@ -2760,6 +2890,8 @@ that establishes it.
   | 6 | A3's falsifier, design gate 2026-08-03 — *"a live site in the census with no marker and no P20 reference"* | posted and **not run**. Three of the eight censused sites fail it: `plan:562`, `plan:855`, `plan:1343`. Caught by O running H's own falsifier |
   | 7 | `ADR-006:84` — *"`shared-uri` would fire on the design at authoring time"* | **false, and one probe shows it.** `rule_shared_uri` keys on the literal URI string (`claims.setdefault(str(uri), …)`) and does no subclass reasoning. `Place` → `sosa:FeatureOfInterest` with `Hazard` → `deo:Hazard` returns `ok [shared-uri]`, exit 0; the control with both on `sosa:FeatureOfInterest` FAILs. A claim about what a guard catches, in an accepted ADR, made without running the guard |
   | 8 | ADR-006 Decision A's own falsifier — *"a published `prov:Activity` definition … under which a physical process producing no entity is a well-formed `prov:Activity`"* | stated and **not run**. One fetch satisfies it: PROV-O and PROV-DM define Entity as *"a physical, digital, conceptual, or other kind of thing"*, PROV-DM §2.1.1's own activity examples are driving a car, printing a book, baking and a race, and PROV-CONSTRAINTS carries no rule requiring generation |
+  | 9 | `items.yaml` P20 `done_when`, still live — *"**MET 2026-08-05.** … Guard in `derive-waves.py`, wired into `make lint`, **probed 12/12 reintroductions caught and 3/3 retractions survive**"* | the 12/12 probe was falsified on 2026-08-05 and the guard was rebuilt the same day. The criterion still certifies `MET` on the falsified reading, and **no probe of the rebuilt guard exists anywhere** — not in `done_when`, not in `lint-selftest`, not in the commit. A claim about what a tool catches, carried by the definition of done that two later items are sequenced behind |
+  | 10 | `2b7fa4c` / `2c6d6f1` — *"it fails loudly if it cannot write its target"* | the branch that would report it is **unreachable**. `sync_register()` returns `0` on every path, so `if sync_register(): problems.append(...)` cannot fire, and the message it would print names the retracted README block. The property itself holds, but by construction rather than by the check that was claimed: the write is unconditional, and an unwritable or wrong-type target raises `PermissionError` / `IsADirectoryError` — verified by mutation |
 
   **#6 is the instance that establishes the claim is not retrospective.**
   It was posted in the same message that proposed C23, as the falsifier
@@ -2781,7 +2913,17 @@ that establishes it.
   claims about artifacts, not defective instruments. That asymmetry is
   the reason for a second entry rather than a widened C22, and it held
   again at block verification 7: all three blocks are C23's.
-- **Updated:** 2026-08-04
+
+  **#9 and #10 are the same round as C22's rows 15 and 16, and the pair
+  is the point.** A repair was made, its mechanism was described
+  accurately in the commit, and neither the criterion that certifies it
+  nor the property the commit asserts was run against. #10 is the milder
+  shape and worth keeping for it: the claimed property is **true** — the
+  generator does fail loudly — and the check named as establishing it
+  cannot execute. A claim that happens to be right, established by
+  nothing, which is C22 #10's shape moved from an instrument to an
+  assertion about one.
+- **Updated:** 2026-08-05
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-03. Accepted as
   proposed, with instance #6 added by O. It generalises beyond the gate
@@ -2898,9 +3040,14 @@ no simpler mechanism could hold.
   reproduces the same partition, the classes it omits are unexercised.
 - **Cheapest test:** at P6b, resolve one day of captured WFIGS and
   perimeter records twice — once through the four-class structure, once
-  through `{minted_id, scheme_rank}` alone — and diff the resulting
-  partitions. Under an hour once fixtures exist. A difference falsifies
-  the simpler mechanism; an identical partition falsifies this claim.
+  through `{minted_id, scheme_rank}` alone — and **diff the partitions,
+  not the counts.** Under an hour once fixtures exist. A difference
+  falsifies the simpler mechanism; an identical partition falsifies
+  this claim. **Two runs producing the same number of clusters with
+  different membership is precisely the outcome the decomposition
+  exists to prevent, and a count comparison reports it as agreement.**
+  *(Sharpening proposed by H 2026-08-05; O disposed and wrote it. The
+  wording is H's.)*
 - **Note — the two systems answer different questions, and that is the
   argument this claim rests on.** KnowWhereGraph's alignment is
   *retrospective and curated*: Hurricane Katrina is one event because a
@@ -2914,19 +3061,68 @@ no simpler mechanism could hold.
   issued the identifier that decided it. KWG needs none of this because
   its alignment is a fact rather than an inference. **If that
   distinction does not hold, most of the decomposition is decoration.**
-- **Watch — standing evidence against, from a working system.**
-  KnowWhereGraph aligns named events across NOAA Storm Events, FEMA
-  Disaster Declarations Summaries and NOAA Historical Hurricane Tracks
-  with **zero identity constructs in its schema**: `owl:sameAs`,
+- **Watch — standing evidence against, from a working system.
+  Population corrected by O 2026-08-05; see Evidence.** KnowWhereGraph
+  aligns named events across NOAA Storm Events, FEMA Disaster
+  Declarations Summaries and NOAA Historical Hurricane Tracks with
+  **zero identity constructs in its schema**: `owl:sameAs`,
   `skos:exactMatch`, `prov:alternateOf`, `prov:specializationOf`,
-  `dcterms:identifier` and `schema:identifier` all occur 0 times across
-  all four cached DMDO graphs, and nothing matching `*name*`, `*align*`,
-  `*match*` or `*identif*` is declared. Measured, not inferred. It is
-  the only working system in this domain either way.
+  `dcterms:identifier` and `schema:identifier` all occur 0 times, and
+  nothing matching `*name*`, `*align*`, `*match*` or `*identif*` is
+  declared — **across the three DMDO alignment modules**
+  (`disaster-event-module-generalized`,
+  `disaster-event-module-extensions`, `disaster-properties-ontology`),
+  **not across all four cached graphs.** The fourth,
+  `undrr-isc-hazard-classification`, is a republished UNDRR-ISC
+  controlled vocabulary rather than an alignment module, and it carries
+  identifier and name terms. Measured, not inferred. It is the only
+  working system in this domain either way.
+- **Price qualifier, proposed by H 2026-08-05 and disposed with a
+  correction.** H proposed recording that KWG's graphs are *"borrowed
+  material from a namespace with no TLD, so KWG cannot be read as a
+  published counter-design."* Verified and **true of the three DMDO
+  modules**, which mint under `http://knowwheregraph/ontology/dmdo#` —
+  a host with no TLD, recorded in `vocab/external/manifest.md:49-51` as
+  *"cannot resolve for anyone — bindable only as BORROWED"*. It is
+  **not** true of the fourth graph, which mints under
+  `https://undrr-hip.org/`. So the qualifier is written for the three
+  modules only. The point it carries survives and is the one that
+  matters: this is evidence that a working pipeline got by without an
+  alias vocabulary, **not** evidence that a published alternative
+  vocabulary exists.
 - **Scope — this is about cost, not correctness.** ADR-001 question 1
   is recorded as *settled*, and the structure may be right. C25 asks
   whether it is **paid for**. An absence of published alternatives is
   weak support for a design; a deployed system that does the job without
   it is evidence about price.
-- **Evidence:** —
-- **Updated:** —
+- **Evidence:** 2026-08-05 — O re-ran C25's own standing measurement
+  against `vocab/external/graphs/`. **The six identity constructs
+  reproduce exactly: all six occur 0 times across all four graphs.**
+  That half of the Watch bullet survives an independent run.
+
+  **The rest of it does not, and it failed in this project's recorded
+  instrument direction — a zero returned because the search looked for
+  a string rather than for the thing.**
+
+  | Term | as written in the Watch bullet | measured, by URI |
+  |---|---|---|
+  | `dcterms:identifier` | 0 across all four | **2**, in `undrr-isc-hazard-classification.ttl` |
+  | `*identif*` declared | none | **`hip:identifier`, 205 occurrences** |
+  | `*name*` declared | none | **`hip:vernacularName`, 1**; `foaf:name` |
+
+  The graph binds `@prefix terms: <http://purl.org/dc/terms/>` **and**
+  `@prefix dcterms: <http://purl.org/dc/terms/>` — two labels, one
+  namespace — and writes the property as `terms:identifier`. A grep for
+  the literal string `dcterms:identifier` returns 0 while the URI
+  `http://purl.org/dc/terms/identifier` is present twice. This is
+  [C22](#c22)'s failure mode, not a defect in C25's argument.
+
+  **The claim's substance is unaffected and the correction narrows the
+  evidence rather than the claim.** The three DMDO modules — the
+  alignment vocabulary the argument is actually about — are clean on
+  every construct and every pattern. The fourth graph is a hazard
+  *classification* list, where per-concept identifiers are expected and
+  say nothing about whether alignment needs identity constructs.
+  C25 stays `asserted`: nothing here tests the decomposition's price,
+  which only the P6b partition diff can do.
+- **Updated:** 2026-08-05
