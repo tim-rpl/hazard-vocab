@@ -212,6 +212,67 @@ RETRACTION_CUES = ("read ", "restated", "retire", "retired", "withdraw",
                    "no longer", "not the long pole")
 
 
+
+GUARD_FIX = HERE / "guard-fixtures"
+
+# F10: `check_retired` was the ninth rule in `make lint` and the only one
+# with no fixture pair. O named that twice as the proximate reason
+# something shipped — B2's two blind spots, then B3's exemption
+# granularity — because a probe leaves no residue in the repository and
+# nothing re-runs it.
+#
+# Each row regresses a defect that actually shipped. `must_fire` is the
+# direction; the fixture's own header names what it is for.
+GUARD_CASES = [
+    ("b3-yaml-no-blank-line.yaml", True,
+     "B3 — no blank line, so a paragraph-scoped exemption ate the file"),
+    ("b2-wrapped-phrase.md", True,
+     "B2 — phrase split by a hard wrap, invisible to splitlines()"),
+    ("b2-capitalised.md", True,
+     "B2 — RETIRED_PHRASES had no re.IGNORECASE"),
+    ("b3-table-cue-elsewhere.md", True,
+     "B3 — a cue in one table row must not exempt another"),
+    ("b3-sentence-scope.md", True,
+     "B3 — cue in one sentence, figure in another, same paragraph"),
+    ("b1-sizing-wrapped.md", True,
+     "B1/B3 — a wrapped sizing claim; this shape was false and invisible"),
+    ("retraction-blockquote.md", False, "a blockquoted retraction"),
+    ("retraction-asterisk-quote.md", False, "mention, not use: *'quoted'* + cue"),
+    ("retraction-backtick-mention.md", False, "mention, not use: `backticked` + cue"),
+    ("retraction-negation.md", False, "a negation IS the repair"),
+    ("clean.md", False, "control — no figure, no sizing claim"),
+]
+
+
+def selftest_guard():
+    """Run every fixture pair. Returns a list of failures.
+
+    Asserted per fixture, in isolation, so a failure names the case —
+    *exactly this named test fails* rather than *a named test fails*,
+    which is the form that would have caught the slot branch and the
+    `id:` branch while both sat uncovered at 8/8.
+    """
+    out, seen = [], set()
+    for name, must_fire, why in GUARD_CASES:
+        f = GUARD_FIX / name
+        seen.add(name)
+        if not f.exists():
+            out.append("guard fixture missing: %s" % name)
+            continue
+        fired = bool(check_retired([f]))
+        if fired != must_fire:
+            out.append("guard fixture `%s` (%s): expected %s, got %s"
+                       % (name, why,
+                          "a violation" if must_fire else "no violation",
+                          "a violation" if fired else "none"))
+    # An unreferenced fixture is a test nobody runs, sitting in the
+    # directory looking like coverage.
+    for f in sorted(GUARD_FIX.glob("*")):
+        if f.is_file() and f.name not in seen:
+            out.append("guard fixture `%s` is referenced by no case" % f.name)
+    return out
+
+
 def sentence_of(text, pos):
     """The retraction's scope is the sentence, not the block.
 
@@ -276,8 +337,19 @@ def check_retired(paths):
         # at line 1 — a guard whose output cannot be acted on.
         units, cur = [], []
         for i, line in enumerate(lines, 1):
-            solo = (is_yaml or line.lstrip().startswith("|")
-                    or line.lstrip().startswith(">"))
+            # The table-row clause that stood here is REMOVED, measured
+            # redundant 2026-08-05. `sentence_of` bounds on `|`, so a
+            # table cell is already its own exemption scope whether or not
+            # its row is its own unit. Deleting it changed nothing: 11/11
+            # fixtures, the document, 64/64 on the two-axis probe, and all
+            # four retraction forms.
+            #
+            # It is deleted rather than kept because **a clause nothing
+            # depends on is a clause no fixture can cover** — F10's own
+            # matrix could not isolate it, which is how the redundancy was
+            # found, and keeping it would leave a permanent hole in the
+            # matrix that looked like coverage.
+            solo = (is_yaml or line.lstrip().startswith(">"))
             if solo or not line.strip():
                 if cur:
                     units.append(cur); cur = []
@@ -351,6 +423,12 @@ def main():
         DOC.write_text(text)
         print("wrote %d blocks" % len(blocks), file=sys.stderr)
         return 1 if errors else 0
+
+    gerrs = selftest_guard()
+    if gerrs and "--check" in sys.argv:
+        print("FAIL  the retired-figure guard fails its own fixtures:\n  "
+              + "\n  ".join(gerrs), file=sys.stderr)
+        return 1
 
     retired = check_retired([SRC, DOC])
     if retired and "--check" in sys.argv:

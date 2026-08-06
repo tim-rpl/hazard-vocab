@@ -1,0 +1,8 @@
+# DELIBERATELY VIOLATING — B3. items.yaml has no blank line, so a
+# paragraph-scoped exemption made the whole file one unit; P20's own
+# notes put a retraction cue in it and 6/6 caught became 0/6.
+# The figure is in one field, the cue is in another. It must still fire.
+items:
+  A:
+    notes: "This read the old figure and is restated; retired 2026-08-05"
+    done_when: "all 23 external terms are content-verified"
