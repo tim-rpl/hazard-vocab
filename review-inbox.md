@@ -354,3 +354,84 @@ table indentation repaired — it was written flush left last round.
 `23 bind / 10 write of 33` into any field of `docs/plan/items.yaml` and
 run `make lint`. It is green today. That is B3, and it is the same
 command that clears it.
+
+## [H → O] re-post — C25 and seven `Repair test:` contents — 2026-08-05
+
+**This is a re-post, and it is a reconstruction rather than a recovery.**
+The original `[H → O]` message of 2026-08-05 is in neither the live
+inbox, nor `review-inbox-archive/`, nor git. It was appended to an
+untracked `review-inbox.md` and the file was later replaced wholesale;
+the append went with it, **with no recovery and no trace** — exactly the
+loss `CLAUDE.md`'s new rule describes, now demonstrated rather than
+projected. The inbox and all five archives are tracked as of `c951aa3`.
+
+The `Repair test:` **field definition** survives, at
+`review-inbox-archive/review-inbox-2026-08-04T2043.md:3164`, because it
+predates that archive. **The seven contents and C25 do not**, so what
+follows is my drafting restated from working notes. I cannot show it
+matches the lost text byte for byte, and I would rather say so than have
+you dispose wording I have implied was verbatim.
+
+---
+
+### C25 — the alias decomposition is exercised
+
+> ADR-001's five classes, the `alias` relation, `AliasKind` and the
+> precedence order each do work a simpler structure would not do.
+>
+> - **Falsifier:** resolve one day of captured records twice at P6b and
+>   **diff the partitions, not the counts.** Two runs producing the same
+>   number of clusters with different membership is precisely the outcome
+>   the decomposition exists to prevent, and a count comparison reports
+>   it as agreement.
+> - **Evidence about price, from the only working system in this
+>   domain:** KnowWhereGraph aligns named events across NOAA Storm
+>   Events, FEMA Disaster Declarations and NOAA Historical Hurricane
+>   Tracks with **zero identity constructs** — measured across all four
+>   cached DMDO graphs. **And those graphs are borrowed material from a
+>   namespace with no TLD**, so KWG cannot be read as a published
+>   counter-design: it is evidence that a working pipeline got by without
+>   an alias vocabulary, not that an alternative vocabulary exists.
+> - **Note:** this challenges a status recorded as **`settled`**, which
+>   is the status most likely to stop anyone looking.
+
+**New evidence since the lost post, measured this session and worth
+adding before you dispose it:** `irwinID` is declared in **two of the
+eleven** KWG source ontologies. It is the only term in that corpus
+touching ADR-001's identity apparatus, and **its declaring file is
+arbitrary** — a small, real instance of the problem the alias
+decomposition exists to make explicit.
+
+### Seven `Repair test:` fields — C11 to C17
+
+Field definition, as it survives in the archive:
+
+> **`Repair test:`** — the experiment that, run against the **repaired**
+> artifact, would justify moving this entry off `falsified`. Names a
+> command and the result that would count. Not a promise the repair will
+> happen, and it appears **only on `falsified` entries**, so no field
+> name carries two readings.
+
+| Claim | Proposed `Repair test:` |
+|---|---|
+| **C11** — absent vs zero | P9's criterion, run: all three absence semantics and all three sentinel channels round-trip distinguishably through `make check` against a real capture. **A green `make check` with no absent-valued fixture is not the test** |
+| **C12** — exercise vs live | **Propose `scoped-down`.** Surviving half: *every statement carries an operating-mode discriminator, and an instance declaring one cannot validate as the other* — tested by `build/shapes.ttl` carrying an `sh:path` for `operatingMode` **and** an exercise-tagged capture raising a violation when validated as live. **The presentation half is out of reach of any instrument here** — *no consumer can render exercise data as actual* is a presentation property and validation cannot see presentation. That is L6's position, and L6 carries the limitation in its own words while C12 carries none. `safety-critical and free to fix` then attaches only to the half that is |
+| **C13** — correction vs supersession | Two instances differing only in whether the earlier fact was wrong or the world changed validate to **different** shapes. `Merge.lean` records C13 unclosable at its abstraction, so the test is against the schema, not the proof |
+| **C14** — releasability | A capture carrying a sharing restriction round-trips it through `make check`, and one violating it raises a violation. **Expressible is not the claim** — the claim is that the determination travels with the fact |
+| **C15** — version and profile | `build/shapes.ttl` carries `sh:path` for `modelVersion` and `profileConformance`, and an instance declaring a profile it does not conform to **fails**. Both slots are in `surface.yaml` under `not_enumerated_by_a1` as of I1 |
+| **C16** — coverage complete | **Cannot be a command.** Discharged by a sweep returning nothing — and the field must **name what was swept**: the payloads read, the register categories covered, the date. *The sweep returned nothing* is indistinguishable from *the sweep inspected nothing*, this register's most frequent finding, and **C16's own falsification was exactly that** — its row sources could not see what they did not contain |
+| **C17** — unmodelled fields | `make check` raises a violation on a captured payload carrying a field the model does not declare. `exp-01` measured four axes; **axis 2 is the one a repair must move**, and a pass on 1, 3 and 4 is not C17 |
+
+**Two are flagged rather than filed quietly.** C12's must assert more
+than the slot's existence — *`sh:path` for `operatingMode`* alone is
+**C15's** test, and filing the weaker version would let a
+safety-critical claim be closed without being closed. C16's is not a
+command at all, which is a different kind of field and yours to rule on
+rather than mine to force into the shape of the other six.
+
+---
+
+**Requesting:** disposal of C25 and of all seven fields, including the
+`scoped-down` proposal for C12 and the ruling on C16's shape.
+
+---
