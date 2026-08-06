@@ -189,7 +189,8 @@ RETIRED_ENUMERATION = (
 RETIRED_PHRASES = re.compile(
     r"\b23 (bind|bindings?|external terms|external identities|external bindings)\b"
     r"|\b(ten|10) local( terms)?\b|\b10 write of\b|\bthe 23\b|\bthe ten\b"
-    r"|\b24 bind\b|\b23/10\b|\b23/9\b|\b24/9\b|\bof 32\b|\bof 33\b")
+    r"|\b24 bind\b|\b23/10\b|\b23/9\b|\b24/9\b|\bof 32\b|\bof 33\b",
+    re.IGNORECASE)   # B2: absent here while SIZING_PHRASES had it
 
 # Sizing claims about an item. Subject B, added 2026-08-05: the census
 # matches numerals and "P5 is the long pole" is not one.
@@ -212,22 +213,62 @@ RETRACTION_CUES = ("read ", "restated", "retire", "retired", "withdraw",
 
 
 def check_retired(paths):
+    """Two blind spots the 12/12 probe could not see, both fixed here.
+
+    **Case.** `RETIRED_PHRASES` had no `re.IGNORECASE` while
+    `SIZING_PHRASES` did, so `The 23`, `The ten` and `Ten local terms`
+    all passed. Both patterns now carry it.
+
+    **Input shape.** This iterated `splitlines()` against a document
+    hard-wrapped at ~72 columns, so **seven of eight phrases passed when
+    split across a wrap, including all four sizing phrases** —
+    `plan:385` was one line-break away from firing. Blocks are now
+    joined and matched with whitespace collapsed, and the reported line
+    is the block's first line.
+
+    The probe missed both because it **varied the phrase and not the
+    shape of the input**. Deriving the subject of a search from a
+    recorded enumeration was the right discipline applied to the wrong
+    axis: *deriving the subject of a search does not derive the shape of
+    its input.*
+    """
     bad = []
     for path in paths:
         is_yaml = path.suffix in (".yaml", ".yml")
-        for i, line in enumerate(path.read_text().splitlines(), 1):
-            if line.lstrip().startswith(">"):
+        lines = path.read_text().splitlines()
+        # Group into blocks so a phrase broken by a hard wrap is still one
+        # string. A blank line, or a change in blockquote status, ends a
+        # block — a `>` line must not merge with the prose beside it or the
+        # exemption would leak across the boundary.
+        blocks, cur, start = [], [], 1
+        for i, line in enumerate(lines, 1):
+            quoted = line.lstrip().startswith(">")
+            if not line.strip() or (cur and quoted != cur[0][1]):
+                if cur:
+                    blocks.append((start, cur)); cur = []
+                start = i + 1
                 continue
-            probe = line if is_yaml else re.sub(r'\*?"[^"\n]{0,300}"?\*?', "", line)
+            if not cur:
+                start = i
+            cur.append((line, quoted))
+        if cur:
+            blocks.append((start, cur))
+
+        for first, rows in blocks:
+            if rows[0][1]:            # blockquoted block — a retraction
+                continue
+            joined = re.sub(r"\s+", " ", " ".join(r[0] for r in rows))
+            probe = joined if is_yaml else re.sub(
+                r'\*?"[^"\n]{0,300}"?\*?', "", joined)
             hit = RETIRED_PHRASES.search(probe) or SIZING_PHRASES.search(probe)
             if not hit:
                 continue
-            if any(c in line.lower() for c in RETRACTION_CUES):
+            if any(c in joined.lower() for c in RETRACTION_CUES):
                 continue
             bad.append("%s:%d — %r is a retired figure or a sizing claim, "
                        "outside a retraction. ADR-004's generated worklist is "
                        "the replacement and it states no total."
-                       % (path.name, i, hit.group(0)))
+                       % (path.name, first, hit.group(0)))
     return bad
 
 

@@ -265,7 +265,7 @@ dependency was the largest defect in the first draft of this section:
 | **P17** | Decide P6a's two preconditions — the carrier class for statement-level slots (PA30) and whether `crs` is a slot (PA29) | a design-gate record; A1's class count confirmed or moved 14 to 15 | — | — | excused — decided at the design gate 2026-08-02 (ADR-004) | **BV12.** PA30 called this a new blocks-start edge on P3's sibling; the design gate is not an item, so it could not be an edge. Now it is |
 | **P18** | Decide how cross-slot constraints reach `make check` | a design-gate record choosing one of three: hand-written SHACL beside generated (breaks invariant 1), a generator emitting them from LinkML `annotations:`, or out-of-scope | — | — | excused — decided at the design gate 2026-08-02 (ADR-005) | **C5's carrier.** `exp-01` shows `sh:equals` catches the substitution and `gen-shacl` cannot emit it. Without this item C5's affirmative evidence has nothing to rest on |
 | **P19** | Cross-slot constraint generator | SHACL `sh:equals` and kin emitted from LinkML `annotations:`, after `gen-shacl` | — | — | excused — ADR-005's implementation; not required by plan 01's scope statement, and C5 stays `asserted` until it exists | ADR-005. **C5's affirmative evidence depends on this, and it is outside plan 01's scope statement** — recorded rather than smoothed over |
-| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Subject widened 2026-08-05: retired figures AND sizing claims about items.** The census pattern matches numerals; *P5 is the long pole* is a sizing claim and no pattern reaches it. It is the same shape as PA5's dependency sentence, which went false when P20 became P5's predecessor and needed its own amendment — prose against the graph, in the document whose generator exists for that class. Assuming the census reached it is what left three residues standing after the sweep run to find them. **Sizing sites: `plan:381` (PA5), `:624` (PA17), `:966`.** **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. **Twelve live sites, and the number has moved twice in two days — treat the census as dated, never as fixed.** Eight censused 2026-08-03 — `items.yaml` P5 item and `done_when` (source), the item and done tables (generated from them), PA5, T4a, PA19, T4 — plus two found by O on 2026-08-04 (BV7-4): PA25's *'PA19 was right about the 23'*, 27 lines above PA19's own marker, and PA25's `assertedTime` paragraph, whose `the 23 —` an em-dash hides from the enumeration. Plus **two more H found on 2026-08-04** by widening its own marker checker to anchor on the determiner (`the 23`, `the ten`) instead of on a following noun: PA28's *'every one of the ten'* and *'nine of the ten'*. All twelve are marked and none corrected. **The second of those two also asserted a decided question was open** — ADR-004 Decision C — and that half is withdrawn in place rather than deferred, because a stale figure misleads about a quantity while a stale open-question misleads about what is settled. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
+| **P20** | Restate P5 and the four prose passages over ADR-004's generated worklist | a plan of record whose live sites name the enumerated list, not a retired count | — | — | **required** | **Subject widened 2026-08-05: retired figures AND sizing claims about items.** The census pattern matches numerals; *P5 is the long pole* is a sizing claim and no pattern reaches it. It is the same shape as PA5's dependency sentence, which went false when P20 became P5's predecessor and needed its own amendment — prose against the graph, in the document whose generator exists for that class. Assuming the census reached it is what left three residues standing after the sweep run to find them. **Repair, not discovery.** The criterion-4 retired-figure sweep is a gate duty and is deliberately NOT an item — a gate duty in the item graph makes the graph model the process rather than the work. **The census in this field is HISTORY, not the bound. `done_when` carries the live one.** Corrected 2026-08-05 (F4): this read *twelve live sites* and *all twelve are marked and none corrected* while `done_when` read **24** and *all restated* — a stale census in `notes` bounding a later criterion is BV7-4, which is the reason clause 1 exists, restated inside the item that carries clause 1. **No work was missed; the contradiction was.** History, in order: 8 censused 2026-08-03; 10 after BV7-4's two (PA25's *'PA19 was right about the 23'* and PA25's `assertedTime` paragraph, whose `the 23 —` an em-dash hides from a noun-anchored pattern); 12 after H widened its own checker to anchor on the determiner; **24 when clause 1 forced a re-derivation** — the jump came from making the exemption file-aware, since `items.yaml`'s values are all double-quoted scalars. **Sizing-site pointers deleted rather than updated**: `plan:381`, `:624`, `:966` were wrong when written and a line number in a prose field goes stale on the next edit. **The second of those two also asserted a decided question was open** — ADR-004 Decision C — and that half is withdrawn in place rather than deferred, because a stale figure misleads about a quantity while a stale open-question misleads about what is settled. **The first version of this criterion named four literal strings, covered three phrasings, and could not see PA19's `23 external identities` or T4's `23 external bindings` — two of its own eight sites (BV6-1).** A criterion satisfiable without doing the thing it exists for; eighth instance of *the subject is narrower than the claim*, inside the definition of done written to close the seventh. `23 bind / 10 write of 33` is the figure ADR-004 retires as unrecoverable. **No new total** — that would be a sixth figure agreeing with a fifth by accident |
 | **P21** | Clear the design-gate rationale residues, in one pass | `docs/residuals-01-design-gate.md` with every entry moved to Cleared | — | — | **required** | **`FALSIFIER.md` §3.1.** A rationale defect inside a decided ADR records; a decision defect blocks. Eight gate rounds produced eight partial passes, and a partial retraction is worse than none — withdrawn at one site, standing at another, the document disagreeing with itself. Same repair shape as **P20**: one pass over a written list. **A marker is not a repair** — marked sites tell a reader the passage is stale and name the owner; restating them is this item's work |
 | **P22** | Retarget Part 2 to earthquake — C2's own cheapest test, on a throwaway schema | a scratch Part 2 for USGS ComCat/ShakeMap, and a `git diff --stat` against the wildfire Part 2 | P7 | — | **required** | **C2's cheapest test, and C2 is the claim the whole project rests on.** Its own entry names it: *write Parts 2, 3 and 6 for earthquake; do not use flood — too similar to wildfire.* **Part 2 is this unit**, so the test is available now at one feed and a throwaway schema. **Nothing lands in `vocab/core/`** — this item authors no canonical content and is deleted after it reports. Earthquake is the case C2 flags against itself: the event is point-like and instantaneous and its extent is a ShakeMap, which is **modelled**, so the Part 1 / Part 3 boundary may sit elsewhere than wildfire puts it. **If it fails, that is worth knowing before Part 1's ARC rather than during it.** Only Part 2 is retargeted here; Parts 3 and 6 are later units, so this is a partial run of C2's test and says so |
 
@@ -633,11 +633,30 @@ item then has to reopen. P8a is the deliberate exception (PA15).
 
 **PA17 — wave 1 should be started in order of *external* latency, not
 in order of size, and this changes what is done first.** PA5 says P5 is
-the long pole, and **it was, until 2026-08-05** — see below. But
-**P1 and P3 both block
-on someone else**: P1 cannot close without an O session changing L2's
-status, and P3 is a design-gate decision. P4 is H's but produces a
-claims change that O must record.
+the long pole, and **it was, until 2026-08-05** — see below. But **P1
+and P3 both block on someone else**: P1 cannot close without an O
+session changing L2's status, and P3 is a design-gate decision. P4 is
+H's but produces a claims change that O must record.
+
+Ranking wave 1 by size put P5 first and left P1's O-turnaround
+un-started, so the wall clock paid for it serially at the end. **P5 left
+wave 1 on 2026-08-03** when P20 became its predecessor, which
+strengthens this argument rather than weakening it: the size-first
+ranking would start an item that cannot start. Ranking by latency starts
+the externally-blocked items first and does P5's work *while* they are
+pending:
+
+> **Restored 2026-08-05 (F3).** These seven lines were deleted at
+> `4f3c28f`, and **not one of them was a censused site.** P20's
+> marker-clearing loop cut from a marker's first line to the next blank
+> line — and the markers here had no blank line before the paragraph
+> that followed, so it took the latency rationale, the *P5 left wave 1*
+> sentence, and the clause introducing the generated table below.
+> `it was, until 2026-08-05 — see below` then pointed into a region the
+> same commit had emptied. **P20's subject is restating figures;
+> deleting an amendment's justification is outside it**, and a
+> line-delimited edit is the wrong instrument for a paragraph-delimited
+> structure — which is B2's defect in the editor rather than the guard.
 
 <!-- BEGIN GENERATED:latency - docs/plan/derive-waves.py. Edit items.yaml, not this. -->
 
@@ -873,8 +892,8 @@ PG4 and PG5, and the third instance this week.
 evidence that a threshold and a reading cannot be expressed in one
 schema without `vocab/` content.
 
-**PA25 — Block A. The ten-row table, and it repairs PA19 by removing
-clause 3 from P5 rather than by narrowing it.**
+**PA25 — Block A. The local-slot table, and it repairs PA19 by
+removing clause 3 from P5 rather than by narrowing it.**
 
 O's experiment reproduces here: a LinkML slot with no `range`, no
 `required` and no `multivalued` emits `sh:maxCount 1`, and
@@ -901,8 +920,8 @@ clause 3 ride on the same argument.
 P7, which blocks-start on P3.** Nine are authored at P6a or P9 and none
 of those is ADR-dependent.
 
-**The repair: clause 3 leaves P5 entirely.** Not narrowed — removed. The
-ten have no external identity to resolve; a term with no external URI
+**The repair: clause 3 leaves P5 entirely.** Not narrowed — removed.
+The local slots have no external identity to resolve; a term with no external URI
 *is* its name, and everything else about it is local form authored where
 its class is authored. P5 resolves the external identities in ADR-004's generated worklist, declares
 prefixes, and caches graphs. That is the resolve-and-cache reading
