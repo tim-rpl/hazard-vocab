@@ -236,11 +236,27 @@ GUARD_CASES = [
      "B3 — cue in one sentence, figure in another, same paragraph"),
     ("b1-sizing-wrapped.md", True,
      "B1/B3 — a wrapped sizing claim; this shape was false and invisible"),
+    # F11: each of these asserts its phrase with NO retraction cue in the
+    # sentence, so the clause the fixture is named for is the ONLY thing
+    # that can decide the verdict. The originals carried a cue AND a
+    # quotation, so they stayed green through the cue path and six of ten
+    # clauses could be deleted with nothing going red — C22's falsifier
+    # verbatim, and its failure direction is the silent one: widening an
+    # exemption leaves the run green either way.
+    ("retraction-backtick-nocue.md", False, "F11 — the backtick strip alone"),
+    ("retraction-asterisk-nocue.md", False, "F11 — the asterisk-quote strip alone"),
+    ("retraction-prose-quote-nocue.md", False, "F11 — the prose bare-quote strip alone"),
+    ("retraction-blockquote-nocue.md", False, "F11 — the blockquote skip alone"),
+    ("b2-sizing-capitalised.md", True, "F11 — re.I on SIZING_PHRASES alone"),
     ("retraction-blockquote.md", False, "a blockquoted retraction"),
     ("retraction-asterisk-quote.md", False, "mention, not use: *'quoted'* + cue"),
     ("retraction-backtick-mention.md", False, "mention, not use: `backticked` + cue"),
     ("retraction-negation.md", False, "a negation IS the repair"),
     ("clean.md", False, "control — no figure, no sizing claim"),
+    # F12: the only case asserting a LINE NUMBER. The 11 pairs before it
+    # asserted fire/no-fire only, so a guard reporting the wrong line was
+    # invisible to its own harness.
+    ("f12-line-number.md", True, "F12 — the reported line must be the real one", 11),
 ]
 
 
@@ -253,13 +269,21 @@ def selftest_guard():
     `id:` branch while both sat uncovered at 8/8.
     """
     out, seen = [], set()
-    for name, must_fire, why in GUARD_CASES:
+    for case in GUARD_CASES:
+        name, must_fire, why = case[:3]
+        want_line = case[3] if len(case) > 3 else None
         f = GUARD_FIX / name
         seen.add(name)
         if not f.exists():
             out.append("guard fixture missing: %s" % name)
             continue
-        fired = bool(check_retired([f]))
+        found = check_retired([f])
+        fired = bool(found)
+        if fired and want_line is not None:
+            got = int(found[0].split(":")[1].split(" ")[0])
+            if got != want_line:
+                out.append("guard fixture `%s`: the violation is on line %d "
+                           "and the guard reported line %d" % (name, want_line, got))
         if fired != must_fire:
             out.append("guard fixture `%s` (%s): expected %s, got %s"
                        % (name, why,
@@ -271,6 +295,34 @@ def selftest_guard():
         if f.is_file() and f.name not in seen:
             out.append("guard fixture `%s` is referenced by no case" % f.name)
     return out
+
+
+def strip_mentions(joined, is_yaml):
+    """Strip mention forms, recording WHERE and HOW MUCH was removed.
+
+    F12: the previous version threw the spans away, so a hit position in
+    the stripped text could not be mapped back to a line in the original.
+    """
+    cuts, probe, out, at = [], joined, [], 0
+    pats = [r"`[^`\n]{0,300}`", r"\*['\"][^'\"\n]{0,300}['\"]\*"]
+    if not is_yaml:
+        pats.append(r'\*?"[^"\n]{0,300}"?\*?')
+    for pat in pats:
+        res, last, acc = [], 0, []
+        for m in re.finditer(pat, probe):
+            acc.append(probe[last:m.start()])
+            res.append((len("".join(acc)), m.end() - m.start()))
+            last = m.end()
+        acc.append(probe[last:])
+        probe = "".join(acc)
+        # shift earlier cuts that now sit after these
+        cuts = sorted(cuts + res)
+    return probe, cuts
+
+
+def deleted_before(cuts, pos):
+    """Total length removed at or before `pos` in the stripped text."""
+    return sum(n for off, n in cuts if off <= pos)
 
 
 def sentence_of(text, pos):
@@ -381,17 +433,25 @@ def check_retired(paths):
             # *asserted*. The exemption is about exactly that difference,
             # so both mention forms are stripped before matching and a
             # bare-prose reintroduction still fires — probed below.
-            probe = re.sub(r"`[^`\n]{0,300}`", "", joined)
-            probe = re.sub(r"\*['\"][^'\"\n]{0,300}['\"]\*", "", probe)
-            if not is_yaml:
-                probe = re.sub(r'\*?"[^"\n]{0,300}"?\*?', "", probe)
+            probe, cuts = strip_mentions(joined, is_yaml)
             for hit in sorted(list(RETIRED_PHRASES.finditer(probe))
                               + list(SIZING_PHRASES.finditer(probe)),
                               key=lambda m: m.start()):
                 if any(c in sentence_of(probe, hit.start()).lower()
                        for c in RETRACTION_CUES):
                     continue
-                line_no = [ln for off, ln in offsets if off <= hit.start()][-1]
+                # F12: offsets index `joined`; the hit is in `probe`,
+                # from which spans have been DELETED. Mapping a probe
+                # position onto joined offsets under-reports by the length
+                # of everything stripped before it — a figure on file line
+                # 7 reported as 4, and the item table's last row at :270
+                # reported :268. Exact for YAML only, because there each
+                # line is its own unit and every offset is 0.
+                #
+                # `deleted` records how much was removed before each probe
+                # position, so a probe offset maps back to a joined offset.
+                jpos = hit.start() + deleted_before(cuts, hit.start())
+                line_no = [ln for off, ln in offsets if off <= jpos][-1]
                 bad.append("%s:%d — %r is a retired figure or a sizing "
                            "claim, outside a retraction. ADR-004's "
                            "generated worklist is the replacement and it "

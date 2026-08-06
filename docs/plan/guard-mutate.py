@@ -43,10 +43,39 @@ MUTATIONS = [
      # unit-scoped exemption necessarily merges its cells. The sentence
      # clause is now the ONLY thing separating them.
      {"b3-sentence-scope.md", "b3-table-cue-elsewhere.md"}),
+    # F11: one mutation per previously-uncovered clause. Each must fail
+    # EXACTLY its no-cue fixture. The originals stayed green through the
+    # cue path, so these clauses could be deleted with nothing red —
+    # C22's falsifier, and its failure direction is the silent one.
+    ('stop stripping asterisk-quoted mentions (F11)',
+     '    pats = [r"`[^`\\n]{0,300}`", r"\\*[\'\\"][^\'\\"\\n]{0,300}[\'\\"]\\*"]',
+     '    pats = [r"`[^`\\n]{0,300}`"]',
+     {'retraction-asterisk-nocue.md'}),
+    ('stop stripping bare quotes in prose (F11)',
+     '        pats.append(r\'\\*?"[^"\\n]{0,300}"?\\*?\')',
+     '        pass',
+     {'retraction-prose-quote-nocue.md'}),
+    ('stop skipping blockquoted units (F11)',
+     '            if unit[0][1].lstrip().startswith(">"):',
+     '            if False and unit[0][1].lstrip().startswith(">"):',
+     {'retraction-blockquote-nocue.md'}),
+    ('drop re.I from SIZING_PHRASES (F11)',
+     '    r"\\blong pole\\b|\\bL-sized\\b|\\bwidest item\\b|\\bstartable today\\b", re.I)',
+     '    r"\\blong pole\\b|\\bL-sized\\b|\\bwidest item\\b|\\bstartable today\\b")',
+     {'b2-sizing-capitalised.md'}),
+    # F12: the mapping from a probe position back to a source line. The
+    # first version of the fixture put its stripped spans in an EARLIER
+    # paragraph, where offsets restart, so it asserted a line number
+    # without testing the mapping and passed with the fix reverted.
+    # Measured: 11 with the fix, 8 without.
+    ("revert the F12 position mapping",
+     "                jpos = hit.start() + deleted_before(cuts, hit.start())",
+     "                jpos = hit.start()",
+     {"f12-line-number.md"}),
     ("stop stripping backticked mentions",
-     '            probe = re.sub(r"`[^`\\n]{0,300}`", "", joined)',
-     '            probe = joined',
-     set()),
+     '    pats = [r"`[^`\\n]{0,300}`", r"\\*[\'\\"][^\'\\"\\n]{0,300}[\'\\"]\\*"]',
+     '    pats = [r"\\*[\'\\"][^\'\\"\\n]{0,300}[\'\\"]\\*"]',
+     {'retraction-backtick-nocue.md'}),
 ]
 
 
