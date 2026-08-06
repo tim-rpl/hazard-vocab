@@ -15,8 +15,21 @@
 `[H → O]` message names the document, states its assertions and
 falsifiers in summary, and requests falsification. The document carries
 the work. This keeps the inbox reviewable and puts the substance under
-version control — `review-inbox*.md` is gitignored, so anything left
-only in the inbox is not in the repository at all.
+version control.
+
+**`review-inbox.md` and `review-inbox-archive/` are tracked, and this
+paragraph used to say they were gitignored.** Corrected 2026-08-05.
+Nothing ignored them — `git check-ignore -v review-inbox.md` matches no
+rule, `.git/info/exclude` is empty and there is no
+`core.excludesfile`. **They had simply never been added**, and
+`git status --short` had been printing `?? review-inbox.md` on every run.
+A claim about repository state, written into a document, checkable by one
+command, never checked — while the answer was in the output of a command
+run dozens of times.
+
+The consequence was not cosmetic: **O could not dispose two proposed
+claims**, because §1 forbids reconstructing wording it cannot read, and
+the proposals existed only in a working tree it has no access to.
 
 Design-stage decisions go to `design/ADR-*`, not to a `docs/design/`
 directory. One ADR per structural decision, numbered, dated, never
