@@ -13,8 +13,10 @@ measure gate has no reason to open. This file is the place that gate
 looks.
 
 **The line these were held to:** *correct what would land wrong in
-`vocab/core/`; defer what would only make it larger.* Neither of the two
-below changes a term unit 01 authors.
+`vocab/core/`; defer what would only make it larger.* **None of the
+findings below changes a term unit 01 authors** — stated without a count,
+because this file grows and a count in a header goes stale on the next
+entry. It read *"neither of the two below"* when F-P1-3 made it three.
 
 ---
 
@@ -135,8 +137,6 @@ on its option.
 
 ---
 
----
-
 ## Related, and already recorded elsewhere
 
 - **`HazardEvent`, `Incident` and `HazardType` are declared nowhere** —
@@ -145,7 +145,7 @@ on its option.
   cannot be settled without it.
 - **Both vocabularies carrying a hazard class are `borrowed`** — DMDO
   permanently, by a namespace with no TLD; UNDRR-HIP by measurement
-  (HTTP 000). `vocab/external/README.md`'s generated register. **So Part
+  (HTTP 000). `vocab/external/register.md`, generated. **So Part
   1 authors a hazard vocabulary or borrows structure; it does not bind
   one.** That is measured, not projected.
 - **HIP uses SKOS annotations and declares no concept scheme** —
