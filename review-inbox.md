@@ -435,3 +435,296 @@ rather than mine to force into the shape of the other six.
 `scoped-down` proposal for C12 and the ruling on C16's shape.
 
 ---
+
+## [H → O] implement — B3/B4/B5 block response — 2026-08-06
+
+**Stage:** implement · **Verdict requested:** verification of three blocks
+**Artifacts:** `docs/plan/derive-waves.py`, `docs/plan/guard-fixtures/` (new),
+`docs/plan/guard-mutate.py` (new), `docs/plan/items.yaml`,
+`docs/plan/plan-01-part2-part0.md`, `vocab/external/fetch-external.py`,
+`docs/README.md`, `review-inbox.md` + archives (now tracked)
+
+**C25 and the seven `Repair test:` contents are already posted**, at
+`review-inbox.md:358`, flagged as a reconstruction rather than a
+recovery. Not repeated here — a third copy of text I have already said I
+cannot show is verbatim would be worse than a pointer.
+
+---
+
+## Leading with what I broke, because two are one family
+
+**Three defects I introduced or carried, all found inside the repairs.**
+
+**1. A `\b` word boundary in a NON-RAW Python string.** I wrote
+`"NIFC_Fire\b"`, which makes `\b` a backspace, and the count came back
+**0**. Raw-string re-check: **14**. Caught only because the surrounding
+axioms contradicted it.
+
+**This is the second instance of one family, and the direction is the
+finding.** The first was `mass_concentration_of_pm2p5` reported MISSING
+from CF because `\b` cannot follow a name ending in an underscore.
+**Both are false negatives, and both corroborated a prior that was
+already suspected** — *CF does not carry PM2.5*, *NIFC_Fire is not
+declared*. A false positive gets looked at because it is surprising. **A
+false negative that agrees with what you expected gets written down.**
+I would rather this went to the register than any of the block repairs.
+
+**2. A failed fetch overwrote the sidecar with the failure's metadata.**
+GeoSPARQL's source URL began returning a 9 KB HTML 404, and the sidecar
+recorded **that page's digest** (`b620507312c5`) against a file whose real
+digest is `7a8028dba554` and which carries all four bound terms. **B5's
+family on the fetch path instead of the check path** — the tool
+destroying the evidence it exists to keep. Now repairs the sidecar from
+the cached bytes and marks `http_status`, `content_type` and `fetched`
+unrecoverable rather than carrying a value from a fetch that returned
+something else.
+
+**3. Third variable-scope slip in `fetch-external.py`.** The repair
+message read *"the source URL returned HTTP 200"* for a 404, because
+`status` was leftover from another loop. Same family as hashing `body`
+from the prior iteration, which reported one digest for three files.
+
+---
+
+## B3 — matching and exemption separated. Blocking finding accepted in full.
+
+Your diagnosis is the sentence I kept: *joining wrapped lines fixed what
+the guard can see, and moved what the guard exempts onto the block —
+different operations that the edit made one.*
+
+**Matching is unit-scoped; exemption is sentence-scoped.** Units follow
+the structure the document has:
+
+| Structure | Unit | Why |
+|---|---|---|
+| YAML | one line | each field is a record; `items.yaml` has no blank line |
+| prose | paragraph | so a hard-wrapped phrase is still found |
+
+And the exemption turns on **mention versus use**: backticks and
+`*'asterisk quotes'*` mark a phrase being talked about; bare prose marks
+one being asserted. **YAML's outer quotes are syntax, not rhetoric** —
+stripping them is what exempted the whole file.
+
+**Hits report their own line.** The first version reported the unit's
+start, putting every `items.yaml` finding at line 1.
+
+**Re-probed on both axes, in a throwaway copy:**
+
+| | |
+|---|---|
+| 16 phrasings × 4 input shapes | **64/64 fire** |
+| your two end-to-end YAML-field targets, after `--write` | **both fire** |
+| four retraction forms | **all survive** |
+
+**One true positive, not a residue.** `plan:385` read *"It is still the
+widest item"* — **false**: P5 is `S` and P9 is the only `L`. It wraps, so
+the pre-B3 guard could not see it. I checked the sizes before restating.
+
+## B4 — the probe is withdrawn in place, not re-cited
+
+`items.yaml:241` no longer cites the 12/12 probe. It records that the
+probe **varied the phrase and never the input shape**, so it could not
+see either blind spot, and carries the two-axis result above instead.
+
+## B5 — `--check` reads only
+
+| Mutation | Result |
+|---|---|
+| corrupt a cached graph | **caught**, both digests named |
+| remove a sidecar | **caught** |
+| control | clean; `diff -rq` shows **no writes** |
+
+Register still reads its measured dispositions. **My first version of
+that comparison hashed `body` from the previous loop** and reported one
+digest for three files — caught because the output was absurd, not
+because anything checked it.
+
+## F8 — a condition that can actually fail
+
+`sync_register()` returned `0` on every path, so the caller's branch was
+unreachable **and the string it would print named the README block the
+same commit withdrew.** Now: no sidecars means no register, verified by
+hiding them.
+
+## F10 — the fixture pair, and it found a redundant clause
+
+**11 pairs under `docs/plan/guard-fixtures/`, run on every `--check`**, so
+`make lint` carries them. Plus `guard-mutate.py`: delete one clause,
+assert the **exact set** that fails — your form. **5/5.**
+
+**The matrix caught three of my own fixtures before it was finished:** one
+passed because I had *quoted* the phrase, so it tested the exemption
+rather than the match; one passed with `re.IGNORECASE` deleted because
+`ten local terms` matches lowercase inside `The ten local terms`; and two
+mutations were unfaithful.
+
+**And it found a clause nothing depends on.** Table-rows-as-their-own-unit
+is redundant — `sentence_of` bounds on `|` already. Deleting it changed
+nothing across 11 fixtures, the document, 64/64, and all four retraction
+forms. **Deleted rather than kept: a clause nothing depends on is a
+clause no fixture can cover**, which is how the redundancy surfaced, and
+keeping it would leave a permanent hole that looked like coverage.
+
+---
+
+## The tracking fix, and what it cost you
+
+**Nothing was ignoring `review-inbox.md`.** `git check-ignore -v` matches
+no rule, `.git/info/exclude` is empty, no `core.excludesfile`. It had
+never been added — and **`git status --short` had been printing
+`?? review-inbox.md` on every run**, which I read past a dozen times
+while scanning for my own files.
+
+`docs/README.md` asserted *"`review-inbox*.md` is gitignored"*. **My file,
+my claim, checkable by one command, never checked.** Corrected in place
+with the mechanism.
+
+**The cost was yours:** the original C25 message is in neither the live
+inbox, the archive, nor git. It was appended to an untracked file that
+was later replaced wholesale. Inbox and all five archives tracked as of
+`c951aa3`.
+
+---
+
+**Verification state:** `make lint` ok; `make lint-selftest` 40 pairs,
+8/8; guard fixtures 11/11; mutation matrix 5/5; two-axis probe 64/64;
+`fetch-external.py --check` clean and writing nothing.
+
+**Requesting:** verification of B3, B4 and B5, and disposal of C25 and the
+seven `Repair test:` fields at `review-inbox.md:358`.
+
+---
+
+## [H → O] implement — external vocabulary cache, new material — 2026-08-06
+
+**Stage:** implement · **Weight:** new material, **not** a block response
+**Artifacts:** `vocab/external/` — `fetch-external.py`, `register.md`,
+35 graphs + sidecars; `docs/measure/part1-carried-findings.md`
+
+**Posted separately from the block response on purpose.** Merged, this
+would inherit blocking weight it has not earned, and §3 gives no basis
+to weigh two kinds of finding differently inside one message. Read it at
+its own weight.
+
+---
+
+### Twelve KWG source-specific ontologies — the profile-level artifacts this project has none of
+
+One per dataset, from `KnowWhereGraph/kwg-ontologies`. **Three are our own
+feeds** — `wildfire-nifc`, `air-quality-epa`, `earthquake-usgs`. DMDO is a
+domain model; **these are worked examples of binding a real feed**, which
+is what `vocab/profiles/` exists for.
+
+Register: **35 rows, 0 gaps, 1 failed fetch — 19 borrowed, 15 bound, 1
+untested.**
+
+**Term lists are derived, not guessed:** one **file-specific** term each,
+a name declared in exactly 1 of the 11, so the check answers *did we get
+THIS dataset's ontology*. My first pass guessed `Region` for all twelve
+and `wildfire-nifc` does not declare it.
+
+### `void.ttl` is not VoID
+
+982 triples, **zero `void#` predicates**, every type minted in KWG's own
+namespace — `kwg:Dataset` 31, `kwg:DatasetSubgraph` 24,
+`kwg:KnowledgeGraph` 1, `kwg:Team` 1, `kwg:Person` 47. **The filename says
+VoID; the graph says KWG's own dataset vocabulary.** A reader reaching for
+`void:triples`, `void:dataDump` or `void:sparqlEndpoint` finds none of
+them. Name-versus-content, in a filename.
+
+### `dereferences` now carries its reason — four causes, not one
+
+One verdict was covering four unrelated causes **that decay differently**,
+which is C11's shape:
+
+| Cause | Decays how |
+|---|---|
+| **structural** — host has no TLD | never; `knowwheregraph` cannot resolve for anyone, ever |
+| **access** — 403 / 404 / expired certificate | could change from another network |
+| **single observation** — `000`, no response | one probe, not a property |
+| **content** — 200, but the probe term is **not defined** in what the namespace serves | the GeoSPARQL case |
+
+**The fourth is the one that would otherwise be invisible.** GeoSPARQL's
+namespace returns 200 `text/anot+turtle` and defines none of the four
+bound terms — bound in name, borrowed in fact.
+
+**And the same host measured differently twice.** KWG's namespace was
+reported 403 from one network and, here, **301 → HTTPS → expired
+certificate**. Both true, neither the property — which is exactly why
+`access` and `structural` cannot share a value.
+
+### A term's declaration may span rows — two reasons, deliberately not merged
+
+Measured over the eleven dataset ontologies: **444 distinct declared URIs,
+46 in more than one file.**
+
+**Ten in KWG's own namespace — the declaring file is arbitrary.**
+`AdministrativeRegion_2` and `S2Cell_Level13` in **10 of 11**; `Region`,
+`spatialRelation`, `hasTemporalScope` in 6; `sfWithin` in 3; `hasFIPS`,
+`stateName`, `countyName` and **`irwinID`** in 2.
+
+**`irwinID` is flagged separately** — the only term in the corpus touching
+ADR-001's identity apparatus, and a scheme identifier with an arbitrary
+declaring file is a different problem from a region class.
+
+**Thirty-six are foreign, and are not row-spanning at all — the
+declaration is in the wrong file entirely.** Stub redeclarations of terms
+KWG does not own: **sosa 11, geosparql 7, skos 6, dcterms 5, owl-time 5,
+schema.org 2.** For these the register points at the **owning namespace's
+row**, which this cache already holds two directories away.
+
+**Conflating the two would make the register say a SOSA term's
+declaration is arbitrary among twelve files, when it is not arbitrary at
+all.** `vocab-conventions.md`'s fifth failure mode, at scale and measured.
+
+### GeoSPARQL 1.1, pinned to the released tag
+
+**1.1 over 1.0 by measurement:** all four bound terms and
+`Feature owl:disjointWith Geometry` are **identical in both**, so ADR-004
+Decision A holds either way. 1.1 mints **65** terms against 39, and both
+share one namespace — so this is a source-file choice, not a rebinding.
+
+Pinned to `1.1.0-ghpages` rather than a branch, because the branch URL
+started 404ing and that is what corrupted the sidecar. The tag file
+differs from what the branch served in **annotation vocabulary only** —
+`skos:` where the branch used `schema.org` — same 65 terms, same axioms on
+all five measured.
+
+### F-P1-3 — recorded for Part 1's measure gate, measured rather than argued
+
+`docs/measure/part1-carried-findings.md`. From `wildfire-nifc.ttl`:
+
+| Measured | |
+|---|---|
+| **`NIFC_IncidentComplexFire`** | **`subClassOf kwg:NIFC_Fire`** — a complex is a *kind of fire* |
+| `incidentName` | `owl:DatatypeProperty`, **no domain, no range** |
+| `partOf` | **0** |
+| `contain` | **0** |
+
+**The missing attribute is the argument.** No containment percentage
+anywhere in v3.0 — containment is a statement about **suppression in
+progress**, and an archive of what happened does not track it. **OHIM
+does, and therefore cannot collapse the two.**
+
+**And they do not assert the collapse — they never make the
+distinction.** With no domain on `incidentName`, nothing in the axioms
+says it attaches to a fire. **A retrospective model of fires with an
+incident name attached by habit**, and the right model for its purpose.
+
+**Carried with it:** `NIFC_Fire ⊑ sosa:FeatureOfInterest` is a **second
+independent instance of the binding ADR-006 removed** — evidence about
+how natural the error is, not that the decision was wrong. And
+`NIFC_FireObservation ⊑ sosa:Observation` **confirms the Part 2 reading
+from someone else's artifact**: perimeter-is-an-observation, a
+convergence on ADR-003's *subject* rather than on its option.
+
+---
+
+**Not yet read:** `air-quality-epa.ttl`, the only one of the twelve
+bearing on the current unit. Held deliberately so new discovery does not
+arrive inside a block response.
+
+**Requesting:** findings, at whatever weight you judge. Nothing here
+blocks.
+
+---
