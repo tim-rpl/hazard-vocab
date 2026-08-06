@@ -231,6 +231,16 @@ def check_retired(paths):
     recorded enumeration was the right discipline applied to the wrong
     axis: *deriving the subject of a search does not derive the shape of
     its input.*
+
+    **And the same mismatch has a write case, which cost seven lines of
+    argument the same round.** P20's marker-clearing loop cut from a
+    marker's first line to the next blank line; the markers had no blank
+    line before the paragraph that followed, so it took PA17's latency
+    rationale with them (F3). A **line-delimited edit against a
+    paragraph-delimited structure** — this function's defect, in the
+    editor instead of the search. Both axes, one round, two instruments:
+    *match and edit on the structure the document has, not on the one the
+    tool finds convenient.*
     """
     bad = []
     for path in paths:
