@@ -1,0 +1,46 @@
+# Retracted phrases — swept on every `make lint` by scripts/sweep-retracted.py
+#
+# WHAT THIS GUARANTEES, AND WHAT IT DOES NOT.
+#
+# It makes VERBATIM reintroduction of a retracted phrase impossible. It
+# says NOTHING about a paraphrase. claims.md C22 row 12 records that
+# exact over-read: the sweep "keys on the sentence, not the proposition
+# … a claim restated in different words is its failure mode. Three
+# shipped past a green run" — all three in accepted ADRs.
+#
+# So do not read a green sweep as "reintroduction is impossible". Read it
+# as "these exact strings are absent". The proposition remains checkable
+# only by reading.
+#
+# FORMAT: one phrase per line. Blank lines and #-comments ignored.
+# Matched with `git grep -F -f` — fixed strings, not regexes.
+#
+#   <phrase>	<date>	<withdrawing message or commit>
+#
+# The date and provenance make an entry AUDITABLE rather than
+# accumulating as apparent coverage: a phrase referencing a file since
+# deleted can no longer fire, and only the provenance says so.
+#
+# EXCLUSIONS the sweep applies, and why each is not optional:
+#
+#   review-inbox.md, review-inbox-archive/
+#       Append-only channel. Hits there are history by design —
+#       .claude/rules/gate-messages.md, "Withdrawing a claim from a
+#       reviewed message". A reviewed message is never marked.
+#
+#   docs/plan/guard-fixtures/
+#       These files carry retired figures BY CONSTRUCTION; that is what
+#       they are for, and several are deliberately bare because a
+#       fixture carrying a retraction cue would exempt itself. Measured:
+#       9 of 15 hits on the first five-phrase list were here.
+#
+#   scripts/retracted.txt
+#       This file contains every retracted phrase and would match all of
+#       them.
+#
+# THE OVER-EXCLUDE DIRECTION IS THE DANGEROUS ONE. A sweep that forgets
+# an exclusion reports history as live — noisy, self-correcting. A sweep
+# that over-excludes reports LIVE TEXT AS HISTORY, silently. A live claim
+# written into an excluded path is invisible to this instrument, and no
+# match-direction fixture can show that. See
+# scripts/sweep-fixtures/README.md.
