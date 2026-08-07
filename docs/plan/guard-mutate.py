@@ -19,6 +19,10 @@ import tempfile
 SRC = pathlib.Path(__file__).resolve().parent
 
 MUTATIONS = [
+    ("make the prose closing quote optional again (F13)",
+     '        pats.append(r\'\\*?"[^"\\n]{0,300}"\\*?\')',
+     '        pats.append(r\'\\*?"[^"\\n]{0,300}"?\\*?\')',
+     {"f13-unbalanced-quote.md"}),
     # Each mutation deletes ONE clause, faithfully. The first version of
     # this matrix mutated crudely — "match per line" was implemented as
     # "keep only the unit's first line" — and mismatched for that reason
@@ -52,7 +56,7 @@ MUTATIONS = [
      '    pats = [r"`[^`\\n]{0,300}`"]',
      {'retraction-asterisk-nocue.md'}),
     ('stop stripping bare quotes in prose (F11)',
-     '        pats.append(r\'\\*?"[^"\\n]{0,300}"?\\*?\')',
+     '        pats.append(r\'\\*?"[^"\\n]{0,300}"\\*?\')',
      '        pass',
      {'retraction-prose-quote-nocue.md'}),
     ('stop skipping blockquoted units (F11)',
@@ -95,7 +99,12 @@ def failing(d):
 base = fresh()
 if failing(base):
     sys.exit("control is red: %s" % failing(base))
-print("control: all 10 fixture pairs pass\n")
+# Derived, not remembered. This read a hardcoded `10` while the directory
+# held 18 fixtures — a harness reporting a count it does not measure is the
+# defect the harness exists to catch.
+_n = len(re.findall(r'^\s*\("[^"]+\.(?:md|yaml)",\s',
+                    (base / "derive-waves.py").read_text(), re.M))
+print("control: all %d fixture pairs pass\n" % _n)
 shutil.rmtree(base.parent)
 
 bad = []

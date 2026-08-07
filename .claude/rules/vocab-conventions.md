@@ -129,8 +129,21 @@ See ADR-001.
 | **Cited** | irrelevant | documentation only, by intent |
 
 Record which of the three every external vocabulary is, with the
-dereference result behind it. **`vocab/external/README.md` is the
-register**, beside the cached graphs in `vocab/external/graphs/`.
+dereference result behind it.
+
+**`vocab/external/register.md` is the register.** It is a **wholly
+generated** file, produced from the per-provenance sidecars beside the
+cached graphs in `vocab/external/graphs/`. Do not edit it, and do not
+add a generated block to `vocab/external/README.md`, which is prose and
+hand-written.
+
+An earlier version of this line named `README.md` as the register. That
+was true when written and became false when the register moved to its
+own file — because a generated block inside a hand-written document has
+two writers and the author wins silently. Following the stale line would
+rebuild exactly the defect `CLAUDE.md`'s one-writer-per-file invariant
+exists to prevent. Retracted here rather than corrected silently,
+because this is the file to follow when authoring `vocab/`.
 
 **Keep the cache outside anything the lints scan.** `vocab/core/` and
 `vocab/profiles/` are the authored vocabulary; `vocab/external/` is

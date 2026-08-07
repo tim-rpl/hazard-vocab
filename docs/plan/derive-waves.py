@@ -248,6 +248,8 @@ GUARD_CASES = [
     ("retraction-prose-quote-nocue.md", False, "F11 — the prose bare-quote strip alone"),
     ("retraction-blockquote-nocue.md", False, "F11 — the blockquote skip alone"),
     ("b2-sizing-capitalised.md", True, "F11 — re.I on SIZING_PHRASES alone"),
+    ("f13-unbalanced-quote.md", True,
+     "F13 — one unbalanced `\"` exempted the next ~300 characters"),
     ("retraction-blockquote.md", False, "a blockquoted retraction"),
     ("retraction-asterisk-quote.md", False, "mention, not use: *'quoted'* + cue"),
     ("retraction-backtick-mention.md", False, "mention, not use: `backticked` + cue"),
@@ -306,7 +308,13 @@ def strip_mentions(joined, is_yaml):
     cuts, probe, out, at = [], joined, [], 0
     pats = [r"`[^`\n]{0,300}`", r"\*['\"][^'\"\n]{0,300}['\"]\*"]
     if not is_yaml:
-        pats.append(r'\*?"[^"\n]{0,300}"?\*?')
+        # F13: the closing quote used to be OPTIONAL — `"?`. Paragraphs are
+        # joined into one line before this runs, so the `\n` bound no longer
+        # applies and a single unbalanced `"` exempted the next ~300
+        # characters: a figure 20 characters after a stray quote was exempt,
+        # at ~250 exempt, past 300 it fired. A mention is a QUOTED SPAN; an
+        # unbalanced quote is not one, so the closer is required.
+        pats.append(r'\*?"[^"\n]{0,300}"\*?')
     for pat in pats:
         res, last, acc = [], 0, []
         for m in re.finditer(pat, probe):

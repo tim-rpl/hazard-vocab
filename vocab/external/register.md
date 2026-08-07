@@ -20,7 +20,11 @@ bare `HTTP 301` and content at 1, the one argued hardest for,
 was the least visible. A generated file of record asserting a
 capability it did not have is C23's shape, written by a tool.
 A row showing **unlabelled** predates the field and has not
-been re-probed.
+been re-probed. **Both tables carry the column**, because the
+one sidecar that lacks the field is a fetch that produced no
+graph — it renders only in *Fetched, produced no graph*, which
+had no reason column, so the fallback was unreachable for the
+only row that needed it.
 
 **Four causes, and they decay differently** — F15: this
 paragraph said *three* and enumerated four.
@@ -71,7 +75,9 @@ paragraph said *three* and enumerated four.
 | `void` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `wildfire-nifc` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 
-*35 graphs with a sidecar; 19 borrowed, 15 bound, 1 untested. 1 fetch(es) produced no graph at all.*
+*35 graphs with a sidecar; 19 borrowed, 15 bound, 1 untested. 0 fetch(es) produced no graph at all.*
+
+**Reason distribution over the 35 rows above** — generated, and its total is asserted equal to the row count. Counting these off the rendered table by hand adds one to every reason that also names a row of the legend: `resolves` 15, `access` 12, `structural` 3, `content` 2, `no-probe` 1, `mints-nothing` 1, `single-observation` 1.
 
 ## A term's declaration may span rows — two different reasons
 
@@ -116,10 +122,10 @@ Conflating the two halves would make this register say a SOSA
 term's declaration is arbitrary among eleven files, when it is
 not arbitrary at all.
 
-## Fetched, produced no graph
+## Sidecar with no source row — orphaned
 
-A sidecar exists and there is no `.ttl` beside it. Listed because **an attempt that failed is not an attempt not made**, and a row count over successes cannot tell them apart.
+A sidecar with no `.ttl` **and no row in `SOURCES`**. This is not a fetch this project could not make; it is the residue of a source row that was removed. Reported separately because the remedy differs — **re-probe a failure, delete an orphan** — and because listing the two together made the register show an ontology as unobtainable when nothing was trying to obtain it.
 
-| Attempted | Source | HTTP |
-|---|---|---|
-| `deo` | <http://schema.knowwheregraph.org/lod/ontology/> | 000 |
+| Orphan | Source it recorded | HTTP | Why |
+|---|---|---|---|
+| `deo` | <http://schema.knowwheregraph.org/lod/ontology/> | 000 | **unlabelled** |

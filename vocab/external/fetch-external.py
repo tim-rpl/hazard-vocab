@@ -446,16 +446,35 @@ CHECK_ONLY = [False]
 def sync_register():
     """Write `register.md` in full. No markers, no host document."""
     import yaml as _y
-    rows, gaps, failed = [], [], []
+    rows, gaps, failed, orphans = [], [], [], []
     stems = {g.stem for g in CACHE.glob("*.ttl")}
     sides = {s.name.replace(".provenance.yaml", "")
              for s in CACHE.glob("*.provenance.yaml")}
+    listed = {s[0] for s in SOURCES}
     # F7: a sidecar with no `.ttl` records a fetch that PRODUCED NO GRAPH.
     # Enumerating `*.ttl` alone made it invisible and `0 gaps` could not
     # see it — C11's absent-versus-zero, in this project's tooling.
+    #
+    # But a sidecar with no `.ttl` AND no row in SOURCES is a different
+    # thing, and reporting the two together said something false: `deo`
+    # was listed as a failed fetch for eight days after its source row was
+    # deliberately DELETED, so the register showed an ontology this project
+    # could not obtain when nothing was trying to obtain one. The remedy
+    # differs too — re-probe a failure, delete an orphan.
     for stem in sorted(sides - stems):
         d = _y.safe_load((CACHE / ("%s.provenance.yaml" % stem)).read_text())
-        failed.append((stem, d.get("source_url", "-"), d.get("http_status", "?")))
+        if stem not in listed:
+            orphans.append((stem, d.get("source_url", "-"),
+                            d.get("http_status", "?"),
+                            d.get("dereference_reason") or "unlabelled"))
+            continue
+        # The reason column belongs here too. Without it the `**unlabelled**`
+        # fallback below was UNREACHABLE for the only sidecar that lacks the
+        # field: `deo` never fetches, so the repair path never rewrites it,
+        # and it renders only in this table — which had no reason column.
+        # A fallback no input can reach is a guard clause no fixture covers.
+        failed.append((stem, d.get("source_url", "-"), d.get("http_status", "?"),
+                       d.get("dereference_reason") or "unlabelled"))
     for g in sorted(CACHE.glob("*.ttl")):
         side = g.with_suffix(".provenance.yaml")
         if not side.exists():
@@ -464,8 +483,16 @@ def sync_register():
         d = _y.safe_load(side.read_text())
         rows.append((g.stem, d.get("namespace", "-"),
                      d.get("dereferences", "?"), d.get("disposition", "?"),
-                     d.get("dereference_reason") or "**unlabelled**",
+                     d.get("dereference_reason") or "unlabelled",
                      d.get("detail", "")))
+
+    def _reason(v):
+        # ONE sentinel, rendered in one place. Carrying the rendered
+        # `**unlabelled**` in the tuple put markup into the tally key, so
+        # the generated distribution said `` `**unlabelled**` `` — the
+        # mutation that was supposed to prove the fallback reachable
+        # found it instead.
+        return "**unlabelled**" if v == "unlabelled" else "`%s`" % v
 
     out = ["# External vocabulary register", "",
            "**Generated in full by `fetch-external.py` from the provenance",
@@ -485,7 +512,11 @@ def sync_register():
            "was the least visible. A generated file of record asserting a",
            "capability it did not have is C23's shape, written by a tool.",
            "A row showing **unlabelled** predates the field and has not",
-           "been re-probed.", "",
+           "been re-probed. **Every table carries the column**, because the",
+           "one sidecar that lacks the field renders in none of the tables",
+           "that had one — it is an orphan, and both the orphan and the",
+           "failed-fetch tables were reason-free, so the fallback was",
+           "unreachable for the only row that needed it.", "",
            "**Four causes, and they decay differently** — F15: this",
            "paragraph said *three* and enumerated four.", "",
            "| Reason | Decays how |",
@@ -499,16 +530,34 @@ def sync_register():
            "| Graph | Namespace | Dereferences | Why | Disposition |",
            "|---|---|---|---|---|"]
     for k, ns, dr, disp, reason, detail in rows:
-        out.append("| `%s` | <%s> | **%s** | `%s` | %s | **%s** |"
-                   % (k, ns, dr, reason, detail or "—", disp))
+        out.append("| `%s` | <%s> | **%s** | %s | %s | **%s** |"
+                   % (k, ns, dr, _reason(reason), detail or "—", disp))
     tally = {}
     for _k, _n, _d, disp, _r, _x in rows:
         tally[disp] = tally.get(disp, 0) + 1
+    # The reason distribution is GENERATED, and its total is asserted
+    # against the row count. Counting it by hand off the rendered file
+    # over-reported every reason that also names a row of the legend
+    # table above — access 13 for 12, content 3 for 2 — because the
+    # instrument could not tell a legend from a datum. The total was the
+    # tell: 40 cells over 35 rows. Stated here so nobody counts again.
+    rtally = {}
+    for _k, _n, _d, _p, reason, _x in rows:
+        rtally[reason] = rtally.get(reason, 0) + 1
+    assert sum(rtally.values()) == len(rows), (
+        "reason distribution %d != %d rows" % (sum(rtally.values()), len(rows)))
     out += ["", "*%d graphs with a sidecar; %s. %d fetch(es) produced no "
             "graph at all.*"
             % (len(rows), ", ".join("%d %s" % (v, k)
                                     for k, v in sorted(tally.items())),
-               len(failed))]
+               len(failed)),
+            "",
+            "**Reason distribution over the %d rows above** — generated, and "
+            "its total is asserted equal to the row count. Counting these off "
+            "the rendered table by hand adds one to every reason that also "
+            "names a row of the legend: %s."
+            % (len(rows), ", ".join("%s %d" % (_reason(k), v) for k, v in
+                                    sorted(rtally.items(), key=lambda x: -x[1])))]
     if gaps:
         out += ["", "**Cached with no sidecar — not covered by the table "
                 "above:**", ""] + ["- `%s`" % g for g in gaps]
@@ -556,8 +605,22 @@ def sync_register():
                 "because **an attempt that failed is not an attempt not "
                 "made**, and a row count over successes cannot tell them "
                 "apart.", "",
-                "| Attempted | Source | HTTP |", "|---|---|---|"]
-        out += ["| `%s` | <%s> | %s |" % f for f in failed]
+                "| Attempted | Source | HTTP | Why |", "|---|---|---|---|"]
+        out += ["| `%s` | <%s> | %s | %s |"
+                % (f[0], f[1], f[2], _reason(f[3])) for f in failed]
+    if orphans:
+        out += ["", "## Sidecar with no source row — orphaned", "",
+                "A sidecar with no `.ttl` **and no row in `SOURCES`**. This "
+                "is not a fetch this project could not make; it is the "
+                "residue of a source row that was removed. Reported "
+                "separately because the remedy differs — **re-probe a "
+                "failure, delete an orphan** — and because listing the two "
+                "together made the register show an ontology as "
+                "unobtainable when nothing was trying to obtain it.", "",
+                "| Orphan | Source it recorded | HTTP | Why |",
+                "|---|---|---|---|"]
+        out += ["| `%s` | <%s> | %s | %s |"
+                % (o[0], o[1], o[2], _reason(o[3])) for o in orphans]
     # F8: this function returned 0 on every path, so the caller's
     # `if sync_register(): problems.append(...)` was unreachable — and the
     # string it would have printed named the README marker block that the
@@ -569,7 +632,7 @@ def sync_register():
     # There is now a condition that can actually fail: no sidecars means
     # nothing to generate from, and a register written from nothing would
     # be an empty table reporting zero problems.
-    if not rows and not failed:
+    if not rows and not failed and not orphans:
         print("FAIL  no provenance sidecars under %s — register.md NOT "
               "written. A register generated from nothing is an empty "
               "table that reports no problems." % CACHE, file=sys.stderr)
@@ -580,8 +643,8 @@ def sync_register():
         print("register.md: not rewritten (--check reads only)")
         return 0
     REGISTER.write_text("\n".join(out) + "\n")
-    print("register.md: %d rows, %d gaps, %d failed fetch(es)"
-          % (len(rows), len(gaps), len(failed)))
+    print("register.md: %d rows, %d gaps, %d failed fetch(es), %d orphan(s)"
+          % (len(rows), len(gaps), len(failed), len(orphans)))
     return 0
 
 

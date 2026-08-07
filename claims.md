@@ -2729,11 +2729,12 @@ instances below countable at all.
   the mechanism of the defect it is invoked to detect.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
-- **Evidence:** 2026-08-04, extended 2026-08-05 (twice) — **sixteen
-  instrument defects, nine files, three authors.** Fourteen manifested;
-  two were self-caught before shipping and are counted because the
-  register counts defects **in instruments**, not defects that caused
-  visible harm.
+- **Evidence:** 2026-08-04, extended 2026-08-05 (twice) and 2026-08-06 —
+  **seventeen instrument defects, ten files, three authors.** Fourteen
+  manifested; two were self-caught before shipping, and one — row 17 —
+  is a coverage gap that has not yet cost anything. All are counted
+  because the register counts defects **in instruments**, not defects
+  that caused visible harm.
 
   | # | Instrument | Defect | Author | Found by |
   |---|---|---|---|---|
@@ -2753,14 +2754,15 @@ instances below countable at all.
   | 14 | `docs/plan/derive-waves.py` `check_retired` — P20's retired-figure guard | admitted on a 12/12 hand probe, every probe **one line of lowercase prose**. Two ordinary variations of its input walk through it: the guard is **line-based** over a document hard-wrapped at ~72 columns (7 of 8 wrapped phrasings pass, including **all four** sizing phrases), and `RETIRED_PHRASES` carries **no `re.IGNORECASE`** while `SIZING_PHRASES` does, so sentence-initial `The 23`, `The ten` and `Ten local terms` pass. **Both manifested**: `plan:385` and `plan:876`/`:904` carry the retired population at a green `make lint` | H | O, by mutation — wrapping and capitalising the phrasings the 12/12 probe had run on one line |
   | 15 | `docs/plan/derive-waves.py` `check_retired` — **the repair for #14** | joining wrapped lines into blocks fixed the shape blindness and moved the **exemption** to the block with it. `items.yaml` contains **no blank line**, so the whole file is one block, that block carries a retraction cue, and the guard now exempts **the entire source file**: 6 of 6 retired figures injected into it are caught by the pre-repair guard and **0 of 6** by the repaired one. In the plan document the same shift exempts both generated tables outright — cue-exempt lines rise 98 → 287 of 1174. A figure injected into `items.yaml`, propagated by `--write` into the item table of the plan of record, leaves `--check` reporting **ok** | H | O, by mutation — running both builds of the guard over the same injections |
   | 16 | `vocab/external/fetch-external.py --check` — documented as *"verify the CACHE only; no network"* | the verification mode **overwrites the record it verifies.** It rewrites all 24 provenance sidecars with `http_status: cache`, `dereferences: skipped`, `disposition: untested` and a fresh `fetched:` stamp, then regenerates `register.md` from them: 15 bound / 7 borrowed / 1 untested becomes **23 untested**, exit 0, `## Problems — *(none)*`. The dispositions are network measurements and are not recoverable offline | H | O, by mutation — running the documented command against a copy and diffing the register against the committed one |
+  | 17 | `docs/plan/guard-fixtures/` + `guard-mutate.py` — **the fixture matrix built to close row 14** | the matrix covers the half of `check_retired` that **matches** and none of the half that **exempts**. Deleting each of the guard's ten clauses in turn: four redden a named fixture, six redden nothing. Four of those six are load-bearing — the backtick strip, the asterisk-quote strip, the prose bare-quote strip and the blockquote skip — each turning a firing case into an exempt one, and each **deletable with no named test going red**, which is this claim's falsifier verbatim. The three fixtures named for them are green through the **retraction-cue** path rather than the strip path: every one carries a cue as well as a quotation, so the clause they are named for never decides the verdict. `re.I` on `SIZING_PHRASES` is uncovered for the same reason — `b1-sizing-wrapped.md` asserts its phrase in lowercase. `guard-mutate.py` records the fifth of these as an expected `set()` and reports **5/5** above it | H | O, by deleting all ten clauses rather than the five the shipped matrix mutates |
 
-  **None of the sixteen was found by reading the instrument.** Thirteen
-  were found by running it against a deliberate defect, one by running
-  it against the file it was already guarding, one by noticing the
-  verdict did not follow from the mechanism, and one — #12 — by checking
-  the instrument's *subject* rather than its output: the sweep reported
-  correctly on the strings it was given, and the claim it existed to
-  find was standing in different words.
+  **None of the seventeen was found by reading the instrument.**
+  Fourteen were found by running it against a deliberate defect, one by
+  running it against the file it was already guarding, one by noticing
+  the verdict did not follow from the mechanism, and one — #12 — by
+  checking the instrument's *subject* rather than its output: the sweep
+  reported correctly on the strings it was given, and the claim it
+  existed to find was standing in different words.
 
   #10 is the entry that forced the criterion into the statement. It
   returned the right answer. Every other row is an instrument that was
@@ -2846,7 +2848,46 @@ instances below countable at all.
   is the proximate reason a defect shipped, and `make lint-selftest`
   still reports `40 rule/fixture pairs, 8/8 rules` over a target that
   now runs nine rules.
-- **Updated:** 2026-08-05
+
+  **Rows 14, 15 and 16 are closed as of 2026-08-06, each verified by O
+  independently of H's report.** Row 15: six retired figures injected
+  into a live `items.yaml` field are now caught 6/6 where the shipped
+  build caught 0/6, and a figure driven through `--write` into the item
+  table of the plan of record leaves `--check` failing at both sites.
+  Row 16: `fetch-external.py --check` against a copy of
+  `vocab/external/` leaves the tree **byte-identical** under `diff -rq`,
+  catches a corrupted graph with both digests named and a removed
+  sidecar, and exits 1 rather than 0 when it has problems. Row 14 is
+  closed by the fixture set row 17 is about — the coverage it asked for
+  now exists, in `derive-waves.py`'s own `selftest_guard()` rather than
+  in `lint-selftest.py`, and it is self-guarding: a referenced fixture
+  removed and an unreferenced fixture added both fail `--check` loudly.
+  `make lint-selftest` still reports `8/8 rules`, which is now correct
+  for `drift-lint.py` and no longer under-reports `check_retired`.
+
+  **Row 17 is what survived the repair, and it is row 14's shape one
+  layer in.** Row 14 was a guard admitted on a probe that varied the
+  phrase and not the input shape. Row 17 is a fixture matrix that
+  varies what the guard *matches* and not what it *exempts* — and B3,
+  the defect the matrix was built to prevent recurring, **was an
+  exemption change.** The failure direction is the silent one: widening
+  an exemption leaves the run green, which is why B3 needed two builds
+  of the guard run over one set of injections to see. Four fixtures
+  close it, one per clause, each asserting its phrase with **no
+  retraction cue in the sentence** — that absence is the whole point,
+  since a cue is what makes the three existing fixtures pass without
+  reaching the clause they name.
+
+  **The principle was stated in the same round and applied to one
+  clause.** H deleted the table-row-as-unit clause on the ground that
+  *"a clause nothing depends on is a clause no fixture can cover, and
+  keeping it would leave a permanent hole that looked like coverage."*
+  That reasoning is right and the deletion was correct — the row clause
+  was measured redundant, `sentence_of` already bounding on `|`. The
+  four clauses in row 17 are the opposite case: things **do** depend on
+  them, and no fixture covers them. The register records the asymmetry
+  rather than the omission, because the principle is the durable part.
+- **Updated:** 2026-08-06
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-02. It generalises
   beyond the gate: it constrains how evidence is admitted to this
@@ -2875,10 +2916,11 @@ that establishes it.
   when. If the answer is "the edit reported success", the claim is
   unestablished — an editing step reporting success is not evidence the
   edit landed.
-- **Evidence:** 2026-08-04, extended 2026-08-05 — **ten instances.** Six
-  sit in accepted documents and two more in a plan of record and a
-  commit message; two were caught by the check itself rather than by the
-  author.
+- **Evidence:** 2026-08-04, extended 2026-08-05 and 2026-08-06 —
+  **twelve instances.** Six sit in accepted documents, two more in a
+  plan of record and a commit message, and two in a generated file of
+  record and a gate message; two were caught by the check itself rather
+  than by the author.
 
   | # | Statement | What was true |
   |---|---|---|
@@ -2892,6 +2934,8 @@ that establishes it.
   | 8 | ADR-006 Decision A's own falsifier — *"a published `prov:Activity` definition … under which a physical process producing no entity is a well-formed `prov:Activity`"* | stated and **not run**. One fetch satisfies it: PROV-O and PROV-DM define Entity as *"a physical, digital, conceptual, or other kind of thing"*, PROV-DM §2.1.1's own activity examples are driving a car, printing a book, baking and a race, and PROV-CONSTRAINTS carries no rule requiring generation |
   | 9 | `items.yaml` P20 `done_when`, still live — *"**MET 2026-08-05.** … Guard in `derive-waves.py`, wired into `make lint`, **probed 12/12 reintroductions caught and 3/3 retractions survive**"* | the 12/12 probe was falsified on 2026-08-05 and the guard was rebuilt the same day. The criterion still certifies `MET` on the falsified reading, and **no probe of the rebuilt guard exists anywhere** — not in `done_when`, not in `lint-selftest`, not in the commit. A claim about what a tool catches, carried by the definition of done that two later items are sequenced behind |
   | 10 | `2b7fa4c` / `2c6d6f1` — *"it fails loudly if it cannot write its target"* | the branch that would report it is **unreachable**. `sync_register()` returns `0` on every path, so `if sync_register(): problems.append(...)` cannot fire, and the message it would print names the retracted README block. The property itself holds, but by construction rather than by the check that was claimed: the write is unconditional, and an unwritable or wrong-type target raises `PermissionError` / `IsADirectoryError` — verified by mutation |
+  | 11 | `[H → O]` 2026-08-06, B3 — *"**Hits report their own line.** The first version reported the unit's start, putting every `items.yaml` finding at line 1"* | true for YAML and **false for prose and tables**, which is where the repair changed anything. `check_retired` matches against `probe`, from which backticked and quoted spans have been **deleted**, while `offsets` index the undeleted `joined`; every stripped span before a hit shifts the reported line **earlier**. Measured: a figure on file line 7 of a backtick-heavy paragraph reports as line 4, and a retired figure driven into the last row of the plan's generated item table sits at `:270` and reports as `:268`. The YAML case is exact only because each YAML line is its own unit, so there is one offset to get right. **No fixture asserts a line number** — the 11 pairs assert fire/no-fire only, so the claim's own harness cannot see it |
+  | 12 | `vocab/external/register.md`, generated header — *"**`dereferences` carries its REASON, not a bare verdict.**"*, and `[H → O]` 2026-08-06 — *"`dereferences` now carries its reason — four causes, not one"* | the field carries the same bare verdict it did before. Its values across 36 sidecars are `yes` (15), `no` (19), `document` (1) and `untested` (1); there is **no `dereference_reason` field anywhere**. The cause lives in a free-text `detail` sibling and is labelled on **4 of the 19** `no` rows — `**structural**` ×3, `**single observation**` ×1. The two causes the gate message argues hardest for are the unlabelled ones: **access** appears on 12 rows as the bare string `**HTTP 301**`, and **content** — called *"the one that would otherwise be invisible"* — as `200 text/anot+turtle, 306 triples, … NOT defined`. A reader cannot count the four causes from the register; they are recoverable only by reading prose and inferring |
 
   **#6 is the instance that establishes the claim is not retrospective.**
   It was posted in the same message that proposed C23, as the falsifier
@@ -2923,7 +2967,40 @@ that establishes it.
   cannot execute. A claim that happens to be right, established by
   nothing, which is C22 #10's shape moved from an instrument to an
   assertion about one.
-- **Updated:** 2026-08-05
+
+  **#9 and #10 are both closed as of 2026-08-06.** `items.yaml:241`
+  withdraws the 12/12 probe in place, records that it varied the phrase
+  and never the input shape, and carries a two-axis result instead; the
+  generated done table at `plan:619` projects the withdrawal, so both
+  views agree. A sweep for the **retracted** string rather than the
+  replacement finds `12/12` in five tracked files and every occurrence
+  is a withdrawal record or this register — no live citation survives.
+  #10's branch can now fail: with every sidecar removed,
+  `sync_register()` prints `FAIL no provenance sidecars … register.md
+  NOT written` and returns 1.
+
+  **#11 and #12 are both claims about a repair, made in the message
+  reporting the repair.** Neither is a claim about work not done — the
+  repairs behind them are real and I verified both. What was not run is
+  the case that would have shown the claim's *scope*: #11 asserts a
+  property of the output on the input shape the repair did not change
+  its handling of, and #12 asserts a field carries something a sibling
+  field carries on a fifth of its rows. Both are cheap: one `--check`
+  against a backtick-heavy paragraph, one `grep dereferences:` across
+  the sidecars.
+
+  **#12 is the first instance whose site is a *generated* file**, which
+  is a shape worth naming. The sentence is in `sync_register()`'s
+  output list, so it is rewritten on every run and cannot drift from
+  the generator — but it also cannot drift from the generator when the
+  generator is what is wrong, and no check compares the header's claim
+  against the rows beneath it. The same paragraph says *"**Three**
+  unrelated causes were all printing `no`"*, enumerates **four**, and
+  closes *"One value covering **four** causes is C11's shape"* —
+  three-versus-four inside one paragraph, in a file of record, which is
+  [C22](#c22)'s boundary case landing on C23's side: nothing inspected
+  it because nothing was pointed at it.
+- **Updated:** 2026-08-06
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-03. Accepted as
   proposed, with instance #6 added by O. It generalises beyond the gate
@@ -3125,4 +3202,25 @@ no simpler mechanism could hold.
   say nothing about whether alignment needs identity constructs.
   C25 stays `asserted`: nothing here tests the decomposition's price,
   which only the P6b partition diff can do.
+
+  **2026-08-06 — `irwinID`, proposed by H and disposed by O after an
+  independent run. The wording below is H's; the measurement is mine.**
+  H proposed recording that *"`irwinID` is declared in two of the eleven
+  KWG source ontologies. It is the only term in that corpus touching
+  ADR-001's identity apparatus, and its declaring file is arbitrary."*
+  Re-derived over `vocab/external/graphs/` with rdflib rather than by
+  grep: across the eleven KWG dataset ontologies there are 444 distinct
+  typed subjects, 46 of them declared in more than one file, and ten of
+  those are in KWG's own namespace. **`irwinID` is one of the ten, in 2
+  of 11**, alongside `hasFIPS`, `stateName` and `countyName`. Confirmed
+  and written.
+
+  **What it is evidence for, and what it is not.** It is a real instance
+  of the problem the alias decomposition exists to make explicit — a
+  scheme identifier whose declaring file carries no meaning, so nothing
+  in the corpus says which authority issued it or how it ranks against
+  another scheme. It is **not** evidence about price, which is what C25
+  asks: one term declared twice does not show that a four-class
+  structure is paid for. The claim stays `asserted` and the P6b
+  partition diff remains the only test that moves it.
 - **Updated:** 2026-08-05
