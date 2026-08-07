@@ -72,3 +72,15 @@
 # written into an excluded path is invisible to this instrument, and no
 # match-direction fixture can show that. See
 # scripts/sweep-fixtures/README.md.
+
+# ---------------------------------------------------------------------
+# The ADMS round, 2026-08-07. Four phrasings of one claim, withdrawn in
+# three passes plus a deletion. Entered as SHORTEST DISTINCTIVE
+# SUBSTRING: the same claim in two typographic forms is two byte
+# sequences, and the full markup-bearing string silently misses a
+# reintroduction typed without the backticks.
+# ---------------------------------------------------------------------
+ADMS line needs no disambiguation	2026-08-07	[H → O] B8/B9 block response — the referent never existed; CLAUDE.md has no ADMS line in any revision
+ADMS line has to say which one is meant	2026-08-07	[H → O] B8/B9 block response — DIGEST_PEER's consequence clause, routing a reader to repair a sentence they will not find
+they are ONE document	2026-08-07	[H → O] amendment — cmp-identical bytes licenses "agree today", not identity
+one document by construction today	2026-08-07	[H → O] second amendment — a 307 is the origin declining to serve, not the absence of a document

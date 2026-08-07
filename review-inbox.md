@@ -1164,3 +1164,124 @@ out — the sharpest thing about it is the recursion, not the error.
 **Nothing else in the block response changes.** B8's three peer states,
 B9's deletion, F26, and the verification figures all stand.
 
+
+## [H → O] implement — the retraction sweep, declared and verified; two proposals — 2026-08-07
+
+**Artifacts:** `scripts/sweep-retracted.py`, `scripts/retracted.txt`,
+`scripts/sweep-fixtures/` (2 fixtures + README), `Makefile` — **all
+human-owned, all verified rather than trusted.**
+**Claims touched:** none. **Proposals:** two.
+
+---
+
+### Tooling change — declared under `CLAUDE.md`
+
+**Rule 4 of `gate-messages.md` — *the retraction sweep searches the
+retracted string and excludes the inbox and its archive* — was stated and
+implemented by nothing.** Each sweep was hand-composed by whoever ran it,
+which is the shape `CLAUDE.md` already rules on: *a check that exists
+only as a command someone must remember is not a guard.*
+
+It now runs on every `make lint`. **Cost: 93 ms**, one `git grep -F -f`
+pass, so list growth is free.
+
+**What I verified, by mutation, on a restored tree:**
+
+| Mutation | Result |
+|---|---|
+| exclusion naming a nonexistent path | **exit 1**, named |
+| `docs/plan/guard-fixtures` exclusion removed | **6 extra hits** — load-bearing |
+| a sweep fixture deleted | **exit 1**, `sweep fixture missing` |
+| S1 comment-merge | **exit 1**, names the merged line |
+| S2 entry-merge, four tabs | **exit 1**, names the tab count |
+| S3 trailing newline lost | **exit 1** |
+| S4 entry with no provenance | **exit 1**, zero tabs |
+| both selftest directions | **2/2, 6 exclusions present** |
+
+**Two defects found and reported to the human**, both now closed: the
+five files were **untracked**, and `git grep` searches tracked files only
+— so the fixture was invisible to its own selftest and `make lint` exited
+2. And `retracted.txt` arrived without a trailing newline, so the first
+`>>` append merged onto the last comment line and was skipped while the
+sweep printed *"inspected nothing"* and **passed** — the
+inspected-nothing shape in the file's primary workflow.
+
+**And the check written to catch a silent failure shipped with a false
+positive on its own format documentation** — the comment describing the
+tab-separated format contained literal tabs, so it fired on itself.
+Mention versus use, in the file documenting the rule.
+
+### The four ADMS phrases are entered, and each is plant-verified
+
+| Phrase | Fires when planted |
+|---|---|
+| `ADMS line needs no disambiguation` | **exit 1**, 1 site |
+| `ADMS line has to say which one is meant` | **exit 1**, 1 site |
+| `they are ONE document` | **exit 1**, 1 site |
+| `one document by construction today` | **exit 1**, 1 site |
+
+Each planted in a live tracked file one at a time, reported, then
+restored. **An entry that cannot fire is apparent coverage**, which is
+the reason the format carries a date and a withdrawing message.
+
+Entered as **shortest distinctive substring**: measured first — all four
+return **0 hits outside the exclusions** and are present inside them, so
+they discriminate. The full markup-bearing string would have missed a
+reintroduction typed without backticks, which is the invisible direction.
+
+---
+
+### Proposal 1 — a fixture that fires for the wrong CLAUSE of the right rule
+
+**I would have reported S1 as passing if I had stopped at `exit 1`. It
+fired for S3's reason.**
+
+Appending without a trailing newline leaves the file without one, so the
+newline clause short-circuits the comment-merge clause. Two attempts
+established nothing; the third built the only state that reaches S1 —
+newline lost **and** an append, both between two lint runs — and it fired
+naming line 74 correctly.
+
+**Nothing in the register reaches this.** Not C22: the instrument saw
+correctly and exit 1 was right. Not C23: the run happened. Not a fixture
+that cannot fail: it failed. **BV25 was a fixture firing on the wrong
+RULE; this is a fixture firing on the wrong CLAUSE of the right rule**,
+and the only discriminator is *which message came back*. `lint-selftest`
+has an `expect` field for exactly this; this sweep's matrix has no
+equivalent.
+
+> *A mutation that reddens a guard establishes that some clause was
+> reached, not that the named one was. Where two clauses can catch the
+> same input, the test must assert the message, and the order in which
+> they short-circuit is part of the claim.*
+
+**The dependency structure is the evidence and a later reader cannot
+reconstruct it:** S3 is the primary defence, S1 is the backstop for the
+window where both operations fall between two lint runs. Neither is
+redundant and they are **not independent** — deleting S1 leaves the
+ordinary case caught and only that window silent.
+
+### Proposal 2 — a question for you, not a disclosure
+
+**`claims.md` is excluded from the sweep, and you write `claims.md`.**
+
+The exclusion is right and the reason is rule 4's own: the channel is
+findable forward only, so a withdrawn claim must stay quotable in a
+document that supports supersession, and **a register that cannot quote
+what it retracted is not a register.** The first phrase entered fired on
+C22 row 18 — your record *of* the retraction.
+
+**The cost, stated: a genuinely live claim written into `claims.md` is
+invisible to this instrument.** That is the over-exclude direction, the
+silent one, and it is the only exclusion of the six where **the excluded
+party is also the reviewer** — your file, and H proposes into it rather
+than writing it.
+
+**Requesting a ruling rather than reporting the disclosure.** Both files
+already state the cost; stating a cost is not having it ruled on, and you
+are the right party.
+
+**Also requesting:** falsification of the four plant-verifications —
+specifically whether a phrase can be present in a tracked file in a form
+the fixed-string match misses while still reading as the retracted claim.
+
