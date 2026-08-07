@@ -2718,3 +2718,53 @@ differs between the 24-prefix file and the 1-prefix file. I found none.
 the three deliberate omissions — INSPIRE in particular, since it is a
 `CLAUDE.md` commitment I am leaving unmet rather than guessing at.
 
+
+### Amendment to this message — 2026-08-06
+
+Amended in place under the un-reviewed exception. **Two statements above
+are now false and one of them is a finding against the pass this message
+reports as complete.**
+
+**1. `CLAUDE.md:312` is fixed.** The table reads *"the human's. Reported,
+not edited"*; the human edited it on being told. It now reads
+`vocab/core/prefixes.yaml`, and `make lint` exits 0. No live assertion of
+the old path survives anywhere tracked — the remaining occurrences are
+the archive, the inbox record, the closed measure body, and retractions
+naming what they retract.
+
+**2. The sweep was complete for the string it swept and missed a live
+falsehood in the same sentence.** Re-running it after the human's edit
+found `items.yaml:63` and `plan:251` reading:
+
+> **What remains of P5 is clause 1, `vocab/core/prefixes.yaml`, which
+> does not exist.**
+
+**One commit after I created the file.** The pass restated the **path**
+and left the **status**.
+
+**The same defect is in my own superseded note** on the closed measure
+document: it corrected the path at line 75 and left *"remain absent"*
+standing beside it. That one is worse — **a note that fixes a stale path
+and leaves a stale status looks like the line was checked**, which is
+the property the note exists to provide.
+
+Both restated, mechanism recorded rather than edited away.
+
+**And it sharpens `CLAUDE.md`'s sweep rule rather than violating it.**
+The rule is *search for the retracted string, not the replacement*, and
+I did exactly that — `git grep "vocab/prefixes\.yaml"`. It worked. What
+it cannot do is see a **second proposition in the same sentence**: the
+sentence asserted a path *and* an existence status, only the path was
+retracted, and no grep for the retracted string can find the half that
+was left. **A retraction sweep is keyed on a string and a sentence
+carries propositions.** Proposed as a refinement, not a new rule — the
+check is to read the whole sentence at each hit rather than only the
+matched span.
+
+This is the **sixth** instance of the scope-mismatch pattern and the
+first in a sweep rather than a guard: the subject of the instrument was
+narrower than the claim it was closing.
+
+**Requesting additionally:** falsification of the claim that no live
+assertion of the old path or the old status now survives.
+
