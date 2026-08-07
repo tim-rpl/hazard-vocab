@@ -197,12 +197,17 @@ one round because the register generator's own checks had no target.
 
 | Case | Verdict | Why |
 |---|---|---|
-| the **input** is empty — `vocab/core/` holds one `.gitkeep` | **note and pass** | an expected state; failing would block every run until vocabulary exists. Say so in the output: *"no schema files found — these rules inspected nothing."* |
+| the **input** is empty — no schema files under the scanned path | **note and pass** | an expected state; failing would block every run until content exists. Say so in the output: *"no schema files found — these rules inspected nothing."* |
 | the **tool** is absent — a tracked generator is not on disk | **fail** | not an expected state. The tree is broken, and a soft note there reports a clean run over a missing check |
 
 Both print the same sentence and mean opposite things, which is why they
 must be distinguished at the point of the check rather than left to a
 reader.
+
+*The example for the first case used to be "`vocab/core/` holds one
+`.gitkeep`". It no longer does — `prefixes.yaml` landed 2026-08-06, and
+`drift-lint.py` inspects a real authored file for the first time. The
+rule is unchanged; its illustration was the thing that expired.*
 
 **A declared change is verified by a second instrument, never by the
 one that made it.** An editing script reporting success is not evidence
@@ -307,9 +312,26 @@ make alloy    # run Alloy structural checks
 
 ## Conventions
 
-- External vocabularies are referenced by URI, never transcribed.
-  Bind to SOSA, PROV-O, QUDT, CF (via NERC NVS2 collection P07),
-  INSPIRE. Prefixes live in `vocab/core/prefixes.yaml`.
+- **External vocabularies are referenced by URI, never transcribed.**
+  Prefixes live in `vocab/core/prefixes.yaml`.
+
+  **Bound and content-verified:** SOSA, PROV-O, QUDT, and CF via NERC
+  NVS2's `standard_name` collection. Each has a register row, a
+  provenance sidecar, and at least one probe term read out of the graph.
+
+  **Committed and not bound: INSPIRE.** Never fetched, no prefix, no
+  register row. That commitment is **unmet, not met**, and it is stated
+  separately because a list of five reads as five equally grounded
+  bindings when four are.
+
+  **The CF route changed 2026-08-06.** This line read *NVS2 collection
+  P07*. Same authority, same service — but P07's local parts are opaque
+  (`…/P07/current/00B3H4MY/`) and `standard_name`'s are the CF names
+  (`…/standard_name/air_temperature/`). **A binding nobody can align by
+  eye is unverifiable every time it is made.** 6/6 content-verified; see
+  `vocab/external/register.md`. P07 stays in the source list as the
+  artifact the measurement was made against, `untested` — the honest
+  record for something cited and not used.
 - Code lists are SKOS concept schemes, versioned independently of the
   schema. LinkML enums reference them via `PermissibleValue.meaning`.
 - One ADR per structural decision, in `design/`. Numbered, dated,

@@ -117,6 +117,19 @@ alignment is the usual reason to adopt an authoritative taxonomy at all.
 is a stub for local reasoning, not the definition — fetch the owning
 namespace for the real one.
 
+**A service can return 200 and `text/turtle` and no triples at all.**
+Measured on `mmisw.org` while looking for a CF route: **HTTP 200,
+`text/turtle`, 761 bytes, zero triples** — and **byte-identical for
+every term requested, including terms that do not exist.** Status code
+and content type were both correct and the body carried nothing.
+
+This is check 5 with a worked instance: *status-code-only is not
+content-verified.* The test is **parse the body and find the term**, and
+a response that is identical for a real term and an invented one is the
+strongest available evidence that nothing was looked up. Ask for a term
+you know is absent — if the answer matches, the service is not
+answering.
+
 ### Borrowed, bound, cited
 
 Three relationships, and the distinction decides what a binding is worth.
