@@ -80,6 +80,16 @@ lint:
 	@test -f vocab/external/fetch-external.py \
 		|| { echo "FAIL: vocab/external/fetch-external.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
 	@$(BIN)python vocab/external/fetch-external.py --check
+	@echo "B: bound-terms.md is what its generator emits"
+	@# Added after B10, and deliberately after the two repairs it depends
+	@# on: this script wrote its own output during --check, and one cell
+	@# carried rdflib's per-parse blank-node label, so wiring it earlier
+	@# would have failed every run for a reason that is not drift. A
+	@# stanza that fails for the wrong reason gets muted, which is worse
+	@# than one that is absent.
+	@test -f vocab/external/audit-bound-terms.py \
+		|| { echo "FAIL: vocab/external/audit-bound-terms.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
+	@$(BIN)python vocab/external/audit-bound-terms.py --check
 	@echo "lint ok"
 
 lint-selftest:

@@ -626,7 +626,7 @@ def check_tables(lines):
 
 
 def check_reason_agrees(d, key):
-    """`dereference_reason` against the three fields it must agree with.
+    """A sidecar against every field of it that can be re-derived offline.
 
     O falsified the nominated attack line: the distribution's sum cannot
     see a PERMUTATION of reasons, and a permuted sidecar becomes
@@ -636,18 +636,34 @@ def check_reason_agrees(d, key):
     invariant over the whole; this is an invariant per row, which is what
     a permutation breaks.
     """
+    out = []
     reason, deref = d.get("dereference_reason"), d.get("dereferences")
-    if reason is None:
-        return None                          # unlabelled: predates the field
-    if reason not in REASON_VERDICT:
-        return ("%s: dereference_reason %r is not one `dereferences()` can "
-                "return" % (key, reason))
-    want = REASON_VERDICT[reason]
-    if deref != want:
-        return ("%s: dereference_reason %r requires dereferences %r, "
-                "found %r — the two disagree and only one can be right"
-                % (key, reason, want, deref))
-    return None
+    if reason is not None and reason not in REASON_VERDICT:
+        out.append("%s: dereference_reason %r is not one `dereferences()` "
+                   "can return" % (key, reason))
+    elif reason is not None and deref != REASON_VERDICT[reason]:
+        out.append("%s: dereference_reason %r requires dereferences %r, "
+                   "found %r — the two disagree and only one can be right"
+                   % (key, reason, REASON_VERDICT[reason], deref))
+    # Three more fields are DERIVABLE and nothing was deriving them. The
+    # sidecars are generated and tracked, and O's census — *there are
+    # three generated files* — is three DOCUMENTS; the 36 sidecars carry
+    # the same banner. The prescribed experiment, run the generator and
+    # diff, cannot be run on them at all: `http_status`, `content_type`,
+    # `fetched` and `detail` are live measurements. But `source_url`,
+    # `namespace` and `disposition` are functions of `SOURCES` and
+    # `DISPOSITION`, so they are checkable offline and now are — 3 fields
+    # × 35 listed sidecars that previously had nothing.
+    listed = {s[0]: (s[1], s[2]) for s in SOURCES}
+    if key in listed:
+        ns, url = listed[key]
+        for field, want in (("namespace", ns), ("source_url", url),
+                            ("disposition",
+                             DISPOSITION.get(d.get("dereferences"), "untested"))):
+            if d.get(field) != want:
+                out.append("%s: %s is %r, derivable value is %r"
+                           % (key, field, d.get(field), want))
+    return out
 
 
 def sync_register():
@@ -689,9 +705,7 @@ def sync_register():
             gaps.append(g.name)
             continue
         d = _y.safe_load(side.read_text())
-        disagree = check_reason_agrees(d, g.stem)
-        if disagree:
-            incoherent.append(disagree)
+        incoherent += check_reason_agrees(d, g.stem)
         rows.append((g.stem, d.get("namespace", "-"),
                      d.get("dereferences", "?"), d.get("disposition", "?"),
                      d.get("dereference_reason") or "unlabelled",
