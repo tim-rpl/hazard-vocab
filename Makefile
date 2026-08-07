@@ -63,7 +63,7 @@ lint:
 	fi
 	@echo "L: no vacuous theorems in design/lean"
 	@$(BIN)python scripts/lean-lint.py design/lean
-	@echo "jurisdiction and declarative-drift rules — C1, C7, C20, C21"
+	@echo "jurisdiction, declarative-drift and prefix rules — C1, C7, C20, C21, and P5 clause 1"
 	@# C19 was never filed. This label cited it for several gates; the
 	@# rules serve the four claims above. A tool citing a claim that
 	@# does not exist sends a reader nowhere.

@@ -37,6 +37,30 @@ HERE = pathlib.Path(__file__).parent
 CACHE = HERE / "graphs"
 SURFACE = HERE.parent.parent / "design" / "surface.yaml"
 
+
+def cache_state():
+    """F19's ruling, IMPORTED from the sibling rather than restated.
+
+    B1: this script was wired into `make lint` without being asked
+    whether it honours a ruling made the round before —
+    `grep -c 'cache_state|unfetched'` returned 0. On a fresh clone every
+    graph is absent, so every lookup failed, and the audit went from 29
+    rows to **zero while returning exit 1 and writing anyway**. That is
+    the empty-bail `fetch-external.py` has and this did not: the sibling
+    generator's own defect, arriving through the repair for the other.
+
+    A second copy of the rule would be the duplicate-definition defect
+    this project has now shipped twice in one file, so the rule is loaded
+    from where it is defined. If the import fails, that is reported —
+    never silently treated as `complete`, which is the state that writes.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "_fx", HERE / "fetch-external.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m.cache_state()[0]
+
 NS = {
     "sosa": "http://www.w3.org/ns/sosa/",
     "ssn-ext": "http://www.w3.org/ns/ssn/ext/",
@@ -144,6 +168,16 @@ def main():
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
 
+    # B1, first half. The cache is input, and an unfetched cache is the
+    # `.gitkeep` case — note what was inspected and pass. Ten seconds of
+    # `git clone && make lint` would have caught the omission; the test
+    # neither the human nor I ran.
+    if cache_state() == "unfetched":
+        print("bound-terms.md: not %s — the cache is unfetched. This check "
+              "inspected nothing. Run `fetch-external.py` to populate it."
+              % ("checked" if args.check else "written"))
+        return 0
+
     rows, problems = [], []
     for key, names in LOOKUP:
         g = load(key)
@@ -213,6 +247,21 @@ def main():
     # and never repaired here.
     text = "\n".join(out + tail) + "\n"
     target = HERE / "bound-terms.md"
+    # B1, second half — the worse one. Exit 1 was returned AND the file was
+    # written, so a run that reported failure still replaced 29 rows with
+    # zero. An audit of no terms is not an audit; it is a table that agrees
+    # with its header, which is B9 one file over.
+    #
+    # The bail is on ROWS, not on problems: a run where every lookup failed
+    # produces no rows and a full problem list, and it is the row count
+    # that says the output is not an audit.
+    if not rows:
+        print("FAIL  %d lookup(s), NO rows — bound-terms.md NOT %s. Every "
+              "row comes from a cached graph; this would replace the audit "
+              "with a header."
+              % (len(LOOKUP), "checked" if args.check else "written"),
+              file=sys.stderr)
+        return 1
     if args.check:
         if not target.exists():
             problems.append("bound-terms.md: absent, and it is generated")

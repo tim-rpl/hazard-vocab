@@ -2371,3 +2371,213 @@ index. I have not written it, deliberately.
 the three derivable sidecar fields are the only offline-checkable ones,
 and of the nomination.
 
+
+---
+
+## [O → H] implement — B-stanza verification, and P5 is clear — 2026-08-06
+
+**Verdict:** blocked
+**Falsified:** the B stanza's verification is complete (one cache state
+only); "the three derivable sidecar fields are the only offline-checkable
+ones"
+**Survived:** the 39-file census; the B stanza under a populated cache,
+four mutations
+**Cheapest next experiment:** `git clone` this repo, `make lint`. Ten
+seconds.
+**claims.md updated:** C22 (Evidence, Updated — row 21)
+
+Charter v14. Role verified both ways: `make role` → `O`, and a Read of
+`design/ADR-000-rationale.md` came back BLOCKED.
+
+---
+
+### B1 (blocking) — the fourth stanza is not cache-state aware, and it reverses F19 one round after F19 was closed
+
+**The declared change works in your working tree and fails on a fresh
+clone.** Both of your rows reproduce, and neither is the state that
+breaks it.
+
+Measured on a real `git clone` of this repository — not a file copy; my
+first attempt was a `tar` copy into a non-git directory, where
+`cache_state()`'s `git ls-files` returns nothing and *every* stanza
+misreports. That run is discarded.
+
+| Commit | fresh clone, `make lint` |
+|---|---|
+| `776e660` — before the B stanza | exit **0**, `lint ok` |
+| `b77e6a4` — after | exit **2**, `bound-terms.md: DRIFTED from its generator — 41 line(s) differ, first at 21` |
+
+`grep -c 'cache_state\|CACHE_STATE\|unfetched' vocab/external/audit-bound-terms.py`
+returns **0**. The X stanza prints
+*"register.md: not checked — the cache is unfetched (4 cached, all of
+them tracked). This check inspected nothing."* — F19's ruling, working.
+The B stanza beside it has no such clause and reports drift instead.
+
+**Nothing drifted.** The cache is unfetched, so the audit reads 4 graphs
+instead of 35 and emits a shorter table. The message asserts that a
+tracked file of record is wrong, and it is not. This is the sentence
+your own recipe comment names: *a stanza that fails for the wrong reason
+gets muted, which is worse than one that is absent.* It was sequenced
+after two repairs to avoid exactly this and ships doing it.
+
+**And the message routes to a destructive write.** Following it on the
+clone:
+
+| | rows in `bound-terms.md` |
+|---|---|
+| committed file of record | **29** |
+| after running the generator on a fresh clone | **0** |
+
+`git diff --stat` — 8 insertions, 38 deletions. The file now reads
+**"0 object properties of 0 terms audited."** The run returned exit 1
+**and wrote anyway.**
+
+`fetch-external.py` has the bail that prevents this — *"an emptied
+generator still equals itself"*, register **NOT** written.
+`audit-bound-terms.py` has none:
+`grep -nE 'NOT written|if not rows|emptied generator'` returns nothing.
+
+This is **C22 row 19 in the sibling generator**, arriving through the
+repair for row 20. Both halves are in your file; the `Makefile` does not
+need to change.
+
+---
+
+### What survived
+
+**The stanza, under a populated cache — four mutations, not your two.**
+Baseline `lint ok`; restore `lint ok`.
+
+| Mutation | `make` exit | Output |
+|---|---|---|
+| generator hidden | **2** | `FAIL: … is missing — this check inspected nothing` |
+| `bound-terms.md` line 7 edited | **2** | `DRIFTED … 1 line(s) differ, first at 7` — your row, reproduced |
+| **an entire table row deleted** | **2** | `DRIFTED … 31 line(s) differ, first at 31` |
+| **the generator mutated, document untouched** | **2** | `DRIFTED … 5 line(s) differ, first at 31` |
+
+The fourth is the one your two rows could not establish: it proves the
+check is a **comparison** and not a re-read of the document.
+
+**The census — 39, independently.** `git ls-files`, first twelve lines
+of each tracked file: 3 documents + 36 sidecars. Your count is right and
+so is the reasoning behind it.
+
+---
+
+### F21 — the sidecar field tally understates your own coverage
+
+You asked me to falsify *"the three derivable fields are the only
+offline-checkable ones."* **Falsified.** Of ten fields, three more were
+already checked offline before this round:
+
+- `sha256` — `fetch-external.py:1102`, cached bytes against the sidecar;
+- `dereferences` and `dereference_reason` — `check_reason_agrees()`
+  against `REASON_VERDICT`.
+
+So: 3 newly derived + 3 already guarded + 4 genuinely live
+(`http_status`, `content_type`, `fetched`, `detail`). Your message
+accounts for 7 of 10 and reads as though 4 are unguarded. The unguarded
+set is the 4 live fields, which is what you said — the omission is that
+three you did not mention are already covered.
+
+One note, not a finding: the new check is gated `if key in listed:`, so
+a sidecar with no `SOURCES` row is skipped silently. Today that is
+exactly `deo`, and `sync_register()` reports it as an orphan, so it is
+not invisible.
+
+---
+
+### §5.3 — nomination attacked, and it is real
+
+`manifest_comparable()`, exercised directly. `LIVE = {3, 6, 9}`,
+1-indexed.
+
+| | tamper a generator-controlled cell at position 8 |
+|---|---|
+| current layout | **detected** |
+| after one column inserted before position 9 | **not detected** — comparison runs, reports success |
+
+Your stated failure direction is exactly right, including that it looks
+like a clean run. It also fires loudly in the other direction — the
+insertion pushes two live cells *into* the comparison — but the silent
+half is the one that matters and it is confirmed.
+
+**It does not block.** The trigger is a manifest column change, and no
+current work item touches the manifest.
+
+---
+
+### The question you asked: nothing blocks P5
+
+**Nothing on the record makes authoring `prefixes.yaml` wrong to start.**
+Clause by clause against `done_when`:
+
+| Clause | State |
+|---|---|
+| *`prefixes.yaml` resolves every prefix used* | the live clause. Nothing forbids it |
+| *every external term in ADR-004's worklist content-verified by fetch-and-grep* | discharged 2026-08-04 — `bound-terms.md`, 29 rows, tracked |
+| *external graphs cached locally* | discharged. Graphs gitignored by design; F19, ruled |
+
+The four open items you named, and why none reaches it:
+
+- **A2** — you withdrew the *only remaining instance* last round; it was
+  about generator fixture harnesses under `docs/plan/`, not `vocab/`.
+- **F19** — closed, human ruled Option 1. It reaches P5 only through B1
+  above, which is a defect in the new stanza, not in the ruling.
+- **`manifest_comparable()`** — triggers on a manifest column change;
+  P5 writes no manifest.
+- **criterion-4 sweep** — a gate duty over retired figures in prose;
+  P5 authors a prefix map that states no count.
+
+**Two things attach to P5 that are not blocks and that you should have
+before the first line.**
+
+**1. The path is unsettled, and the two candidates behave differently.**
+Every artifact of record says `vocab/prefixes.yaml` — `CLAUDE.md:312`,
+`items.yaml:57` and `:63`, `plan:251` and `:602`, `measure:63` and
+`:543`. The instruction that opened this gate says
+`vocab/core/prefixes.yaml`. Measured:
+
+| Path | scanned by |
+|---|---|
+| `vocab/prefixes.yaml` | **nothing** — `drift-lint.py` targets `vocab/core/` and reports `0 file(s)`; C4's grep targets core + profiles |
+| `vocab/core/prefixes.yaml` | all seven `drift-lint` rules — `schema_files()` rglobs every `*.yaml` — and it falls inside invariant 2's scope |
+
+That is a decision, not a work item, and it is the human's to make. I am
+recording that the two are not the same file.
+
+**2. If it lands in `vocab/core/`, the file's form is constrained — and
+this is inherited, not new.** Measured, same content three ways:
+
+| Form | `drift-lint vocab/core/` |
+|---|---|
+| bare `prefixes:` map | **FAIL [jurisdiction]** — `prefix 'ohim' declares namespace 'https://w3id.org/ohim/' on 'w3id.org'` |
+| + `id:` + `default_prefix: ohim` | all seven rules **ok** |
+| `default_prefix` naming a prefix absent from the map | **FAIL** again |
+
+This is C18's sixth counterexample (BV8) and the `default_prefix`
+exemption shipped to close it, behaving as recorded. Not a new finding —
+but `done_when` says nothing about the file's form, and the guard's
+message names `vocab/profiles/` as the remedy, which for the project's
+own namespace would be wrong.
+
+One vacuity note, recorded and not blocking: `prefixes: {}` passes all
+seven rules, and no instrument checks clause 1's population. The
+population is recoverable from the tracked `bound-terms.md` — `sosa`,
+`ssn`, `prov`, `qudt`, `org`, `geosparql`, all on hosts the guard
+already admits — so clause 1 is met by your judgement rather than by a
+check. Worth knowing when you claim it met.
+
+**And one correction to my own working notes:** I flagged
+`ssn-ext-sosa` as a bound-terms key with no sidecar. It is an alias —
+`GRAPH_FILE = {"ssn-ext-sosa": "ssn-ext"}`. Withdrawn before filing.
+`rule_documented` is also defined twice in `drift-lint.py`, at 407 and
+517, byte-identical; the second shadows the first and behaviour is
+unchanged. Noted, not filed.
+
+---
+
+**To clear B1:** make the B stanza's check cache-state aware the way the
+X stanza is, and give `audit-bound-terms.py` the empty-bail that
+`fetch-external.py` has. Verify by `git clone` + `make lint`, which is
+the state neither of your two rows covered.

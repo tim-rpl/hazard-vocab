@@ -404,6 +404,65 @@ def rule_jurisdiction(path, doc):
 PLACEHOLDER = {"", "todo", "tbd", "fixme", "xxx", "tk", "n/a", "-", "..."}
 
 
+def rule_declared_prefix(path, doc):
+    """Every CURIE prefix used is declared in this file's `prefixes:` map.
+
+    This is P5 clause 1 — *prefixes.yaml resolves every prefix used* —
+    mechanized. Without it the clause is met by judgement: `prefixes: {}`
+    passes every other rule, and no instrument checks the population.
+
+    IT IS NOT COVERED BY `jurisdiction`. That rule flags an undeclared
+    CURIE prefix only when the prefix is not in GENERIC_ACRONYMS — and
+    GENERIC_ACRONYMS is exactly `sosa`, `prov`, `qudt`, `geo`, `dct` and
+    the rest of clause 1's population. Being a known generic vocabulary
+    says the prefix is not a jurisdiction; it says nothing about whether
+    the file declares it. Two questions, one allowlist, and the second
+    was uncovered.
+
+    KNOWN LIMITATION, same as the rest of this file: raw YAML does not
+    resolve `imports:`, so a prefix declared in an imported schema reads
+    as undeclared here. Recorded rather than worked around — the trigger
+    is the first multi-file `vocab/core/`, which is P6a.
+    """
+    bad = []
+    declared = set(doc.get("prefixes") or {})
+
+    def check(kind, where, value):
+        v = str(value)
+        if "://" in v or ":" not in v:
+            return
+        pfx = v.split(":", 1)[0]
+        if pfx and pfx not in declared:
+            bad.append(f"{path}: {kind} `{where}` uses CURIE prefix "
+                       f"`{pfx}:` which this file does not declare. Add it "
+                       f"to `prefixes:` — a prefix map that does not resolve "
+                       f"every prefix used is the clause it exists to meet, "
+                       f"unmet")
+
+    for n, c in (doc.get("classes") or {}).items():
+        if not isinstance(c, dict):
+            continue
+        for f in ("class_uri", "meaning"):
+            if c.get(f):
+                check(f"class {f}", n, c[f])
+        for m in (c.get("exact_mappings") or []):
+            check("class exact_mappings", n, m)
+    for n, sl in (doc.get("slots") or {}).items():
+        if not isinstance(sl, dict):
+            continue
+        for f in ("slot_uri", "meaning"):
+            if sl.get(f):
+                check(f"slot {f}", n, sl[f])
+        for m in (sl.get("exact_mappings") or []):
+            check("slot exact_mappings", n, m)
+    for ename, e in (doc.get("enums") or {}).items():
+        for pv, body in ((e or {}).get("permissible_values") or {}).items():
+            if isinstance(body, dict) and body.get("meaning"):
+                check("permissible value meaning", f"{ename}.{pv}",
+                      body["meaning"])
+    return bad
+
+
 def rule_documented(path, doc):
     """Invariant 7: every class and slot carries a `description` and at
     least one `examples` entry.
@@ -514,40 +573,6 @@ def rule_shared_uri(path, doc):
 PLACEHOLDER = {"", "todo", "tbd", "fixme", "xxx", "tk", "n/a", "-", "..."}
 
 
-def rule_documented(path, doc):
-    """Invariant 7: every class and slot carries a `description` and at
-    least one `examples` entry.
-
-    `CLAUDE.md` invariant 7 said "Lint enforces it" and nothing did. A
-    schema with eight classes, twelve slots, every description the
-    literal string TODO and zero examples passed clean and generated its
-    shapes at exit 0. See claims.md C20.
-
-    This matters beyond documentation: C6 (LLM-legibility) rests on
-    invariant 7 and has no other guard.
-    """
-    bad = []
-
-    def check(kind, name, body):
-        if not isinstance(body, dict):
-            body = {}
-        d = str(body.get("description") or "").strip()
-        if d.lower().rstrip(".") in PLACEHOLDER:
-            bad.append(f"{path}: {kind} `{name}` has "
-                       f"{'no description' if not d else f'a placeholder description ({d!r})'}"
-                       f" — invariant 7")
-        if not body.get("examples"):
-            bad.append(f"{path}: {kind} `{name}` has no `examples` entry — "
-                       f"invariant 7. One example grounds a reader, human "
-                       f"or model, better than three sentences")
-
-    for n, c in (doc.get("classes") or {}).items():
-        check("class", n, c)
-    for n, sl in (doc.get("slots") or {}).items():
-        check("slot", n, sl)
-    return bad
-
-
 RULES = {
     "inline-attributes": rule_inline_attributes,
     "is-a-depth": rule_is_a_depth,
@@ -555,6 +580,7 @@ RULES = {
     "role-named": rule_role_named,
     "jurisdiction": rule_jurisdiction,
     "documented": rule_documented,
+    "declared-prefix": rule_declared_prefix,
     "shared-uri": rule_shared_uri,
 }
 

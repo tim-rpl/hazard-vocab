@@ -1,0 +1,22 @@
+# DELIBERATELY VIOLATING — uses `sosa:` without declaring it.
+#
+# `jurisdiction` does not catch this: its undeclared-prefix branch
+# exempts anything in GENERIC_ACRONYMS, and `sosa` is in it. That
+# allowlist answers "is this a jurisdiction", not "does the file declare
+# it" — two questions, one allowlist, and the second was uncovered.
+#
+# This is P5 clause 1 mechanized: a prefix map that does not resolve
+# every prefix used is the clause it exists to meet, unmet.
+id: https://w3id.org/ohim/core
+name: ohim_undeclared_generic_prefix_fixture
+default_prefix: ohim
+prefixes:
+  linkml: https://w3id.org/linkml/
+  ohim:   https://w3id.org/ohim/core/
+default_range: string
+imports: [linkml:types]
+slots:
+  observedProperty:
+    description: The property an observation is about.
+    examples: [{value: "PM2.5 mass concentration"}]
+    slot_uri: sosa:observedProperty
