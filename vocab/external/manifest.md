@@ -33,10 +33,11 @@ disagreeing with itself.
 | `owl-time` | <http://www.w3.org/2006/time> | 200 | 101486 | `251bd6970b0d` | text/turtle | 4/4 occur | **4/4 declared** | <http://www.w3.org/2006/time#> | **yes** — 200 text/turtle, `Interval` defined |
 | `foaf` | <http://xmlns.com/foaf/0.1/> | 200 | 44209 | `3d859b5d92a2` | application/rdf+xml | 1/1 occur | **1/1 declared** | <http://xmlns.com/foaf/0.1/> | **yes** — 200 application/rdf+xml, `Document` defined |
 | `dqv` | <https://www.w3.org/ns/dqv.ttl> | 200 | 12246 | `cc333223d13c` | text/turtle | 2/2 occur | **2/2 declared** | <http://www.w3.org/ns/dqv#> | **yes** — 200 text/turtle, `QualityMeasurement` defined |
-| `adms` | <https://www.w3.org/ns/adms.ttl> | 200 | 12687 | `c79e72752851` | text/turtle | 2/2 occur | **2/2 declared** | <http://www.w3.org/ns/adms#> | **no** — 200 text/html, unparseable |
+| `adms` | <https://www.w3.org/ns/adms.ttl> | 200 | 12687 | `c79e72752851` | text/turtle | 2/2 occur | **2/2 declared** | <http://www.w3.org/ns/adms#> | **no** — 200 text/html, and it does not parse as RDF — what the namespace serves is not a graph |
+| `adms-semic` | <https://uri.semic.eu/w3c/ns/adms.ttl> | 200 | 12687 | `c79e72752851` | text/turtle | 2/2 occur | **2/2 declared** | <http://www.w3.org/ns/adms#> | **untested** — no probe term declared |
 | `dcterms` | <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl> | 200 | 47834 | `13df401072dd` | text/turtle | 2/2 occur | **2/2 declared** | <http://purl.org/dc/terms/> | **yes** — 200 text/turtle, `conformsTo` defined |
 | `shacl` | <https://www.w3.org/ns/shacl.ttl> | 200 | 52899 | `0e5d8aea0eab` | text/turtle | 5/5 occur | **5/5 declared** | <http://www.w3.org/ns/shacl#> | **yes** — 200 text/turtle, `NodeShape` defined |
-| `schema` | <https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/schema.ttl> | 200 | 506121 | `81263c76dbaf` | text/plain | 3/3 occur | **3/3 declared** | <https://schema.org/> | **no** — 200 text/html, unparseable |
+| `schema` | <https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/schema.ttl> | 200 | 506121 | `81263c76dbaf` | text/plain | 3/3 occur | **3/3 declared** | <https://schema.org/> | **no** — 200 text/html, and it does not parse as RDF — what the namespace serves is not a graph |
 | `sioc` | <http://rdfs.org/sioc/ns#> | 200 | 54624 | `8935462c4a8a` | application/rdf+xml | 1/1 occur | **1/1 declared** | <http://rdfs.org/sioc/ns#> | **yes** — 200 application/rdf+xml, `Community` defined |
 | `wildfire-nifc` | <https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/wildfire-nifc-documentation/ontology.ttl> | 200 | 28021 | `c9a9ecfa70ee` | text/plain | 1/1 occur | **1/1 declared** | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** — 301, and the redirect target did not serve a graph |
 | `air-quality-epa` | <https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/air-quality-epa-documentation/ontology.ttl> | 200 | 50573 | `b0a0a4a3a79e` | text/plain | 1/1 occur | **1/1 declared** | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** — 301, and the redirect target did not serve a graph |
@@ -62,8 +63,8 @@ disagreeing with itself.
 - ssn-ext: 2/2 bound terms are NOT typed subjects under `http://www.w3.org/ns/ssn/ext/` — present by substring only, which is a presence census and not a binding
 - ssn-ext: namespace returns a graph but mints no term of its own (200 text/turtle, 145 triples, mints **no term of its own** — `ObservationCollection` is defined here but minted elsewhere) — a URI built from this namespace is a URI nobody declares
 - geosparql: namespace does not dereference to a graph (200 text/anot+turtle, 305 triples, but `http://www.opengis.net/ont/geosparql#Geometry` is NOT defined in what the namespace serves) — bindable only as BORROWED
-- adms: namespace does not dereference to a graph (200 text/html, unparseable) — bindable only as BORROWED
-- schema: namespace does not dereference to a graph (200 text/html, unparseable) — bindable only as BORROWED
+- adms: namespace does not dereference to a graph (200 text/html, and it does not parse as RDF — what the namespace serves is not a graph) — bindable only as BORROWED
+- schema: namespace does not dereference to a graph (200 text/html, and it does not parse as RDF — what the namespace serves is not a graph) — bindable only as BORROWED
 - wildfire-nifc: namespace does not dereference to a graph (301, and the redirect target did not serve a graph) — bindable only as BORROWED
 - air-quality-epa: namespace does not dereference to a graph (301, and the redirect target did not serve a graph) — bindable only as BORROWED
 - earthquake-usgs: namespace does not dereference to a graph (301, and the redirect target did not serve a graph) — bindable only as BORROWED

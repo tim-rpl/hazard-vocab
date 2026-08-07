@@ -455,3 +455,147 @@ repository. **Requesting a ruling on where they belong.**
 **Requesting:** falsification of the seven-state table — specifically an
 eighth state neither predicate catches.
 
+
+## [H → O] implement — F25 ruled by the human, ADMS resolved by measurement, `content` split — 2026-08-07
+
+**Artifacts:** `vocab/external/fetch-external.py`,
+**`vocab/external/mutate-register.py`** and
+**`vocab/external/probe-cache-states.py`** (new, tracked — see F25),
+`register.md` + `manifest.md` + sidecars (network run).
+**Claims touched:** none. **Proposals:** one, at the end.
+
+---
+
+### `content` was doing double duty — split BEFORE the ADMS decision
+
+The reason field added to fix C11's shape had C11's shape. One value
+covered two causes that decay differently:
+
+| Reason | Means | Decays how |
+|---|---|---|
+| `content` | 200 **and a real graph**, probe term not defined in it | a fact about the **vocabulary** — stable |
+| `not-a-graph` | 200, and the body does not parse as RDF at all | **content negotiation** — could change tomorrow |
+
+Split first, because the ADMS question was *which of the two is it* and
+the column could not say. **Fourth time in this column, and the first
+inside the repair for it.**
+
+### ADMS — resolved mechanically. They are ONE document.
+
+Added rather than substituted, as instructed. Two rows, two sidecars,
+`terms_declared` pointed at the question:
+
+| | Bytes | SHA-256 | Terms declared |
+|---|---|---|---|
+| `adms` — `w3.org/ns/adms.ttl` | 12,687 | `c79e72752851` | **2/2** |
+| `adms-semic` — `uri.semic.eu/w3c/ns/adms.ttl` | 12,687 | `c79e72752851` | **2/2** |
+
+**Byte-identical by `cmp`**, and both declare their terms as typed
+subjects under `http://www.w3.org/ns/adms#`. So the W3C edit **was the
+migration completing** — the new file *is* the SEMIC file, and the
+deprecation banner went away because the handover finished. Not two
+documents diverging. **No switch to make, and `CLAUDE.md`'s ADMS line
+needs no disambiguation.**
+
+**The row stays, and it keeps working.** `DIGEST_PEER` now asserts the
+pair on every run, so *they are one document* remains true rather than
+having been true once. Verified by mutation: appending one line to
+`adms-semic.ttl` and repairing its sidecar gives
+`sync_register()` **rc=1**, naming both digests and the consequence.
+
+The namespace verdict is unchanged and was never the issue: it serves
+`text/html`, which is now `not-a-graph`. **Bound by name, borrowed in
+fact** — GeoSPARQL's split.
+
+### Shelf life — stated once, in the header
+
+> **EVERY VERDICT IN THIS FILE HAS A SHELF LIFE.** … These verdicts were
+> true when fetched and decay independently of this repository.
+
+Once, not per row: a per-row staleness note is a hand-written claim
+beside a generated one.
+
+---
+
+### F25 — ruled by the human. Both probes are tracked, in `vocab/external/`.
+
+The absolute path was a defect, not a constraint — `pathlib.Path(__file__).parent`,
+`sys.executable`, and the grep for this working tree's path returns
+nothing in either file. Placed beside the generators they mutate, matching
+`guard-mutate.py`'s precedent.
+
+**`mutate-register.py`** — 6/6. **`probe-cache-states.py`** — **9/9**,
+which is one more state than last round.
+
+**Removing the hardcoded subject found a hole the hardcoded one hid.**
+The probe named `geosparql.ttl`; derived, it picked
+`admin-regions-gadm.ttl` and four states went green that should have been
+red. The reason is correct and is my own scoping decision —
+`cache_state(keys=…)` bounds the audit to the six graphs it reads, so a
+degraded seventh cannot corrupt what it writes. **The old 8/8 tested the
+in-scope half and asserted nothing about the other half**, and it passed
+only because the named subject happened to be in scope.
+
+State 8 now asserts the scoping decision instead of assuming it: an
+out-of-scope graph zero-byted → **audit rc=0, register rc=1**. The audit
+is right to ignore it; the register reads every graph and must not.
+
+### The hardcoded-number class, addressed rather than instanced
+
+Three probes broke on data literals this session — a row count, a source
+key, a table size — each fixed after it broke. The rule is now stated in
+the file and applied across both:
+
+> A literal describing **behaviour** is fine — `rc=1`, `untouched=True`
+> are the contract under test and cannot go stale. A literal describing
+> **data** must be derived.
+
+Swept: `TRACKED` (four filenames, now `git ls-files`), the mutation
+subject, the peer subjects in the permutation, the decay-table size, the
+register row count. What remains literal is behavioural only.
+
+**And the sweep's own assertion caught a mention-versus-use error** — it
+rejected the word in my explanatory comment, not in code. The check is
+now on code lines.
+
+---
+
+### A2 — the decay half, declared and not closed
+
+`make lint` cannot invoke these. **Measured: `mutate-register.py` 34.8s,
+`probe-cache-states.py` 100.4s** — the state probe runs 9 states × 2
+generators, each parsing the cache. Against a lint that currently
+completes in seconds, that is a target people stop running.
+
+So this is `guard-mutate.py`'s precedent and now the third tracked probe
+nothing invokes. **Declared, not closed.** A separate target would be the
+fix and `Makefile` is the human's; I am not requesting one until I can
+say what it should cost, because a 100-second stanza gets muted, which is
+the failure mode already recorded this round.
+
+---
+
+### Proposal — a claim C22 does not reach
+
+**An external vocabulary moved under a live binding and the instrument
+was working.** `adms` changed on both axes between two fetches in one
+session: the source document 11,134 → 12,687 bytes, and the namespace
+from `200 text/turtle` with the term defined to `200 text/html`,
+unparseable. Nothing was wrong with the guard; the world moved.
+
+C22 is about instruments that cannot see and C23 about claims made
+without looking. **Neither covers a correct measurement that expires.**
+Proposed wording:
+
+> *A measurement of somebody else's artifact is true at a timestamp, not
+> in general. A register of such measurements states its shelf life, and
+> a claim that cites one carries the date it was made.*
+
+Its first instance is the two-sidecar ADMS measurement, and its falsifier
+is a live-fetch verdict in this repository that cannot change without a
+change in this repository.
+
+**Requesting:** falsification of the ADMS identity claim — specifically
+whether `cmp`-identical bytes today licenses *one document* rather than
+*two documents that agree today* — and of state 8's expectation.
+

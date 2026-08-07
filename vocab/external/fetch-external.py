@@ -114,6 +114,35 @@ SOURCES = [
     ("adms", "http://www.w3.org/ns/adms#",
      "https://www.w3.org/ns/adms.ttl",
      ["Identifier", "schemeAgency"]),
+    # ADDED, not substituted, 2026-08-07. The W3C document is being edited
+    # under a live binding: 11,134 -> 12,687 bytes between two fetches in
+    # one session, and the earlier copy carried
+    # `# deprecated - now maintained by Semic (see adms.var)` while the
+    # newer one does not. A switch made now binds to whichever side of a
+    # migration the fetch happens to catch.
+    #
+    # So both are cached and the question was answered MECHANICALLY rather
+    # than argued.
+    #
+    # **ANSWERED: they are ONE document.** Both URLs serve 12,687 bytes,
+    # digest `c79e72752851`, byte-identical by `cmp`, and both declare
+    # 2/2 terms as typed subjects under `http://www.w3.org/ns/adms#`. So
+    # the W3C edit WAS the migration completing — the new file is the
+    # SEMIC file, and the deprecation banner went away because the
+    # handover finished. Not two documents diverging, and no switch to
+    # make. `CLAUDE.md`'s ADMS line needs no disambiguation.
+    #
+    # The row stays. It cost 12 KB and one register row to replace an
+    # argument with a measurement, and it keeps replacing it: `DIGEST_PEER`
+    # below now fails if the two ever stop agreeing, which is the only
+    # form in which "they are the same document" can remain true rather
+    # than having been true once.
+    #
+    # No `PROBE` entry: the namespace is the same URI `adms` already
+    # probes, and probing it twice measures one thing twice.
+    ("adms-semic", "http://www.w3.org/ns/adms#",
+     "https://uri.semic.eu/w3c/ns/adms.ttl",
+     ["Identifier", "schemeAgency"]),
     ("dcterms", "http://purl.org/dc/terms/",
      "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.ttl",
      ["conformsTo", "issued"]),
@@ -347,6 +376,17 @@ def fetch(url):
 # substitute for a field — `dereference_reason` exists because free text
 # could not be counted (F14) — but the shape of a URI is not a category,
 # and the alternative is that someone redoes the reasoning.
+# Sources that MUST cache byte-identical payloads, and why. A pair here
+# asserts a claim about the world — *these two URLs serve one document* —
+# which is true when measured and can stop being true silently. The
+# register would then carry two rows that agree by habit.
+DIGEST_PEER = {
+    ("adms", "adms-semic"):
+        "W3C and SEMIC serve the same ADMS document; a divergence means "
+        "the migration reopened and `CLAUDE.md`'s ADMS line has to say "
+        "which one is meant",
+}
+
 SIDECAR_NOTE = {
     "cf-standard-name":
         "Every subject ends in a trailing `/`; the CURIE carries it "
@@ -438,7 +478,17 @@ def dereferences(ns, key):
         except Exception:
             g = Graph()
     else:
-        return "no", "content", "200 %s, unparseable" % ctype.split(";")[0]
+        # SPLIT from `content`, 2026-08-07. One value covered two causes
+        # that decay differently, in the field added to stop exactly that
+        # (F14) — the fourth time in this column and the first inside the
+        # repair for it. `adms` is why it mattered: its namespace began
+        # serving `text/html`, which is content negotiation and could
+        # change tomorrow, and the column reported it identically to
+        # GeoSPARQL's `Geometry`-absent-from-a-real-graph, which is a
+        # modelling fact about the vocabulary.
+        return ("no", "not-a-graph",
+                "200 %s, and it does not parse as RDF — what the namespace "
+                "serves is not a graph" % ctype.split(";")[0])
     ct = ctype.split(";")[0]
     # Does this namespace mint ANY term of its own? A document that
     # returns a graph while declaring nothing under its own namespace is
@@ -477,6 +527,7 @@ REASON_VERDICT = {
     "access": "no",
     "single-observation": "no",
     "content": "no",
+    "not-a-graph": "no",
     "mints-nothing": "document",     # NOT "no" — a document resolves
     "resolves": "yes",
     "no-probe": "untested",
@@ -621,7 +672,10 @@ DECAY = [
     ("structural", "never — a host with no TLD cannot resolve for anyone"),
     ("access", "403/404/301/expired cert — could change from another network"),
     ("single-observation", "`000`, no response — one probe, not a property"),
-    ("content", "200, but the probe term is not defined in what is served"),
+    ("content", "200 and a real graph, but the probe term is not defined "
+                "in it — a fact about the VOCABULARY, and stable"),
+    ("not-a-graph", "200, and the body does not parse as RDF at all — "
+                    "content negotiation, and could change tomorrow"),
     ("mints-nothing", "200 and a graph, but no term under its own namespace"),
 ]
 
@@ -958,6 +1012,16 @@ def sync_register():
            "source list in the generator.**", "",
            "`README.md` carries the conventions and the findings; this file",
            "carries the measurements. One writer each.", "",
+           "**EVERY VERDICT IN THIS FILE HAS A SHELF LIFE.** `dereferences`",
+           "is a live measurement of somebody else's server, stamped with a",
+           "`fetched:` date in each sidecar. These verdicts were true when",
+           "fetched and decay independently of this repository — a",
+           "namespace that resolved can start serving HTML, and a source",
+           "document can be edited under a live binding. Both happened to",
+           "`adms` on 2026-08-07, between two fetches in one session.",
+           "Stated once, here, rather than per row: a per-row staleness note",
+           "is a hand-written claim beside a generated one, which is the",
+           "defect this file has paid for three times.", "",
            "**`dereferences` is a separate live fetch of the namespace, not of",
            "the cached file.** GeoSPARQL is why: `:Geometry` is defined in the",
            "cached graph and undefined in what the namespace serves. A",
@@ -1151,6 +1215,19 @@ def sync_register():
               "an emptied generator still equals itself."
               % (len(failed) + len(orphans), CACHE), file=sys.stderr)
         return 1
+    # DIGEST_PEER: pairs asserted to serve one document. Checked here so
+    # the claim is re-established on every run rather than remembered from
+    # the run that made it.
+    for (x, y), why in DIGEST_PEER.items():
+        px, py = CACHE / ("%s.ttl" % x), CACHE / ("%s.ttl" % y)
+        if not (px.exists() and py.exists()):
+            continue
+        dx = hashlib.sha256(px.read_bytes()).hexdigest()[:12]
+        dy = hashlib.sha256(py.read_bytes()).hexdigest()[:12]
+        if dx != dy:
+            incoherent.append(
+                "%s and %s are asserted to be one document and are not — "
+                "%s vs %s. %s" % (x, y, dx, dy, why))
     bad = check_tables(out) + incoherent
     text = "\n".join(out) + "\n"
     if CHECK_ONLY[0]:

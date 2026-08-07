@@ -7,6 +7,17 @@ source list in the generator.**
 `README.md` carries the conventions and the findings; this file
 carries the measurements. One writer each.
 
+**EVERY VERDICT IN THIS FILE HAS A SHELF LIFE.** `dereferences`
+is a live measurement of somebody else's server, stamped with a
+`fetched:` date in each sidecar. These verdicts were true when
+fetched and decay independently of this repository — a
+namespace that resolved can start serving HTML, and a source
+document can be edited under a live binding. Both happened to
+`adms` on 2026-08-07, between two fetches in one session.
+Stated once, here, rather than per row: a per-row staleness note
+is a hand-written claim beside a generated one, which is the
+defect this file has paid for three times.
+
 **`dereferences` is a separate live fetch of the namespace, not of
 the cached file.** GeoSPARQL is why: `:Geometry` is defined in the
 cached graph and undefined in what the namespace serves. A
@@ -26,7 +37,7 @@ that had one — it is an orphan, and both the orphan and the
 failed-fetch tables were reason-free, so the fallback was
 unreachable for the only row that needed it.
 
-**5 causes of non-dereference, and they decay differently.**
+**6 causes of non-dereference, and they decay differently.**
 F15/B8: this heading said *three* over four rows, then *four*
 over five. Both times the table beneath it was right. The
 number is counted from that table now, so it cannot disagree
@@ -37,13 +48,15 @@ with it.
 | `structural` | never — a host with no TLD cannot resolve for anyone |
 | `access` | 403/404/301/expired cert — could change from another network |
 | `single-observation` | `000`, no response — one probe, not a property |
-| `content` | 200, but the probe term is not defined in what is served |
+| `content` | 200 and a real graph, but the probe term is not defined in it — a fact about the VOCABULARY, and stable |
+| `not-a-graph` | 200, and the body does not parse as RDF at all — content negotiation, and could change tomorrow |
 | `mints-nothing` | 200 and a graph, but no term under its own namespace |
 
 | Graph | Namespace | Dereferences | Why | Detail | Disposition |
 |---|---|---|---|---|---|
 | `admin-regions-gadm` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
-| `adms` | <http://www.w3.org/ns/adms#> | **no** | `content` | 200 text/html, unparseable | **borrowed** |
+| `adms-semic` | <http://www.w3.org/ns/adms#> | **untested** | `no-probe` | no probe term declared | **untested** |
+| `adms` | <http://www.w3.org/ns/adms#> | **no** | `not-a-graph` | 200 text/html, and it does not parse as RDF — what the namespace serves is not a graph | **borrowed** |
 | `air-quality-epa` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `census-uscb` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `cf-standard-name` | <http://vocab.nerc.ac.uk/standard_name/> | **yes** | `resolves` | 200 text/turtle, `air_temperature` defined. Every subject ends in a trailing `/`; the CURIE carries it (`cfsn:air_temperature/`); it does NOT reach the emitted Turtle — `gen-shacl` writes the full URI in angle brackets and the result reparses. Scheme is `http`, not `https` | **bound** |
@@ -67,7 +80,7 @@ with it.
 | `prov-o` | <http://www.w3.org/ns/prov#> | **yes** | `resolves` | 200 text/turtle, `Entity` defined | **bound** |
 | `qudt-schema` | <http://qudt.org/schema/qudt/> | **yes** | `resolves` | 200 text/turtle, `QuantityValue` defined | **bound** |
 | `qudt-units` | <http://qudt.org/vocab/unit/> | **yes** | `resolves` | 200 text/turtle, `M-PER-SEC` defined | **bound** |
-| `schema` | <https://schema.org/> | **no** | `content` | 200 text/html, unparseable | **borrowed** |
+| `schema` | <https://schema.org/> | **no** | `not-a-graph` | 200 text/html, and it does not parse as RDF — what the namespace serves is not a graph | **borrowed** |
 | `shacl` | <http://www.w3.org/ns/shacl#> | **yes** | `resolves` | 200 text/turtle, `NodeShape` defined | **bound** |
 | `sioc` | <http://rdfs.org/sioc/ns#> | **yes** | `resolves` | 200 application/rdf+xml, `Community` defined | **bound** |
 | `skos` | <http://www.w3.org/2004/02/skos/core#> | **yes** | `resolves` | 200 application/rdf+xml, `Concept` defined | **bound** |
@@ -79,9 +92,9 @@ with it.
 | `void` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `wildfire-nifc` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 
-*36 graphs with a sidecar; 20 borrowed, 15 bound, 1 untested. 0 fetch(es) produced no graph at all.*
+*37 graphs with a sidecar; 20 borrowed, 15 bound, 2 untested. 0 fetch(es) produced no graph at all.*
 
-**Reason distribution over the 36 rows above** — generated, and its total is asserted equal to the row count. Counting these off the rendered table by hand adds one to every reason that also names a row of the legend: `resolves` 15, `access` 12, `content` 3, `structural` 3, `no-probe` 1, `mints-nothing` 1, `single-observation` 1.
+**Reason distribution over the 37 rows above** — generated, and its total is asserted equal to the row count. Counting these off the rendered table by hand adds one to every reason that also names a row of the legend: `resolves` 15, `access` 12, `structural` 3, `no-probe` 2, `not-a-graph` 2, `content` 1, `mints-nothing` 1, `single-observation` 1.
 
 ## A term's declaration may span rows — two different reasons
 
