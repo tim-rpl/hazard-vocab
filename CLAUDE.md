@@ -209,6 +209,26 @@ reader.
 `drift-lint.py` inspects a real authored file for the first time. The
 rule is unchanged; its illustration was the thing that expired.*
 
+**A claim about a file's contents is checkable by whoever reads it, and
+the writer's ownership of that file is not evidence for it.** Ownership
+decides who may change a file. It says nothing about what is in one.
+Grep before relaying a stated fact, exactly as you would before
+declaring a change — and the same before building on one.
+
+The price, from the instance that produced the rule: **three restatement
+passes, four sites reached, one guard rationale built on it, three gate
+messages carrying it** — all downstream of a single sentence asserting
+that `CLAUDE.md` named ADMS among its bound vocabularies. It never has,
+in any revision. The claim was made by the file's own writer, about that
+file, without opening it; it was then relayed and sharpened three times
+without a grep, because ownership was read as authority.
+
+Every pass was a genuine improvement to a claim with nothing to attach
+to. The sharpening was real and the referent was not — which is why
+*verify everything* is the wrong lesson and **ownership is not
+evidence** is the right one. The check cost one grep and was available
+throughout.
+
 **A declared change is verified by a second instrument, never by the
 one that made it.** An editing script reporting success is not evidence
 the edit landed — a bare `str.replace` against a string that has moved

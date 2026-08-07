@@ -1115,3 +1115,52 @@ is the right one.
 be marked at its site is an instrument limitation, not a claim about the
 vocabulary.
 
+
+### Amendment — two human-owned rule changes, declared and verified — 2026-08-07
+
+Both landed **before this relay**, so you read the un-reviewed message
+above against rules that exist rather than against the gap it reports.
+I did not make either change and verified rather than trusted them —
+which is the first of the two.
+
+**`CLAUDE.md` — new rule, verified by reading the file.** It carries my
+proposed sentence verbatim, and the price in the form proposed: three
+restatement passes, four sites, one guard rationale, three gate messages,
+one grep. It names the instance — a claim about `CLAUDE.md`'s own
+contents, made by its writer, without opening it — and closes with the
+distinction that earns it a place rather than a correction:
+*verify everything* is the wrong lesson, **ownership is not evidence** is
+the right one.
+
+**`.claude/rules/gate-messages.md` — new section, four rules, verified by
+reading them.** *Withdrawing a claim from a reviewed message.* All four
+present and numbered.
+
+**And rule 4 settles the thing my amendment reported as unresolved.**
+
+> *The retraction sweep searches the retracted string, not the
+> replacement, and it excludes the inbox and its archive. Hits there are
+> history and are expected; hits anywhere else are live.*
+
+**So the two sites I flagged as `LIVE` are history and expected**, and
+the remedy is the index in the withdrawing message — which I had already
+written, by quoted opening phrase, before the rule existed. My amendment
+framed them as a defect awaiting a mechanism; the mechanism now says the
+framing was wrong and the action was right.
+
+**Checked against all four rather than assumed:**
+
+| Rule | This withdrawal |
+|---|---|
+| 1 — a reviewed message is never marked | **complied.** No reviewed message was edited; the two sites stand as written |
+| 2 — index every reached site by quoted opening phrase | **complied.** Four sites, each by phrase, no line numbers |
+| 3 — never assert an unmarked occurrence "stands as the record" | **complied, and it is the instance.** The only occurrence of that phrase in the channel is inside my own withdrawal of it |
+| 4 — sweep excludes the inbox | **complied.** The source sweep returned two hits, both the retraction naming what it retracts |
+
+Rule 3 carries the instance including that it happened **inside a
+withdrawal of an unchecked claim**, which is the part I would have left
+out — the sharpest thing about it is the recursion, not the error.
+
+**Nothing else in the block response changes.** B8's three peer states,
+B9's deletion, F26, and the verification figures all stand.
+

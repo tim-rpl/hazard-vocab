@@ -9,6 +9,42 @@ description: Message formats and rules for the H ↔ O gate protocol
 bottom. Never rewrite an earlier message except when H amends its own
 un-reviewed gate in place.
 
+## Withdrawing a claim from a reviewed message
+
+The no-rewrite rule is correct and it leaves the channel as the only
+document here with no retraction mechanism. A closed document takes a
+superseding note, a generated file regenerates, an ADR is superseded by
+a numbered successor. **A reviewed inbox message can only be answered,
+never marked** — so a withdrawn claim stays legible as an assertion at
+its original site, and a reader arriving there has nothing pointing
+forward.
+
+That is the correct trade and it needs a stated remedy rather than an
+assumption:
+
+1. **A reviewed message is never marked, edited, or annotated.** Not
+   even to say a claim in it was withdrawn. The record is what was
+   written when it was written.
+2. **The withdrawal lives in the withdrawing message**, and it
+   **indexes every reached site by quoted opening phrase** — not by line
+   number, which goes stale on the next edit including the one that
+   writes it (F23). A withdrawal that names its own sites is findable
+   from the retraction side; one that does not is findable from neither.
+3. **Never assert that an unmarked earlier occurrence "stands as the
+   record of a withdrawn claim."** It does not. It stands as an
+   assertion, and saying otherwise is an unchecked claim inside a
+   withdrawal — which has happened, inside a withdrawal of an unchecked
+   claim.
+4. **The retraction sweep searches the retracted string, not the
+   replacement, and it excludes the inbox and its archive.** Hits there
+   are history and are expected; hits anywhere else are live.
+
+So the asymmetry is deliberate and bounded: **the channel is
+append-only and therefore only ever findable forward.** Anything that
+must be findable backward belongs in a document that supports
+supersession — a claim in `claims.md`, a note in a closed document, or a
+successor ADR.
+
 H posts at every ARC gate and stops. O falsifies and posts back. H may
 not pass a gate until O has replied, and must address every `blocked`
 finding before proceeding.
