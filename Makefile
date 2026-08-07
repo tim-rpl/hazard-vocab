@@ -90,6 +90,11 @@ lint:
 	@test -f vocab/external/audit-bound-terms.py \
 		|| { echo "FAIL: vocab/external/audit-bound-terms.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
 	@$(BIN)python vocab/external/audit-bound-terms.py --check
+	@echo "R: no retracted phrase is live in a tracked file"
+	@test -f scripts/sweep-retracted.py \
+		|| { echo "FAIL: scripts/sweep-retracted.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
+	@$(BIN)python scripts/sweep-retracted.py
+	@$(BIN)python scripts/sweep-retracted.py --selftest
 	@echo "lint ok"
 
 lint-selftest:

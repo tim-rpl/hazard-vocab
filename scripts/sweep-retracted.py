@@ -57,17 +57,81 @@ EXCLUDE = [
     "docs/plan/guard-fixtures",   # retired figures BY CONSTRUCTION
     "scripts/retracted.txt",      # contains every phrase
     "scripts/sweep-fixtures",     # deliberate positives for --selftest
+    "claims.md",                  # supersession-supporting; see below
 ]
 
+# WHY claims.md IS EXCLUDED, and it is the same argument as the inbox.
+# `.claude/rules/gate-messages.md` rule 4 names claims.md as one of the
+# documents where a withdrawn thing MUST remain findable backward — the
+# channel is findable forward only, so the register is where the record
+# lives. A register that cannot quote what it retracted is not a
+# register, and the first phrase entered here fired on C22 row 18, which
+# is O's record OF the retraction.
+#
+# The cost of this exclusion, stated because it is the over-exclude
+# direction: a genuinely live claim written into claims.md is invisible
+# to this instrument. That is O's file, O writes statuses and evidence,
+# and H proposes — so a live assertion arriving there is a different
+# failure with a different reviewer.
 
-def phrases(path: pathlib.Path) -> list[str]:
+
+def phrases(path: pathlib.Path) -> tuple[list[str], list[str]]:
+    """Parse the list, and FAIL LOUDLY on a swallowed append.
+
+    The workflow is `>>` at each withdrawal, and the file ends in a
+    comment block. If the file loses its trailing newline — a transfer
+    stripping it, an editor, a partial write — the first append MERGES
+    ONTO THE LAST COMMENT LINE, which starts with `#` and is skipped.
+    The sweep then prints "lists no phrases — this check inspected
+    nothing" and passes.
+
+    That is inspected-nothing-and-passed in the primary path, and it cost
+    a reviewer two mutations to spot. So: a `#` line carrying a TAB is
+    the signature of a swallowed entry, because the entry format is
+    tab-separated and prose comments are not. Loud, not silent.
+    """
+    raw = path.read_text()
+    problems = []
+    if raw and not raw.endswith("\n"):
+        problems.append(f"{path.name} does not end with a newline. The "
+                        f"next `>>` append will merge onto the last line "
+                        f"— and if that line is a comment, the entry is "
+                        f"silently skipped and this check passes having "
+                        f"inspected nothing")
     out = []
-    for line in path.read_text().split("\n"):
+    for n, line in enumerate(raw.split("\n"), 1):
         line = line.strip()
-        if not line or line.startswith("#"):
+        if not line:
+            continue
+        if line.startswith("#"):
+            if "\t" in line:
+                problems.append(
+                    f"{path.name}:{n} is a comment line containing a tab. "
+                    f"That is the signature of an entry appended onto a "
+                    f"comment — the entry is being skipped. Split the "
+                    f"line")
+            continue
+        # An append onto an EXISTING ENTRY is the second swallow shape,
+        # and the newline assertion cannot see it after the fact: the
+        # merged line ends with the appended newline. An entry has
+        # exactly two tabs — phrase, date, provenance — so a merged pair
+        # has four, and a merged phrase silently replaces the one before
+        # it while the count stays put.
+        nt = line.count("\t")
+        if nt != 2:
+            problems.append(
+                f"{path.name}:{n} has {nt} tab(s); an entry has exactly "
+                f"two — phrase, date, provenance. "
+                + ("More than two is the signature of an entry appended "
+                   "onto the entry above it: the phrase is corrupted and "
+                   "the count does not change. Split the line."
+                   if nt > 2 else
+                   "Fewer than two means the date or the provenance is "
+                   "missing, and an entry that cannot be dated cannot be "
+                   "audited when it stops firing."))
             continue
         out.append(line.split("\t")[0].strip())
-    return out
+    return out, problems
 
 
 def sweep(pats: list[str], root: pathlib.Path,
@@ -122,6 +186,11 @@ def selftest(root: pathlib.Path) -> int:
                  and l.strip().endswith("return"))
 
     # direction 1 — a phrase outside the exclusions IS reported
+    _, lp = phrases(LIST)
+    for pr in lp:
+        print(f" FAIL  {pr}")
+    failures += lp
+
     hits = sweep([probe], root, [e for e in EXCLUDE
                                  if e != "scripts/sweep-fixtures"])
     got = any("live-reintroduction.md" in h for h in hits)
@@ -175,7 +244,11 @@ def main() -> int:
     if bad:
         return 1
 
-    pats = phrases(LIST)
+    pats, problems = phrases(LIST)
+    for pr in problems:
+        print(f"FAIL: {pr}")
+    if problems:
+        return 1
     if not pats:
         print(f"  note: {LIST.name} lists no phrases — this check "
               f"inspected nothing")

@@ -15,7 +15,25 @@
 # FORMAT: one phrase per line. Blank lines and #-comments ignored.
 # Matched with `git grep -F -f` — fixed strings, not regexes.
 #
-#   <phrase>	<date>	<withdrawing message or commit>
+#   phrase  <TAB>  date  <TAB>  withdrawing message or commit
+#
+# The format is documented with the word TAB rather than a literal tab,
+# deliberately: the check below fires on ANY comment line carrying a
+# literal tab, and a comment illustrating the format with real tabs is a
+# false positive in the check written to catch a silent failure. Mention
+# versus use, in the file documenting the rule.
+#
+# THIS FILE MUST END WITH A NEWLINE. The workflow is `>>`, the file ends
+# in comments, and an append onto a `#` line is silently skipped — the
+# sweep then reports "inspected nothing" and passes. sweep-retracted.py
+# asserts both the trailing newline and that no comment line carries a
+# tab, which is the signature of a swallowed entry.
+#
+# ENTER THE SHORTEST DISTINCTIVE SUBSTRING, not the full markup-bearing
+# string. The same claim in two typographic forms is two byte sequences —
+# `` `CLAUDE.md`'s ADMS line `` and CLAUDE.md's ADMS line differ — and a
+# full string silently misses a reintroduction typed without the markup,
+# which is the invisible direction.
 #
 # The date and provenance make an entry AUDITABLE rather than
 # accumulating as apparent coverage: a phrase referencing a file since
@@ -37,6 +55,16 @@
 #   scripts/retracted.txt
 #       This file contains every retracted phrase and would match all of
 #       them.
+#
+#   claims.md
+#       Supersession-supporting. gate-messages.md rule 4 names it as one
+#       of the documents where a withdrawn thing MUST remain findable
+#       backward, since the channel is findable forward only. A register
+#       that cannot quote what it retracted is not a register — the first
+#       phrase entered here fired on C22 row 18, which is O's record OF
+#       the retraction. Cost, stated: a genuinely live claim written into
+#       claims.md is invisible here. That is O's file and a different
+#       reviewer's failure.
 #
 # THE OVER-EXCLUDE DIRECTION IS THE DANGEROUS ONE. A sweep that forgets
 # an exclusion reports history as live — noisy, self-correcting. A sweep
