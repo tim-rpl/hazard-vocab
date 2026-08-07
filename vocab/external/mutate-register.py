@@ -55,9 +55,12 @@ def fresh():
 
 
 bad = []
+CASES = 0
 
 
 def case(label, fn, expect):
+    global CASES
+    CASES += 1
     d = fresh()
     try:
         got = fn(d)
@@ -224,5 +227,10 @@ def map_drift(d):
 case("REASON_VERDICT made to disagree with dereferences()", map_drift,
      lambda g: isinstance(g, str) and g.startswith("AssertionError"))
 
-print("\n%d/6 mutations behave as claimed" % (6 - len(bad)))
+# F26: this read `%d/6` while the sibling probe derives the same figure
+# from `len(STATES)` — two files disagreeing about a rule stated in one of
+# them, and the affected number is the one this gate asked O to verify.
+# Seven cases would have printed `6/6`. Fourth instance of the hardcoded
+# number, in the file written to close that class.
+print("\n%d/%d mutations behave as claimed" % (CASES - len(bad), CASES))
 sys.exit(1 if bad else 0)

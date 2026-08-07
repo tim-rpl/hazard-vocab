@@ -2791,11 +2791,11 @@ instances below countable at all.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
 - **Evidence:** 2026-08-04, extended 2026-08-05 (twice), 2026-08-06
-  (four times) and 2026-08-07 — **twenty-three instrument defects, eleven
-  files, three authors.** Nineteen manifested; two were self-caught before
-  shipping, and two — rows 17 and 19 — are coverage gaps that have not yet
-  cost anything. All are counted because the register counts defects **in
-  instruments**, not defects that caused visible harm.
+  (four times) and 2026-08-07 (twice) — **twenty-five instrument defects,
+  twelve files, three authors.** Nineteen manifested; two were self-caught
+  before shipping, and four — rows 17, 19, 24 and 25 — are coverage gaps
+  that have not yet cost anything. All are counted because the register
+  counts defects **in instruments**, not defects that caused visible harm.
 
   **This count read *twenty-one* while the table carried twenty-two rows.**
   O added row 22 on 2026-08-06 and did not restate the total above it —
@@ -2828,6 +2828,8 @@ instances below countable at all.
   | 21 | `make lint`'s **B** stanza + `vocab/external/audit-bound-terms.py` — **the repair for #20** | row 20 put the generator into `make lint`; the stanza it was given is **not cache-state aware**, and `grep -c 'cache_state\|CACHE_STATE\|unfetched'` over the script returns **0**. The X stanza beside it prints *"the cache is unfetched (4 cached, all of them tracked). This check inspected nothing."* — F19's ruling, closed one round earlier. The B stanza reports **drift** in that same state. Measured on a real `git clone`: `776e660` exits **0**, `b77e6a4` exits **2** with `bound-terms.md: DRIFTED from its generator — 41 line(s) differ, first at 21`. **Nothing drifted** — the cache is unfetched, so the audit reads 4 graphs instead of 35. The message asserts a tracked file of record is wrong, and it routes to a write that destroys it: running the generator on the clone takes `bound-terms.md` from **29 term rows to 0** — *"0 object properties of 0 terms audited"*, 38 lines deleted — returning exit 1 **and writing anyway**. `fetch-external.py` has the bail that prevents this (*"an emptied generator still equals itself"*, register NOT written); `audit-bound-terms.py` has none. **This is row 19 in the sibling generator**, arriving through the repair for row 20. The instrument was probed in one state of its input — H's populated working tree — where both declared mutation rows are correct | human (`Makefile`) + H (script) | O, by `git clone` + `make lint`, after discarding a first attempt whose `tar` copy into a non-git directory made `cache_state()`'s `git ls-files` misreport every stanza |
   | 22 | `vocab/external/audit-bound-terms.py` — **the repair for #21** | the repair is aware of exactly one cache state. `cache_state()` returns `unfetched | complete | partial`, and the new guard tests `== "unfetched"`; its docstring states that a **partial** cache "is not emptiness and stays caught", treating the third state as covered. What it is caught *as* is row 21 verbatim. Measured on a copy of `vocab/external/` with one fetched graph removed (`graphs/sosa.ttl`): `--check` exits **1** with `bound-terms.md: DRIFTED from its generator — 41 line(s) differ, first at 21` — the same string, the same false assertion that a tracked file of record is wrong, and nothing drifted. Following that message into the write path takes `bound-terms.md` from **29 term rows to 14** — *"4 object properties of 14 terms audited"* — exit **1 and written anyway**. The empty-bail added for row 21 is `if not rows:`, and 14 rows is not zero, so it covers total loss and not truncation. `partial` is reached by any single failed source fetch, an interrupted fetch, or deleting one graph to force a re-fetch. **Third instance of one defect across two sibling generators**, and the second to arrive through the repair for its predecessor | H | O, by removing one cached graph from a copy of `vocab/external/` and running both the check and the write path |
   | 23 | `vocab/external/audit-bound-terms.py` — **the repair for #22** | the repair bounds the row count and never reads a graph. `expected = sum(len(names) for _key, names in LOOKUP)` with `if len(rows) < expected` catches emptiness (row 21) and truncation (row 22), and a **present, parseable graph that defines none of its terms produces a FULL row count** — every lookup yields an `ABSENT` row, `len(rows) == expected == 29`, and the bail does not fire. Measured on a copy of `vocab/external/` with `graphs/geosparql.ttl` truncated to zero bytes: `--check` exits 1 with `bound-terms.md: DRIFTED from its generator — 10 line(s) differ, first at 44` — the same false assertion that a tracked file of record is wrong, and nothing drifted; the write path exits **1 and writes**, replacing GeoSPARQL's three real definitions with `ABSENT` and *"11 object properties"* with *"10 object properties of 29 terms audited"*. **The state is documented in the generated file's own header** — *"the GeoSPARQL namespace URI returns a Prez description document in which all four bound terms appear and none is defined. The manifest scored it 4/4; this audit found zero definitions"* — so a re-fetch from the namespace rather than the fetch URL reaches it, and `cache_state()` cannot see it because it compares filenames and reads no bytes. **Fourth instance of one defect across two sibling generators, and the third to arrive through the repair for its predecessor.** The clause is also **deletable with no named test going red** — this claim's falsifier verbatim: no fixture anywhere references `audit-bound-terms.py` or `bound-terms.md`, and with the clause removed `lint-selftest` still reports 43 pairs, 9/9 | H | O, by truncating one cached graph to zero bytes rather than removing it, and by deleting the clause and re-running the named harness |
+  | 24 | `vocab/external/fetch-external.py` `DIGEST_PEER` — the guard the gate message offers as what *"keeps that sentence true"* for *"two URLs currently resolve to one body, revocably"* | **its green is entailed by the redirect standing, and it is blind to the one state its own rationale names.** `fetch()` runs `curl -sS -L`, so `adms.ttl` is fetched **through** the 307 and both cached bodies are two fetches of `https://uri.semic.eu/w3c/ns/adms.ttl`. Their `cmp` identity is therefore guaranteed by construction while the redirect stands, and measures nothing about `w3.org`. The rationale asserts the complement — *"If the 307 is withdrawn, w3.org begins serving a SECOND document and the guard fires"* — which assumes withdrawal implies divergence. Measured on a throwaway copy with the redirect withdrawn and the bodies left identical (`resolved_url` flipped to `same as source_url`): `sync_register()` returns **0**, silently, while the licensed sentence has degraded from *two URLs resolve to one body* to *two bodies that agree today*. That is the inference retracted in pass 1 — *`cmp`-identical bytes licenses two documents that agree today, not one document* — reappearing inside the guard offered as the retraction's support, one level up. The datum that would settle it is already captured and read by nothing: `resolved_url` is written to 37 of the 38 sidecars — all but `deo`, the orphan, which predates the field and has not been re-fetched — and appears in **no** check. Controls: true divergence by one appended line → `rc=1`; the peer graph removed → `rc=1`. So the guard detects post-withdrawal divergence only, which is the complement of the sentence it is cited for | H | O, by mutation on a copy — withdrawing the redirect with the bodies identical, then diverging them by one line and deleting the peer as controls |
+  | 25 | `vocab/external/mutate-register.py` — **the file that ships this round's hardcoded-literal sweep** | its own headline figure is a hardcoded data literal. `print("\n%d/6 mutations behave as claimed" % (6 - len(bad)))` names the case count — a datum about the file — while the sibling probe derives the identical figure from `len(STATES)`. The gate message asserts *"What remains literal is behavioural only"* after sweeping five other sites in these two files, and this is the sixth. Measured by adding a seventh passing case exactly as a repair would: the run prints **`6/6 mutations behave as claimed`** while seven ran; with one failure among seven it would print `5/6`. The exit code is derived from `bad` and stays correct, so the defect is confined to the figure the gate message quotes — which is the figure O is asked to verify. **Fourth instance of the hardcoded-number class in one session**, in the file written to address that class rather than instance it | H | O, by adding a seventh case to a copy and reading the headline |
 
   **None of the first seventeen was found by reading the instrument.**
   Fourteen were found by running it against a deliberate defect, one by
@@ -3089,11 +3091,13 @@ that establishes it.
   unestablished — an editing step reporting success is not evidence the
   edit landed.
 - **Evidence:** 2026-08-04, extended 2026-08-05, 2026-08-06 (three
-  times) and 2026-08-07 — **seventeen instances.** Six sit in accepted
-  documents, two more in a plan of record and a commit message, five in a
-  generated file of record and a gate message, and two — #16 and #17 — in
-  the authored prefix map and the gate message that delivered it; two were
-  caught by the check itself rather than by the author.
+  times) and 2026-08-07 (twice) — **eighteen instances.** Six sit in
+  accepted documents, two more in a plan of record and a commit message,
+  five in a generated file of record and a gate message, two — #16 and
+  #17 — in the authored prefix map and the gate message that delivered
+  it, and one — #18 — in a live generator's source comments and the gate
+  message quoting them; two were caught by the check itself rather than
+  by the author.
 
   **#16 and #17 are the same round's remedy and the same round's ground.**
   Both were written to close a finding about unsupported verification —
@@ -3122,6 +3126,7 @@ that establishes it.
   | 15 | `[H → O]` 2026-08-06 amendment, A2 — *"the asymmetry is now **the only remaining instance** of the gap that produced three of this round's blocks"* | there is a second, in the same directory and worse. `vocab/external/audit-bound-terms.py` generates the tracked file `vocab/external/bound-terms.md`, has a `--check` mode, and is named nowhere in the `Makefile`: A2 describes a generator that runs without a fixture harness, while this one does not run at all. The claim is about what a directory contains, and the run that establishes it is one command — `git ls-files '*.py'` against `grep Makefile`, ten seconds, which is also the falsifier for the `CLAUDE.md` invariant the same amendment cites |
   | 16 | `vocab/core/prefixes.yaml`, the BOUND banner **rewritten from measurement this round to replace a false one** — *"14 namespaces dereference (`resolves`), 2 … (`content`), 1 was never probed"* | measured now: **15 `resolves`, 2 `content`, 0 unprobed.** The one unprobed namespace was `cfsn`, and **the same commit (`1ccfff3`) bound it** — the banner and the `cfsn:` line are additions in one diff. So the sentence written to retract an inverted method carries a distribution from before its own commit's change, and a reader looking for the never-probed namespace finds none. Re-derived by mapping all 17 declared namespaces onto the sidecars' `namespace:` fields and tallying `dereference_reason`. The same sentence calls the five audited namespaces *"the six keys in `audit-bound-terms.py`'s NS map"*: `NS` has **seven** keys, `LOOKUP` has six entries, and the five named are namespaces | H | O, by running the namespace-to-sidecar comparison the file's own NAMED GAP section specifies and declares unbuilt |
   | 17 | `[H → O]` 2026-08-07, the CF switch — *"**probes** — **six**, OHIM's actual CF names — one would clear check 5 and prove nothing about the other five"* | **one of the six is a probe.** `PROBE["cf-standard-name"]` is a single URI, `…/standard_name/air_temperature/`, and it is the only one evaluated by `dereferences()`, the mechanism that parses a graph and tests for `rdf:type`. The other five reach the register through `terms_found()`, a `\b`-anchored **substring match over the raw payload bytes** — the strength the same sentence says proves nothing. **`nvs-p07` is the control and it sits in the tree:** its row reads `6/6 terms present`, identical wording in the identical column, with **0 of 6 declared as subjects** — every one a `skos` label match, because P07's subjects are `…/current/00B3H4MY/`. So the *Content check* column reads the same for a route where the terms are subjects and one where they are labels, which is the distinction `CLAUDE.md` and `prefixes.yaml` both draw between the two routes. **The conclusion is true and independently verified** — O parsed the cached graph and found all 6/6 present as subjects carrying `rdf:type` at the trailing-slash URI — so the binding is sound and five-sixths of the evidence offered for it is the weaker test. It also contradicts a convention added to `.claude/rules/vocab-conventions.md` in the same round: *"The test is **parse the body and find the term**"*, against `terms_found`'s docstring, which argues for substring deliberately | H (script), human (convention) | O, by parsing both cached CF graphs and asking, per name, whether it is a typed subject or only a literal |
+  | 18 | `vocab/external/fetch-external.py:162` and `:422`, and `[H → O]` 2026-08-07 — *"`CLAUDE.md`'s ADMS line needs no disambiguation"* (asserted first as a bare conclusion, then twice more through two restatements), and `DIGEST_PEER`'s stated consequence *"a second document is back in play, and `CLAUDE.md`'s ADMS line has to say which one is meant"* | **`CLAUDE.md` has no ADMS line, and no revision of it ever has.** `grep -niE 'adms\|semic\|asset descr' CLAUDE.md` returns nothing, and `git log --all -S adms -- CLAUDE.md` and the same pickaxe on `ADMS` both return no commit — so this is not a stale pointer to a line since removed, it is a referent that has never existed. Two consequences. The conclusion the round's **third** phrasing was built to reach is vacuous: a sentence that does not exist needs no disambiguation under any measurement, so the ADMS resolution terminates in a statement nothing could falsify. And `DIGEST_PEER`'s rationale routes a future reader — at the exact moment the guard fires — to repair a sentence they will not find. Under the charitable reading the line meant is `CLAUDE.md`'s external-vocabularies paragraph, which the previous round rewrote to *"Read `vocab/external/register.md` for which, per namespace; do not read a claim about it here"* — it carries no per-namespace claim and so would need no disambiguation under any divergence either. Both readings leave the sentence false or empty. The establishing run is one grep | H | O, by grepping `CLAUDE.md` and pickaxing every revision of it |
 
   **#6 is the instance that establishes the claim is not retrospective.**
   It was posted in the same message that proposed C23, as the falsifier
@@ -3434,3 +3439,66 @@ no simpler mechanism could hold.
   structure is paid for. The claim stays `asserted` and the P6b
   partition diff remains the only test that moves it.
 - **Updated:** 2026-08-05
+
+### C26 — A measurement of somebody else's artifact is true at a timestamp, not in general
+A measurement of somebody else's artifact is true at a timestamp, not in
+general. A register of such measurements states its shelf life, and a
+claim that cites one carries the date it was made.
+
+- **Status:** `asserted`
+- **Falsifier:** a live-fetch verdict in this repository that cannot
+  change without a change in this repository.
+- **Cheapest test:** take any `dereferences` verdict, re-fetch its
+  namespace, and ask whether the value could have moved without any
+  commit here. Minutes. *(The criterion above is H's; this procedure is
+  O's mechanical form of it, and adds nothing to what it asserts.)*
+- **Evidence:** 2026-08-07, verified by O at the implement gate that
+  proposed it.
+
+  **The register states its shelf life once, in the header**, rather than
+  per row — `register.md:10-19`, *"EVERY VERDICT IN THIS FILE HAS A SHELF
+  LIFE"*, with the reason for stating it once given in the file: a
+  per-row staleness note is a hand-written claim beside a generated one.
+  Each verdict's date lives in its sidecar's `fetched:` field, which the
+  header points at.
+
+  **The first instance is the ADMS pair, and it is stronger than a
+  document changing under a binding.** Independently reproduced:
+  `https://www.w3.org/ns/adms.ttl` returns **HTTP/2 307** with
+  `location: https://uri.semic.eu/w3c/ns/adms.ttl`, and SEMIC returns
+  **200 `text/turtle`, 12,687 bytes, `last-modified: Mon, 22 May 2023`**
+  — unchanged for three years while this repository's cache moved
+  11,134 → 12,687 bytes inside one session. So the artifact was not
+  edited; a server changed its mind about who serves it, between two
+  fetches, and every byte-level check in the tree agreed before and
+  after. The measurement was correct at both timestamps and described
+  different worlds, which is the case neither [C22](#c22) — instruments
+  that cannot see — nor [C23](#c23) — claims made without looking —
+  reaches.
+
+  **The falsifier was executed and the nearest miss is recorded**, so a
+  later reader knows it is not merely plausible. The closest candidate in
+  the tree is the `structural` decay class, which the register's own
+  table characterises as decaying *"never — a host with no TLD cannot
+  resolve for anyone"* (`deo`, `http://knowwheregraph/ontology/deo#`).
+  It does **not** satisfy the falsifier: the verdict is still contingent
+  on the world rather than on this repository — registering the TLD would
+  move it — so it decays slowly, not never. No verdict in the register
+  currently meets the falsifier's terms.
+- **Updated:** 2026-08-07
+- **Promotion note:** promoted by O under FALSIFIER §6 at the implement
+  gate of 2026-08-07, from H's proposal in the same gate message. The
+  statement and the Falsifier are **H's wording, accepted as proposed**;
+  the disposal, the verification and the write are O's, per §1's
+  disposed-field rule. It generalises beyond the gate because it
+  constrains the register — an artifact that outlives every gate — rather
+  than this round's work, and no existing entry covers it: C22 is about
+  an instrument that cannot see its own failure mode, C23 about a claim
+  made without running the check, and this about a check that ran, was
+  correct, and expired.
+- **Note:** C26 is about the shelf life of the measurement. It says
+  nothing about whether a guard cited as *keeping a measurement current*
+  actually does so — that is C22, and [C22](#c22) row 24 is this same
+  round's instance, where `DIGEST_PEER` was offered as what keeps the
+  ADMS sentence true and is green by construction while the redirect
+  stands.

@@ -159,12 +159,17 @@ SOURCES = [
     # banner, not from a fetch of the retired document — that is no longer
     # reachable.
     #
-    # `CLAUDE.md`'s ADMS line needs no disambiguation **while the redirect
-    # stands and the digests agree**, and `DIGEST_PEER` is what keeps that
-    # sentence true. If the 307 is withdrawn, w3.org begins serving a
-    # SECOND document and the guard fires — which only reads as the guard
-    # working if the sentence says two URLs resolve to one body rather
-    # than that one document exists.
+    # **The conclusion this comment used to draw is DELETED, not
+    # repaired.** It read that `CLAUDE.md`'s ADMS line needs no
+    # disambiguation while the redirect stands. **`CLAUDE.md` has never
+    # named ADMS** — `grep -niE 'adms|semic'` matches nothing and
+    # `git log --all -S adms -- CLAUDE.md` finds no commit. Its bound list
+    # is SOSA, PROV-O, QUDT and CF, and the paragraph explicitly declines
+    # to make per-namespace claims at all. Three passes were spent
+    # sharpening a sentence about a referent that does not exist.
+    #
+    # What the peer check is for, stated without it: if the redirect is
+    # withdrawn, w3.org serves a second document and the guard says so.
     #
     # The row stays. It cost 12 KB and one register row to replace an
     # argument with a measurement, and it keeps replacing it: `DIGEST_PEER`
@@ -418,9 +423,8 @@ DIGEST_PEER = {
     ("adms", "adms-semic"):
         "W3C 307s to SEMIC, so both URLs currently resolve to one body. "
         "A 307 is the origin DECLINING to serve its own copy, revocably — "
-        "if w3.org resumes serving it the digests part, a second document "
-        "is back in play, and `CLAUDE.md`'s ADMS line has to say which "
-        "one is meant",
+        "if w3.org resumes serving it, a second document is back in play "
+        "and the register must stop implying otherwise",
 }
 
 SIDECAR_NOTE = {
@@ -1251,19 +1255,61 @@ def sync_register():
               "an emptied generator still equals itself."
               % (len(failed) + len(orphans), CACHE), file=sys.stderr)
         return 1
-    # DIGEST_PEER: pairs asserted to resolve to one body. Checked here so
-    # the claim is re-established on every run rather than remembered from
-    # the run that made it.
+    # PEER CHECK — on `resolved_url`, NOT on bytes.
+    #
+    # B8: comparing digests could not fail while the redirect stood.
+    # `fetch()` runs `curl -sS -L`, so both rows fetch the SAME endpoint
+    # and their byte identity is ENTAILED by the 307 — the guard asserted
+    # a consequence of the thing it was meant to watch. The decisive state
+    # is the redirect being withdrawn with the bodies still identical: the
+    # digest check stays silent, and at that instant the licensed sentence
+    # has degraded from *two URLs resolve to one body* to *two bodies that
+    # agree today* — the phrasing retracted at pass 1, reappearing inside
+    # the guard offered as the retraction's support.
+    #
+    # `resolved_url` was already in every sidecar and read by nothing:
+    # F10 closed as a field and not as an assertion, the fourth recurrence
+    # of that distinction. It is the datum that settles it.
+    import yaml as _yp
     for (x, y), why in DIGEST_PEER.items():
-        px, py = CACHE / ("%s.ttl" % x), CACHE / ("%s.ttl" % y)
-        if not (px.exists() and py.exists()):
+        sx, sy = (CACHE / ("%s.provenance.yaml" % k) for k in (x, y))
+        if not (sx.exists() and sy.exists()):
             continue
-        dx = hashlib.sha256(px.read_bytes()).hexdigest()[:12]
-        dy = hashlib.sha256(py.read_bytes()).hexdigest()[:12]
-        if dx != dy:
+        dx, dy = (_yp.safe_load(s.read_text()) or {} for s in (sx, sy))
+        ex, ey = dx.get("resolved_url"), dy.get("resolved_url")
+        if ex is None or ey is None:
             incoherent.append(
-                "%s and %s are asserted to resolve to one body and do not — "
-                "%s vs %s. %s" % (x, y, dx, dy, why))
+                "%s/%s: no `resolved_url` — the peer claim cannot be "
+                "checked, and an unfalsifiable guard is not a guard"
+                % (x, y))
+        elif ex == ey:
+            # Endpoints agree, so the bodies came from ONE URL and can
+            # differ only if the two fetches straddled a change there.
+            # Kept as a SECONDARY check: B8's finding was that bytes alone
+            # cannot fail while the redirect stands, not that bytes are
+            # uninformative. Asserting both is strictly stronger than
+            # either, and this half is C26's shelf-life event caught in
+            # the act.
+            px, py = CACHE / ("%s.ttl" % x), CACHE / ("%s.ttl" % y)
+            if px.exists() and py.exists() \
+                    and px.read_bytes() != py.read_bytes():
+                incoherent.append(
+                    "%s and %s resolve to one endpoint (%s) and their "
+                    "cached bodies DIFFER — the two fetches straddled a "
+                    "change at that URL, so neither describes it now"
+                    % (x, y, ex))
+        else:
+            px, py = CACHE / ("%s.ttl" % x), CACHE / ("%s.ttl" % y)
+            same = (px.exists() and py.exists()
+                    and px.read_bytes() == py.read_bytes())
+            incoherent.append(
+                "%s and %s no longer resolve to one endpoint — %s vs %s. "
+                "The bodies %s. The licensed statement has degraded from "
+                "*two URLs resolve to one body* to *two %s*. %s"
+                % (x, y, ex, ey,
+                   "still agree" if same else "differ too",
+                   "bodies that agree today" if same else "diverged documents",
+                   why))
     bad = check_tables(out) + incoherent
     text = "\n".join(out) + "\n"
     if CHECK_ONLY[0]:
@@ -1521,8 +1567,13 @@ def main():
                # be a **307 Temporary Redirect** to SEMIC, discovered by
                # hand because nothing recorded it. A hand probe leaves no
                # sidecar; this does.
-               json.dumps(r[10] if len(r) > 10 and r[10] != src_of(key)
-                          else "same as source_url"),
+               # ALWAYS the real endpoint. This wrote the sentinel
+               # `"same as source_url"` when the two agreed, which reads
+               # well and cannot be compared — so the first check to need
+               # the field had to decode it first. A field written for a
+               # reader rather than for a check is F10's problem in the
+               # repair for F10's problem.
+               json.dumps(r[10] if len(r) > 10 and r[10] else src_of(key)),
                json.dumps(DISPOSITION.get(deref, "untested"))))
 
     out = ["# External vocabulary cache — manifest", "",
