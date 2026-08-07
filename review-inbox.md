@@ -661,3 +661,46 @@ at both timestamps and described different worlds.
 **Unchanged and standing:** state 8, the `content` / `not-a-graph` split,
 the 9/9 and 6/6 matrices, and the F25 placement.
 
+
+### Second amendment — the same sentence, third pass — 2026-08-07
+
+**A 307 does not license *"one document by construction today"* either.**
+It says *this URL is temporarily serving from that URL*. It does not say
+the origin has no document of its own — only that it is not serving it
+right now.
+
+**And my own evidence names the second document.** The paragraph above
+records an 11,134-byte w3.org file carrying `# deprecated - now
+maintained by Semic`, and says w3.org stopped serving it. That document
+existed. A sentence asserting there is one document contradicts the
+timeline offered two paragraphs earlier as its support.
+
+**Restated to what the measurement carries:**
+
+> **Two URLs currently resolve to one body, revocably.**
+
+**The practical difference, and it is why the phrasing matters.** If the
+307 is withdrawn, w3.org begins serving a **second** document and
+`DIGEST_PEER` fires. That is the guard working — but it only *reads* as
+the guard working if the sentence says *two URLs resolve to one body*
+rather than *one document exists*. Under the strong phrasing the guard
+firing looks like an anomaly; under the correct one it looks like the
+thing it was built for.
+
+**Restated at six sites**, not only in the prose that stated it: the
+source comment, `DIGEST_PEER`'s rationale and its two code comments, the
+divergence message, and the `CLAUDE.md`-line conclusion. Searched for the
+retracted phrasing rather than the replacement.
+
+**Third pass over one sentence, and the record of why each failed:**
+
+| Pass | Claimed | Failed because |
+|---|---|---|
+| 1 | *they are ONE document* | `cmp`-identical bytes licenses *agree today* |
+| 2 | *one document by construction today* | a 307 is the origin declining to serve, not the absence of a document |
+| 3 | *two URLs resolve to one body, revocably* | — |
+
+Each time the guard I had already written was correct and the sentence
+above it claimed more. **`DIGEST_PEER` has been right since it was
+written**; only the prose has moved.
+

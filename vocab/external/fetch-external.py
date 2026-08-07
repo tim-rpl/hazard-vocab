@@ -137,10 +137,17 @@ SOURCES = [
     #        location: https://uri.semic.eu/w3c/ns/adms.ttl
     #
     # Not a 200, so they are not two independently served files. Not a
-    # 301/302 either — **307 is explicitly TEMPORARY**, so it is one
-    # document *by construction today* with the origin reserving the right
-    # to serve its own again. `resolved_url` in each sidecar records this
-    # rather than leaving it to a hand probe with no residue.
+    # 301/302 either. **A 307 says THIS URL IS TEMPORARILY SERVING FROM
+    # THAT URL** — it does not say the origin has no document of its own,
+    # only that it is not serving it right now.
+    #
+    # So the licensed statement is: **two URLs currently resolve to one
+    # body, revocably.** Not *there is one document* — the evidence below
+    # names a w3.org document that existed and was retired, which is the
+    # second document the strong phrasing denies. Third restatement of
+    # this sentence; the first two each claimed more than the measurement
+    # carried. `resolved_url` in each sidecar records the redirect rather
+    # than leaving it to a hand probe with no residue.
     #
     # And the timeline is now exact. SEMIC's file carries
     # `last-modified: Mon, 22 May 2023`, unchanged for three years, while
@@ -154,8 +161,10 @@ SOURCES = [
     #
     # `CLAUDE.md`'s ADMS line needs no disambiguation **while the redirect
     # stands and the digests agree**, and `DIGEST_PEER` is what keeps that
-    # sentence true. A 307 is revocable by definition, which is precisely
-    # why the guard is not redundant.
+    # sentence true. If the 307 is withdrawn, w3.org begins serving a
+    # SECOND document and the guard fires — which only reads as the guard
+    # working if the sentence says two URLs resolve to one body rather
+    # than that one document exists.
     #
     # The row stays. It cost 12 KB and one register row to replace an
     # argument with a measurement, and it keeps replacing it: `DIGEST_PEER`
@@ -402,15 +411,16 @@ def fetch(url):
 # could not be counted (F14) — but the shape of a URI is not a category,
 # and the alternative is that someone redoes the reasoning.
 # Sources that MUST cache byte-identical payloads, and why. A pair here
-# asserts a claim about the world — *these two URLs serve one document* —
+# asserts a claim about the world — *these two URLs resolve to one body* —
 # which is true when measured and can stop being true silently. The
 # register would then carry two rows that agree by habit.
 DIGEST_PEER = {
     ("adms", "adms-semic"):
-        "W3C 307s to SEMIC, so these are one document today. A 307 is "
-        "TEMPORARY by definition: if w3.org resumes serving its own copy "
-        "the digests part, the migration has reopened, and `CLAUDE.md`'s "
-        "ADMS line has to say which one is meant",
+        "W3C 307s to SEMIC, so both URLs currently resolve to one body. "
+        "A 307 is the origin DECLINING to serve its own copy, revocably — "
+        "if w3.org resumes serving it the digests part, a second document "
+        "is back in play, and `CLAUDE.md`'s ADMS line has to say which "
+        "one is meant",
 }
 
 SIDECAR_NOTE = {
@@ -1241,7 +1251,7 @@ def sync_register():
               "an emptied generator still equals itself."
               % (len(failed) + len(orphans), CACHE), file=sys.stderr)
         return 1
-    # DIGEST_PEER: pairs asserted to serve one document. Checked here so
+    # DIGEST_PEER: pairs asserted to resolve to one body. Checked here so
     # the claim is re-established on every run rather than remembered from
     # the run that made it.
     for (x, y), why in DIGEST_PEER.items():
@@ -1252,7 +1262,7 @@ def sync_register():
         dy = hashlib.sha256(py.read_bytes()).hexdigest()[:12]
         if dx != dy:
             incoherent.append(
-                "%s and %s are asserted to be one document and are not — "
+                "%s and %s are asserted to resolve to one body and do not — "
                 "%s vs %s. %s" % (x, y, dx, dy, why))
     bad = check_tables(out) + incoherent
     text = "\n".join(out) + "\n"
