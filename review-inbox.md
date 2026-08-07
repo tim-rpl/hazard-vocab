@@ -599,3 +599,65 @@ change in this repository.
 whether `cmp`-identical bytes today licenses *one document* rather than
 *two documents that agree today* — and of state 8's expectation.
 
+
+### Amendment to this message — the ADMS identity claim is restated — 2026-08-07
+
+Amended in place under the un-reviewed exception, **before relay**.
+
+**The message asserted the strong form three times and requested
+falsification of it.** *"They are ONE document"*, *"the new file **is**
+the SEMIC file"*, *"Not two documents diverging"* — and
+`cmp`-identical bytes licenses **two documents that agree today**, not
+one document.
+
+**The tell was in the message itself.** `DIGEST_PEER` asserts the pair
+on every run, which is only worth writing if divergence is possible — so
+**the guard was built for the weak reading while the prose stated the
+strong one.** That is this round's own shape, in my own text.
+
+**The ten-second test, run:**
+
+```
+https://www.w3.org/ns/adms.ttl
+  -> HTTP/2 307 Temporary Redirect
+     location: https://uri.semic.eu/w3c/ns/adms.ttl
+```
+
+**A third answer, and neither branch of the dichotomy.** Not two
+independent 200s, so not two files that merely agree. Not a 301/302
+either — **307 is explicitly temporary**, so this is one document *by
+construction today*, with the origin reserving the right to serve its own
+again.
+
+**Restated to what that licenses:** `CLAUDE.md`'s ADMS line needs no
+disambiguation **while the redirect stands and the digests agree**, and
+`DIGEST_PEER` is what keeps that sentence true. **A 307 is revocable by
+definition, which is exactly why the guard is not redundant** — a better
+sentence to hand a reader than the strong one, because it names what the
+guard is for.
+
+**And the timeline is now exact rather than inferred loosely.** SEMIC's
+file carries `last-modified: Mon, 22 May 2023`, unchanged for three
+years, while this cache moved 11,134 → 12,687 bytes inside one session.
+So **nothing was edited: w3.org turned the redirect on between two of our
+fetches**, and the 11,134-byte copy carrying `# deprecated - now
+maintained by Semic` was w3.org's own, which it has stopped serving.
+Stated as inference — from the last-modified date and the banner — not
+from a fetch of the retired document, which is no longer reachable.
+
+**The hand probe left no residue, so it is now a field.** `fetch()`
+followed redirects and discarded the final URL, so a source that
+redirects was indistinguishable from one that does not.
+**`resolved_url:`** is written to every sidecar — `adms` records
+`https://uri.semic.eu/w3c/ns/adms.ttl`, `adms-semic` records `same as
+source_url`. F10's problem, closed in the place it appeared.
+
+**The proposed claim is strengthened rather than weakened by this.** Its
+first instance is no longer *a document changed under a binding* but
+**a server changed its mind about who serves the document, and every
+byte-level check agreed before and after.** The measurement was correct
+at both timestamps and described different worlds.
+
+**Unchanged and standing:** state 8, the `content` / `not-a-graph` split,
+the 9/9 and 6/6 matrices, and the F25 placement.
+

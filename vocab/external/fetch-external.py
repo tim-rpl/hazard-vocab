@@ -124,13 +124,38 @@ SOURCES = [
     # So both are cached and the question was answered MECHANICALLY rather
     # than argued.
     #
-    # **ANSWERED: they are ONE document.** Both URLs serve 12,687 bytes,
-    # digest `c79e72752851`, byte-identical by `cmp`, and both declare
-    # 2/2 terms as typed subjects under `http://www.w3.org/ns/adms#`. So
-    # the W3C edit WAS the migration completing — the new file is the
-    # SEMIC file, and the deprecation banner went away because the
-    # handover finished. Not two documents diverging, and no switch to
-    # make. `CLAUDE.md`'s ADMS line needs no disambiguation.
+    # **ANSWERED, and the strong form is not licensed.** Both URLs serve
+    # 12,687 bytes, digest `c79e72752851`, byte-identical by `cmp`, both
+    # declaring 2/2 terms as typed subjects under `w3.org/ns/adms#`.
+    #
+    # `cmp`-identical bytes licenses *two documents that agree today*, not
+    # *one document*. The test that settles it is the redirect, and it
+    # answers a **third** way:
+    #
+    #   `https://www.w3.org/ns/adms.ttl`
+    #     -> HTTP/2 **307 Temporary Redirect**
+    #        location: https://uri.semic.eu/w3c/ns/adms.ttl
+    #
+    # Not a 200, so they are not two independently served files. Not a
+    # 301/302 either — **307 is explicitly TEMPORARY**, so it is one
+    # document *by construction today* with the origin reserving the right
+    # to serve its own again. `resolved_url` in each sidecar records this
+    # rather than leaving it to a hand probe with no residue.
+    #
+    # And the timeline is now exact. SEMIC's file carries
+    # `last-modified: Mon, 22 May 2023`, unchanged for three years, while
+    # this cache moved 11,134 -> 12,687 bytes within one session. So
+    # nothing was EDITED: **w3.org turned the redirect on between two of
+    # our fetches**, and the 11,134-byte copy carrying
+    # `# deprecated - now maintained by Semic` was w3.org's own, which it
+    # has stopped serving. Inference, from the last-modified date and the
+    # banner, not from a fetch of the retired document — that is no longer
+    # reachable.
+    #
+    # `CLAUDE.md`'s ADMS line needs no disambiguation **while the redirect
+    # stands and the digests agree**, and `DIGEST_PEER` is what keeps that
+    # sentence true. A 307 is revocable by definition, which is precisely
+    # why the guard is not redundant.
     #
     # The row stays. It cost 12 KB and one register row to replace an
     # argument with a measurement, and it keeps replacing it: `DIGEST_PEER`
@@ -382,9 +407,10 @@ def fetch(url):
 # register would then carry two rows that agree by habit.
 DIGEST_PEER = {
     ("adms", "adms-semic"):
-        "W3C and SEMIC serve the same ADMS document; a divergence means "
-        "the migration reopened and `CLAUDE.md`'s ADMS line has to say "
-        "which one is meant",
+        "W3C 307s to SEMIC, so these are one document today. A 307 is "
+        "TEMPORARY by definition: if w3.org resumes serving its own copy "
+        "the digests part, the migration has reopened, and `CLAUDE.md`'s "
+        "ADMS line has to say which one is meant",
 }
 
 SIDECAR_NOTE = {
@@ -1307,7 +1333,7 @@ def main():
 
         if not body:
             rows.append((key, ns, status, 0, "-", "-", "no payload",
-                         "**no** — no payload", "no-probe", "—"))
+                         "**no** — no payload", "no-probe", "—", final))
             continue
 
         found = terms_found(body, terms)
@@ -1361,7 +1387,8 @@ def main():
         rows.append((key, ns, status, len(body),
                      hashlib.sha256(body).hexdigest()[:12],
                      ctype.split(";")[0] or "-", verdict,
-                     "**%s** — %s" % (deref, detail), reason, strong))
+                     "**%s** — %s" % (deref, detail), reason, strong,
+                     final))
 
     # PROVENANCE SIDECARS. One per graph, carrying exactly the fields
     # README.md specifies. Written from the same measurement that fills
@@ -1471,12 +1498,21 @@ def main():
             "dereferences:  %s\n"
             "detail:        %s\n"
             "dereference_reason: %s\n"
+            "resolved_url:  %s\n"
             "disposition:   %s\n"
             % (json.dumps(src_of(key)), json.dumps(stamp),
                json.dumps(r[2]), json.dumps(r[5]), json.dumps(r[4]),
                json.dumps(ns), json.dumps(deref),
                json.dumps(r[7].split("—", 1)[-1].strip()),
                json.dumps(r[8]),
+               # The URL curl ENDED at. `fetch()` follows redirects and
+               # this was thrown away, so a source that redirects looked
+               # identical to one that does not — and `adms` turned out to
+               # be a **307 Temporary Redirect** to SEMIC, discovered by
+               # hand because nothing recorded it. A hand probe leaves no
+               # sidecar; this does.
+               json.dumps(r[10] if len(r) > 10 and r[10] != src_of(key)
+                          else "same as source_url"),
                json.dumps(DISPOSITION.get(deref, "untested"))))
 
     out = ["# External vocabulary cache — manifest", "",
