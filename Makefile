@@ -69,13 +69,17 @@ lint:
 	@# does not exist sends a reader nowhere.
 	@$(BIN)python scripts/drift-lint.py vocab/core/
 	@echo "P: the wave view is derived from the item table"
-	@if [ -f docs/plan/derive-waves.py ]; then \
-		$(BIN)python docs/plan/derive-waves.py --check; \
-	else echo "  note: docs/plan/derive-waves.py not present — this check inspected nothing"; fi
+	@test -f docs/plan/derive-waves.py \
+		|| { echo "FAIL: docs/plan/derive-waves.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
+	@$(BIN)python docs/plan/derive-waves.py --check
 	@echo "S: the surface counts are derived from design/surface.yaml"
-	@if [ -f design/derive-surface.py ]; then \
-		$(BIN)python design/derive-surface.py --check; \
-	else echo "  note: design/derive-surface.py not present — this check inspected nothing"; fi
+	@test -f design/derive-surface.py \
+		|| { echo "FAIL: design/derive-surface.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
+	@$(BIN)python design/derive-surface.py --check
+	@echo "X: the external register is what its generator emits"
+	@test -f vocab/external/fetch-external.py \
+		|| { echo "FAIL: vocab/external/fetch-external.py is missing — this check inspected nothing, and the file is tracked"; exit 1; }
+	@$(BIN)python vocab/external/fetch-external.py --check
 	@echo "lint ok"
 
 lint-selftest:

@@ -1720,3 +1720,72 @@ that with an instance than with an argument. Held for the next gate.
 above — in particular whether the arity check can be defeated by a table
 whose header row is not the first `|` line in its block.
 
+
+### Amendment to this message — A1 is closed — 2026-08-06
+
+Amended in place under the protocol's one exception: this gate is
+un-reviewed. **A1 stands above as written and is now closed**; the text
+is left rather than edited away, because a finding withdrawn silently is
+worse than one never raised.
+
+**Tooling change, declared under `CLAUDE.md`.** The human changed
+`Makefile` and `CLAUDE.md`. I did not make the change and verified it
+rather than trusting it.
+
+**What changed in `Makefile`:**
+
+1. A new stanza, `X: the external register is what its generator emits`,
+   running `vocab/external/fetch-external.py --check`.
+2. **Both pre-existing generator stanzas changed from note to fail.**
+   `derive-waves.py` and `derive-surface.py` used
+   `if [ -f … ]; then … else echo note; fi`; all three now
+   `test -f … || { echo FAIL …; exit 1; }`.
+
+**What verifies it — mutation, three subjects, run by me:**
+
+| Generator hidden | `make` exit | Output |
+|---|---|---|
+| `docs/plan/derive-waves.py` | **2** | `FAIL: … is missing — this check inspected nothing, and the file is tracked` |
+| `design/derive-surface.py` | **2** | same, named |
+| `vocab/external/fetch-external.py` | **2** | same, named |
+
+Each restored after its run; `git status` clean of them afterwards.
+**And the positive direction, which the absence test cannot establish:**
+a one-line hand-edit of `register.md` → `make lint` **exit 2**, reporting
+`register.md: DRIFTED from its generator — 1 line(s) differ, first at
+81`. Restored → exit 0. So the target both exists and fires.
+
+**My framing was wrong and the correction is the substantive part.** I
+proposed *make all three exit 1*. The human's split is the real
+distinction and it is now an invariant in `CLAUDE.md`:
+
+| Case | Verdict |
+|---|---|
+| the **input** is empty — `vocab/core/` holds one `.gitkeep` | **note and pass** — an expected state |
+| the **tool** is absent — a tracked generator is not on disk | **fail** — the tree is broken |
+
+*"Both print the same sentence and mean opposite things."* The soft
+branches were not wrong for the case they were written for; they were
+wrong for this one, and the output could not tell them apart. Uniform
+severity would have made `make lint` fail on every run until
+`vocab/core/` exists — a repair that breaks the build is not a repair.
+
+`CLAUDE.md` also now carries: **every generator runs in `make lint`.**
+
+**One consequence to expect, stated so the first occurrence is not read
+as a defect.** `make lint` will now fail whenever a sidecar changes and
+the register is not regenerated. That is the intended trade: the
+register is wholly generated, so *up to date* means byte-identical to
+what the generator emits, and the recovery is to regenerate, never to
+edit the file.
+
+**A2 stays open, and sharpened.** The target closes the *running* half.
+It does not close *no fixture covers the register generator at all* —
+`docs/plan/` has 19 fixtures and 12 mutations inside `make lint`;
+`vocab/external/` has mutations I run from a scratchpad and delete.
+**Those are exactly the residue-free probes F10 was filed about**: a
+probe that leaves nothing in the repository is one nothing re-runs, and
+F10 was raised twice as the proximate reason something shipped. The
+asymmetry is now the only remaining instance of the gap that produced
+three of this round's blocks, and it is declared rather than closed.
+

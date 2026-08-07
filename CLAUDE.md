@@ -188,6 +188,22 @@ file rather than embedding it. Any generator that cannot find its target
 absent is the "inspected nothing" shape inside a generator instead of a
 check.
 
+**And every generator runs in `make lint`.** An instrument nobody
+invokes is an instrument nobody runs, and a check that exists only as a
+command someone must remember is not a guard. Three defects shipped in
+one round because the register generator's own checks had no target.
+
+**"Inspected nothing" splits two ways, and only one of them passes.**
+
+| Case | Verdict | Why |
+|---|---|---|
+| the **input** is empty — `vocab/core/` holds one `.gitkeep` | **note and pass** | an expected state; failing would block every run until vocabulary exists. Say so in the output: *"no schema files found — these rules inspected nothing."* |
+| the **tool** is absent — a tracked generator is not on disk | **fail** | not an expected state. The tree is broken, and a soft note there reports a clean run over a missing check |
+
+Both print the same sentence and mean opposite things, which is why they
+must be distinguished at the point of the check rather than left to a
+reader.
+
 **A declared change is verified by a second instrument, never by the
 one that made it.** An editing script reporting success is not evidence
 the edit landed — a bare `str.replace` against a string that has moved
