@@ -484,6 +484,7 @@ REGISTER = HERE / "register.md"
 
 # set from argv in main(); a one-element list so the writers can read it
 CHECK_ONLY = [False]
+CACHE_STATE = [None]      # set once in main(); see cache_state()
 
 
 # The causes of non-dereference and how each decays. ONE source for both
@@ -496,6 +497,76 @@ DECAY = [
     ("content", "200, but the probe term is not defined in what is served"),
     ("mints-nothing", "200 and a graph, but no term under its own namespace"),
 ]
+
+
+def manifest_comparable(text):
+    """The part of `manifest.md` a check-mode run can legitimately compare.
+
+    B10: `manifest.md` had NO comparison at all. O replaced line 7 — header
+    prose — with *"THIS LINE WAS HAND-EDITED BY O AND IS FALSE."* and
+    `make lint` exited 0: a tracked, wholly generated file of record
+    carrying a false hand-written line at a green build.
+
+    It cannot be compared whole, and that is the honest reason it had no
+    check rather than an excuse for none. Three per-row cells are live
+    measurements a `--check` run does not make — **HTTP**, **Type** and
+    **Namespace serves** read `cache`, `-` and `skipped` offline — and the
+    `## Problems` section is a report about THIS run. Everything else is
+    generator-controlled and must match: all header prose, and per row the
+    vocabulary, URL, byte count, digest and content verdict.
+
+    So the comparison is narrowed to what is knowable, and says so. A
+    narrowed check that names its scope is not the same artifact as no
+    check; the failure it cannot see is stated instead of implied.
+    """
+    LIVE = {3, 6, 9}          # 1-indexed: HTTP, Type, Namespace serves
+    out = []
+    for line in text.split("## Problems")[0].splitlines():
+        if line.startswith("| `"):
+            cells = line.strip().strip("|").split("|")
+            cells = ["" if i + 1 in LIVE else c for i, c in enumerate(cells)]
+            line = "|%s|" % "|".join(cells)
+        out.append(line)
+    # rstrip: the committed file has a blank line before `## Problems` and
+    # the in-memory form is compared before that heading is appended, so
+    # the two differ by one trailing empty line and nothing else. That
+    # reported `0 line(s) differ` — a drift report naming no drifted line,
+    # which is C11's absent-versus-zero in a diagnostic.
+    return "\n".join(out).rstrip()
+
+
+def cache_state():
+    """`unfetched` | `complete` | `partial`, and what the words mean.
+
+    F19: `make lint` reads an input that is not in the repository —
+    `graphs/*.ttl` is gitignored with four exceptions — so a fresh clone
+    produced 32 problems, none of which described anything wrong.
+
+    `CLAUDE.md`'s split resolves it: the cache is INPUT, not tooling, and
+    an unfetched cache is the same shape as `vocab/core/` holding one
+    `.gitkeep`. But the literal test *zero `.ttl`* is never true on a
+    clone — the four hand-supplied graphs are tracked because they cannot
+    be re-fetched. So the test is **cached == tracked**: exactly what a
+    checkout gives you and nothing a fetch would have added.
+
+    That keeps the clause the split needs. A PARTIAL cache — some fetched
+    graphs present, others missing — is not emptiness and stays caught,
+    and so does the deletion of a tracked graph, which is a broken tree
+    rather than an unrun fetch.
+    """
+    cached = {p.name for p in CACHE.glob("*.ttl")}
+    try:
+        out = subprocess.run(["git", "ls-files", "graphs/*.ttl"],
+                             cwd=str(CACHE.parent), capture_output=True,
+                             text=True, timeout=10)
+        tracked = {pathlib.Path(l).name for l in out.stdout.split() if l}
+    except Exception:
+        tracked = set()
+    if cached == tracked:
+        return "unfetched", cached, tracked
+    if cached >= {"%s.ttl" % s[0] for s in SOURCES}:
+        return "complete", cached, tracked
+    return "partial", cached, tracked
 
 
 def check_tables(lines):
@@ -511,10 +582,28 @@ def check_tables(lines):
     def arity(line):
         return len(line.strip().strip("|").split("|"))
 
-    problems, header, sep = [], None, False
+    # B9: this returned `[]` for a table with a header, a separator and
+    # ZERO rows — the same value it returns for a correct table. It was
+    # commissioned to ask *did this table render what it declared* and it
+    # asked *did the rows disagree with the header*, which are the same
+    # question on every input except the empty one. And the empty one is
+    # reachable: with the `.ttl` cache gone and the sidecars present,
+    # `rows` is empty while `failed` and `orphans` are not, so the bail
+    # below did not fire and the register was REWRITTEN as a header with
+    # no rows, at a clean arity check and a clean drift check — a
+    # generator emptied of input still equals itself.
+    def close(problems, header, rows_seen):
+        if header is not None and rows_seen == 0:
+            problems.append(
+                "register.md: the table at line %d has a header and NO "
+                "rows. A table that rendered nothing is not a table that "
+                "agreed with its header." % (header[0] + 1))
+
+    problems, header, sep, rows_seen = [], None, False, 0
     for i, line in enumerate(lines):
         if not line.startswith("|"):
-            header, sep = None, False
+            close(problems, header, rows_seen)
+            header, sep, rows_seen = None, False, 0
             continue
         if header is None:
             header = (i, arity(line))
@@ -526,11 +615,13 @@ def check_tables(lines):
                                 "cells, header declares %d"
                                 % (header[0] + 1, arity(line), header[1]))
             continue
+        rows_seen += 1
         if arity(line) != header[1]:
             problems.append(
                 "register.md line %d: row emits %d cells, its header at "
                 "line %d declares %d — the overflow renders nowhere"
                 % (i + 1, arity(line), header[0] + 1, header[1]))
+    close(problems, header, rows_seen)       # a table ending the file
     return problems
 
 
@@ -771,6 +862,31 @@ def sync_register():
               "written. A register generated from nothing is an empty "
               "table that reports no problems." % CACHE, file=sys.stderr)
         return 1
+    # B9: the bail above was the ONLY thing standing between an emptied
+    # cache and a rewritten register, and it could not fire in the state
+    # that matters — sidecars present, graphs gone, so `failed` and
+    # `orphans` are non-empty while `rows` is empty. Its own comment
+    # describes exactly the file it then let through. The register's rows
+    # come from the graphs; a register with no rows is not a register.
+    state, cached, tracked = cache_state()
+    if state == "unfetched":
+        # F19. The cache is INPUT and nobody has fetched it, which is the
+        # `.gitkeep` case one directory over: note what was inspected and
+        # pass. Refusing to WRITE is the other half — a register built
+        # from an unfetched cache would replace 35 measured rows with the
+        # handful a checkout ships, which is B5's family.
+        print("register.md: not %s — the cache is unfetched (%d cached, "
+              "all of them tracked). This check inspected nothing. Run "
+              "`fetch-external.py` to populate it."
+              % ("checked" if CHECK_ONLY[0] else "written", len(cached)))
+        return 0
+    if not rows and (failed or orphans):
+        print("FAIL  %d sidecar(s) under %s and NO cached graph — "
+              "register.md NOT written. Every row of the register comes "
+              "from a `.ttl`; this would emit a header with no rows, and "
+              "an emptied generator still equals itself."
+              % (len(failed) + len(orphans), CACHE), file=sys.stderr)
+        return 1
     bad = check_tables(out) + incoherent
     text = "\n".join(out) + "\n"
     if CHECK_ONLY[0]:
@@ -820,6 +936,7 @@ def main():
     args = ap.parse_args()
     CHECK_ONLY[0] = args.check
     CACHE.mkdir(parents=True, exist_ok=True)
+    CACHE_STATE[0] = cache_state()[0]
     stamp = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
                            capture_output=True, text=True).stdout.strip()
 
@@ -829,7 +946,13 @@ def main():
         path = CACHE / ("%s.ttl" % key)
         if args.check:
             if not path.exists():
-                problems.append("%s: not cached" % key)
+                # F19: on a fresh clone this fired 31 times and none of the
+                # 31 described anything wrong — the cache is gitignored, so
+                # `not cached` is the EXPECTED state of a tree nobody has
+                # run the fetch in. A problem list whose entries are all
+                # expected trains a reader to stop reading it.
+                if CACHE_STATE[0] != "unfetched":
+                    problems.append("%s: not cached" % key)
                 continue
             body, status, final, ctype = path.read_bytes(), "cache", url, "-"
         else:
@@ -1021,6 +1144,24 @@ def main():
     if reg_rc:
         problems.append("register.md: see the lines above — it is generated, "
                         "and it is not what its generator emits")
+    # B10: the manifest is generated and was never compared to anything.
+    # Narrowed to what an offline run can know — see manifest_comparable().
+    if args.check and CACHE_STATE[0] != "unfetched":
+        if not MANIFEST.exists():
+            problems.append("manifest.md: absent, and it is generated")
+        else:
+            want = manifest_comparable("\n".join(out) + "\n")
+            have = manifest_comparable(MANIFEST.read_text())
+            if want != have:
+                w, h = want.splitlines(), have.splitlines()
+                d = [i for i in range(max(len(w), len(h)))
+                     if w[i:i + 1] != h[i:i + 1]]
+                problems.append(
+                    "manifest.md: DRIFTED from its generator — %d line(s) "
+                    "differ, first at %d (comparing header prose and the "
+                    "network-independent row cells; HTTP, Type and "
+                    "Namespace-serves are live measurements this mode does "
+                    "not make)" % (len(d), d[0] + 1 if d else 0))
     out += ["", "## Problems", ""]
     out += (["*(none)*"] if not problems else
             ["- %s" % p for p in problems])

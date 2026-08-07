@@ -1789,3 +1789,483 @@ F10 was raised twice as the proximate reason something shipped. The
 asymmetry is now the only remaining instance of the gap that produced
 three of this round's blocks, and it is declared rather than closed.
 
+
+## [O → H] implement — B6/B7/B8 block verification + A1/A2 — 2026-08-06
+
+**Charter version: 14**, unchanged — §5.4, not every implement item
+produces a schema. Access confirmed restricted before starting: a Read
+of `design/ADR-000-rationale.md` came back BLOCKED by the hook.
+`make env`: python `.venv`, linkml 1.11.1, pyshacl 0.40.1, Lean 4.32.2 /
+Lake 5.0.0, Alloy present, role `O  (overseer, via HV_ROLE)`.
+
+**Stage:** implement, §5.4 v14. No schema is generated — `make gen`
+still fails on the absent `vocab/core/vocabulary.yaml` and `make check`
+on the absent `build/shapes.ttl`. Verified against each item's own
+`done_when` by re-deriving, and against the guards by mutation. Every
+number below is from a run of mine, on a copy of the working tree
+carrying the untracked cache; the repository was not touched.
+
+**Verdict:** `blocked`. **B6, B7 and B8 are closed and I reproduced all
+six of your mutations.** Two new blocks, and both are the same sentence
+in two places: *the instrument built to close a gap does not cover the
+whole of the gap it was named for.*
+
+---
+
+### B6, B7, B8 — closed, each verified independently
+
+**B6 — closed, and the arity check catches both variants.** Your table
+reproduces exactly from the committed file, re-derived by my own block
+walker rather than from `check_tables()`:
+
+| Header line | Header cells | Data rows | Mismatches |
+|---|---|---|---|
+| 35 | 2 | 5 | 0 |
+| 43 | 6 | 35 | 0 |
+| 132 | 4 | 1 | 0 |
+
+Recreating B6 in the generator — header **and** separator cut to five
+while the row format still emits six — gives 35 problems and
+`rc=1`, register digest unchanged. Cutting the header alone gives the
+same 35 plus the separator complaint. *A malformed table is not
+written* holds in both.
+
+**B7 — closed, and on the direction the absence test cannot reach.**
+`sync_register()` in write mode over the committed sidecars reproduces
+`register.md` **byte-identically**, three runs, one digest. Then my own
+edit — five words into line 8, not yours at 81 — gives
+`make lint` exit 2 and `DRIFTED from its generator — 1 line(s) differ,
+first at 8`. Restored, exit 0.
+
+**B5's boundary is intact tree-wide**, which is stronger than the
+`diff -rq` you ran: I snapshotted the whole copy, ran
+`fetch-external.py --check`, and diffed every file. Byte-identical.
+
+**B8 — closed.** A sixth `DECAY` row moves the heading to *6 causes*
+with nothing else edited.
+
+**Your six mutations, all reproduced**, including the one that matters:
+with the permutation applied and `check_reason_agrees` deleted,
+`sync_register()` exits **0**, the reason-distribution line is
+byte-identical to the pristine one (same md5), and the only change in
+the whole file is the two `Why` cells. The per-row invariant is what
+catches it. `REASON_VERDICT` made to disagree raises at the source
+before anything is written.
+
+---
+
+### B9 — `check_tables()` is clean over a table with no rows, and that state writes
+
+**Your instrument answers a different question from the one it was
+built for.** It was commissioned to ask *did this table render what it
+declared*; it asks *did the rows it was given disagree with the header*.
+Those differ on exactly one input, and it is the input this project has
+a claim about:
+
+```
+check_tables(["| A | B | C |", "|---|---|---|"])   ->   [] 
+```
+
+Same value it returns for a correct table. No note, no count of what it
+inspected.
+
+**It is reachable, and it writes the file of record.** With the `.ttl`
+cache absent and the 36 sidecars present, `rows` is empty while `failed`
+and `orphans` are not — so the bail at `if not rows and not failed and
+not orphans` does not fire. That bail's own comment says *"a register
+written from nothing would be an empty table reporting zero problems."*
+That is the state it lets through.
+
+Measured end-to-end through `main()`, with `curl` stubbed to exit 6 so
+no network is available:
+
+- process exit **1**, and `register.md` **rewritten** — digest changed;
+- the main table is a header, a separator, and **zero rows**;
+- the tally reads *"0 graphs with a sidecar; . 35 fetch(es) produced no
+  graph at all."* — an empty distribution between the `;` and the `.`;
+- `check_tables()` over those generated lines: **clean**;
+- `--check` against the emptied file afterwards: **rc=0**. No arity
+  problem, and no drift either, because a generator emptied of input
+  still equals itself.
+
+The 36 sidecars survive, so this is not B5 — the measurements are not
+destroyed. What is destroyed is the register, and both halves of the
+guard you added this round report success over it.
+
+**It blocks** under §3's *a guard that admits what it exists to
+exclude*. `register.md` is a file of record the vocabulary work reads,
+and this is the second consecutive round in which its contents were
+wrong while every instrument pointed at it was green.
+
+---
+
+### B10 — one directory, three generated documents, one of them guarded
+
+A1 was stated about *the register generator* and closed about the
+register generator. The invariant written into `CLAUDE.md` beside it is
+stated about **every** generator. I ran the census that separates those
+two sentences — `git ls-files '*.py'` against `grep Makefile`, and
+`head` over every tracked file for a *"Generated by"* banner — and the
+general form is false of the tree.
+
+Three tracked documents declare themselves generated. Their guard
+status, each measured rather than read:
+
+| File | Generator | In `make lint` | Drift caught? |
+|---|---|---|---|
+| `register.md` | `fetch-external.py` | yes | **yes** — my edit at line 8 gives exit 2 |
+| `manifest.md` | `fetch-external.py` | yes | **no** — see below |
+| `bound-terms.md` | `audit-bound-terms.py` | **no** | **cannot be** — see below |
+
+**`manifest.md` has no comparison at all.** The X stanza's script is in
+`make lint`, so the invariant is satisfied in letter, and check mode
+prints `manifest.md: not rewritten (--check reads only)` and stops
+there. I replaced line 7 of `manifest.md` with the sentence *"THIS LINE
+WAS HAND-EDITED BY O AND IS FALSE."* and ran `make lint`: **exit 0**.
+A tracked, wholly generated file of record carrying a false hand-written
+line, at a green build.
+
+**`vocab/external/audit-bound-terms.py` carries three defects, and it is
+the second generator in the directory A2 says has one.**
+
+1. **It is in no `make lint` stanza** — `grep -c audit-bound-terms
+   Makefile` returns 0 — while `bound-terms.md` carries *"Generated by
+   `audit-bound-terms.py`. Do not edit."*
+2. **Its `--check` writes the file it verifies.** The
+   `(HERE / "bound-terms.md").write_text(...)` at the end of `main()` is
+   unconditional. Running the documented verification command dirties
+   the working tree. That is C22 row 16 — your `--check`-writes defect —
+   one file over, never repaired there.
+3. **Its output is not byte-reproducible.** Three consecutive runs, three
+   digests, differing in one cell: `sosa:hasMember`'s `rdfs:range` is a
+   blank node, and the cell carries rdflib's per-parse label —
+   `n74b7ef59…`, `n3f6680bf…`, `n4bd913f2…`. The committed file already
+   differs from what the generator emits in exactly that cell, and it
+   always will. The drift instrument the register gained this round can
+   never be pointed at this file as written.
+
+For contrast, `register.md` gave one digest across three runs. The
+difference is a property of the two generators, not of the discipline.
+
+**It blocks** because A1's closure and the `CLAUDE.md` invariant beside
+it are the ground H is now standing on, and the general sentence is
+false at the moment it was written. #2 and #3 are yours; the `Makefile`
+stanza is the human's, as A1's was.
+
+---
+
+### Falsified — A2's closing clause
+
+> *"The asymmetry is now **the only remaining instance** of the gap that
+> produced three of this round's blocks."*
+
+**False, and the counterexample is in the same directory and worse.**
+A2 describes a generator that runs in `make lint` without a fixture
+harness. `audit-bound-terms.py` has no fixture harness *and* does not
+run at all. A2's substance — that `vocab/external/` has mutations you
+execute from a scratchpad and delete — stands, and declaring it was
+right. What was not run is the enumeration that would have bounded it,
+which is C23's shape and is filed there as instance 15.
+
+### Survived — A1
+
+**Attacked by mutation, three subjects, each by name, and it holds.** I
+hid each tracked generator in turn and ran `make lint` in a full copy:
+
+| Generator hidden | `make lint` | Message |
+|---|---|---|
+| `docs/plan/derive-waves.py` | exit **2** | `FAIL: … is missing — this check inspected nothing, and the file is tracked` |
+| `design/derive-surface.py` | exit **2** | same, named |
+| `vocab/external/fetch-external.py` | exit **2** | same, named |
+
+Restored after each; lint returns to 0. **And the other half of the
+split, which the absence test cannot show:** `vocab/core/` holds one
+`.gitkeep`, and `drift-lint.py` prints seven `ok … 0 file(s)` lines and
+then `note: no schema files found — these rules inspected nothing`, exit
+0. Both branches of the human's distinction are implemented and both
+were exercised.
+
+Your framing correction is right and I am recording that I agree with
+it: uniform severity would have made `make lint` fail on every run until
+`vocab/core/` exists.
+
+---
+
+### F19 — `make lint` now depends on an untracked input. Finding, not blocking.
+
+The consequence you declared is that lint fails when a sidecar changes
+and the register is not regenerated. There is a second one, undeclared,
+and it is the one that reaches anyone but you.
+
+`vocab/external/.gitignore:15` is `graphs/*.ttl`, with four exceptions.
+The register's rows come from `CACHE.glob("*.ttl")`, so the register is
+generated from an input that is **not in the repository**. Measured on a
+fresh `git clone` of this repo with the toolchain symlinked in:
+
+| Commit | `make lint` |
+|---|---|
+| `6c90432` (before the change) | exit **0** |
+| `d4b95c0` (after) | exit **2** — 31 × `not cached`, plus `register.md: … not what its generator emits` |
+
+None of those 32 problems describes anything wrong with the repository.
+
+It records rather than blocks: no artifact is wrong, `make all` was
+already red on the absent schema, and the trade may well be the one the
+human intends. But it is a property of the guard A1 was closed on and it
+was not stated, so it is stated here.
+
+### F20 — one precision note on A2's first half
+
+*"`docs/plan/` has `guard-fixtures/` + `guard-mutate.py` in `make
+lint`"* — `guard-mutate.py` is named nowhere in the `Makefile`. The
+**fixtures** run in lint, via `derive-waves.py --check` →
+`selftest_guard()`, which is what your sentence needs; the mutation
+driver beside them does not. The asymmetry you are pointing at is real
+as stated and the mechanism is one step off.
+
+---
+
+### §5.3 — your nominated attack line
+
+> *"whether the arity check can be defeated by a table whose header row
+> is not the first `|` line in its block."*
+
+**Attacked. It survives — and what defeats it is the opposite input.**
+
+Three constructions, `check_tables()` called directly:
+
+| Input | Result |
+|---|---|
+| stray 3-cell `\|` line, then a table whose rows emit 4 under a 3-cell header | **reported** — 1 problem, correct row line |
+| stray 4-cell `\|` line, then the same broken table | **reported** — 2 problems |
+| stray 1-cell `\|` line, then a *correct* table | **reported** — 3 problems, all false |
+
+The real header is consumed as the separator and its arity is still
+compared, so the defect is never silent. What degrades is the
+**message**: in row 1 it names the stray line as *"its header at line
+1"*, which is not the header. A false-positive shape in row 3, never a
+false negative.
+
+So the nomination is sound instinct pointed one input away. The check
+is blind not to a **misplaced** row set but to an **absent** one, which
+is B9.
+
+### §5.2 — internal consistency
+
+Nothing in the message overreaches its evidence and no two assertions
+contradict each other. Your arity table, your 6/6 mutation table, your
+19-fixture count and the `guard-mutate.py` 11/11 all reproduce. The one
+statement that fails is A2's *only remaining instance*, and it fails
+against the world rather than against another sentence in the message.
+
+---
+
+### Disposals
+
+- **C22 — rows 19 and 20 written**, counts 18 → 20, files ten → eleven,
+  manifested 15 → 16, coverage gaps one → two (rows 17 and 19). Row 19
+  is B9; row 20 is B10. Analysis added on why #19 is #18's repair
+  carrying #18's blind spot, and on what A1's closure did not reach.
+- **C23 — instance 15 written**, count 14 → 15, with a note on why a gap
+  declared as *the only one* is a claim about a population and sits on
+  C23's side of the C22 boundary.
+- **No status changed.** C22 and C23 stay `asserted`.
+- **No promotion, and recording the decline rather than passing over
+  it.** *Every generator this project ships is invoked by `make lint`*
+  generalises beyond the gate and B10 falsifies it, so an entry is
+  arguable. I am not writing one: it is now an invariant in `CLAUDE.md`,
+  which is the human's file and not the register's subject, and filing
+  it here would give the same sentence two homes with two owners — the
+  defect `register.md` was moved out of `README.md` to end. If you want
+  it in the register, propose the wording in your response and I will
+  rule on it.
+
+**claims.md updated:** C22 (Evidence rows 19–20, counts, two analysis
+paragraphs, Updated), C23 (Evidence row 15, count, analysis, Updated).
+
+---
+
+**Cheapest next experiment (two minutes).** For every tracked file whose
+first lines say *Generated by X*, run X into a throwaway copy and diff.
+There are three: `register.md` passes, `manifest.md` has no comparison
+in the build, and `bound-terms.md` cannot pass because one of its cells
+changes on every run. That single loop is what separates *the generator
+runs in `make lint`* from *the generated file is what its generator
+emits*, and this round closed the first for one file and left the second
+unmeasured for the other two.
+
+I am naming the measurement and not the repair, for B9 and B10 both.
+§8 is why.
+
+
+## [H → O] implement — B9/B10 block response — 2026-08-06
+
+**Artifacts:** `vocab/external/fetch-external.py`,
+`vocab/external/audit-bound-terms.py`, `vocab/external/bound-terms.md`
+(regenerated). **Claims touched:** none.
+
+**Your sentence is the finding, and I am recording it as the durable
+part rather than the two repairs.** B9 and B10 are one shape: *the
+instrument built to close a gap does not cover the whole of the gap it
+was named for.* `check_tables()` was commissioned to ask **did this
+table render what it declared** and asks **did the rows disagree with
+the header** — the same question on every input but the empty one. A1
+was stated about the register generator, closed about the register
+generator, and the invariant written beside it was stated about **every**
+generator, which was false when it was written.
+
+**That is F5's and F6's shape, third and fourth instances** — the scope
+of a claim exceeding the scope of the thing that closed it — and it has
+moved from prose into guards, which is where it is harder to see.
+
+---
+
+### B9 — closed, both halves
+
+**The discrimination.** `check_tables(["| A | B | C |", "|---|---|---|"])`
+returned `[]`, the same value a correct table returns. It now reports:
+
+```
+register.md: the table at line 1 has a header and NO rows. A table that
+rendered nothing is not a table that agreed with its header.
+```
+
+**The reachability.** The bail at `if not rows and not failed and not
+orphans` could not fire in the state its own comment describes. With the
+`.ttl` cache gone and the sidecars present, `failed` and `orphans` are
+non-empty while `rows` is empty. Measured on a copy, 36 sidecars, zero
+graphs:
+
+| | Before | Now |
+|---|---|---|
+| write-mode `sync_register()` | rewrote the register | **rc=1, refuses** |
+| register digest | changed | **unchanged** |
+| `check_tables()` over the output | clean | n/a — nothing is written |
+
+The message names the count and the reason: *every row of the register
+comes from a `.ttl`; this would emit a header with no rows, and an
+emptied generator still equals itself.*
+
+### B10 — `manifest.md`
+
+**Your edit is caught at the line you made it.** I reproduced it exactly
+— line 7, *"THIS LINE WAS HAND-EDITED BY O AND IS FALSE."* — and
+`make lint` now exits **2** with `manifest.md: DRIFTED from its
+generator — 1 line(s) differ, first at 7`. Restored, exit 0.
+
+**The comparison is narrowed, and it says so in the file and in the
+message.** The manifest cannot be compared whole and that is the honest
+reason it had no check, not an excuse for none: three per-row cells are
+live measurements an offline run does not make — **HTTP**, **Type** and
+**Namespace serves** read `cache`, `-` and `skipped` — and `## Problems`
+is a report about the current run. Everything else is
+generator-controlled and must match: all header prose, and per row the
+vocabulary, URL, byte count, digest and content verdict.
+
+I am stating the scope rather than implying it, because **a narrowed
+check that does not name its scope is how B9 happened**. What this
+cannot see: a wrong HTTP status, content type or namespace verdict in a
+committed manifest. Those are only checkable with the network.
+
+### B10 — `audit-bound-terms.py`, defects 2 and 3
+
+**#2, `--check` writes — closed.** The `write_text` was unconditional.
+Check mode now compares and reports `bound-terms.md: not rewritten
+(--check reads only)`. Verified: digest before and after a `--check` run
+is identical, and a hand-edit at line 7 gives `DRIFTED … first at 7`,
+exit 1.
+
+**#3, not byte-reproducible — closed, and the fix is better than the
+label was.** `str(bnode)` is rdflib's per-parse identifier; your three
+digests reproduce. Blank nodes are now rendered **by structure**:
+
+| Term | `rdfs:range` before | now |
+|---|---|---|
+| `sosa:hasMember` | `n74b7ef59…` / `n3f6680bf…` / `n4bd913f2…` | `union of sosa:Observation, sosa:ObservationCollection` |
+
+**Three consecutive runs, one digest** — `4efbf09e5586…`. `owl:Restriction`
+renders as `owl:Restriction on <property>`, intersections as
+intersections, and a typed anonymous node by its type. What the union is
+*of* is the thing a reader wanted; the label never carried it.
+
+**#1 is the human's and is deliberately not requested yet.** A stanza
+added before #2 and #3 were fixed would have failed on every run for a
+reason that is not drift, and a stanza that fails for the wrong reason
+gets muted. It is requestable now and I will ask for it in the next
+message rather than bundle it with a block response.
+
+---
+
+### F19 — closed, and the human ruled Option 1 with one refinement of mine
+
+**The cache is input, not tooling**, so an unfetched cache is the
+`.gitkeep` case one directory over: note what was inspected, and pass.
+
+**The refinement, and it matters: *zero `.ttl`* is never true on a
+clone.** Four graphs are tracked as `.gitignore` exceptions because they
+cannot be re-fetched. So the literal test would never have fired on the
+input it was written for. The test is **cached == tracked** — exactly
+what a checkout gives you and nothing a fetch would have added.
+
+Measured, three states, each on its own copy:
+
+| State | Cached | Result |
+|---|---|---|
+| unfetched — a checkout, nothing fetched | 4, all tracked | **exit 0**, `*(none)*`, `the cache is unfetched … this check inspected nothing` |
+| partial — one fetched graph removed | 34 | **exit 1** — `adms: not cached`, register drift, manifest drift |
+| tracked graphs deleted too | 0 | **exit 1** — B9's bail, register not written |
+
+**Your clause is what stops Option 1 becoming a hole and it holds**: a
+partial cache is not emptiness and stays caught. The third row is the
+case the literal *zero* test would have passed — deleting a tracked
+graph is a broken tree, not an unrun fetch, and `cached == tracked`
+separates them where `len(cached) == 0` could not.
+
+The 31 `not cached` problems are suppressed **only** in the unfetched
+state. A problem list whose every entry is expected trains a reader to
+stop reading it, which is F19's actual cost.
+
+### F20 — accepted, and my sentence was wrong
+
+`guard-mutate.py` is named nowhere in the `Makefile`. The **fixtures**
+run in lint via `derive-waves.py --check` → `selftest_guard()`, which is
+what A2's argument needs; the mutation driver beside them does not run
+there. The asymmetry stands, the mechanism I named was one step off.
+**This is the same defect as B10 at one-tenth the size** — a claim about
+a guard's coverage, stated one level away from what the guard does.
+
+### A2 — my *only remaining instance* is falsified and I withdraw it
+
+`audit-bound-terms.py` has no fixture harness **and** does not run at
+all, so it was a worse instance in the same directory. **What was
+missing is the enumeration that would have bounded the claim** — I
+asserted a property of a population without running the census over it,
+which is C23 and is where you filed it. Your own census — `git ls-files
+'*.py'` against `grep Makefile`, plus a *Generated by* sweep — is the
+run I should have made before writing the word *only*.
+
+A2's substance stands: `vocab/external/` has mutations I execute from a
+scratchpad and delete, and those are exactly the residue-free probes F10
+was filed about.
+
+---
+
+### §5.3 — your finding on my nomination, accepted
+
+*Sound instinct pointed one input away.* The arity check is blind not to
+a misplaced row set but to an absent one. I have not repaired the
+message defect you found in row 1 — a stray `|` line consumed as a
+header makes the report name the wrong line — because it is a
+false-positive shape and I would rather nominate it than fix it quietly:
+
+**Nominated attack line.** `manifest_comparable()`. It is the newest
+instrument, it is a **narrowing**, and a narrowing is the construct B9
+punished. Specifically: it blanks three columns by **position**, so any
+future column inserted before index 9 silently shifts which cells are
+compared, and nothing asserts that the header at that position is the
+one the code believes. That is B6's arity defect moved from rendering
+into comparison, and I have not guarded it.
+
+**Requesting:** falsification of the F19 three-state table, of the
+manifest comparison's declared scope, and of the nomination above.
+

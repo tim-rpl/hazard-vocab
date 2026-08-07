@@ -2730,11 +2730,11 @@ instances below countable at all.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
 - **Evidence:** 2026-08-04, extended 2026-08-05 (twice) and 2026-08-06
-  (twice) — **eighteen instrument defects, ten files, three authors.**
-  Fifteen manifested; two were self-caught before shipping, and one —
-  row 17, now narrowed to a single clause — is a coverage gap that has
-  not yet cost anything. All are counted because the register counts
-  defects **in instruments**, not defects that caused visible harm.
+  (three times) — **twenty instrument defects, eleven files, three
+  authors.** Sixteen manifested; two were self-caught before shipping,
+  and two — rows 17 and 19 — are coverage gaps that have not yet cost
+  anything. All are counted because the register counts defects **in
+  instruments**, not defects that caused visible harm.
 
   | # | Instrument | Defect | Author | Found by |
   |---|---|---|---|---|
@@ -2756,6 +2756,8 @@ instances below countable at all.
   | 16 | `vocab/external/fetch-external.py --check` — documented as *"verify the CACHE only; no network"* | the verification mode **overwrites the record it verifies.** It rewrites all 24 provenance sidecars with `http_status: cache`, `dereferences: skipped`, `disposition: untested` and a fresh `fetched:` stamp, then regenerates `register.md` from them: 15 bound / 7 borrowed / 1 untested becomes **23 untested**, exit 0, `## Problems — *(none)*`. The dispositions are network measurements and are not recoverable offline | H | O, by mutation — running the documented command against a copy and diffing the register against the committed one |
   | 17 | `docs/plan/guard-fixtures/` + `guard-mutate.py` — **the fixture matrix built to close row 14** | the matrix covers the half of `check_retired` that **matches** and none of the half that **exempts**. Deleting each of the guard's ten clauses in turn: four redden a named fixture, six redden nothing. Four of those six are load-bearing — the backtick strip, the asterisk-quote strip, the prose bare-quote strip and the blockquote skip — each turning a firing case into an exempt one, and each **deletable with no named test going red**, which is this claim's falsifier verbatim. The three fixtures named for them are green through the **retraction-cue** path rather than the strip path: every one carries a cue as well as a quotation, so the clause they are named for never decides the verdict. `re.I` on `SIZING_PHRASES` is uncovered for the same reason — `b1-sizing-wrapped.md` asserts its phrase in lowercase. `guard-mutate.py` records the fifth of these as an expected `set()` and reports **5/5** above it | H | O, by deleting all ten clauses rather than the five the shipped matrix mutates |
   | 18 | `vocab/external/fetch-external.py` `sync_register()` — the main register table | the row emitter writes **six cells under a five-column header**. Introduced by the F14 repair at `be7d243`, which added the `Why` cell to the row format string and not to the header: 5/5 at `3ddc721`, 6/5 at `be7d243` and at `f00f027`. GFM ignores cells past the header, so in every rendered view the **`Disposition` column displays the free-text `detail`** — *"301, and the redirect target did not serve a graph"* under a heading reading *Disposition* — and the actual disposition, `bound` / `borrowed` / `untested`, is **dropped from all 35 rows**. That is the distinction `vocab-conventions.md` says decides what a binding is worth, and the register is where it is recorded. Every instrument that admitted the repair is green either way: the 3/3 mutation set and `assert sum(rtally.values()) == len(rows)` both operate on raw strings and tallies, `--check` reports `## Problems — *(none)*`, and no fixture covers the generator at all | H | O, by counting the cells the generator emits against the columns it declares |
+  | 19 | `vocab/external/fetch-external.py` `check_tables()` — **the instrument built this round to close #18** | it reports clean over a table that has a header, a separator and **no data rows**. The arity comparison is per row, so a table with none is a table with nothing to compare, and the function returns `[]` — the same value it returns for a correct table. That state is reachable and it writes: with the `.ttl` cache absent and the 36 sidecars present, `rows` is empty while `failed` and `orphans` are not, so the `if not rows and not failed and not orphans` bail — whose own comment says *"a register written from nothing would be an empty table reporting zero problems"* — does not fire. Measured end-to-end through `main()` with `curl` stubbed to fail: process exit 1, and `register.md` **rewritten** to a main table of a header, a separator and zero rows, tallied *"0 graphs with a sidecar; . 35 fetch(es) produced no graph at all"* — an empty distribution between the `;` and the `.`. `--check` over that file then returns **rc=0**: no arity problem, and no drift, because the emptied file is byte-identical to what the generator now emits | H | O, by running the generator with the cache moved aside |
+  | 20 | `vocab/external/audit-bound-terms.py` — the sibling generator of the tracked file `vocab/external/bound-terms.md` | three defects, and the file is a generated file of record carrying *"Generated by `audit-bound-terms.py`. Do not edit."* **It is not in `make lint`** — `grep -c audit-bound-terms Makefile` returns 0 — so A1's repair, which put the *register* generator into the build, left a second generator in the same directory that nothing invokes. **Its `--check` writes the file it verifies**, unconditionally at the last line of `main()`: row 16's defect, one file over, still live. And **its output is not byte-reproducible** — three consecutive runs give three digests, because `sosa:hasMember`'s `rdfs:range` is a blank node and the cell carries rdflib's per-parse label (`n74b7ef59…`, `n3f6680bf…`, `n4bd913f2…`). The committed file already differs from what the generator emits in exactly that cell, so the drift instrument the register gained this round can never be pointed at this file | H | O, by enumerating tracked `*.py` against the `Makefile` and running the one that was missing, three times |
 
   **None of the first seventeen was found by reading the instrument.**
   Fourteen were found by running it against a deliberate defect, one by
@@ -2777,6 +2779,29 @@ instances below countable at all.
   copy shows the committed `register.md` is five lines behind its
   generator, and nothing reports it — `--check` reads only and prints
   `## Problems — *(none)*`.
+
+  **#19 is #18's repair carrying #18's own blind spot into the next
+  round, and the two are one shape at different scopes.** #18 was a
+  header measuring a row set it did not describe; #19 is the measurement
+  of that header against **an empty row set**, which passes by
+  construction. The instrument was built to answer *did this table
+  render what it declared* and it answers *did the rows it was given
+  disagree with the header* — a question with no wrong answer when there
+  are no rows. It is the failure direction `FALSIFIER.md` §4 names
+  verbatim, an instrument reporting success when it has inspected
+  nothing, occurring inside the instrument commissioned to close an
+  instance of it. Both halves of the build agree: `check_tables()` is
+  clean and the byte comparison is clean, because a generator emptied of
+  input still equals itself.
+
+  **#20 is what A1's closure did not reach.** A1 was stated about *the
+  register generator* and closed about *the register generator*, and the
+  invariant written into `CLAUDE.md` alongside it is stated about
+  **every** generator. The tree has two in one directory; one is now in
+  `make lint` and one is not, and the one that is not also carries a
+  writing `--check` and a non-reproducible output. Nothing in the round
+  distinguished the specific closure from the general invariant, and the
+  census that separates them is one command.
 
   #10 is the entry that forced the criterion into the statement. It
   returned the right answer. Every other row is an instrument that was
@@ -2993,11 +3018,11 @@ that establishes it.
   when. If the answer is "the edit reported success", the claim is
   unestablished — an editing step reporting success is not evidence the
   edit landed.
-- **Evidence:** 2026-08-04, extended 2026-08-05 and 2026-08-06 (twice) —
-  **fourteen instances.** Six sit in accepted documents, two more in a
-  plan of record and a commit message, and four in a generated file of
-  record and a gate message; two were caught by the check itself rather
-  than by the author.
+- **Evidence:** 2026-08-04, extended 2026-08-05 and 2026-08-06 (three
+  times) — **fifteen instances.** Six sit in accepted documents, two
+  more in a plan of record and a commit message, and five in a generated
+  file of record and a gate message; two were caught by the check itself
+  rather than by the author.
 
   | # | Statement | What was true |
   |---|---|---|
@@ -3015,6 +3040,7 @@ that establishes it.
   | 12 | `vocab/external/register.md`, generated header — *"**`dereferences` carries its REASON, not a bare verdict.**"*, and `[H → O]` 2026-08-06 — *"`dereferences` now carries its reason — four causes, not one"* | the field carries the same bare verdict it did before. Its values across 36 sidecars are `yes` (15), `no` (19), `document` (1) and `untested` (1); there is **no `dereference_reason` field anywhere**. The cause lives in a free-text `detail` sibling and is labelled on **4 of the 19** `no` rows — `**structural**` ×3, `**single observation**` ×1. The two causes the gate message argues hardest for are the unlabelled ones: **access** appears on 12 rows as the bare string `**HTTP 301**`, and **content** — called *"the one that would otherwise be invisible"* — as `200 text/anot+turtle, 306 triples, … NOT defined`. A reader cannot count the four causes from the register; they are recoverable only by reading prose and inferring |
   | 13 | `vocab/external/register.md`, generated header — *"**Four causes, and they decay differently** — F15: this paragraph said *three* and enumerated four"* | the table immediately beneath it enumerates **five**: `structural`, `access`, `single-observation`, `content`, `mints-nothing`. All five are causes of non-dereference, so the disagreement is exact and not a scoping question. F15's defect — a count in a paragraph disagreeing with the enumeration under it — reproduced in the repair for F15, off by one in the same direction, in the same paragraph of the same generated file. The generated distribution further down reports **seven** distinct `dereference_reason` values over the 35 rows; the two extra are `resolves` and `no-probe`, which are not failure causes, so seven-versus-five is consistent and four-versus-five is not |
   | 14 | `[H → O]` 2026-08-06, Artifacts — *"`vocab/external/register.md` (regenerated)"* | the committed file is **not** what its generator emits. Regenerating from the committed sidecars into a throwaway copy differs in five lines: the committed file carries the pre-repair paragraph *"**Both tables carry the column** … it renders only in *Fetched, produced no graph*, which had no reason column, so the fallback was unreachable"* while the generator now emits *"**Every table carries the column** … it is an orphan."* So the committed register asserts the `**unlabelled**` fallback is unreachable, reports *0 fetch(es) produced no graph at all*, and renders `deo` as `**unlabelled**` in an orphan table — three statements that cannot all hold, in a wholly generated file of record. Nothing detects the drift: `--check` reads only and reports `## Problems — *(none)*` |
+  | 15 | `[H → O]` 2026-08-06 amendment, A2 — *"the asymmetry is now **the only remaining instance** of the gap that produced three of this round's blocks"* | there is a second, in the same directory and worse. `vocab/external/audit-bound-terms.py` generates the tracked file `vocab/external/bound-terms.md`, has a `--check` mode, and is named nowhere in the `Makefile`: A2 describes a generator that runs without a fixture harness, while this one does not run at all. The claim is about what a directory contains, and the run that establishes it is one command — `git ls-files '*.py'` against `grep Makefile`, ten seconds, which is also the falsifier for the `CLAUDE.md` invariant the same amendment cites |
 
   **#6 is the instance that establishes the claim is not retrospective.**
   It was posted in the same message that proposed C23, as the falsifier
@@ -3092,6 +3118,17 @@ that establishes it.
   regenerate, and nothing compares a prose count against the rows under
   it. The pair is the reason C22 #18 and these two arrived in the same
   pass — one artifact, three defects, no run that could see any of them.
+
+  **#15 is the first instance attached to a self-declared open gap**,
+  and that is what makes it worth counting rather than waiving. A2 was
+  filed as a finding against H's own repair and left open deliberately;
+  nothing about the disclosure is in bad faith. What was not run is the
+  enumeration that would have bounded it. A gap declared as *the only
+  one* is a claim about a population, and the distance between declaring
+  a gap and declaring its extent is one command — which is also why this
+  sits on C23's side of the boundary and not [C22](#c22)'s: no
+  instrument inspected the wrong thing, because none was pointed at the
+  question.
 - **Updated:** 2026-08-06
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-03. Accepted as

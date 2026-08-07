@@ -33,7 +33,7 @@ file.
 | `sosa` | `FeatureOfInterest` | class | — | — | — |
 | `sosa` | `Procedure` | class | — | — | — |
 | `sosa` | `ObservableProperty` | class | — | — | — |
-| `ssn-ext-sosa` | `hasMember` | object property | sosa:ObservationCollection | nc641a6b833cd4b89b982cc5704d027b9b20 | rdfs:member |
+| `ssn-ext-sosa` | `hasMember` | object property | sosa:ObservationCollection | union of sosa:Observation, sosa:ObservationCollection | rdfs:member |
 | `ssn-ext-sosa` | `ObservationCollection` | class | — | — | — |
 | `prov-o` | `wasAttributedTo` | object property | prov:Entity | prov:Agent | prov:wasInfluencedBy |
 | `prov-o` | `generatedAtTime` | datatype property | prov:Entity | xsd:dateTime | — |

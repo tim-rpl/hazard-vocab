@@ -29,7 +29,7 @@ import pathlib
 import sys
 
 try:
-    from rdflib import Graph, RDF, RDFS, OWL, URIRef
+    from rdflib import Graph, RDF, RDFS, OWL, URIRef, BNode
 except ImportError:
     sys.exit("rdflib not importable — run under .venv/bin/python")
 
@@ -75,7 +75,39 @@ OBJECT_PROPS = {OWL.ObjectProperty}
 DATA_PROPS = {OWL.DatatypeProperty}
 
 
-def short(u):
+def anon(u, g):
+    """A STABLE rendering of a blank node, by its structure.
+
+    B10: `str(bnode)` is rdflib's per-parse label — `n74b7ef59…`,
+    `n3f6680bf…`, `n4bd913f2…` on three consecutive runs of the same
+    input. It reached one cell of `bound-terms.md`, so the file was never
+    byte-reproducible and the drift check the register gained could never
+    be pointed at it. A generated file that cannot equal itself cannot be
+    guarded, whatever the Makefile says.
+
+    Naming the construct is also more useful than the label was:
+    `sosa:hasMember`'s range is a union, and *what* it is a union of is
+    the thing a reader wants.
+    """
+    types = set(g.objects(u, RDF.type))
+    if OWL.Restriction in types:
+        p = [short(o, g) for o in g.objects(u, OWL.onProperty)]
+        return "owl:Restriction on %s" % (", ".join(p) or "an unnamed property")
+    for op, word in ((OWL.unionOf, "union"),
+                     (OWL.intersectionOf, "intersection")):
+        for lst in g.objects(u, op):
+            members = [short(m, g) for m in g.items(lst)]
+            return "%s of %s" % (word, ", ".join(members) or "nothing")
+    if types:
+        return "anonymous %s" % ", ".join(sorted(short(t, g) for t in types))
+    return "an anonymous node"
+
+
+def short(u, g=None):
+    if isinstance(u, BNode):
+        # No graph, no structure to read — say so rather than emit a label
+        # that changes on the next parse.
+        return anon(u, g) if g is not None else "an anonymous node"
     s = str(u)
     for k, v in NS.items():
         if s.startswith(v):
@@ -130,10 +162,10 @@ def main():
             kind = ("object property" if types & OBJECT_PROPS else
                     "datatype property" if types & DATA_PROPS else
                     "class" if OWL.Class in types or RDFS.Class in types
-                    else ", ".join(sorted(short(t) for t in types)))
-            dom = sorted({short(o) for o in g.objects(u, RDFS.domain)})
-            rng = sorted({short(o) for o in g.objects(u, RDFS.range)})
-            sup = sorted({short(o) for o in g.objects(u, RDFS.subPropertyOf)})
+                    else ", ".join(sorted(short(t, g) for t in types)))
+            dom = sorted({short(o, g) for o in g.objects(u, RDFS.domain)})
+            rng = sorted({short(o, g) for o in g.objects(u, RDFS.range)})
+            sup = sorted({short(o, g) for o in g.objects(u, RDFS.subPropertyOf)})
             rows.append((key, name, kind, ", ".join(dom) or "—",
                          ", ".join(rng) or "—", ", ".join(sup) or "—"))
 
@@ -175,8 +207,27 @@ def main():
         for p in problems:
             print("- %s" % p)
         tail += ["", "## Problems", ""] + ["- %s" % p for p in problems]
-    (HERE / "bound-terms.md").write_text("\n".join(out + tail) + "\n")
-    return 1 if (problems and args.check) else 0
+    # B10: this write was UNCONDITIONAL, so running the documented
+    # verification command dirtied the working tree — C22 row 16, the
+    # `--check`-writes defect, one file over from where it was repaired
+    # and never repaired here.
+    text = "\n".join(out + tail) + "\n"
+    target = HERE / "bound-terms.md"
+    if args.check:
+        if not target.exists():
+            problems.append("bound-terms.md: absent, and it is generated")
+        elif target.read_text() != text:
+            have, want = target.read_text().splitlines(), text.splitlines()
+            d = [i for i in range(max(len(have), len(want)))
+                 if have[i:i + 1] != want[i:i + 1]]
+            problems.append(
+                "bound-terms.md: DRIFTED from its generator — %d line(s) "
+                "differ, first at %d" % (len(d), d[0] + 1 if d else 0))
+            print("\n## Problems\n\n- %s" % problems[-1])
+        print("bound-terms.md: not rewritten (--check reads only)")
+    else:
+        target.write_text(text)
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":
