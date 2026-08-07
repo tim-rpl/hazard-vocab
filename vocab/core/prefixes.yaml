@@ -1,0 +1,110 @@
+id: https://w3id.org/ohim/prefixes
+name: ohim-prefixes
+title: OHIM prefix map
+description: >-
+  The prefix map for OHIM's core. Every CURIE prefix used anywhere in
+  `vocab/core/` resolves here, which is P5 clause 1.
+
+  This is a LinkML schema and not a bare `prefixes:` map. It carries an
+  `id:` and a `default_prefix:` because a bare map fails
+  `drift-lint.py`'s `jurisdiction` rule, whose remedy message directs the
+  author to `vocab/profiles/` — correct for a jurisdiction-specific
+  scheme and wrong for this project's own namespace. A LinkML schema
+  needs an `id:` regardless.
+
+  It lives in `vocab/core/` and not in `vocab/` because `vocab/` is
+  scanned by nothing: `drift-lint.py` targets `vocab/core/` and the
+  Makefile's C4 grep targets core plus profiles. All nine rules scan
+  this path, and it falls inside CLAUDE.md invariant 2. A prefix map no
+  instrument inspects is what claims.md C18 records.
+
+license: https://creativecommons.org/licenses/by/4.0/
+default_prefix: ohim
+default_range: string
+
+prefixes:
+  # This project. `w3id.org/ohim/` is the namespace CLAUDE.md declares.
+  ohim: https://w3id.org/ohim/
+
+  # LinkML's own metamodel. Required by every schema that imports
+  # `linkml:types`, which is every schema this project will write.
+  linkml: https://w3id.org/linkml/
+
+  # The RDF/OWL substrate. `gen-shacl` emits these whether or not a
+  # source schema names them; declaring them here keeps the CURIEs a
+  # reader sees in `build/` resolvable from the source.
+  rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  xsd: http://www.w3.org/2001/XMLSchema#
+  sh: http://www.w3.org/ns/shacl#
+
+  # ---------------------------------------------------------------
+  # BOUND. Every namespace below was fetched, and a probe term was read
+  # out of the cached graph rather than off its name — see
+  # `vocab/external/register.md` for the per-namespace dereference
+  # verdict and `vocab/external/bound-terms.md` for what each term is.
+  #
+  # A prefix here asserts the URI, not that the namespace dereferences:
+  # `geo:` is *bound* by name and *borrowed* in fact, because
+  # `geo:Geometry` is defined in the cached graph and undefined in what
+  # the namespace serves. That distinction is the register's, and it is
+  # why this comment does not claim more than a prefix map can.
+  # ---------------------------------------------------------------
+
+  # Observation. SOSA is the core; SSN and its extensions mint into
+  # their own namespaces except `ssn-ext`, whose terms are minted in
+  # SOSA's — which is why there is no `ssnext:` prefix and
+  # `sosa:hasMember` is the CURIE that resolves.
+  sosa: http://www.w3.org/ns/sosa/
+  ssn: http://www.w3.org/ns/ssn/
+  ssn-system: http://www.w3.org/ns/ssn/systems/
+
+  # Provenance and agency.
+  prov: http://www.w3.org/ns/prov#
+  org: http://www.w3.org/ns/org#
+  foaf: http://xmlns.com/foaf/0.1/
+  schema: https://schema.org/
+  sioc: http://rdfs.org/sioc/ns#
+
+  # Space.
+  geo: http://www.opengis.net/ont/geosparql#
+
+  # Quantity and unit. Two namespaces, not one — the schema mints the
+  # classes and the vocabulary mints the individual units.
+  qudt: http://qudt.org/schema/qudt/
+  unit: http://qudt.org/vocab/unit/
+
+  # Time.
+  time: http://www.w3.org/2006/time#
+
+  # Concept schemes, quality, identifiers, metadata.
+  skos: http://www.w3.org/2004/02/skos/core#
+  dqv: http://www.w3.org/ns/dqv#
+  adms: http://www.w3.org/ns/adms#
+  dcterms: http://purl.org/dc/terms/
+
+  # CF Standard Names, served by NERC's NVS2 as collection P07. The
+  # NAMESPACE serves `text/html`; only the profile URL serves the graph.
+  # The prefix is the namespace, which is what a CURIE expands to.
+  cfsn: http://vocab.nerc.ac.uk/collection/P07/current/
+
+# NOT DECLARED, and stated rather than omitted silently:
+#
+# **INSPIRE.** CLAUDE.md commits to binding it and this project has never
+# fetched it — it is absent from `fetch-external.py`'s source list, so
+# there is no cached graph, no dereference verdict and no content-verified
+# term. Declaring a prefix for it would assert an identity nobody here has
+# checked, which is the defect the whole external cache exists to prevent.
+# It is a gap in P5 clause 1's population and belongs in the gate, not in
+# a prefix map that would look complete with it.
+#
+# **The eleven KWG dataset ontologies.** All eleven share one namespace,
+# `http://stko-kwg.geog.ucsb.edu/lod/ontology/`, and OHIM binds no term
+# from any of them — they are read as evidence, not bound. A prefix
+# declared for a namespace nothing uses is a prefix `declared-prefix`
+# cannot check and a reader would take as a commitment.
+#
+# **DMDO and UNDRR-HIP.** Both are `borrowed` permanently — DMDO's
+# namespace has no TLD and cannot resolve for anyone, HIP's was measured
+# at HTTP 000. Structure copied and cited; nothing bound.

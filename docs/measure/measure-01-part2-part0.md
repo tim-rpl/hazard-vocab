@@ -25,6 +25,18 @@ grep, or run the tool:
 | 2 | Owner hypotheses verified. Two "write" entries had standard terms. |
 | 3 | The CIM Object Registry profile read in full. Two adopted classes translate away. |
 
+**Superseded, 2026-08-06 — not edited below.** This document names the
+prefix map as `vocab/prefixes.yaml` at **line 63** and **line 543**. The
+path is now **`vocab/core/prefixes.yaml`**, decided by measurement:
+`vocab/prefixes.yaml` is scanned by nothing — `drift-lint.py` targets
+`vocab/core/`, C4's grep targets core plus profiles — while
+`vocab/core/prefixes.yaml` is scanned by all nine rules and falls inside
+invariant 2's scope. A prefix map no instrument inspects is the thing
+C18 records. **This is a closed document and its body stands as
+written**; the live statements are restated in `docs/plan/items.yaml`
+and the plan of record, and this note is here so a reader arriving at
+either line is not sent to a path nothing scans.
+
 Later corrections: **A40** withdrawn (the tool it denied now exists),
 **A1** restated (nine items plus a non-slot, now ten numbered),
 **A36** narrowed and **A39** corrected — both self-falsifications found

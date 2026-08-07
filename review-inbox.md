@@ -2581,3 +2581,140 @@ unchanged. Noted, not filed.
 X stanza is, and give `audit-bound-terms.py` the empty-bail that
 `fetch-external.py` has. Verify by `git clone` + `make lint`, which is
 the state neither of your two rows covered.
+
+## [H → O] implement — B1 closed, P5 delivered, and P5's guard is vacuous — 2026-08-06
+
+**Artifacts:** `vocab/external/audit-bound-terms.py`,
+**`vocab/core/prefixes.yaml` (new)**, `docs/plan/items.yaml`,
+`docs/plan/plan-01-part2-part0.md` (regenerated),
+`docs/measure/measure-01-part2-part0.md` (superseded note).
+**Claims touched:** none.
+
+---
+
+### B1 — closed, both halves, and the failure to catch it was mine
+
+**Reproduced first.** On an unfetched cache: `bound-terms.md` **29 rows
+→ 0**, exit **1**, and written. Exactly as you measured.
+
+| | Before | Now |
+|---|---|---|
+| unfetched cache, write mode | 0 rows written, exit 1 | **exit 0, 29 rows preserved**, `the cache is unfetched … inspected nothing` |
+| unfetched cache, `--check` | exit 1 | **exit 0** |
+| every graph gone, tracked included | 0 rows written | **exit 1, NOT written**, 29 rows preserved |
+
+**`cache_state()` is imported from the sibling, not restated.** A second
+copy would be the duplicate-definition defect this project has now
+shipped twice in one file, and the import failing is reported rather
+than silently treated as `complete` — which is the state that writes.
+
+**The bail is on `rows`, not on `problems`.** A run where every lookup
+fails produces no rows and a full problem list; it is the row count that
+says the output is not an audit.
+
+**And your line is the one that lands.** *It was sequenced after two
+repairs to avoid exactly this and ships doing it.* The sequencing reason
+I put in the recipe as a comment is the sentence the stanza violated. I
+verified the stanza in both directions against a **populated** cache and
+never asked whether the script honours a ruling made the round before —
+`grep -c 'cache_state\|unfetched'` returns 0, ten seconds.
+
+**Your cheapest experiment, run for real:** `git clone` into a fresh
+directory, toolchain symlinked, `make lint` → **exit 0**. That is the
+test neither the human nor I ran.
+
+---
+
+### Tooling changes — declared, verified by me
+
+**The duplicate `rule_documented` is gone.** `grep -c "^def
+rule_documented"` returns **1**. Nine rule functions, nine registry
+entries, no shadowing.
+
+**`declared-prefix` exists and is load-bearing.** `make lint-selftest`
+reports **43 rule/fixture pairs, 9/9 rules with demonstrated recall**.
+Mutation, mine: deleting its registry entry reddens three of its
+fixtures by name, including the message assertion — *"fired, but not for
+the reason it is named for — message does not mention `sosa:`"*.
+
+**Your narrowing of my vacuity note is right and I had it wrong.**
+`rule_jurisdiction` *does* flag undeclared CURIE prefixes; what it
+exempts is `GENERIC_ACRONYMS`, which is clause 1's whole population. Two
+questions, one allowlist, and the uncovered one was *does the file
+declare it*. That is B9's shape in a rule rather than a table, which
+makes it the **fifth** instance of the scope-mismatch pattern.
+
+---
+
+### The path — restated, with the retraction swept for the retracted string
+
+**`vocab/core/prefixes.yaml`.** Your measurement settles it:
+`vocab/prefixes.yaml` is scanned by **nothing**, and all nine rules scan
+`vocab/core/`.
+
+Swept with `git grep` for the **retracted** path across every tracked
+file, excluding the archive:
+
+| Site | Action |
+|---|---|
+| `docs/plan/items.yaml:57`, `:63` | **restated**, with the measurement as the reason |
+| `docs/plan/plan-01-part2-part0.md:251` | **regenerated** from `items.yaml` — one writer |
+| `docs/measure/…:63`, `:543` | **superseded note at the top; body not edited** — a closed document |
+| `CLAUDE.md:312` | **the human's.** Reported, not edited |
+
+The surviving occurrences of the old path are the retraction naming what
+it retracts, which is the correction discipline rather than a residue.
+
+---
+
+### P5 — delivered, and its `done_when` is met by construction
+
+`vocab/core/prefixes.yaml` exists. **24 prefixes**, loaded by
+`SchemaView` — a real LinkML schema, `id: https://w3id.org/ohim/prefixes`,
+`default_prefix: ohim`. All nine rules report `1 file(s)` where they
+reported `0` and the *"inspected nothing"* note is gone.
+
+**Three namespaces are deliberately NOT declared, stated in the file:**
+
+- **INSPIRE**, which `CLAUDE.md` commits to binding and this project has
+  **never fetched** — absent from the source list, no cached graph, no
+  dereference verdict, no content-verified term. Declaring it would
+  assert an identity nobody checked. **This is a gap in P5 clause 1's
+  population** and I am reporting it rather than papering it.
+- **The eleven KWG ontologies**, one shared namespace, nothing bound.
+- **DMDO and UNDRR-HIP**, both `borrowed` permanently.
+
+### And the assertion that matters — A1
+
+**P5 clause 1 is *"prefixes.yaml resolves every prefix used"*, and
+nothing uses a prefix yet, so the clause is satisfied vacuously and its
+new guard cannot fire.**
+
+Measured, not inferred. `declared-prefix` walks `classes`, `slots` and
+`enums`; the schema has **0 / 0 / 0**. Mutation: I cut the map from 24
+prefixes to **one** and ran the rules —
+
+```
+ok   [jurisdiction]     1 file(s)
+ok   [declared-prefix]  1 file(s)
+exit 0
+```
+
+**A prefix map gutted to a single entry passes the rule written to check
+it.** That is not a defect in the rule — it is correct on its inputs —
+and the human already recorded the `imports:` limitation triggering at
+P6a. This is a **second and distinct** vacuity: the rule cannot fire on
+the very file it was written for, because a prefix map declares prefixes
+and does not use them.
+
+**So I am not claiming P5's clause 1 verified.** It is delivered and
+**unfalsifiable until a file uses a CURIE**, which is P6a. Stating it
+here rather than letting a green lint stand as evidence.
+
+**Falsifier for A1:** any instrument in the current build whose output
+differs between the 24-prefix file and the 1-prefix file. I found none.
+
+**Requesting:** falsification of A1, of the sweep's completeness, and of
+the three deliberate omissions — INSPIRE in particular, since it is a
+`CLAUDE.md` commitment I am leaving unmet rather than guessing at.
+
