@@ -2729,12 +2729,12 @@ instances below countable at all.
   the mechanism of the defect it is invoked to detect.
 - **Cheapest test:** delete one clause, run the harness, read *which* row
   fails. Seconds.
-- **Evidence:** 2026-08-04, extended 2026-08-05 (twice) and 2026-08-06 —
-  **seventeen instrument defects, ten files, three authors.** Fourteen
-  manifested; two were self-caught before shipping, and one — row 17 —
-  is a coverage gap that has not yet cost anything. All are counted
-  because the register counts defects **in instruments**, not defects
-  that caused visible harm.
+- **Evidence:** 2026-08-04, extended 2026-08-05 (twice) and 2026-08-06
+  (twice) — **eighteen instrument defects, ten files, three authors.**
+  Fifteen manifested; two were self-caught before shipping, and one —
+  row 17, now narrowed to a single clause — is a coverage gap that has
+  not yet cost anything. All are counted because the register counts
+  defects **in instruments**, not defects that caused visible harm.
 
   | # | Instrument | Defect | Author | Found by |
   |---|---|---|---|---|
@@ -2755,14 +2755,28 @@ instances below countable at all.
   | 15 | `docs/plan/derive-waves.py` `check_retired` — **the repair for #14** | joining wrapped lines into blocks fixed the shape blindness and moved the **exemption** to the block with it. `items.yaml` contains **no blank line**, so the whole file is one block, that block carries a retraction cue, and the guard now exempts **the entire source file**: 6 of 6 retired figures injected into it are caught by the pre-repair guard and **0 of 6** by the repaired one. In the plan document the same shift exempts both generated tables outright — cue-exempt lines rise 98 → 287 of 1174. A figure injected into `items.yaml`, propagated by `--write` into the item table of the plan of record, leaves `--check` reporting **ok** | H | O, by mutation — running both builds of the guard over the same injections |
   | 16 | `vocab/external/fetch-external.py --check` — documented as *"verify the CACHE only; no network"* | the verification mode **overwrites the record it verifies.** It rewrites all 24 provenance sidecars with `http_status: cache`, `dereferences: skipped`, `disposition: untested` and a fresh `fetched:` stamp, then regenerates `register.md` from them: 15 bound / 7 borrowed / 1 untested becomes **23 untested**, exit 0, `## Problems — *(none)*`. The dispositions are network measurements and are not recoverable offline | H | O, by mutation — running the documented command against a copy and diffing the register against the committed one |
   | 17 | `docs/plan/guard-fixtures/` + `guard-mutate.py` — **the fixture matrix built to close row 14** | the matrix covers the half of `check_retired` that **matches** and none of the half that **exempts**. Deleting each of the guard's ten clauses in turn: four redden a named fixture, six redden nothing. Four of those six are load-bearing — the backtick strip, the asterisk-quote strip, the prose bare-quote strip and the blockquote skip — each turning a firing case into an exempt one, and each **deletable with no named test going red**, which is this claim's falsifier verbatim. The three fixtures named for them are green through the **retraction-cue** path rather than the strip path: every one carries a cue as well as a quotation, so the clause they are named for never decides the verdict. `re.I` on `SIZING_PHRASES` is uncovered for the same reason — `b1-sizing-wrapped.md` asserts its phrase in lowercase. `guard-mutate.py` records the fifth of these as an expected `set()` and reports **5/5** above it | H | O, by deleting all ten clauses rather than the five the shipped matrix mutates |
+  | 18 | `vocab/external/fetch-external.py` `sync_register()` — the main register table | the row emitter writes **six cells under a five-column header**. Introduced by the F14 repair at `be7d243`, which added the `Why` cell to the row format string and not to the header: 5/5 at `3ddc721`, 6/5 at `be7d243` and at `f00f027`. GFM ignores cells past the header, so in every rendered view the **`Disposition` column displays the free-text `detail`** — *"301, and the redirect target did not serve a graph"* under a heading reading *Disposition* — and the actual disposition, `bound` / `borrowed` / `untested`, is **dropped from all 35 rows**. That is the distinction `vocab-conventions.md` says decides what a binding is worth, and the register is where it is recorded. Every instrument that admitted the repair is green either way: the 3/3 mutation set and `assert sum(rtally.values()) == len(rows)` both operate on raw strings and tallies, `--check` reports `## Problems — *(none)*`, and no fixture covers the generator at all | H | O, by counting the cells the generator emits against the columns it declares |
 
-  **None of the seventeen was found by reading the instrument.**
+  **None of the first seventeen was found by reading the instrument.**
   Fourteen were found by running it against a deliberate defect, one by
   running it against the file it was already guarding, one by noticing
   the verdict did not follow from the mechanism, and one — #12 — by
   checking the instrument's *subject* rather than its output: the sweep
   reported correctly on the strings it was given, and the claim it
   existed to find was standing in different words.
+
+  **#18 is the first exception, and a narrow one.** It was not found by
+  running the generator — every run of it is green, and that is the
+  entry's whole content — but by measuring one part of its output
+  against another: the cells each row emits against the columns the
+  header declares. That is still a measurement rather than a reading,
+  and it was the only form available, because the defect is invisible to
+  every execution of the instrument and visible in one count over its
+  product. **The register's own drift is invisible for the same
+  reason:** regenerating from the committed sidecars into a throwaway
+  copy shows the committed `register.md` is five lines behind its
+  generator, and nothing reports it — `--check` reads only and prints
+  `## Problems — *(none)*`.
 
   #10 is the entry that forced the criterion into the statement. It
   returned the right answer. Every other row is an instrument that was
@@ -2887,6 +2901,69 @@ instances below countable at all.
   four clauses in row 17 are the opposite case: things **do** depend on
   them, and no fixture covers them. The register records the asymmetry
   rather than the omission, because the principle is the durable part.
+
+  **Row 17 is narrowed rather than closed, and the closure was
+  re-derived rather than read.** My own enumeration of `check_retired`
+  finds **fourteen** clauses where last round's found ten; deleting each
+  in turn against `selftest_guard()` reddens a named fixture for
+  **twelve** — eleven redden exactly one, and dropping the sentence
+  scope reddens two. All four clauses row 17 names are closed, and so are
+  `re.I` on `SIZING_PHRASES`, the F12 position mapping and the F13
+  required closer. Two stay silent. One is the whitespace collapse,
+  already measured non-load-bearing and declared as such. **The other
+  was merged into "blockquote skip" by last round's enumeration and is a
+  separate clause** — the `solo` split that makes a `>` line its own
+  unit, distinct from the `continue` that skips a blockquoted unit.
+  Deleting it leaves all 18 fixtures byte-identical to control, and it
+  is load-bearing in **both** directions: a retired figure inside a
+  blockquote following prose with no blank line goes exempt → firing,
+  and a retired figure asserted in **prose immediately after a
+  blockquote** goes firing → **exempt**. The second is the silent
+  direction, and it is B3's shape exactly — a widened exemption, green
+  either way. This claim's falsifier verbatim, surviving the repair
+  built to close it, in a clause the finding that demanded the repair
+  counted as half of another.
+
+  **A restatement of the statement above was proposed at this gate and
+  is NOT written into it.** H proposed adding *"Ask what result would
+  look different if the thing were false. An instrument whose output is
+  identical either way carries no information and reads as
+  confirmation,"* on the ground that it is prospective where the
+  existing criterion is diagnostic; offered three routes as evidence for
+  one mechanism — a false negative agreeing with expectation, an
+  uncovered guard clause, a fixture asserting a property it cannot test;
+  and named its own falsifier: an instrument defect in this register
+  whose output *would* have looked different and which shipped anyway.
+
+  **The falsifier fires, and it fires on H's own first route.** The
+  `\b`-in-a-non-raw-string defect does not have an output identical
+  either way. Measured over `git ls-files` at `f00f027`,
+  `"NIFC_Fire\b"` returns **0** and `r"NIFC_Fire\b"` returns **13** —
+  and the raw count tracks the corpus across revisions (0 at `8743a46`,
+  9 at `be7d243` and `3ddc721`, 13 at `f00f027`), which is what an
+  instrument carrying information looks like. It shipped twice not
+  because the signal could not discriminate but because the **wrong
+  value coincided with the author's prior.** Routes 2 and 3 are the
+  opposite, and I confirmed route 2 this round: deleting the
+  blockquote-solo clause leaves `selftest_guard()` identical to control.
+  Those two are one mechanism. Route 1 is a second one, and the proposed
+  sentence misdescribes it.
+
+  **The wording is also silent about which proposition to substitute,
+  and route 1 is where that bites.** Asked of *"is `NIFC_Fire` absent
+  from the corpus?"* the question is answered satisfactorily — a nonzero
+  count would look different — and the defect ships. Asked of *"is my
+  pattern correct?"* it catches. Nothing in the sentence selects between
+  the two, and for routes 2 and 3 the choice never arises because every
+  framing returns the same answer.
+
+  So the mechanism named is real and sharp, and it has a fresh instance
+  at this gate — **#18 is exactly it.** But it covers two of the three
+  routes offered as its evidence, and a generalisation one of its own
+  cited instances does not satisfy does not belong in the statement.
+  Recorded here as a disposal, not written above. The wording is H's,
+  the ruling is mine, and H is free to re-propose it scoped to the
+  mechanism rather than to the three routes.
 - **Updated:** 2026-08-06
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-02. It generalises
@@ -2916,9 +2993,9 @@ that establishes it.
   when. If the answer is "the edit reported success", the claim is
   unestablished — an editing step reporting success is not evidence the
   edit landed.
-- **Evidence:** 2026-08-04, extended 2026-08-05 and 2026-08-06 —
-  **twelve instances.** Six sit in accepted documents, two more in a
-  plan of record and a commit message, and two in a generated file of
+- **Evidence:** 2026-08-04, extended 2026-08-05 and 2026-08-06 (twice) —
+  **fourteen instances.** Six sit in accepted documents, two more in a
+  plan of record and a commit message, and four in a generated file of
   record and a gate message; two were caught by the check itself rather
   than by the author.
 
@@ -2936,6 +3013,8 @@ that establishes it.
   | 10 | `2b7fa4c` / `2c6d6f1` — *"it fails loudly if it cannot write its target"* | the branch that would report it is **unreachable**. `sync_register()` returns `0` on every path, so `if sync_register(): problems.append(...)` cannot fire, and the message it would print names the retracted README block. The property itself holds, but by construction rather than by the check that was claimed: the write is unconditional, and an unwritable or wrong-type target raises `PermissionError` / `IsADirectoryError` — verified by mutation |
   | 11 | `[H → O]` 2026-08-06, B3 — *"**Hits report their own line.** The first version reported the unit's start, putting every `items.yaml` finding at line 1"* | true for YAML and **false for prose and tables**, which is where the repair changed anything. `check_retired` matches against `probe`, from which backticked and quoted spans have been **deleted**, while `offsets` index the undeleted `joined`; every stripped span before a hit shifts the reported line **earlier**. Measured: a figure on file line 7 of a backtick-heavy paragraph reports as line 4, and a retired figure driven into the last row of the plan's generated item table sits at `:270` and reports as `:268`. The YAML case is exact only because each YAML line is its own unit, so there is one offset to get right. **No fixture asserts a line number** — the 11 pairs assert fire/no-fire only, so the claim's own harness cannot see it |
   | 12 | `vocab/external/register.md`, generated header — *"**`dereferences` carries its REASON, not a bare verdict.**"*, and `[H → O]` 2026-08-06 — *"`dereferences` now carries its reason — four causes, not one"* | the field carries the same bare verdict it did before. Its values across 36 sidecars are `yes` (15), `no` (19), `document` (1) and `untested` (1); there is **no `dereference_reason` field anywhere**. The cause lives in a free-text `detail` sibling and is labelled on **4 of the 19** `no` rows — `**structural**` ×3, `**single observation**` ×1. The two causes the gate message argues hardest for are the unlabelled ones: **access** appears on 12 rows as the bare string `**HTTP 301**`, and **content** — called *"the one that would otherwise be invisible"* — as `200 text/anot+turtle, 306 triples, … NOT defined`. A reader cannot count the four causes from the register; they are recoverable only by reading prose and inferring |
+  | 13 | `vocab/external/register.md`, generated header — *"**Four causes, and they decay differently** — F15: this paragraph said *three* and enumerated four"* | the table immediately beneath it enumerates **five**: `structural`, `access`, `single-observation`, `content`, `mints-nothing`. All five are causes of non-dereference, so the disagreement is exact and not a scoping question. F15's defect — a count in a paragraph disagreeing with the enumeration under it — reproduced in the repair for F15, off by one in the same direction, in the same paragraph of the same generated file. The generated distribution further down reports **seven** distinct `dereference_reason` values over the 35 rows; the two extra are `resolves` and `no-probe`, which are not failure causes, so seven-versus-five is consistent and four-versus-five is not |
+  | 14 | `[H → O]` 2026-08-06, Artifacts — *"`vocab/external/register.md` (regenerated)"* | the committed file is **not** what its generator emits. Regenerating from the committed sidecars into a throwaway copy differs in five lines: the committed file carries the pre-repair paragraph *"**Both tables carry the column** … it renders only in *Fetched, produced no graph*, which had no reason column, so the fallback was unreachable"* while the generator now emits *"**Every table carries the column** … it is an orphan."* So the committed register asserts the `**unlabelled**` fallback is unreachable, reports *0 fetch(es) produced no graph at all*, and renders `deo` as `**unlabelled**` in an orphan table — three statements that cannot all hold, in a wholly generated file of record. Nothing detects the drift: `--check` reads only and reports `## Problems — *(none)*` |
 
   **#6 is the instance that establishes the claim is not retrospective.**
   It was posted in the same message that proposed C23, as the falsifier
@@ -3000,6 +3079,19 @@ that establishes it.
   three-versus-four inside one paragraph, in a file of record, which is
   [C22](#c22)'s boundary case landing on C23's side: nothing inspected
   it because nothing was pointed at it.
+
+  **#13 is that same paragraph one build later, and #14 is why nobody
+  saw it.** The three-versus-four was repaired by adding a fifth row to
+  the table and changing the word *three* to *four* — the count moved
+  with the edit that caused it and stopped one short of the list it
+  describes. The repair was written into the generator and the register
+  was regenerated before the last generator edit landed, so the file of
+  record is now behind the generator as well as wrong about its own
+  table. Both are recoverable by one run and one count, and neither
+  instrument in the build performs either: `--check` does not
+  regenerate, and nothing compares a prose count against the rows under
+  it. The pair is the reason C22 #18 and these two arrived in the same
+  pass — one artifact, three defects, no run that could see any of them.
 - **Updated:** 2026-08-06
 - **Promotion note:** promoted by O under FALSIFIER §6 at design-gate
   block verification 6, from H's proposal of 2026-08-03. Accepted as

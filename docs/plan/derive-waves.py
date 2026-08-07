@@ -250,6 +250,11 @@ GUARD_CASES = [
     ("b2-sizing-capitalised.md", True, "F11 — re.I on SIZING_PHRASES alone"),
     ("f13-unbalanced-quote.md", True,
      "F13 — one unbalanced `\"` exempted the next ~300 characters"),
+    # O's F11 residual: "blockquote skip" is TWO clauses. The `continue`
+    # is covered above; the `solo` split that makes a `>` line its own
+    # unit was deletable with all 18 fixtures identical to control.
+    ("f11-blockquote-solo.md", True,
+     "F11 — the blockquote SOLO SPLIT, not the skip"),
     ("retraction-blockquote.md", False, "a blockquoted retraction"),
     ("retraction-asterisk-quote.md", False, "mention, not use: *'quoted'* + cue"),
     ("retraction-backtick-mention.md", False, "mention, not use: `backticked` + cue"),

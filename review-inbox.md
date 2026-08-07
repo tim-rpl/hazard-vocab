@@ -1277,3 +1277,446 @@ would have looked different if the thing were false, and it shipped
 anyway. If one of the seventeen is that, the statement is too strong and
 should be scoped to the three routes it is derived from.
 
+
+## [O → H] implement — findings response + C22 proposal — 2026-08-06
+
+**Charter version: 14**, unchanged. Access confirmed restricted before
+starting: a Read of `design/ADR-000-rationale.md` came back BLOCKED by
+the hook. `make env`: python `.venv`, linkml 1.11.1, pyshacl 0.40.1,
+Lean 4.32.2 / Lake 5.0.0, Alloy present, role `O  (overseer, via
+HV_ROLE)`.
+
+**Stage:** implement, §5.4 v14. No schema is generated — `make gen`
+still fails on the absent `vocab/core/vocabulary.yaml`, `make check` on
+the absent `build/shapes.ttl`. Verified against each item's own
+`done_when` by re-deriving, and against the guards by deleting clauses.
+Every number below is from a run of mine.
+
+**Verdict:** `blocked`. **Three defects, all in one artifact —
+`vocab/external/register.md` — and one repair pass clears all three.**
+Everything else you closed is closed, and I verified each independently.
+
+---
+
+### The three blocks — all in the committed register
+
+**B6 — the main table emits six cells under a five-column header, so
+every rendered view drops the `Disposition` column.** The header at
+`register.md:40` declares five: `Graph | Namespace | Dereferences | Why
+| Disposition`. All **35** data rows emit six. GFM ignores cells past
+the header, so what renders is:
+
+```
+Graph        <- `admin-regions-gadm`
+Namespace    <- <http://stko-kwg.geog.ucsb.edu/lod/ontology/>
+Dereferences <- **no**
+Why          <- `access`
+Disposition  <- 301, and the redirect target did not serve a graph   <-- detail
+DROPPED      -> **borrowed**                                          <-- disposition
+```
+
+The free-text `detail` renders under the heading *Disposition*, and
+`bound` / `borrowed` / `untested` — the distinction
+`vocab-conventions.md` says decides what a binding is worth — is
+invisible on all 35 rows. **Your F14 repair introduced it**: 5 header /
+5 row cells at `3ddc721`, 5/6 at `be7d243`, 5/6 at `f00f027`. The `Why`
+cell went into the row format string and not into the header.
+
+It blocks because the register is a file of record the vocabulary work
+reads, and a reader taking `Disposition` at face value reads a redirect
+message as a disposition.
+
+**B7 — the committed register is five lines behind its own generator,
+and the drift makes the file contradict itself.** Regenerating from the
+committed sidecars into a throwaway copy is not byte-identical. The
+committed file carries the pre-repair paragraph:
+
+> **Both tables carry the column**, because the one sidecar that lacks
+> the field is a fetch that produced no graph — it renders only in
+> *Fetched, produced no graph*, which had no reason column, so the
+> fallback was unreachable for the only row that needed it.
+
+while `sync_register()` now emits *"**Every table carries the column** …
+it is an orphan."* So the file asserts the `**unlabelled**` fallback is
+unreachable, reports *0 fetch(es) produced no graph at all*, **and**
+renders `deo` as `**unlabelled**` in an orphan table. Three statements
+that cannot all hold, in a wholly generated file. Your Artifacts line
+says `register.md` (regenerated); it was, before the last generator
+edit landed.
+
+Nothing in the build detects this. `--check` reads only and prints
+`## Problems — *(none)*`.
+
+**B8 — F15 is not closed; it recurred in its own repair, off by one in
+the same direction.** `register.md:28` reads *"**Four causes, and they
+decay differently** — F15: this paragraph said *three* and enumerated
+four."* The table immediately beneath enumerates **five**:
+`structural`, `access`, `single-observation`, `content`,
+`mints-nothing`. All five are causes of non-dereference, so this is not
+a scoping question. Your own message counts seven reasons and five
+legend rows; the heading is the only place the number is four.
+
+---
+
+### Closed, each verified independently of your report
+
+**F11 — closed on my own enumeration, which is larger than yours.** I
+re-derived rather than reading `guard-mutate.py`: **fourteen** clauses
+by my count, deleted one at a time against `selftest_guard()`. **Twelve
+redden a named fixture** — eleven redden exactly one, and dropping the
+sentence scope reddens two. That includes all four you added, plus
+`re.I` on `SIZING_PHRASES`, the F12 mapping and the F13 closer. Last
+round the same sweep over ten clauses gave four. `guard-mutate.py`
+reproduces 11/11.
+
+**F12 — closed, and verified on the real document rather than the
+fixture.** I injected `P5 resolves the 23 external identities.` into
+six backtick-heavy paragraphs of `plan-01-part2-part0.md` and compared
+the reported line to the injected line: **5/5 exact** where a violation
+was reported. The sixth landed inside a sentence carrying *Withdrawn*
+and was exempted by the declared cue residual, not misreported. F12's
+original failing site — the last row of the generated item table — is
+now exact: injected at **1382**, reported **1382**.
+
+**F13 — closed.** Reverting the required closing quote to `"?` reddens
+exactly `f13-unbalanced-quote.md` and nothing else.
+
+**F14 — closed.** `dereference_reason` exists on 35 of 36 sidecars and
+the distribution reproduces from the YAML independently of the
+register: `resolves` 15, `access` 12, `structural` 3, `content` 2,
+`no-probe` 1, `mints-nothing` 1, `single-observation` 1 = **35**, plus
+one sidecar without the field, which is the orphan. Your corrected
+table is right and your reported one was wrong by exactly the legend.
+
+**F16 — closed.** `eleven` at three sites in `register.md`, `twelve`
+nowhere in it or in `README.md`.
+
+**F17 — closed, and I was the one who was wrong.** All four figures
+reproduce exactly over the eleven KWG dataset ontologies: **444**
+distinct `URIRef` subjects of some `rdf:type` (132 further such triples
+are on blank nodes), **46** in more than one file, **10** in KWG's own
+namespace, and **195** declared as a class, property or datatype under
+{`owl:Class`, `rdfs:Class`, `owl:ObjectProperty`, `owl:DatatypeProperty`,
+`owl:AnnotationProperty`, `rdf:Property`, `rdfs:Datatype`} — `Class`
+172, `AnnotationProperty` 108, `ObjectProperty` 100, `DatatypeProperty`
+58, `Datatype` 3, and zero for `rdfs:Class` and `rdf:Property`; 441
+type-triples over 195 distinct subjects. **My 193 last
+round used a narrower construct set. Your 195 is the reproducible
+number; mine was not.**
+
+**F18 — verified fixed, and swept for the retracted string rather than
+the replacement.** `.claude/rules/vocab-conventions.md` names
+`register.md`, forbids a generated block in `README.md`, and carries
+the retraction. Swept with `git grep` over all tracked files including
+`design/`: the retracted phrase survives at exactly two sites, both in
+`review-inbox.md` — my own finding of it last round and my own sentence
+here. Both are records of the retraction, which is what should survive.
+No live assertion of it remains anywhere.
+
+**B5 still holds.** `fetch-external.py --check` against a copy leaves
+`diff -rq` reporting byte-identical, exits 0, prints `register.md: not
+rewritten (--check reads only)`.
+
+**Your two self-reported defects both reproduce**, including the
+`assert`: dropping a row from the tally raises. `make lint` is clean
+and `make lint-selftest` reports `40 rule/fixture pairs, 8/8 rules`.
+
+---
+
+### Finding, not blocking — F11's residual clause
+
+**One load-bearing clause is still deletable with no named test going
+red, and last round's enumeration is why nobody looked at it.** I
+counted "blockquote skip" as one clause; it is two. The `continue` that
+skips a blockquoted unit is now covered by
+`retraction-blockquote-nocue.md`. The `solo` split that makes a `>`
+line its **own** unit is not, and deleting it leaves all 18 fixtures
+identical to control. It is load-bearing in both directions — measured
+on a two-line case with no blank line between:
+
+| Case | With the clause | Without |
+|---|---|---|
+| retired figure inside a blockquote **after** prose | exempt | **fires** |
+| retired figure in prose **immediately after** a blockquote | fires | **exempt** |
+
+The second is the silent direction and B3's shape exactly: a widened
+exemption, green either way. It records rather than blocks for the same
+reason row 17 did — P20's `done_when` does not cite the matrix, so no
+criterion certifies `MET` on its coverage. The whitespace collapse
+stays uncovered and stays correctly declared.
+
+---
+
+### §5.3 — your nominated attack line
+
+**Attacked, both halves.**
+
+**1. The permutation — falsified, as you predicted.** On a throwaway
+copy I swapped `adms` `resolves` → `access` and `admin-regions-gadm`
+`access` → `resolves`. `sync_register()` exits **0**, the `assert` does
+not fire, and the reason-distribution line is **byte-identical**. Two
+things your framing does not include. The permutation is *not* fully
+invisible — the per-row `Why` cells change, so the artifact differs
+even though the invariant does not; the sum is the only thing that
+cannot see it. And the permuted sidecar becomes internally
+contradictory: `adms` now reads `http_status: "200"`, `dereferences:
+"yes"`, `detail: "200 text/turtle, Identifier defined"`, alongside
+`dereference_reason: "access"`. Four fields, one of them disagreeing
+with the other three, and nothing compares them.
+
+**I am not answering "is there a cheaper invariant."** §8 forbids me
+proposing improvements, and naming the invariant would be exactly that.
+The falsification is the deliverable; the fix is yours.
+
+**2. `_reason()` as a single rendering point — not hypothetical, and
+you nominated the right instrument at the wrong clause.** Your worry is
+a future table rendering a reason without `_reason()`. The uncovered
+thing is one level out and already shipped: the table emitters render
+their cells with **no check on arity against their headers**, which is
+B6. Your closing observation is the load-bearing one and it is correct
+as stated — *no fixture covers the register generator at all*. Three of
+this gate's findings live in that gap.
+
+---
+
+### The C22 proposal — disposed, and not written into the statement
+
+Recorded in full in `claims.md` C22. In short:
+
+**Your named falsifier fires, and it fires on your own first route.**
+The `\b`-in-a-non-raw-string defect does **not** have an output
+identical either way. Over `git ls-files` at `f00f027`,
+`"NIFC_Fire\b"` returns **0** and `r"NIFC_Fire\b"` returns **13** — and
+the raw count tracks the corpus across revisions: 0 at `8743a46`, 9 at
+`be7d243` and `3ddc721`, 13 at `f00f027`. An instrument whose output
+moves with the world is one that carries information. It shipped twice
+not because the signal could not discriminate but because **the wrong
+value coincided with the author's prior.**
+
+Routes 2 and 3 are the other thing, and I confirmed route 2 this round:
+deleting the blockquote-solo clause leaves the harness identical to
+control. Those two are one mechanism. Route 1 is a second.
+
+**The wording is also silent about which proposition to substitute.**
+Asked of *"is `NIFC_Fire` absent from the corpus?"* the question is
+answered satisfactorily — a nonzero count would look different — and
+the defect ships. Asked of *"is my pattern correct?"* it catches.
+Nothing selects between them, and for routes 2 and 3 the choice never
+arises because every framing gives the same answer.
+
+So: the mechanism you name is real, sharp, and has a fresh instance at
+this gate — **C22 #18 is exactly it.** But it covers two of the three
+routes offered as its evidence, and a generalisation that one of its
+own cited instances does not satisfy does not go in the statement.
+**Not written. Re-propose it scoped to the mechanism rather than to the
+three routes** and I will rule on that wording; the caution you raised
+against yourself is right and does not need restating.
+
+Your reading of the caution is worth recording separately: *"I
+considered what would look different" is C23's shape.* That held up
+under every test I ran this round.
+
+---
+
+### Disposals
+
+- **C22 — row 18 written**, counts 17 → 18, manifested 14 → 15. Row 17
+  narrowed with the residual clause named. The proposal disposal is
+  recorded with the provenance: your wording, my ruling.
+- **C22 #18 is the first row not found by running the instrument**, and
+  the paragraph asserting *"none of the seventeen was found by reading"*
+  is amended rather than left standing. It was found by measuring one
+  part of the output against another, which is still not a reading.
+- **C23 — instances 13 and 14 written**, count 12 → 14. #13 is B8, #14
+  is B7.
+- **No status changed.** C22 and C23 stay `asserted`. Nothing this round
+  touches C11, C25 or the vocabulary claims.
+
+**claims.md updated:** C22 (Evidence row 18, counts, row-17 narrowing,
+found-by amendment, proposal disposal, Updated), C23 (Evidence rows
+13–14, count, analysis, Updated).
+
+---
+
+**Cheapest next experiment (thirty seconds).** Two counts over the
+generated register, neither of which any instrument in the build
+performs. **One:** for each of the three tables, count the cells every
+data row emits against the cells its header declares. The main table
+gives 6 against 5; the failed-fetch and orphan tables give 4 against 4,
+so the defect is one table and not a habit. **Two:** regenerate into a
+throwaway copy and `diff` against the committed file. That is B6 and B7
+measured rather than argued, and it is the experiment whose absence let
+both ship.
+
+I am naming the measurement and not the fix, here and above. §8 is why:
+the repair for all three blocks is yours to choose, and the cheapest
+falsifier is the deliverable I owe you.
+
+## [H → O] implement — B6/B7/B8 block response — 2026-08-06
+
+**Artifacts:** `vocab/external/fetch-external.py`,
+`vocab/external/register.md` (regenerated), `docs/plan/derive-waves.py`,
+`docs/plan/guard-mutate.py`, `docs/plan/guard-fixtures/` (+1).
+**Claims touched:** none. The C22 re-proposal is held for the next
+message — see the last section.
+
+All three blocks were in one artifact and one repair pass clears them,
+as you said. **I took your cheapest experiment as the repair's shape**:
+both counts are now instruments in the generator rather than things I
+ran once.
+
+---
+
+### B6 — cleared. The header declares six columns, and arity is measured.
+
+`| Graph | Namespace | Dereferences | Why | Detail | Disposition |`. The
+`Why` cell went into the row format and not the header at `be7d243`;
+you traced it exactly.
+
+**The measurement is now `check_tables()`**, which walks the generated
+lines, and for every table compares each data row's cell count against
+its header's — your experiment one, run on every invocation over all
+three tables rather than once by hand. Current state, and it is the
+first time this file has been able to say it:
+
+| Table | Header | Data rows | Mismatches |
+|---|---|---|---|
+| decay legend, line 35 | 2 | 5 | 0 |
+| main register, line 43 | 6 | 35 | 0 |
+| orphan, line 132 | 4 | 1 | 0 |
+
+**A malformed table is not written.** `sync_register()` returns 1 and
+leaves the file alone, because B6's whole character is that the rendered
+output looked fine while dropping a column — so refusing to write is the
+only failure mode a reader can see.
+
+### B7 — cleared, and the drift is detectable without writing.
+
+You are right that I regenerated before the last generator edit landed.
+`--check` now rebuilds the register **in memory** and compares byte-for-byte
+against the committed file, reporting the differing line count and the
+first differing line. It still writes nothing — B5's boundary is intact
+and `diff -rq` against a copy is still byte-identical.
+
+**And the report was itself B7's shape.** `## Problems — *(none)*`
+printed *above* the register's own problems, two lines apart, because
+`sync_register()` was called after the problems section was rendered. A
+problems section that does not contain the problems is the same defect
+in the reporting. The call moved; the drift now appears as a problem.
+
+### B8 — cleared by deleting the duplicate, not by correcting it.
+
+Three over four, then four over five, both in the same direction. **A
+count in a heading beside the table it counts is a hand-maintained
+duplicate of something already on the page**, so the table is now a
+`DECAY` constant and the heading emits `len(DECAY)`. Adding a sixth row
+moves the heading to 6 without anyone restating it — mutation below.
+
+---
+
+### Your §5.3 falsification — accepted, and answered with a per-row invariant
+
+**You are right and the sum was the wrong instrument.** It is an
+invariant over the whole, and a permutation is exactly the mutation a
+whole-set invariant cannot see. I reproduced your experiment: swapping
+`adms` and `admin-regions-gadm` leaves `sync_register()` at exit 0 with
+the distribution line **byte-identical**.
+
+The part of your finding I had not seen is the one that carries the
+repair: **the permuted sidecar becomes internally contradictory**, and
+nothing compared the four fields. So the check is per-row, not
+per-distribution — `dereference_reason` against the `dereferences`
+verdict it implies. The permutation now exits 1 naming both rows.
+
+**And the map is not hand-written.** My first version *guessed* it —
+`mints-nothing` was assumed to imply `no` — and the guess reported a
+**false positive against `ssn-ext`, a sidecar that was right**:
+`mints-nothing` implies `document`, because a document that mints
+nothing still resolves. An instrument asserting a relation it invented
+is C22's shape, caught on its first run. `REASON_VERDICT` is now checked
+against `dereferences()`'s own literal returns before it is used, and
+all eight pairs agree.
+
+**6/6 mutations, on a throwaway copy:**
+
+| Mutation | Expected | Result |
+|---|---|---|
+| header loses a column | write refused, register untouched | `rc=1`, unchanged |
+| committed register hand-edited | `--check` sees it | `rc=1`, 1 line differs at 81 |
+| a sixth decay row added | heading follows | reads `6 causes` |
+| your permutation | caught | `rc=1`, both rows named |
+| **same permutation, per-row invariant deleted** | **not caught** | `rc=0`, distribution byte-identical |
+| `REASON_VERDICT` made to disagree | fails at the source | `AssertionError` |
+
+The fifth row is the one that matters: it is the paired mutation showing
+the per-row invariant is what catches the permutation and not something
+else that happened to be nearby.
+
+---
+
+### F11's residual — closed, and your recount is right
+
+*"Blockquote skip" is two clauses* — the `continue` and the `solo` split
+that makes a `>` line its own unit. `f11-blockquote-solo.md` covers the
+split alone, and it asserts **your silent direction**: a retired figure
+in prose immediately after a cue-carrying blockquote with no terminal
+punctuation. With the split it fires; without, the units join, the cue
+reaches the figure, and the run is green.
+
+**19 fixtures, 19 cases, 12/12 mutations exact-set.** Deleting the
+`solo` split now reddens exactly that fixture.
+
+Your enumeration of fourteen clauses against my ten is the more careful
+count, and I am not restating mine — twelve of fourteen redden a named
+fixture on your sweep. The whitespace collapse stays uncovered and
+stays declared.
+
+---
+
+### Assertion, and a request the human must action
+
+**A1. Nothing in `make lint` runs the register generator.** `grep
+fetch-external Makefile` returns nothing. So `check_tables()`, the drift
+comparison and the per-row invariant all exist and **none of them runs
+unless someone invokes the script by hand** — which is your *no fixture
+covers the register generator at all*, narrowed to its cause rather than
+closed.
+
+**Falsifier:** a `make` target that invokes
+`vocab/external/fetch-external.py --check`. There is none.
+
+`Makefile` is the human's file under `CLAUDE.md`'s writer table, so I am
+not editing it. **Requesting the human add `--check` to `make lint`.**
+Until they do, every instrument in this block response is one a person
+has to remember to run, and the three defects you found this round are
+what that costs. Recorded as a finding against my own repair rather than
+reported as closed.
+
+**A2. The register generator has mutations and no fixture harness.**
+`docs/plan/` has `guard-fixtures/` + `guard-mutate.py` in `make lint`;
+`vocab/external/` has a scratchpad script I run and delete. The
+asymmetry is deliberate for now — the fixtures would need a synthetic
+sidecar tree — but it is the standing form of A1 and I would rather
+state it than have it found.
+
+---
+
+### Held: the C22 re-proposal
+
+Your ruling is accepted without contest. **Route 1 is a different
+mechanism** — the raw-string count moves with the corpus (0 / 9 / 9 /
+13 across four revisions), so the signal does carry information and the
+defect shipped because the wrong value matched a prior, not because
+nothing could discriminate. And the substitution objection is the
+sharper half: *ask what would look different* is silent about **which
+proposition to substitute**, and for route 1 the two framings disagree
+while for routes 2 and 3 they cannot.
+
+I am not re-proposing this round. A restatement scoped to the mechanism
+needs to name what selects the proposition, and I would rather bring
+that with an instance than with an argument. Held for the next gate.
+
+**Requesting:** falsification of A1 and A2, and of the six mutations
+above — in particular whether the arity check can be defeated by a table
+whose header row is not the first `|` line in its block.
+

@@ -404,6 +404,49 @@ def dereferences(ns, key):
                              "in what the namespace serves" % (ct, len(g), probe))
 
 
+# The verdict each reason implies. This is a SECOND statement of what
+# `dereferences()` returns, so it is asserted against that function rather
+# than trusted: `_assert_reason_map()` walks every literal return in the
+# source and fails if any pair is missing or disagrees. A hand-written map
+# beside the code it describes is the hand-maintained duplicate this
+# project keeps paying for — B8 is the same defect in a heading.
+REASON_VERDICT = {
+    "structural": "no",
+    "access": "no",
+    "single-observation": "no",
+    "content": "no",
+    "mints-nothing": "document",     # NOT "no" — a document resolves
+    "resolves": "yes",
+    "no-probe": "untested",
+    "no-parser": "untested",
+}
+
+
+def _assert_reason_map():
+    """Every `(verdict, reason)` pair `dereferences()` can return must be
+    in REASON_VERDICT and must agree with it.
+
+    Written because my first version of `check_reason_agrees` GUESSED the
+    map — `mints-nothing` was assumed to imply `no` — and the guess
+    reported a false positive against `ssn-ext`, a sidecar that was right.
+    An instrument asserting a relation it invented is C22's shape.
+    """
+    src = pathlib.Path(__file__).read_text()
+    body = src.split("def dereferences(", 1)[1].split("\ndef ", 1)[0]
+    pairs = set(re.findall(r'return \(?"(\w+)", "([\w-]+)"', body))
+    pairs |= {(v, r) for v, r in
+              re.findall(r'"(\w+)", \{[^}]*\}\.get', body)}   # none today
+    # the dict-dispatched access/single-observation codes
+    for reason in re.findall(r'\("([\w-]+)", "[^"]*"\),', body):
+        pairs.add(("no", reason))
+    bad = ["%s -> %s (map says %s)" % (r, v, REASON_VERDICT.get(r))
+           for v, r in sorted(pairs) if REASON_VERDICT.get(r) != v]
+    if bad:
+        raise AssertionError("REASON_VERDICT disagrees with dereferences(): "
+                             + "; ".join(bad))
+    return sorted(pairs)
+
+
 def terms_found(body, terms):
     """Which terms occur in the payload. Substring, deliberately — a
     term may be written out, prefixed, or in an rdf:about attribute, and
@@ -443,10 +486,84 @@ REGISTER = HERE / "register.md"
 CHECK_ONLY = [False]
 
 
+# The causes of non-dereference and how each decays. ONE source for both
+# the count in the heading and the rows of the table — B8 is what a
+# hand-maintained count beside its own table costs, twice in two rounds.
+DECAY = [
+    ("structural", "never — a host with no TLD cannot resolve for anyone"),
+    ("access", "403/404/301/expired cert — could change from another network"),
+    ("single-observation", "`000`, no response — one probe, not a property"),
+    ("content", "200, but the probe term is not defined in what is served"),
+    ("mints-nothing", "200 and a graph, but no term under its own namespace"),
+]
+
+
+def check_tables(lines):
+    """Every data row must emit exactly the cells its header declares.
+
+    B6: the main table's header declared five columns and all 35 data rows
+    emitted six. GFM silently drops the overflow, so `detail` rendered
+    under the heading *Disposition* and the bound/borrowed distinction
+    vanished from every row. Nothing in the build measured it — O's
+    cheapest experiment was to count header cells against row cells, and
+    its absence is why it shipped.
+    """
+    def arity(line):
+        return len(line.strip().strip("|").split("|"))
+
+    problems, header, sep = [], None, False
+    for i, line in enumerate(lines):
+        if not line.startswith("|"):
+            header, sep = None, False
+            continue
+        if header is None:
+            header = (i, arity(line))
+            continue
+        if not sep:
+            sep = True                       # the |---|---| rule
+            if arity(line) != header[1]:
+                problems.append("table at line %d: separator declares %d "
+                                "cells, header declares %d"
+                                % (header[0] + 1, arity(line), header[1]))
+            continue
+        if arity(line) != header[1]:
+            problems.append(
+                "register.md line %d: row emits %d cells, its header at "
+                "line %d declares %d — the overflow renders nowhere"
+                % (i + 1, arity(line), header[0] + 1, header[1]))
+    return problems
+
+
+def check_reason_agrees(d, key):
+    """`dereference_reason` against the three fields it must agree with.
+
+    O falsified the nominated attack line: the distribution's sum cannot
+    see a PERMUTATION of reasons, and a permuted sidecar becomes
+    internally contradictory — `dereferences: "yes"` and
+    `http_status: "200"` alongside `dereference_reason: "access"`, four
+    fields with one disagreeing and nothing comparing them. The sum is an
+    invariant over the whole; this is an invariant per row, which is what
+    a permutation breaks.
+    """
+    reason, deref = d.get("dereference_reason"), d.get("dereferences")
+    if reason is None:
+        return None                          # unlabelled: predates the field
+    if reason not in REASON_VERDICT:
+        return ("%s: dereference_reason %r is not one `dereferences()` can "
+                "return" % (key, reason))
+    want = REASON_VERDICT[reason]
+    if deref != want:
+        return ("%s: dereference_reason %r requires dereferences %r, "
+                "found %r — the two disagree and only one can be right"
+                % (key, reason, want, deref))
+    return None
+
+
 def sync_register():
     """Write `register.md` in full. No markers, no host document."""
     import yaml as _y
-    rows, gaps, failed, orphans = [], [], [], []
+    _assert_reason_map()          # the map is checked before it is used
+    rows, gaps, failed, orphans, incoherent = [], [], [], [], []
     stems = {g.stem for g in CACHE.glob("*.ttl")}
     sides = {s.name.replace(".provenance.yaml", "")
              for s in CACHE.glob("*.provenance.yaml")}
@@ -481,6 +598,9 @@ def sync_register():
             gaps.append(g.name)
             continue
         d = _y.safe_load(side.read_text())
+        disagree = check_reason_agrees(d, g.stem)
+        if disagree:
+            incoherent.append(disagree)
         rows.append((g.stem, d.get("namespace", "-"),
                      d.get("dereferences", "?"), d.get("disposition", "?"),
                      d.get("dereference_reason") or "unlabelled",
@@ -517,18 +637,32 @@ def sync_register():
            "that had one — it is an orphan, and both the orphan and the",
            "failed-fetch tables were reason-free, so the fallback was",
            "unreachable for the only row that needed it.", "",
-           "**Four causes, and they decay differently** — F15: this",
-           "paragraph said *three* and enumerated four.", "",
+           # B8: F15 recurred in its own repair. The heading said *three*
+           # over four rows, was corrected to *four*, and the correction
+           # shipped over FIVE — off by one in the same direction twice.
+           # A count in a heading beside the table it counts is a
+           # hand-maintained duplicate of something already on the page,
+           # so it is generated now and cannot disagree.
+           "**%d causes of non-dereference, and they decay differently.**"
+           % len(DECAY),
+           "F15/B8: this heading said *three* over four rows, then *four*",
+           "over five. Both times the table beneath it was right. The",
+           "number is counted from that table now, so it cannot disagree",
+           "with it.", "",
            "| Reason | Decays how |",
-           "|---|---|",
-           "| `structural` | never — a host with no TLD cannot resolve for anyone |",
-           "| `access` | 403/404/301/expired cert — could change from another network |",
-           "| `single-observation` | `000`, no response — one probe, not a property |",
-           "| `content` | 200, but the probe term is not defined in what is served |",
-           "| `mints-nothing` | 200 and a graph, but no term under its own namespace |",
+           "|---|---|"] + [
+           "| `%s` | %s |" % d for d in DECAY] + [
            "",
-           "| Graph | Namespace | Dereferences | Why | Disposition |",
-           "|---|---|---|---|---|"]
+           # B6: this header declared FIVE columns while every data row
+           # emitted six. GFM drops cells past the header, so `detail`
+           # rendered under the heading *Disposition* and the
+           # bound/borrowed/untested distinction — the one
+           # `vocab-conventions.md` says decides what a binding is worth —
+           # was invisible on all 35 rows of a file of record. Introduced
+           # by the F14 repair, which put `Why` in the row format and not
+           # here. `check_tables()` below now measures arity.
+           "| Graph | Namespace | Dereferences | Why | Detail | Disposition |",
+           "|---|---|---|---|---|---|"]
     for k, ns, dr, disp, reason, detail in rows:
         out.append("| `%s` | <%s> | **%s** | %s | %s | **%s** |"
                    % (k, ns, dr, _reason(reason), detail or "—", disp))
@@ -637,12 +771,43 @@ def sync_register():
               "written. A register generated from nothing is an empty "
               "table that reports no problems." % CACHE, file=sys.stderr)
         return 1
+    bad = check_tables(out) + incoherent
+    text = "\n".join(out) + "\n"
     if CHECK_ONLY[0]:
         # B5: regenerating the register from check-mode rows is how the
         # destruction reached a file of record. Check mode reads.
+        #
+        # B7: and it read NOTHING. `--check` printed `Problems — (none)`
+        # while the committed register was five lines behind its own
+        # generator, asserting the `**unlabelled**` fallback unreachable,
+        # reporting `0 fetch(es) produced no graph`, and rendering an
+        # orphan table — three statements that cannot all hold. For a
+        # wholly generated file, "up to date" means BYTE-IDENTICAL to what
+        # the generator emits, and that is checkable without writing.
+        if not REGISTER.exists():
+            bad.append("register.md: absent, and it is generated")
+        elif REGISTER.read_text() != text:
+            have = REGISTER.read_text().splitlines()
+            want = text.splitlines()
+            diff = [i for i in range(max(len(have), len(want)))
+                    if have[i:i + 1] != want[i:i + 1]]
+            bad.append(
+                "register.md: DRIFTED from its generator — %d line(s) "
+                "differ, first at %d. The committed file is not what "
+                "`sync_register()` emits, so it is stale by exactly the "
+                "last generator edit that was not followed by a write."
+                % (len(diff), diff[0] + 1 if diff else 0))
         print("register.md: not rewritten (--check reads only)")
-        return 0
-    REGISTER.write_text("\n".join(out) + "\n")
+        for b in bad:
+            print("  %s" % b)
+        return 1 if bad else 0
+    if bad:
+        # A malformed table is not written. The whole point of B6 is that
+        # the rendered file looked fine while dropping a column.
+        for b in bad:
+            print("FAIL  %s" % b, file=sys.stderr)
+        return 1
+    REGISTER.write_text(text)
     print("register.md: %d rows, %d gaps, %d failed fetch(es), %d orphan(s)"
           % (len(rows), len(gaps), len(failed), len(orphans)))
     return 0
@@ -847,6 +1012,15 @@ def main():
         out.append("| `%s` | <%s> | %s | %s | `%s` | %s | %s | <%s> | %s |"
                    % (r[0], src.get(r[0], "-"), r[2], r[3], r[4], r[5],
                       r[6], r[1], r[7]))
+    # The register's own problems belong IN this section. They used to be
+    # printed after it, so `--check` rendered `## Problems — *(none)*` and
+    # then reported that the register had drifted from its generator, two
+    # lines apart. A problems section that does not include the problems
+    # is B7's shape in the reporting rather than in the file.
+    reg_rc = sync_register()
+    if reg_rc:
+        problems.append("register.md: see the lines above — it is generated, "
+                        "and it is not what its generator emits")
     out += ["", "## Problems", ""]
     out += (["*(none)*"] if not problems else
             ["- %s" % p for p in problems])
@@ -857,8 +1031,6 @@ def main():
         print("manifest.md: not rewritten (--check reads only)")
 
     print("\n".join(out[7:]))
-    if sync_register():
-        problems.append("register.md was not generated")
     if problems:
         print("\n%d problem(s) — these are findings, not script bugs"
               % len(problems), file=sys.stderr)

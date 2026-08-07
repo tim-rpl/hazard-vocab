@@ -20,14 +20,17 @@ bare `HTTP 301` and content at 1, the one argued hardest for,
 was the least visible. A generated file of record asserting a
 capability it did not have is C23's shape, written by a tool.
 A row showing **unlabelled** predates the field and has not
-been re-probed. **Both tables carry the column**, because the
-one sidecar that lacks the field is a fetch that produced no
-graph — it renders only in *Fetched, produced no graph*, which
-had no reason column, so the fallback was unreachable for the
-only row that needed it.
+been re-probed. **Every table carries the column**, because the
+one sidecar that lacks the field renders in none of the tables
+that had one — it is an orphan, and both the orphan and the
+failed-fetch tables were reason-free, so the fallback was
+unreachable for the only row that needed it.
 
-**Four causes, and they decay differently** — F15: this
-paragraph said *three* and enumerated four.
+**5 causes of non-dereference, and they decay differently.**
+F15/B8: this heading said *three* over four rows, then *four*
+over five. Both times the table beneath it was right. The
+number is counted from that table now, so it cannot disagree
+with it.
 
 | Reason | Decays how |
 |---|---|
@@ -37,8 +40,8 @@ paragraph said *three* and enumerated four.
 | `content` | 200, but the probe term is not defined in what is served |
 | `mints-nothing` | 200 and a graph, but no term under its own namespace |
 
-| Graph | Namespace | Dereferences | Why | Disposition |
-|---|---|---|---|---|
+| Graph | Namespace | Dereferences | Why | Detail | Disposition |
+|---|---|---|---|---|---|
 | `admin-regions-gadm` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `adms` | <http://www.w3.org/ns/adms#> | **yes** | `resolves` | 200 text/turtle, `Identifier` defined | **bound** |
 | `air-quality-epa` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
