@@ -46,6 +46,7 @@ with it.
 | `adms` | <http://www.w3.org/ns/adms#> | **yes** | `resolves` | 200 text/turtle, `Identifier` defined | **bound** |
 | `air-quality-epa` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `census-uscb` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
+| `cf-standard-name` | <http://vocab.nerc.ac.uk/standard_name/> | **yes** | `resolves` | 200 text/turtle, `air_temperature` defined. Every subject ends in a trailing `/`; the CURIE carries it (`cfsn:air_temperature/`); it does NOT reach the emitted Turtle — `gen-shacl` writes the full URI in angle brackets and the result reparses. Scheme is `http`, not `https` | **bound** |
 | `climate-divisions-observations-noaa` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `cropland-types-usda` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `dcterms` | <http://purl.org/dc/terms/> | **yes** | `resolves` | 200 text/turtle, `conformsTo` defined | **bound** |
@@ -78,9 +79,9 @@ with it.
 | `void` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 | `wildfire-nifc` | <http://stko-kwg.geog.ucsb.edu/lod/ontology/> | **no** | `access` | 301, and the redirect target did not serve a graph | **borrowed** |
 
-*35 graphs with a sidecar; 19 borrowed, 15 bound, 1 untested. 0 fetch(es) produced no graph at all.*
+*36 graphs with a sidecar; 19 borrowed, 16 bound, 1 untested. 0 fetch(es) produced no graph at all.*
 
-**Reason distribution over the 35 rows above** — generated, and its total is asserted equal to the row count. Counting these off the rendered table by hand adds one to every reason that also names a row of the legend: `resolves` 15, `access` 12, `structural` 3, `content` 2, `no-probe` 1, `mints-nothing` 1, `single-observation` 1.
+**Reason distribution over the 36 rows above** — generated, and its total is asserted equal to the row count. Counting these off the rendered table by hand adds one to every reason that also names a row of the legend: `resolves` 16, `access` 12, `structural` 3, `content` 2, `no-probe` 1, `mints-nothing` 1, `single-observation` 1.
 
 ## A term's declaration may span rows — two different reasons
 

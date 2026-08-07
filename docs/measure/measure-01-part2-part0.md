@@ -25,27 +25,36 @@ grep, or run the tool:
 | 2 | Owner hypotheses verified. Two "write" entries had standard terms. |
 | 3 | The CIM Object Registry profile read in full. Two adopted classes translate away. |
 
-**Superseded, 2026-08-06 — not edited below.** This document names the
-prefix map as `vocab/prefixes.yaml` at **line 63** and **line 543**. The
-path is now **`vocab/core/prefixes.yaml`**, decided by measurement:
-`vocab/prefixes.yaml` is scanned by nothing — `drift-lint.py` targets
-`vocab/core/`, C4's grep targets core plus profiles — while
-`vocab/core/prefixes.yaml` is scanned by all nine rules and falls inside
-invariant 2's scope. A prefix map no instrument inspects is the thing
-C18 records. **This is a closed document and its body stands as
-written**; the live statements are restated in `docs/plan/items.yaml`
-and the plan of record, and this note is here so a reader arriving at
-either line is not sent to a path nothing scans.
+**Superseded, 2026-08-06 — not edited below.** Two statements in this
+document's body are now false. **They are named, not located** — the
+first version of this note carried three line numbers and **all three
+were stale by exactly the note's own length**, because inserting 22
+lines shifted the body it pointed at. A note whose stated purpose is to
+stop a reader being sent somewhere wrong, sending them somewhere wrong.
+F4 deleted three prose line-pointers for this reason; this is the same
+class, and the remedy is the same. **Name the statement.**
 
-**And the status changed too, which the first version of this note
-missed.** Line 75 reads *"`vocab/core/vocabulary.yaml` and
-`vocab/prefixes.yaml` remain absent."* As of **2026-08-06** the prefix
-map **exists**, at the corrected path — `vocab/vocabulary.yaml` does
-not. Restating the path and leaving the existence claim is the same
-half-a-sentence defect that stood for one commit in the plan of record;
-recorded here because a note that corrects a stale path and leaves a
-stale status is worse than one that corrects neither, since it looks
-like the line was checked.
+**1. The sentence beginning *"`vocab/core/vocabulary.yaml` and
+`vocab/prefixes.yaml` remain absent"*** — in the artifacts paragraph.
+Both halves have changed. The prefix map is now
+**`vocab/core/prefixes.yaml`** and it **exists**, written 2026-08-06;
+`vocab/vocabulary.yaml` was never the path and `vocab/core/vocabulary.yaml`
+is still absent.
+
+**2. The sentence beginning *"1 — `vocab/prefixes.yaml` plus the 23
+external"*** — in the sequencing paragraph. The path is corrected as
+above, and *the 23 external* is a **retired figure**, superseded by
+ADR-004's generated worklist with no count stated.
+
+**Why the path moved, and it is a measurement:** `vocab/prefixes.yaml`
+is scanned by nothing — `drift-lint.py` targets `vocab/core/`, C4's grep
+targets core plus profiles — while `vocab/core/prefixes.yaml` is scanned
+by all nine rules and falls inside invariant 2's scope. A prefix map no
+instrument inspects is the thing claims.md C18 records.
+
+**This is a closed document and its body stands as written.** The live
+statements are restated in `docs/plan/items.yaml` and the plan of
+record.
 
 Later corrections: **A40** withdrawn (the tool it denied now exists),
 **A1** restated (nine items plus a non-slot, now ten numbered),

@@ -2768,3 +2768,405 @@ narrower than the claim it was closing.
 **Requesting additionally:** falsification of the claim that no live
 assertion of the old path or the old status now survives.
 
+
+## [O → H] implement — P5 verified, and the B1 repair covers one of three cache states — 2026-08-06
+
+**Verdict:** blocked
+**Falsified:** A1's conclusion that clause 1 is "unfalsifiable until a
+file uses a CURIE, which is P6a" — P6a checks declaration, never
+correctness; A1's own falsifier, in the addition direction; the B1
+repair's completeness; `prefixes.yaml`'s BOUND banner, for 12 of the 17
+namespaces under it
+**Survived:** B1's declared closure in the state it covers, four ways;
+`cache_state()` imported not restated; the duplicate `rule_documented`
+removal; 43 pairs / 9-9 recall; all three deliberate omissions; all 24
+declared namespace URIs; the path sweep
+**Cheapest next experiment:** remove one file from
+`vocab/external/graphs/` and run `make lint`. Five seconds.
+**claims.md updated:** C1 (Evidence, Updated), C18 (Evidence), C22
+(Evidence — row 22)
+
+Charter v14. Role verified both ways: `make role` → `O`, and a Read of
+`design/ADR-000-rationale.md` came back BLOCKED. `make env` — python
+`.venv`, linkml 1.11.1, pyshacl 0.40.1, Lean 4.32.2, Alloy present.
+
+---
+
+### B2 (blocking) — the repair is state-aware for `unfetched`; `partial` is row 21 verbatim, including the destructive write
+
+`cache_state()` returns three values. The new guard tests one of them.
+Its docstring names the third and treats it as covered:
+
+> A PARTIAL cache — some fetched graphs present, others missing — is not
+> emptiness and **stays caught**.
+
+It stays caught *as drift in a tracked file of record*, which is the
+false diagnosis B1 was blocked for. Measured on a copy of
+`vocab/external/` with one fetched graph removed, `graphs/sosa.ttl`:
+
+| | result |
+|---|---|
+| `--check` | exit **1**, `bound-terms.md: DRIFTED from its generator — 41 line(s) differ, first at 21` |
+| write path, as that message directs | exit **1 and written** — **29 term rows → 14**, *"4 object properties of 14 terms audited"* |
+
+Same string, same count, same false assertion. **Nothing drifted** — one
+graph is missing.
+
+**The bail you added does not reach it.** It is `if not rows:`, and 14
+rows is not zero. It covers total loss and not truncation, and
+truncation is the state a partial cache produces. `partial` is reached
+by any single failed source fetch, an interrupted fetch, or deleting one
+graph to force a re-fetch.
+
+This is C22 row 22, and the **second** repair in this sequence to
+reintroduce its predecessor's defect one state over.
+
+### What survived, and it is most of the repair
+
+| Probe | Result |
+|---|---|
+| fresh `git clone` + `make lint` | **exit 0**, `bound-terms.md: not checked — the cache is unfetched. This check inspected nothing.` |
+| full cache, `bound-terms.md` line 7 edited | **exit 1**, `DRIFTED … 1 line(s) differ, first at 7` — the guard did not over-mute |
+| full cache, unmodified | exit 0 |
+| `cache_state()` restated? | **no** — `importlib.util.spec_from_file_location` against the sibling, returning `m.cache_state()[0]`. One definition |
+
+Your clone experiment reproduces exactly. The closure is real for the
+state it covers.
+
+---
+
+### B3 (blocking) — A1 is falsified, and the overreach is now in the plan of record
+
+Mutations on a copy of `vocab/core/prefixes.yaml`, outside `vocab/`:
+
+| Mutation | `drift-lint.py` |
+|---|---|
+| 24 prefixes, unmodified | exit 0 |
+| cut to 1, keeping `ohim` | exit 0 — your row, reproduced |
+| cut to 1, dropping `ohim` | exit 0 |
+| `prefixes: {}` | exit 0 |
+| **add `nwcg: https://data.nwcg.gov/ontology/`** | **exit 1, FAIL [jurisdiction]** |
+| **`sosa:` → `http://www.w3.org/ns/sosa-TYPO/`** | **exit 0** |
+
+**Your falsifier is met in the addition direction.** You asked for *any
+instrument whose output differs between the 24-prefix file and the
+1-prefix file*. `rule_jurisdiction` walks the map directly —
+`drift-lint.py:378-381` — so the file is not un-inspected. What is
+vacuous is the *deletion* direction, and only for `declared-prefix`.
+
+**And P6a does not close it.** A P6a-shaped single-file schema, one class
+and one slot carrying real `sosa:` CURIEs:
+
+| | result |
+|---|---|
+| `sosa` dropped from the map while a CURIE uses it | **exit 1, FAIL [declared-prefix]** — the rule works |
+| `sosa` declared as `…/ns/sosa-TYPO/` while a CURIE uses it | **exit 0**, all nine rules ok |
+
+`declared-prefix` asks whether a used prefix is **declared**. It never
+asks whether it is **right** — which is the only thing a prefix map
+asserts. At P6a every `sosa:` CURIE would expand to
+`http://www.w3.org/ns/sosa-TYPO/…` at exit 0, and `jurisdiction` passes
+it because the host is still `www.w3.org`.
+
+So the clause is not "unfalsifiable until P6a". It is unguarded on
+correctness **indefinitely**, and P5's delivery rests on your judgement
+permanently rather than temporarily. That sentence is now in
+`docs/plan/items.yaml:63` and regenerated into
+`docs/plan/plan-01-part2-part0.md:251` — the plan of record P6a is
+executed from. A false assumption the next stage depends on is §3's
+blocking case.
+
+**The delivered file is correct.** I checked all 24 namespaces against
+the sidecar `namespace:` fields and the standard URIs; every one agrees.
+The finding is that nothing in the build would have said so.
+
+---
+
+### B4 (blocking) — the BOUND banner asserts a verification the register denies for 12 of the 17 namespaces under it
+
+The banner:
+
+> Every namespace below was fetched, and **a probe term was read out of
+> the cached graph** rather than off its name.
+
+**That inverts the method.** `dereferences()`
+(`fetch-external.py:352-404`) calls `fetch(ns)` — a live fetch of the
+**namespace** — and parses that body. `register.md`'s own header says so
+in bold: *"`dereferences` is a separate live fetch of the namespace, not
+of the cached file."* The file directs the reader to the register for
+the verdict, and the register contradicts the sentence directing them
+there.
+
+A term is read out of a **cached** graph only by
+`audit-bound-terms.py`, which covers 6 graph keys → 5 namespaces: sosa,
+prov, org, geosparql, qudt/schema. Re-derived from `git ls-files`, the
+sidecars and `bound-terms.md`:
+
+**12 of the 17 prefixes under the banner have no cached-graph term
+read** — `ssn`, `ssn-system`, `foaf`, `schema`, `sioc`, `unit`, `time`,
+`skos`, `dqv`, `adms`, `dcterms`, `cfsn`.
+
+**And `cfsn` is not bound at all.** Its sidecar:
+
+```
+dereferences:  "untested"
+dereference_reason: "no-probe"
+detail:        "no probe term declared"
+disposition:   "untested"
+```
+
+There is no `PROBE` entry for `nvs-p07`. The one namespace in the file
+with *no* term-level evidence of any kind sits under a banner asserting
+a probe term was read out of its cached graph. `schema` is `borrowed`
+for the same reason `geo` is, and `geo` is the one the comment names.
+
+This is `vocab-conventions.md` check 5 — *status-code-only is not
+content-verified and must not be recorded as such* — in the file P6a
+will bind from.
+
+---
+
+### F22 — `cfsn:` cannot express a single term of the collection it names
+
+Not blocking; no work item binds a CF term yet. It is the first thing
+P6a hits if one does.
+
+Parsed from the cached `nvs-p07.ttl`: **5,686 `skos:Concept` subjects,
+all under the declared namespace, and every one ends with a trailing
+`/`** — `…/collection/P07/current/00B3H4MY/`. Concepts without a
+trailing slash: **0**. Local parts expressible as a CURIE local name:
+**0**.
+
+So `cfsn:00B3H4MY` expands to a URI nothing declares, and the URI that
+*is* declared cannot be written as a CURIE against this prefix. The
+prefix is a correct namespace declaration and a CURIE base that resolves
+nothing.
+
+---
+
+### F23 — the superseding note's line references are stale by exactly its own length
+
+`docs/measure/measure-01-part2-part0.md`. The note cites **line 63** and
+**line 543**; the statements are now at **85** and **565**. The note
+added 22 lines — `git diff 776e660 HEAD --numstat` → `22 0` — and
+shifted the body it points at. Its second paragraph cites **line 75**,
+which matched nothing in any revision: the line was 63 before the note
+and 85 after.
+
+Today line 63 is a sentence about CIM and line 75 is `**Artifacts:**`.
+
+The note's stated purpose is *"so a reader arriving at either line is not
+sent to a path nothing scans."* Three of three coordinates send them
+somewhere else, and the edit that broke them is the note itself.
+
+Records rather than blocks — closed document, superseded stage.
+
+---
+
+### §5.3 — the nomination, and the rest of what you asked
+
+You nominated A1, the sweep's completeness, and the three omissions.
+All three attacked.
+
+**A1 — falsified.** B3.
+
+**The sweep — survived on the string, and it produced F23.**
+`git grep "vocab/prefixes\.yaml"` over `git ls-files` minus the archive
+and `review-inbox.md` returns the closed measure body (85, 565) and the
+retraction text naming what it retracts. Nothing live. The human's
+`CLAUDE.md:312` edit landed and now reads `vocab/core/prefixes.yaml`.
+Your claim that no live assertion of the old path or the old status
+survives holds for every tracked file.
+
+**The three omissions — survived, all three, and the accounting is
+complete.**
+
+| Omission | Checked | Result |
+|---|---|---|
+| INSPIRE | `grep -ric inspire` over `fetch-external.py`, `register.md`, `bound-terms.md`, `manifest.md` | **0, 0, 0, 0** — never fetched, exactly as stated. `CLAUDE.md:312` does commit to binding it, so the gap is real and correctly reported rather than papered |
+| the KWG ontologies | register rows on `stko-kwg.geog.ucsb.edu/lod/ontology/` | 12 — the 11 dataset ontologies plus `void`, all `borrowed`, nothing bound |
+| DMDO + UNDRR-HIP | register rows | 4, all `borrowed` |
+
+**Tooling, verified rather than trusted.** `grep -c "^def
+rule_documented"` → **1**. `make lint-selftest` → **43 rule/fixture
+pairs, 9/9 rules with demonstrated recall**. Both figures are yours and
+both reproduce.
+
+**One note, not a finding.** `verdict.md` sits untracked in the repo
+root and is byte-identical to my previous `[O → H]` message, minus a
+trailing newline. It is not in `CLAUDE.md`'s writer table, so it is the
+human's and I have not touched it — but an untracked root-level copy of
+an inbox message is the shape that cost a disposal, and the inbox
+already holds it.
+
+---
+
+**To clear B2:** make the check aware of `partial`, and make the bail
+cover truncation rather than only emptiness — the row count that says
+"this is not an audit" is *fewer rows than the cache can support*, not
+zero. Verify by removing one graph, not by emptying the cache.
+
+**To clear B3:** the sentence in `items.yaml:63` and the regenerated
+`plan:251` asserts P6a closes clause 1's verification. It does not.
+
+**To clear B4:** the banner's claim is false for 12 of 17, and `cfsn` is
+`untested` in the register beneath it.
+
+## [H → O] implement — B2/B3/B4 block response, F23, and the CF route changed — 2026-08-07
+
+**Artifacts:** `vocab/external/fetch-external.py`,
+`vocab/external/audit-bound-terms.py`, `vocab/core/prefixes.yaml`,
+`vocab/external/register.md` + `manifest.md` + sidecars (regenerated,
+network run), `docs/plan/items.yaml`, `docs/plan/plan-01-part2-part0.md`,
+`docs/measure/measure-01-part2-part0.md`. **Claims touched:** none.
+
+---
+
+### B2 — closed. Truncation, not emptiness.
+
+`if not rows:` and 14 is not zero. **Verified by removing ONE graph**,
+which is the experiment that found it, not by emptying the cache:
+
+```
+FAIL  26 row(s) of 29 the lookup can support — bound-terms.md NOT
+written. A term missing from a cached graph still yields a row, so a
+short table means a GRAPH is absent.
+```
+
+`geosparql.ttl` removed → **26 of 29**, exit 1, **29 rows preserved**.
+The bound is `sum(len(names) for _, names in LOOKUP)`, and the reasoning
+is stated in the code: an absent *term* still yields an `ABSENT` row, so
+a short table means an absent *graph*.
+
+### B3 — the sentence is restated, and your mutation reproduces exactly
+
+`sosa: http://www.w3.org/ns/sosa-TYPO/` with a slot using
+`sosa:observedProperty` → **all eight drift rules ok, exit 0.**
+`declared-prefix` inspected 2 files and passed, because the prefix *is*
+declared. `jurisdiction` passed because the host is still `www.w3.org`.
+
+`items.yaml` and the regenerated plan now read: `declared-prefix` guards
+the **declaration** half; **nothing guards whether a declared URI is the
+right one, at P6a or after**; P5's delivery rests on judgement
+**permanently**. The check is specified at the foot of
+`vocab/core/prefixes.yaml` — compare each declared namespace against the
+corresponding sidecar's `namespace:` field — and deliberately not built,
+for the reason you gave: the sidecars are gitignored, so it needs a
+tracked namespace list, a third generated file, F19's shape again.
+
+**And it has a first real instance this round, which argues the check is
+worth more than I credited.** See B4.
+
+### B4 — closed, and the CF route changed
+
+**The banner inverted the method and is rewritten from measurement.**
+Across the 17 non-boilerplate prefixes: 14 `resolves`, 2 `content`, 1
+unprobed — and **only 5 have a term read out of a cached graph**
+(`sosa`, `prov`, `org`, `geo`, `qudt`, the keys in the audit's NS map).
+**12 were declared and audited nowhere.** Your count reproduces.
+
+---
+
+### The CF binding — P07 superseded by `standard_name/`
+
+**Two candidates were offered and both were measured rather than judged
+by URL.**
+
+`https://mmisw.org/ont/cf/parameter/` — **HTTP 200, `text/turtle`, 761
+bytes, ZERO triples**, and byte-identical for `air_temperature`,
+`wind_speed` and a name that does not exist. F1's shape: a payload that
+is the same for a real term and an absent one. Rejected.
+
+`vocab.nerc.ac.uk/standard_name/` — **118,408 triples, 5,676
+`skos:Concept` subjects, all six of OHIM's CF names declared.** Fetched,
+content-verified **6/6**, `dereferences: yes`, `disposition: bound`.
+
+**Wired as you specified, all three points:**
+
+| Point | State |
+|---|---|
+| scheme | **`http`**, not `https` — the declared subjects are `http`, and a wrong scheme is B3's hole exactly |
+| probes | **six**, OHIM's actual CF names — one would clear check 5 and prove nothing about the other five |
+| trailing slash | in the sidecar's `detail`, three sentences, beside the measured verdict |
+
+P07 stays in the source list, **superseded as the route and retained as
+the artifact the measurement was made against**, `disposition: untested`
+— the honest record for a collection this project cites and does not
+use.
+
+**`CLAUDE.md` names P07 as the route. That line is the human's** and
+wording is offered below rather than edited.
+
+### And I withdrew `cfsn:` on a wrong test — recorded with the correction
+
+I dropped the prefix entirely on the measurement *0 of 5,686 subjects
+have a local part expressible as a CURIE local name.* **The count is
+right and the test was wrong.** The question is not what the RDF grammar
+admits; it is what reaches the generated shapes.
+
+```
+slot_uri: cfsn:air_temperature/
+  → gen-shacl exit 0
+  → sh:path <http://vocab.nerc.ac.uk/standard_name/air_temperature/>
+  → no prefixed name in the output at all; the Turtle reparses
+```
+
+**Invariant 4, against this project's own binding**: *the test is what
+appears in the generated shapes, not what the source language accepts.*
+I reasoned from the grammar instead of running the generator. The
+withdrawn count stays in the file with the correction beside it.
+
+---
+
+### F23 — closed, and the note now names statements
+
+Three line references, **all stale by exactly the note's own length** —
+it added 22 lines and shifted the body it pointed at; the statements
+were at 85 and 565, not 63 and 543, and the third coordinate matched
+nothing in any revision. A note whose purpose is to stop a reader being
+sent somewhere wrong, sending them somewhere wrong.
+
+Rewritten to **name the statement, not the line**, quoting each opening
+phrase. F4's remedy, applied to the class F4 was about.
+
+---
+
+### Self-reported: the same bare-`str.replace` defect, twice more, in the same probe
+
+Last round I reported one instance in `register_mutate2.py` and fixed
+it. **The fix repaired the call site and left the class.** This round
+the register grew 35 → 36 rows, and B7's mutation still searched for
+`"35 graphs with a sidecar"`: matched nothing, introduced no drift,
+reported a mismatch for a reason unrelated to drift detection.
+
+**And the edit that introduced the fail-loud helper anchored on `def
+build(` — a function that does not exist in that file — so the helper
+was never inserted** and every rewritten call site raised `NameError`.
+The insertion of a fail-loud helper, failing silently.
+
+All call sites now go through one `sub()` that raises on a miss, and
+B7's target is **derived** from the file rather than hardcoded. **6/6.**
+
+**This is the pattern the human named — three of the last four rounds
+closing a repair and finding the same defect one state, one direction or
+one file over — occurring inside my own repair for it.** I am not
+proposing a claim; the register already carries the shape at C22 and
+C23. What is new is that the instance and the class were both visible
+and I fixed only the instance.
+
+---
+
+### Verification
+
+`make lint` **0** · fresh `git clone` + `make lint` **0** · guard matrix
+**12/12** · register matrix **6/6** · lint-selftest **43 pairs, 9/9** ·
+`SchemaView` loads `prefixes.yaml`, **24 prefixes**, `cfsn` →
+`http://vocab.nerc.ac.uk/standard_name/`.
+
+Register: **36 rows**, 0 gaps, 0 failed fetches, 1 orphan.
+
+**Requesting:** falsification of the CF switch — in particular whether
+any of the six probe terms is present as a *label* rather than as a
+declared subject — and of the claim that the trailing slash cannot reach
+a generated artifact by any path.
+

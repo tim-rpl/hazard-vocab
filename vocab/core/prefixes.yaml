@@ -40,16 +40,34 @@ prefixes:
   sh: http://www.w3.org/ns/shacl#
 
   # ---------------------------------------------------------------
-  # BOUND. Every namespace below was fetched, and a probe term was read
-  # out of the cached graph rather than off its name — see
-  # `vocab/external/register.md` for the per-namespace dereference
-  # verdict and `vocab/external/bound-terms.md` for what each term is.
+  # A prefix here asserts a URI. It asserts nothing else, and the first
+  # version of this comment asserted more.
   #
-  # A prefix here asserts the URI, not that the namespace dereferences:
-  # `geo:` is *bound* by name and *borrowed* in fact, because
-  # `geo:Geometry` is defined in the cached graph and undefined in what
-  # the namespace serves. That distinction is the register's, and it is
-  # why this comment does not claim more than a prefix map can.
+  # **It read: "every namespace below was fetched, and a probe term was
+  # read out of the cached graph rather than off its name."** That
+  # inverts the method. `dereferences()` fetches the NAMESPACE live and
+  # parses THAT body — `register.md`'s own header says so in bold — so
+  # the sentence contradicted the file it sent the reader to for the
+  # verdict. Measured across the 17 non-boilerplate prefixes below:
+  #
+  #   * 14 namespaces dereference (`resolves`), 2 return a graph in which
+  #     the probe term is NOT defined (`content`), 1 was never probed.
+  #   * **Only 5 have a term read out of a cached graph** — `sosa`,
+  #     `prov`, `org`, `geo`, `qudt`. Those are the six keys in
+  #     `audit-bound-terms.py`'s NS map, and `bound-terms.md` is the
+  #     record of what each of their terms IS. The other **12 are
+  #     declared here and not audited anywhere.**
+  #
+  # `geo:` is the case that keeps the two apart: *bound* by name and
+  # *borrowed* in fact, because `geo:Geometry` is defined in the cached
+  # graph and undefined in what the namespace serves. That distinction is
+  # the register's to make, not this file's.
+  #
+  # NOTHING HERE CHECKS THAT A DECLARED URI IS THE RIGHT ONE.
+  # `drift-lint.py`'s `declared-prefix` asks whether a used prefix is
+  # DECLARED; `jurisdiction` asks whether it looks jurisdiction-specific.
+  # `sosa: http://www.w3.org/ns/sosa-TYPO/` passes all nine rules. See
+  # the gap recorded at the foot of this file.
   # ---------------------------------------------------------------
 
   # Observation. SOSA is the core; SSN and its extensions mint into
@@ -84,11 +102,82 @@ prefixes:
   adms: http://www.w3.org/ns/adms#
   dcterms: http://purl.org/dc/terms/
 
-  # CF Standard Names, served by NERC's NVS2 as collection P07. The
-  # NAMESPACE serves `text/html`; only the profile URL serves the graph.
-  # The prefix is the namespace, which is what a CURIE expands to.
-  cfsn: http://vocab.nerc.ac.uk/collection/P07/current/
+  # CF Standard Names, via NERC NVS2's `standard_name` collection.
+  #
+  # SCHEME IS `http`. The declared subjects are `http://`; `https://`
+  # would mint URIs nothing declares, and that is the first real instance
+  # of the correctness gap recorded at the foot of this file —
+  # `declared-prefix` would pass it and `jurisdiction` would pass it,
+  # the host being unchanged.
+  #
+  # TRAILING SLASH: every subject ends in `/`, so the CURIE carries it —
+  # `cfsn:air_temperature/`. It does not reach the generated shapes;
+  # `gen-shacl` emits `sh:path <http://…/air_temperature/>`, a full URI
+  # with no prefixed name, and the Turtle reparses. Tested before
+  # binding, which is invariant 4.
+  cfsn: http://vocab.nerc.ac.uk/standard_name/
 
+# ===================================================================
+# CF STANDARD NAMES — the route changed, 2026-08-06
+# ===================================================================
+#
+# **P07 is superseded as the route to CF. `standard_name/` is the
+# binding.** Same authority, same NVS2 service, same terms — and local
+# parts a reviewer can read:
+#
+#   http://vocab.nerc.ac.uk/standard_name/air_temperature/
+#   http://vocab.nerc.ac.uk/collection/P07/current/00B3H4MY/     (P07)
+#
+# That is not cosmetic. ADR-000 D5 chose SKOS partly for cross-scheme
+# mapping, and `cfsn:00B3H4MY/` cannot be aligned to a CF name by eye,
+# which makes every binding to it an unverifiable act. `standard_name/`
+# is content-verified: **6/6 of OHIM's CF names present**, namespace
+# `dereferences: yes`, `disposition: bound` — see the register.
+#
+# **A withdrawal recorded with its correction, because the count was
+# right and the test was wrong.** This file previously dropped `cfsn:`
+# entirely, on the measurement *0 of 5,686 subjects have a local part
+# expressible as a CURIE local name*. The count reproduces — and it was
+# **the wrong test**. The question is not whether the RDF grammar admits
+# a trailing slash in a prefixed name; it is what reaches the generated
+# shapes. Measured: `slot_uri: cfsn:air_temperature/` → `gen-shacl` exit
+# 0, `sh:path <http://vocab.nerc.ac.uk/standard_name/air_temperature/>`,
+# **no prefixed name in the output at all**, and the Turtle reparses.
+# The slash never gets anywhere it would be invalid.
+#
+# Reasoning from the source language instead of running the generator is
+# what invariant 4 exists to forbid, and it was done here against this
+# project's own binding.
+#
+# `CLAUDE.md` names P07 as the route; **that line needs amending and it
+# is the human's file.** The commitment to CF stands; the route changed.
+#
+# ===================================================================
+# NAMED GAP — nothing checks that a declared URI is CORRECT
+# ===================================================================
+#
+# `declared-prefix` guards the DECLARATION half of P5 clause 1: a used
+# prefix must appear here. Nothing guards the other half.
+#
+#   sosa: http://www.w3.org/ns/sosa-TYPO/
+#
+# with a CURIE using it passes **all nine rules, exit 0** — `jurisdiction`
+# is satisfied because the host is still `www.w3.org`. So P5's delivery
+# rests on judgement **permanently**, not until P6a. An earlier statement
+# in `items.yaml` said P6a closes clause 1's verification; it is restated.
+#
+# **The check that would close it, specified rather than built:** compare
+# every namespace declared here against the `namespace:` field of the
+# corresponding provenance sidecar. Every one of the 17 was verified that
+# way by hand and all 17 agree — so the comparison is available, it is
+# mechanical, and it is not written.
+#
+# **Why not now:** the sidecars are gitignored, so the check needs a
+# TRACKED namespace list to compare against — which is a third generated
+# file and F19's shape again, another round of tooling before any
+# vocabulary exists. Build it when something authored is wrong, not
+# before.
+#
 # NOT DECLARED, and stated rather than omitted silently:
 #
 # **INSPIRE.** CLAUDE.md commits to binding it and this project has never

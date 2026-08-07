@@ -255,12 +255,25 @@ def main():
     # The bail is on ROWS, not on problems: a run where every lookup failed
     # produces no rows and a full problem list, and it is the row count
     # that says the output is not an audit.
-    if not rows:
-        print("FAIL  %d lookup(s), NO rows — bound-terms.md NOT %s. Every "
-              "row comes from a cached graph; this would replace the audit "
-              "with a header."
-              % (len(LOOKUP), "checked" if args.check else "written"),
-              file=sys.stderr)
+    # B2: this read `if not rows:` — and 14 rows is not zero. Removing ONE
+    # cached graph took the audit from 29 term rows to 14, exit 1, and
+    # WRITTEN, with the same message and the same false diagnosis one state
+    # over. Emptiness is the special case; **truncation is what a partial
+    # cache actually produces.**
+    #
+    # The count that says "this is not an audit" is fewer rows than the
+    # LOOKUP can support, not zero. A term that is genuinely absent from a
+    # cached graph still yields a row — `ABSENT` — so a short table means a
+    # GRAPH is missing, which is exactly the case that must not be written.
+    expected = sum(len(names) for _key, names in LOOKUP)
+    if len(rows) < expected:
+        print("FAIL  %d row(s) of %d the lookup can support — "
+              "bound-terms.md NOT %s. A term missing from a cached graph "
+              "still yields a row, so a short table means a GRAPH is "
+              "absent. Truncation, not emptiness, is what a partial cache "
+              "produces."
+              % (len(rows), expected,
+                 "checked" if args.check else "written"), file=sys.stderr)
         return 1
     if args.check:
         if not target.exists():

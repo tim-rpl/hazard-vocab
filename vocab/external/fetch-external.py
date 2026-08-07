@@ -213,6 +213,42 @@ SOURCES = [
     ("void", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
      "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/void.ttl",
      ["Dataset", "KnowledgeGraph"]),
+    # CF Standard Names, the BOUND route. Same authority and same NVS2
+    # service as P07 below, and it carries the same terms with READABLE
+    # local parts: `…/standard_name/air_temperature/` against P07's
+    # `…/P07/current/00B3H4MY/`. That is not cosmetic — ADR-000 D5 chose
+    # SKOS partly for cross-scheme mapping, and a binding nobody can
+    # review by eye is an unverifiable act every time it is made.
+    #
+    # SCHEME: `http://`, not `https://`. The declared subjects are `http`;
+    # `https` would mint URIs nothing declares, and it is precisely the
+    # hole `declared-prefix` does not cover — the prefix would be declared
+    # and `jurisdiction` would pass it, the host being unchanged.
+    #
+    # TRAILING SLASH: every one of the 5,676 subjects ends in `/`. The
+    # CURIE carries it — `cfsn:air_temperature/` — and it does NOT reach
+    # the emitted Turtle: `gen-shacl` writes
+    # `sh:path <http://vocab.nerc.ac.uk/standard_name/air_temperature/>`,
+    # a full URI with no prefixed name, and the result reparses. Tested
+    # before binding, which is invariant 4: what appears in the generated
+    # shapes, not what the source language accepts.
+    #
+    # All SIX of OHIM's CF names are probed, not one. One would clear
+    # `vocab-conventions.md` check 5 while proving nothing about the
+    # other five.
+    ("cf-standard-name", "http://vocab.nerc.ac.uk/standard_name/",
+     "http://vocab.nerc.ac.uk/standard_name/?_profile=nvs&_mediatype=text/turtle",
+     ["air_temperature", "wind_speed", "mole_fraction_of_ozone_in_air",
+      "atmosphere_boundary_layer_thickness",
+      "mass_concentration_of_pm2p5_ambient_aerosol_particles_in_air",
+      "mass_concentration_of_pm10_ambient_aerosol_particles_in_air"]),
+    # SUPERSEDED as the CF route, 2026-08-06, by `cf-standard-name` above.
+    # Retained as a cached artifact because it is the graph the
+    # measurement was made against — 5,686 concepts, every subject ending
+    # in `/`, **0 with a local part any reader can align to a CF name**.
+    # Nothing binds from it, so it stays unprobed and reads
+    # `disposition: untested`, which is the honest record for a
+    # collection this project cites and does not use.
     ("nvs-p07", "http://vocab.nerc.ac.uk/collection/P07/current/",
      "http://vocab.nerc.ac.uk/collection/P07/current/?_profile=nvs&_mediatype=text/turtle",
      ["air_temperature", "wind_speed", "mole_fraction_of_ozone_in_air",
@@ -306,6 +342,19 @@ def fetch(url):
 # **This is the second instance of one defect.** The same assumption was
 # corrected in `audit-bound-terms.py` earlier in this session and left
 # standing here: fixed in one file, live in another, one directory apart.
+# A fact about a namespace that a future reader will trip over, carried
+# into the sidecar's `detail` beside the measured verdict. Not a
+# substitute for a field — `dereference_reason` exists because free text
+# could not be counted (F14) — but the shape of a URI is not a category,
+# and the alternative is that someone redoes the reasoning.
+SIDECAR_NOTE = {
+    "cf-standard-name":
+        "Every subject ends in a trailing `/`; the CURIE carries it "
+        "(`cfsn:air_temperature/`); it does NOT reach the emitted Turtle — "
+        "`gen-shacl` writes the full URI in angle brackets and the result "
+        "reparses. Scheme is `http`, not `https`",
+}
+
 PROBE = {
     "sosa": "http://www.w3.org/ns/sosa/Observation",
     "ssn": "http://www.w3.org/ns/ssn/System",
@@ -326,6 +375,9 @@ PROBE = {
     "shacl": "http://www.w3.org/ns/shacl#NodeShape",
     "schema": "https://schema.org/GovernmentOrganization",
     "sioc": "http://rdfs.org/sioc/ns#Community",
+    # Trailing slash included — it is part of the declared URI, and a
+    # probe without it asks about a term nobody minted.
+    "cf-standard-name": "http://vocab.nerc.ac.uk/standard_name/air_temperature/",
     # F1's lesson: probe for a DEFINED term, not a 200.
     # All eleven KWG ontologies plus `void.ttl` share ONE namespace, so
     # they share one
@@ -392,14 +444,24 @@ def dereferences(ns, key):
     # returns a graph while declaring nothing under its own namespace is
     # a document, not a term namespace, and a URI built from it is a URI
     # nobody declares. `ssn/ext/` is exactly that.
+    # The last segment of the probe URI, for the human-readable detail.
+    # `rsplit("/", 1)[-1]` returns the EMPTY STRING for a URI ending in a
+    # slash, and every one of CF Standard Names' 5,676 subjects does —
+    # the first `cf-standard-name` run reported ``  `` defined ``, a
+    # verdict naming no term. The label is cosmetic and the verdict was
+    # right, which is exactly why it would have survived: nothing about
+    # the run looked wrong except a pair of empty backticks.
+    def label(u):
+        return u.rstrip("/").rsplit("/", 1)[-1].rsplit("#", 1)[-1] or u
+
     own = {s for s in g.subjects(RDF.type, None)
            if str(s).startswith(ns) and str(s) != ns}
     if list(g.objects(URIRef(probe), RDF.type)):
         if not own:
             return ("document", "mints-nothing", "200 %s, %d triples, mints **no term of its "
                     "own** — `%s` is defined here but minted elsewhere"
-                    % (ct, len(g), probe.rsplit("/", 1)[-1]))
-        return "yes", "resolves", "200 %s, `%s` defined" % (ct, probe.rsplit("/", 1)[-1].rsplit("#", 1)[-1])
+                    % (ct, len(g), label(probe)))
+        return "yes", "resolves", "200 %s, `%s` defined" % (ct, label(probe))
     return "no", "content", ("200 %s, %d triples, but `%s` is NOT defined "
                              "in what the namespace serves" % (ct, len(g), probe))
 
@@ -998,6 +1060,8 @@ def main():
         # graph in which a probe term is defined — not whether it 200s.
         deref, reason, detail = (("skipped", "not-probed", "--check, no network")
                                  if args.check else dereferences(ns, key))
+        if key in SIDECAR_NOTE and not args.check:
+            detail = "%s. %s" % (detail, SIDECAR_NOTE[key])
         if deref == "no":
             problems.append("%s: namespace does not dereference to a graph "
                             "(%s) — bindable only as BORROWED" % (key, detail))
