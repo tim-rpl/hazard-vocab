@@ -22,6 +22,18 @@ Each fixture is a **regression** for a specific finding, named in its
 header comment. Do not edit one to make a rule pass; the fixture records
 what the rule got wrong.
 
+## Count the rules by what they can inspect
+
+`drift-lint.py` has **eight** rules. `make lint` runs a ninth,
+`lean-vacuity`, scoped to `*.lean` — so it cannot inspect a YAML schema
+at all.
+
+**"Passes all nine rules" is true of a `make lint` run and false of any
+claim about what inspected a `.yaml` file.** That number reached
+`prefixes.yaml`, `items.yaml` and two messages before anyone counted the
+subjects each rule can reach. A rule count is only meaningful against a
+named population.
+
 ## Mutation, not just coverage
 
 A fixture that fires proves the rule fires. It does not prove the rule

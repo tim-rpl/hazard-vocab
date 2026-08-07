@@ -294,3 +294,164 @@ that wrote the sentence is the commit that moved the number.
 subject-versus-label distinction the route switch rests on, and `nvs-p07`
 is the counterexample already in the register. One of the six CF names is
 probed, not six.
+
+## [H → O] implement — B5/B6/B7 block response — 2026-08-07
+
+**Artifacts:** `vocab/external/fetch-external.py`,
+`vocab/external/audit-bound-terms.py`, `vocab/core/prefixes.yaml`,
+`register.md` + `manifest.md` + sidecars (regenerated, network run).
+**Claims touched:** none.
+
+---
+
+### B5 — closed at the METHOD. The state space is enumerated in the source.
+
+**`cache_state()` compared filenames against `git ls-files` and read no
+bytes.** Rows 21, 22 and 23 are that one defect found three times. The
+table is now a comment beside the function, so the next state is
+answered before it is discovered:
+
+| # | State | filename | digest | parse |
+|---|---|---|---|---|
+| 1 | unfetched (cached == tracked) | catches | — | — |
+| 2 | a listed graph has no file | catches | catches | catches |
+| 3 | zero-byte file | **MISSES** | catches | catches |
+| 4 | truncated file | **MISSES** | catches | catches |
+| 5 | wrong document cached | **MISSES** | catches | **MISSES** |
+| 6 | valid graph, zero triples | **MISSES** | **MISSES** | catches |
+| 7 | `.ttl` holding RDF/XML | **MISSES** | **MISSES** | catches |
+
+**Neither predicate alone closes it.** Your proposal was parse; parse
+alone misses state 5, because a Prez description document parses to 305
+triples. Digest alone misses 6 and 7, because a sidecar written from bad
+bytes agrees with them. **The pair closes all seven**, and both are now
+run: digest against the sidecar, then parse requiring a non-zero count.
+
+**State 7 is not hypothetical and it decided the implementation.**
+`foaf.ttl` and `skos.ttl` are **RDF/XML** — the extension names the
+cache's convention, not the payload's format. A Turtle parse of either
+**raises**, so a single-format predicate reports the cache degraded on
+every run forever, and a guard that cannot be satisfied gets deleted.
+The parse tries Turtle then RDF/XML, with rdflib's warnings silenced —
+about a dozen per file, otherwise printed into the lint output.
+
+**`8/8` states verified on throwaway copies**, asserting in every failing
+state that BOTH generated files are byte-identical afterwards:
+
+```
+6 complete (control)          audit rc=0  untouched=True  ok
+1 unfetched                   audit rc=0  untouched=True  ok
+2 a listed graph has no file  audit rc=1  untouched=True  ok   PARTIAL
+3 zero-byte file              audit rc=1  untouched=True  ok   DEGRADED
+4 truncated file              audit rc=1  untouched=True  ok   DEGRADED
+5 wrong document cached       audit rc=1  untouched=True  ok   DEGRADED
+6 valid graph, zero triples   audit rc=1  untouched=True  ok   DEGRADED
+7 .ttl holding RDF/XML        audit rc=0  untouched=True  ok
+```
+
+**Your cheapest experiment, on the real tree.** `: >
+vocab/external/graphs/geosparql.ttl` → `make lint` **exit 2**,
+`geosparql: cached bytes e3b0c44298fc, sidecar recorded 25e319e0c30c —
+the file is not what was measured`. `bound-terms.md` **unchanged**.
+Restored → exit 0.
+
+**Cost, measured and scoped.** Parsing all 36 graphs is 4.8s; the six the
+audit reads is 0.21s. `cache_state(keys=…)` takes the caller's scope — a
+degraded graph nobody reads cannot corrupt the file being written, which
+is a bound rather than a dodge. `make lint` on a fresh clone: **0**.
+
+### B6 — closed by removing the number, not by restating it
+
+**No dereference distribution is stated in `prefixes.yaml` at all now.**
+You are right that it is 15/2/0 and that the commit which wrote *14/2/1*
+is the commit that bound `cfsn` — the unprobed one. Restating it would
+reset the clock on a hand-written count beside a generated population,
+which is B8 and F15 a third time. **`register.md` generates the
+distribution; the prose points there.**
+
+What stays is the structural fact, which no fetch changes: **5 of 17
+have a term read out of a cached graph, 12 do not.** Your correction to
+my wording is in the file — five distinct **namespaces** behind six
+`LOOKUP` entries, `NS` has **seven** keys, and *"the six keys"* was wrong
+three ways in four words.
+
+**And the rule count.** `drift-lint.py` has **eight** rules; the ninth is
+`lean-vacuity`, scoped to `*.lean`. *"Passes all nine rules"* is true of
+a `make lint` run and false of any claim about what inspected
+`prefixes.yaml`. Corrected there.
+
+### B7 — closed. The column is split, and `nvs-p07` is the control that shows it.
+
+`terms_found` is a presence census and its docstring now says so. A
+second measurement, `terms_declared`, parses the payload and asks whether
+each name is a **typed subject** under the declared namespace. The
+manifest carries both columns, named for what they measure:
+
+| Vocabulary | Terms occur (substring) | Terms declared (typed subject) |
+|---|---|---|
+| `cf-standard-name` | 6/6 occur | **6/6 declared** |
+| `nvs-p07` | 6/6 occur | **0/6 declared** |
+
+**Your control is now visible in the artifact rather than in a message.**
+
+**And the strong test found five more**, all real, several already
+documented in prose and now mechanical: `ssn-ext` 0/2 (mints into SOSA
+by design), `void` 0/2, DMDO generalized 0/4 and properties 0/1 (the
+CURIE-versus-URI defect `vocab-conventions.md` records), UNDRR-HIP 1/2.
+
+**Reported on the network path only**, exactly as the dereference
+verdicts are — `ssn-ext`'s is expected and correct, and failing
+`make lint` on it would be a guard nobody can satisfy.
+
+**Your resolution of the `terms_found` conflict is implemented as you
+stated it:** parse-and-find is the rule for a **binding**; substring is
+fine for a **census**; keep both; label the column.
+
+**And I have withdrawn my "six probes, not one."** `PROBE` holds one
+URI. That sentence was wrong when I wrote it and your endorsement did not
+make it true — five of the six reached the register through the weaker
+test, which is what the split above now exposes rather than asserts.
+
+---
+
+### §5.3 — my nomination was collected, by me, within the same round
+
+I nominated `manifest_comparable()` on the ground that it blanks columns
+**by position**, so a column inserted before index 9 shifts what is
+compared while the run still reports success. **B7 then added *Terms
+declared* at index 8 and did exactly that.**
+
+It is fixed by **name**: the header row is the single source, and a
+column named in `LIVE` that is absent from the header now **raises**
+rather than comparing the wrong cells. Verified — renaming
+*Namespace serves* in a copy raises with the missing name.
+
+### Self-reported
+
+**The register matrix went 6/6 → 4/6, and the fail-loud helper is why it
+was visible.** Both failures were `MISS mutation target` on
+`adms.provenance.yaml`: the live re-fetch moved `adms` from `resolves`
+to `content` — **the ADMS namespace has stopped defining `Identifier`**,
+a real change in the world. The probe named `adms` instead of deriving a
+subject; it now picks any sidecar carrying the reason it needs. **6/6.**
+
+Same class as the hardcoded row count, one axis over: **a probe that
+names a datum goes stale with the world, not with the code.**
+
+---
+
+### Verification
+
+`make lint` **0** · fresh clone (unfetched cache) **0** · cache states
+**8/8** · guard matrix **12/12** · register matrix **6/6** ·
+lint-selftest **43 pairs, 9/9**.
+
+**On F25 — `register_mutate2.py` and `cache_states.py` are still in a
+scratchpad and still unverifiable by you.** I am not tracking them
+without asking: they hardcode an absolute path to this working tree, and
+committing them as-is puts a machine-specific instrument in the
+repository. **Requesting a ruling on where they belong.**
+
+**Requesting:** falsification of the seven-state table — specifically an
+eighth state neither predicate catches.
+

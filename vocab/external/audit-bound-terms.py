@@ -59,7 +59,13 @@ def cache_state():
         "_fx", HERE / "fetch-external.py")
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
-    return m.cache_state()[0]
+    # SCOPED to the graphs this script reads. B5: the state space is
+    # enumerated in `fetch-external.py` beside `cache_state()`, and the
+    # byte-level half of it costs 4.8s over all 36 graphs and 0.2s over
+    # these six. A degraded graph nobody here reads cannot corrupt the
+    # file being written, so the scope is the honest bound and not a dodge.
+    state, why, _ = m.cache_state(keys=[k for k, _n in LOOKUP])
+    return state, why
 
 NS = {
     "sosa": "http://www.w3.org/ns/sosa/",
@@ -172,11 +178,26 @@ def main():
     # `.gitkeep` case — note what was inspected and pass. Ten seconds of
     # `git clone && make lint` would have caught the omission; the test
     # neither the human nor I ran.
-    if cache_state() == "unfetched":
+    state, why = cache_state()
+    if state == "unfetched":
         print("bound-terms.md: not %s — the cache is unfetched. This check "
               "inspected nothing. Run `fetch-external.py` to populate it."
               % ("checked" if args.check else "written"))
         return 0
+    if state in ("degraded", "partial"):
+        # B5, closed at the METHOD rather than at a fourth state. The row
+        # count cannot see a graph that is present and parses to nothing:
+        # every failed lookup still appends an `ABSENT` row, so
+        # `len(rows) == expected` and the truncation bail below never
+        # fires. Reading the BYTES is what separates *this graph defines
+        # nothing* from *this term is genuinely absent*, and only the
+        # second belongs in the audit.
+        print("FAIL  the cache is %s — bound-terms.md NOT %s:"
+              % (state.upper(), "checked" if args.check else "written"),
+              file=sys.stderr)
+        for w in why:
+            print("        %s" % w, file=sys.stderr)
+        return 1
 
     rows, problems = [], []
     for key, names in LOOKUP:

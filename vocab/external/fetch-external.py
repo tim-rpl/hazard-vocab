@@ -510,12 +510,77 @@ def _assert_reason_map():
 
 
 def terms_found(body, terms):
-    """Which terms occur in the payload. Substring, deliberately — a
+    """Which terms OCCUR in the payload. Substring, deliberately — a
     term may be written out, prefixed, or in an rdf:about attribute, and
     a parser that understood only one of those would report absence for
-    a term that is present."""
+    a term that is present.
+
+    This is a PRESENCE CENSUS and not a binding test. B7: the column it
+    fed said `6/6 terms present` for `cf-standard-name`, whose six names
+    are typed subjects, and `6/6 terms present` for `nvs-p07`, where
+    **0 of 6** are — P07's subjects are `…/current/00B3H4MY/` and the
+    names appear only as labels. Identical wording, same column, opposite
+    facts, and the subject-versus-label distinction is exactly what the
+    CF route change rests on.
+
+    `vocab-conventions.md`'s *parse the body and find the term* is the
+    rule for a BINDING; this is fine for a census. Both are kept and the
+    column is labelled for what it measures — see `terms_declared`.
+    """
     text = body.decode("utf-8", "replace")
     return {t: bool(re.search(r"\b%s\b" % re.escape(t), text)) for t in terms}
+
+
+def terms_declared(body, ns, terms):
+    """Which terms are TYPED SUBJECTS in the parsed graph.
+
+    The strong test `terms_found` is not. A name counts only if some
+    subject carrying an `rdf:type` has a URI under `ns` whose last
+    segment — trailing slash stripped, because every CF Standard Name
+    subject ends in one — equals the name.
+
+    Returns None when the payload does not parse, so *unparseable* and
+    *nothing declared* stay distinguishable; a single boolean would make
+    them the same cell, which is C11's shape.
+    """
+    n = _parse_graph(body)
+    if n is None:
+        return None
+    g, RDF = n
+    out = {}
+    subs = {}
+    for s in set(g.subjects(RDF.type, None)):
+        u = str(s)
+        if u.startswith(ns):
+            subs.setdefault(u.rstrip("/").rsplit("/", 1)[-1].rsplit("#", 1)[-1],
+                            u)
+    for t in terms:
+        out[t] = t in subs
+    return out
+
+
+def _parse_graph(raw):
+    """(graph, RDF) or None. Both serialisations, quietly — two cached
+    `.ttl` files are RDF/XML."""
+    try:
+        from rdflib import Graph, RDF
+    except ImportError:
+        return None
+    import logging
+    lg = logging.getLogger("rdflib")
+    prior = lg.level
+    lg.setLevel(logging.ERROR)
+    try:
+        for fmt in ("turtle", "xml"):
+            g = Graph()
+            try:
+                g.parse(data=raw, format=fmt)
+                return g, RDF
+            except Exception:
+                continue
+        return None
+    finally:
+        lg.setLevel(prior)
 
 
 DISPOSITION = {"yes": "bound", "no": "borrowed", "document": "borrowed",
@@ -581,12 +646,31 @@ def manifest_comparable(text):
     narrowed check that names its scope is not the same artifact as no
     check; the failure it cannot see is stated instead of implied.
     """
-    LIVE = {3, 6, 9}          # 1-indexed: HTTP, Type, Namespace serves
-    out = []
+    # BLANKED BY NAME, not by position. This read `LIVE = {3, 6, 9}` and
+    # I nominated it for attack on the ground that a column inserted
+    # before index 9 would silently shift what is compared, the run still
+    # reporting success. B7 then added *Terms declared* at index 8 and it
+    # did exactly that — the nomination, collected. Positions are read
+    # off the header row, so the header is the single source and a moved
+    # column moves with it.
+    LIVE = {"HTTP", "Type", "Namespace serves"}
+    out, live_idx = [], None
     for line in text.split("## Problems")[0].splitlines():
-        if line.startswith("| `"):
+        if line.startswith("| Vocabulary |"):
+            names = [c.strip() for c in line.strip().strip("|").split("|")]
+            live_idx = {i for i, n in enumerate(names) if n in LIVE}
+            missing = LIVE - {n for n in names}
+            if missing:
+                raise AssertionError(
+                    "manifest_comparable: no column named %s — the header "
+                    "changed and this would have silently compared the "
+                    "wrong cells" % sorted(missing))
+        elif line.startswith("| `"):
+            if live_idx is None:
+                raise AssertionError(
+                    "manifest_comparable: a data row before the header row")
             cells = line.strip().strip("|").split("|")
-            cells = ["" if i + 1 in LIVE else c for i, c in enumerate(cells)]
+            cells = ["" if i in live_idx else c for i, c in enumerate(cells)]
             line = "|%s|" % "|".join(cells)
         out.append(line)
     # rstrip: the committed file has a blank line before `## Problems` and
@@ -597,24 +681,47 @@ def manifest_comparable(text):
     return "\n".join(out).rstrip()
 
 
-def cache_state():
-    """`unfetched` | `complete` | `partial`, and what the words mean.
+# THE CACHE'S STATE SPACE, enumerated before it is checked.
+#
+# Three consecutive repairs fixed three states of ONE defect, each
+# authored and verified in the state it was written for: an emptied
+# cache (C22 row 21), a truncated table from a missing graph (row 22),
+# and a graph that is present and parseable and defines nothing (row 23).
+# The common cause is that `cache_state()` compared FILENAMES against
+# `git ls-files` and read no bytes.
+#
+#   | # | State                          | filename | digest | parse |
+#   |---|--------------------------------|----------|--------|-------|
+#   | 1 | unfetched (cached == tracked)  | catches  |   —    |   —   |
+#   | 2 | a listed graph has no file     | catches  | catches| catches|
+#   | 3 | zero-byte file                 | MISSES   | catches| catches|
+#   | 4 | truncated file                 | MISSES   | catches| catches|
+#   | 5 | wrong document served & cached | MISSES   | catches| MISSES|
+#   | 6 | valid graph, zero triples      | MISSES   | MISSES | catches|
+#   | 7 | `.ttl` holding RDF/XML         | MISSES   | MISSES | catches|
+#
+# So neither predicate alone closes it and the pair does. Digest catches
+# any drift from the bytes that were measured; parse catches bytes that
+# were always bad, which a sidecar written from them would agree with.
+#
+# State 7 is not hypothetical and is why the parse tries two formats:
+# **`foaf.ttl` and `skos.ttl` are RDF/XML.** A Turtle parse of either
+# RAISES, so a single-format predicate would report the cache degraded on
+# every run, forever — a guard that cannot be satisfied gets deleted.
+def cache_state(keys=None):
+    """`unfetched` | `complete` | `partial` | `degraded`, plus the reasons.
 
-    F19: `make lint` reads an input that is not in the repository —
-    `graphs/*.ttl` is gitignored with four exceptions — so a fresh clone
-    produced 32 problems, none of which described anything wrong.
+    F19: the cache is INPUT and `graphs/*.ttl` is gitignored, so a fresh
+    clone must not fail. `unfetched` is the `.gitkeep` case — note what
+    was inspected and pass. The literal test *zero `.ttl`* is never true
+    on a clone, because the four hand-supplied graphs are tracked; the
+    test is **cached == tracked**.
 
-    `CLAUDE.md`'s split resolves it: the cache is INPUT, not tooling, and
-    an unfetched cache is the same shape as `vocab/core/` holding one
-    `.gitkeep`. But the literal test *zero `.ttl`* is never true on a
-    clone — the four hand-supplied graphs are tracked because they cannot
-    be re-fetched. So the test is **cached == tracked**: exactly what a
-    checkout gives you and nothing a fetch would have added.
-
-    That keeps the clause the split needs. A PARTIAL cache — some fetched
-    graphs present, others missing — is not emptiness and stays caught,
-    and so does the deletion of a tracked graph, which is a broken tree
-    rather than an unrun fetch.
+    `keys` limits the byte-level checks to the graphs a caller actually
+    reads. `audit-bound-terms.py` passes its six; a caller that reads
+    everything passes None. Parsing all 36 costs ~4.8s and the six cost
+    a fraction of that, so the scope is a real saving and not a dodge —
+    a degraded graph nobody reads cannot corrupt the file being written.
     """
     cached = {p.name for p in CACHE.glob("*.ttl")}
     try:
@@ -625,10 +732,74 @@ def cache_state():
     except Exception:
         tracked = set()
     if cached == tracked:
-        return "unfetched", cached, tracked
-    if cached >= {"%s.ttl" % s[0] for s in SOURCES}:
-        return "complete", cached, tracked
-    return "partial", cached, tracked
+        return "unfetched", [], cached
+    listed = {"%s.ttl" % s[0] for s in SOURCES}
+    if not cached >= listed:
+        return "partial", sorted("%s: listed, not cached" % m[:-4]
+                                 for m in listed - cached), cached
+
+    scope = listed if keys is None else {"%s.ttl" % k for k in keys}
+    bad = []
+    for name in sorted(scope & cached):
+        g = CACHE / name
+        stem = name[:-4]
+        raw = g.read_bytes()
+        side = CACHE / ("%s.provenance.yaml" % stem)
+        if side.exists():
+            import yaml as _y
+            d = _y.safe_load(side.read_text()) or {}
+            have = hashlib.sha256(raw).hexdigest()[:12]
+            want = d.get("sha256")
+            if want and not str(want).startswith("unrecoverable") \
+                    and want != have:
+                bad.append("%s: cached bytes %s, sidecar recorded %s — the "
+                           "file is not what was measured" % (stem, have, want))
+                continue
+        n = _triples(raw)
+        if n is None:
+            bad.append("%s: does not parse as Turtle or RDF/XML" % stem)
+        elif n == 0:
+            bad.append("%s: parses to ZERO triples" % stem)
+    if bad:
+        return "degraded", bad, cached
+    return "complete", [], cached
+
+
+def _triples(raw):
+    """Triple count, trying both serialisations. None if neither parses.
+
+    Two cached `.ttl` files are RDF/XML — the extension names the cache's
+    convention, not the payload's format — so a Turtle-only check reports
+    a permanent false failure on `foaf` and `skos`.
+    """
+    try:
+        from rdflib import Graph
+    except ImportError:
+        return 1          # no parser: do not manufacture a failure
+    import logging
+    # The Turtle attempt on an RDF/XML payload emits a dozen "does not
+    # look like a valid URI" warnings per file before it raises. They are
+    # the probe working, not a finding, and left unsilenced they bury the
+    # lint output they are printed into.
+    lg = logging.getLogger("rdflib")
+    prior = lg.level
+    lg.setLevel(logging.ERROR)
+    try:
+        return _parse_any(Graph, raw)
+    finally:
+        lg.setLevel(prior)
+
+
+def _parse_any(Graph, raw):
+    for fmt in ("turtle", "xml"):
+        g = Graph()
+        try:
+            g.parse(data=raw, format=fmt)
+            return len(g)
+        except Exception:
+            continue
+    return None
+
 
 
 def check_tables(lines):
@@ -944,7 +1115,24 @@ def sync_register():
     # `orphans` are non-empty while `rows` is empty. Its own comment
     # describes exactly the file it then let through. The register's rows
     # come from the graphs; a register with no rows is not a register.
-    state, cached, tracked = cache_state()
+    state, why, cached = cache_state()
+    if state == "degraded":
+        # B5's class, generalised. `fetch-external.py` already refused to
+        # write from an EMPTIED cache — *an emptied generator still equals
+        # itself* — and a degraded one is the same sentence: the register
+        # would describe bytes nobody can read as though they were the
+        # measurement.
+        print("FAIL  the cache is DEGRADED — register.md NOT %s:"
+              % ("checked" if CHECK_ONLY[0] else "written"), file=sys.stderr)
+        for w in why:
+            print("        %s" % w, file=sys.stderr)
+        return 1
+    if state == "partial":
+        print("FAIL  the cache is PARTIAL — register.md NOT %s:"
+              % ("checked" if CHECK_ONLY[0] else "written"), file=sys.stderr)
+        for w in why:
+            print("        %s" % w, file=sys.stderr)
+        return 1
     if state == "unfetched":
         # F19. The cache is INPUT and nobody has fetched it, which is the
         # `.gitkeep` case one directory over: note what was inspected and
@@ -1041,7 +1229,8 @@ def main():
                                 "left untouched" % (key, status, url))
 
         if not body:
-            rows.append((key, ns, status, 0, "-", "-", "no payload", "**no** — no payload"))
+            rows.append((key, ns, status, 0, "-", "-", "no payload",
+                         "**no** — no payload", "no-probe", "—"))
             continue
 
         found = terms_found(body, terms)
@@ -1050,9 +1239,32 @@ def main():
             problems.append("%s: %d/%d terms MISSING from the payload: %s"
                             % (key, len(missing), len(terms),
                                ", ".join(missing)))
+        # B7: TWO measurements, reported separately, because one column
+        # said `6/6 terms present` for a route whose terms are subjects
+        # and for one whose terms are only labels. `nvs-p07` is the
+        # control and it now reads `0/6 declared` beside its `6/6 occur`.
+        declared = terms_declared(body, ns, terms) if terms else None
+        if declared is None:
+            strong = "unparseable" if terms else "—"
+        else:
+            nd = sum(1 for v in declared.values() if v)
+            strong = "**%d/%d declared**" % (nd, len(terms))
+            # Recorded on the NETWORK path only, exactly as the
+            # dereference verdicts are. Several of these are documented
+            # facts — `ssn-ext` mints into SOSA's namespace by design —
+            # so failing `make lint` on them would be a guard that cannot
+            # be satisfied, and those get deleted. The COLUMN is written
+            # in both modes; the problem entry is a finding about an
+            # external vocabulary, not about this tree.
+            if nd < len(terms) and not args.check:
+                problems.append(
+                    "%s: %d/%d bound terms are NOT typed subjects under `%s` "
+                    "— present by substring only, which is a presence census "
+                    "and not a binding"
+                    % (key, len(terms) - nd, len(terms), ns))
         verdict = ("**not content-verified** — no term list" if not terms
-                   else "%d/%d terms present" % (len(terms) - len(missing),
-                                                 len(terms)))
+                   else "%d/%d occur" % (len(terms) - len(missing),
+                                         len(terms)))
         # The namespace is a different question from the fetch URL, and
         # GeoSPARQL is the case that proves it: the namespace returns a
         # description document mentioning every bound term and defining
@@ -1072,7 +1284,7 @@ def main():
         rows.append((key, ns, status, len(body),
                      hashlib.sha256(body).hexdigest()[:12],
                      ctype.split(";")[0] or "-", verdict,
-                     "**%s** — %s" % (deref, detail), reason))
+                     "**%s** — %s" % (deref, detail), reason, strong))
 
     # PROVENANCE SIDECARS. One per graph, carrying exactly the fields
     # README.md specifies. Written from the same measurement that fills
@@ -1206,13 +1418,13 @@ def main():
            "minted terms against zero `owl:Class` declarations. Both are",
            "true. A row that showed only one verdict read as a document",
            "disagreeing with itself.", "",
-           "| Vocabulary | Fetch URL (cached) | HTTP | Bytes | SHA-256 | Type | Content check | Namespace | Namespace serves |",
-           "|---|---|---|---|---|---|---|---|---|"]
+           "| Vocabulary | Fetch URL (cached) | HTTP | Bytes | SHA-256 | Type | Terms occur (substring) | Terms declared (typed subject) | Namespace | Namespace serves |",
+           "|---|---|---|---|---|---|---|---|---|---|"]
     src = {k: u for k, _n, u, _t in SOURCES}
     for r in rows:
-        out.append("| `%s` | <%s> | %s | %s | `%s` | %s | %s | <%s> | %s |"
+        out.append("| `%s` | <%s> | %s | %s | `%s` | %s | %s | %s | <%s> | %s |"
                    % (r[0], src.get(r[0], "-"), r[2], r[3], r[4], r[5],
-                      r[6], r[1], r[7]))
+                      r[6], r[9] if len(r) > 9 else "—", r[1], r[7]))
     # The register's own problems belong IN this section. They used to be
     # printed after it, so `--check` rendered `## Problems — *(none)*` and
     # then reported that the register had drifted from its generator, two

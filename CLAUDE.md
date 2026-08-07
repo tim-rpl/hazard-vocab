@@ -315,9 +315,23 @@ make alloy    # run Alloy structural checks
 - **External vocabularies are referenced by URI, never transcribed.**
   Prefixes live in `vocab/core/prefixes.yaml`.
 
-  **Bound and content-verified:** SOSA, PROV-O, QUDT, and CF via NERC
-  NVS2's `standard_name` collection. Each has a register row, a
-  provenance sidecar, and at least one probe term read out of the graph.
+  **Bound, with a register row and a provenance sidecar:** SOSA, PROV-O,
+  QUDT, and CF via NERC NVS2's `standard_name` collection.
+
+  **"Content-verified" means two different things and the register
+  distinguishes them; this line must not.** A term read out of a
+  **cached graph** by `audit-bound-terms.py` — `sosa`, `ssn-ext-sosa`,
+  `prov-o`, `org`, `geosparql`, `qudt-schema`, and nothing else — is a
+  stronger claim than a term found in a **live namespace body** by
+  `dereferences()`. CF has the second and not the first. So does
+  `qudt-units`. **Read `vocab/external/register.md` for which, per
+  namespace; do not read a claim about it here.**
+
+  An earlier version of this line said *"at least one probe term read out
+  of the graph"*, which is true under one reading and false under the
+  other, and `prefixes.yaml` lists `cfsn` among those *"not audited
+  anywhere"*. Two current, authoritative files giving a reader opposite
+  answers — the ambiguity was in the phrase *the graph*.
 
   **Committed and not bound: INSPIRE.** Never fetched, no prefix, no
   register row. That commitment is **unmet, not met**, and it is stated
@@ -328,8 +342,12 @@ make alloy    # run Alloy structural checks
   P07*. Same authority, same service — but P07's local parts are opaque
   (`…/P07/current/00B3H4MY/`) and `standard_name`'s are the CF names
   (`…/standard_name/air_temperature/`). **A binding nobody can align by
-  eye is unverifiable every time it is made.** 6/6 content-verified; see
-  `vocab/external/register.md`. P07 stays in the source list as the
+  eye is unverifiable every time it is made.** All six names are present
+  in the graph as typed subjects, verified; **one of them is a `PROBE`
+  entry** and the other five reach the register through a substring
+  match over payload bytes. The conclusion holds and five-sixths of the
+  evidence for it is the weaker test — `nvs-p07` is the control, at 6/6
+  present with 0 of 6 as subjects. See `vocab/external/register.md`. P07 stays in the source list as the
   artifact the measurement was made against, `untested` — the honest
   record for something cited and not used.
 - Code lists are SKOS concept schemes, versioned independently of the

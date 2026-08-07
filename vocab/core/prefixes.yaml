@@ -48,15 +48,31 @@ prefixes:
   # inverts the method. `dereferences()` fetches the NAMESPACE live and
   # parses THAT body — `register.md`'s own header says so in bold — so
   # the sentence contradicted the file it sent the reader to for the
-  # verdict. Measured across the 17 non-boilerplate prefixes below:
+  # verdict.
   #
-  #   * 14 namespaces dereference (`resolves`), 2 return a graph in which
-  #     the probe term is NOT defined (`content`), 1 was never probed.
-  #   * **Only 5 have a term read out of a cached graph** — `sosa`,
-  #     `prov`, `org`, `geo`, `qudt`. Those are the six keys in
-  #     `audit-bound-terms.py`'s NS map, and `bound-terms.md` is the
-  #     record of what each of their terms IS. The other **12 are
-  #     declared here and not audited anywhere.**
+  # **NO DEREFERENCE DISTRIBUTION IS STATED HERE, AND THAT IS THE FIX.**
+  # The replacement sentence carried its own count — *14 resolve, 2
+  # content, 1 never probed* — and it was **one commit stale before it
+  # shipped**: the commit that wrote it is the commit that bound `cfsn`,
+  # which was the unprobed one. It is 15/2/0. A count hand-written beside
+  # a generated population is the defect this project has now paid for at
+  # B8, F15 and here, and restating it to 15/2/0 would only reset the
+  # clock. **`register.md` generates the distribution; read it there.**
+  #
+  # What is stated here is the STRUCTURAL fact, which no fetch changes:
+  #
+  #   * **Two different reads are called "verified" and only one is
+  #     strong.** A term read out of a CACHED GRAPH — parsed, and the
+  #     term found as a typed subject — is a stronger claim than a term
+  #     found in a LIVE NAMESPACE BODY, and far stronger than a term
+  #     found by substring in a payload.
+  #   * **5 of the 17 have the strong kind**, via `bound-terms.md`:
+  #     `sosa`, `prov`, `org`, `geo`, `qudt`. Those are five distinct
+  #     NAMESPACES behind six `LOOKUP` entries — `NS` has seven keys, and
+  #     an earlier version of this sentence called them "the six keys",
+  #     which was wrong three ways in four words.
+  #   * **12 are declared here and audited in no cached graph.** That
+  #     includes `cfsn` and `unit`.
   #
   # `geo:` is the case that keeps the two apart: *bound* by name and
   # *borrowed* in fact, because `geo:Geometry` is defined in the cached
@@ -66,8 +82,15 @@ prefixes:
   # NOTHING HERE CHECKS THAT A DECLARED URI IS THE RIGHT ONE.
   # `drift-lint.py`'s `declared-prefix` asks whether a used prefix is
   # DECLARED; `jurisdiction` asks whether it looks jurisdiction-specific.
-  # `sosa: http://www.w3.org/ns/sosa-TYPO/` passes all nine rules. See
-  # the gap recorded at the foot of this file.
+  # `sosa: http://www.w3.org/ns/sosa-TYPO/` passes every rule that can
+  # inspect this file. See the gap recorded at the foot of it.
+  #
+  # **Eight rules inspect this file, not nine.** `drift-lint.py` has
+  # eight; `make lint`'s ninth is `lean-vacuity`, scoped to `*.lean`,
+  # which cannot read a YAML prefix map. *"Passes all nine rules"* is
+  # true of a `make lint` run and false of any claim about what inspected
+  # THIS file — a rule count is only meaningful against a named
+  # population.
   # ---------------------------------------------------------------
 
   # Observation. SOSA is the core; SSN and its extensions mint into
