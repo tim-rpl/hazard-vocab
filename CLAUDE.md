@@ -309,7 +309,7 @@ make alloy    # run Alloy structural checks
 
 - External vocabularies are referenced by URI, never transcribed.
   Bind to SOSA, PROV-O, QUDT, CF (via NERC NVS2 collection P07),
-  INSPIRE. Prefixes live in `vocab/prefixes.yaml`.
+  INSPIRE. Prefixes live in `vocab/core/prefixes.yaml`.
 - Code lists are SKOS concept schemes, versioned independently of the
   schema. LinkML enums reference them via `PermissibleValue.meaning`.
 - One ADR per structural decision, in `design/`. Numbered, dated,

@@ -37,6 +37,16 @@ written**; the live statements are restated in `docs/plan/items.yaml`
 and the plan of record, and this note is here so a reader arriving at
 either line is not sent to a path nothing scans.
 
+**And the status changed too, which the first version of this note
+missed.** Line 75 reads *"`vocab/core/vocabulary.yaml` and
+`vocab/prefixes.yaml` remain absent."* As of **2026-08-06** the prefix
+map **exists**, at the corrected path — `vocab/vocabulary.yaml` does
+not. Restating the path and leaving the existence claim is the same
+half-a-sentence defect that stood for one commit in the plan of record;
+recorded here because a note that corrects a stale path and leaves a
+stale status is worse than one that corrects neither, since it looks
+like the line was checked.
+
 Later corrections: **A40** withdrawn (the tool it denied now exists),
 **A1** restated (nine items plus a non-slot, now ten numbered),
 **A36** narrowed and **A39** corrected — both self-falsifications found
