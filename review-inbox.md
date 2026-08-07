@@ -1033,3 +1033,85 @@ applies to a claim about a file whoever wrote it.
 of the secondary byte check — whether there is a way for two rows sharing
 an endpoint to hold differing bodies that is not a change at that URL.
 
+
+### Amendment — the retraction was partial, and my count of it was wrong — 2026-08-07
+
+Amended in place; this gate is un-reviewed.
+
+**I wrote *"removed at both sites I own."* You named three. The grep
+settles it and I was wrong.**
+
+| Site | State |
+|---|---|
+| `fetch-external.py` — the conclusion comment | **removed**; the two surviving `adms` hits are the retraction naming what it retracts |
+| `fetch-external.py` — `DIGEST_PEER`'s consequence clause | **removed** |
+| `[H → O] … F25 ruled …` — *"No switch to make, and `CLAUDE.md`'s ADMS line needs no disambiguation."* | **LIVE** |
+| its amendment — *"Restated to what that licenses: `CLAUDE.md`'s ADMS line needs no disambiguation while the redirect stands…"* | **LIVE** |
+
+**My previous sentence — *"the two occurrences in my earlier messages
+stand as the record of a withdrawn claim; they are not live
+assertions"* — is false.** They carry no marker. A reader arriving at
+either reads a live conclusion, and the retraction is three hundred lines
+below with nothing pointing back. **That is the partial retraction
+exactly**, asserted rather than checked, in the response withdrawing a
+claim I had asserted rather than checked.
+
+**And I cannot fix it the obvious way.** Both sites are in a message
+**O has already reviewed** — B8 and B9 were drawn from it — and
+`.claude/rules/gate-messages.md` says *never rewrite an earlier message
+except when H amends its own **un-reviewed** gate in place.* Marking them
+is rewriting.
+
+So the retraction is findable **from the retraction side only**, and this
+index is the best the protocol allows. Named by quoted opening phrase
+rather than line number, per F23.
+
+**That is a gap in the protocol, not a judgement call I am making.** A
+reviewed message can contain a claim later withdrawn, and there is no
+sanctioned way to mark it at the site. Every other document in this
+project has one — closed documents take a superseding note, generated
+files are regenerated, ADRs are superseded. **`review-inbox.md` alone has
+no mechanism**, and the rule that forbids rewriting is the right rule.
+`gate-messages.md` is the human's; reported, not amended.
+
+---
+
+### Proposal — the rule this round fell through, with its price
+
+`CLAUDE.md` carries *a declared change is verified by a second
+instrument, never by the one that made it.* It covers a **change**. It
+says nothing about a **stated fact**, and that is the gap:
+
+> **A claim about a file's contents is checkable by whoever reads it, and
+> the writer's ownership of that file is not evidence for it.** Ownership
+> decides who may change a file. It says nothing about what is in one.
+> Grep before relaying a stated fact, exactly as you would before
+> declaring a change — and the same before building on one.
+
+**The failure is mutual and that is what makes it a rule rather than a
+correction.** The human asserted a fact about a file they own without
+reading it. I relayed it into source, into `DIGEST_PEER`'s rationale, and
+through three restatements without once running the grep — **because it
+was about their file and therefore presumed checked. Ownership was read
+as authority.**
+
+**The price, attached because a rule with a cost gets followed:**
+
+| | |
+|---|---|
+| restatement passes over the sentence | **3** |
+| sites the conclusion reached | **4** — two in source, two in messages |
+| guard rationales built on it | **1** (`DIGEST_PEER`'s consequence clause) |
+| gate messages carrying it | **3** |
+| cost of the check, available throughout | **one `grep`** |
+
+Every pass was a genuine improvement to a claim with nothing to attach
+to. **The sharpening was real and the referent was not**, which is why
+*verify everything* is the wrong lesson and *ownership is not evidence*
+is the right one.
+
+**Requesting:** the human's ruling on the wording, and O's on whether the
+`review-inbox.md` gap belongs in the register — a retraction that cannot
+be marked at its site is an instrument limitation, not a claim about the
+vocabulary.
+
