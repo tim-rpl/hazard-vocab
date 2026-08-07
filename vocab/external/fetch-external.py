@@ -147,14 +147,20 @@ SOURCES = [
     # (200, text/turtle, 11.5 MB). That gap is precisely what the register's
     # `dereferences` column is for, and it is why the fetch URL and the
     # namespace are separate fields rather than one.
-    # The twelve KWG source-specific ontologies — one per dataset, and the
+    # ELEVEN KWG source-specific ontologies — one per dataset — plus
+    # `void.ttl`, which is NOT one of them. F16: this read *twelve* and
+    # *one per dataset*, and the twelfth is the catalogue whose own
+    # section below shows it is a collection description, not a dataset
+    # ontology. The heading was wrong by exactly the file the section
+    # beneath it proves is not one. Eleven is the number every
+    # measurement here uses. These are the
     # profile-level artifacts `vocab/profiles/` exists for and has none of.
     # DMDO is a domain model; these are worked examples of binding a real
     # feed. Three are our own: wildfire-nifc, air-quality-epa,
     # earthquake-usgs.
     #
     # Files are renamed on ingest from `<folder>/ontology.ttl`, because
-    # twelve files called `ontology.ttl` give twelve sidecars called
+    # eleven files called `ontology.ttl` give eleven sidecars called
     # `ontology.provenance.yaml`. **The rename is recoverable because the
     # file's identity is its `source_url`**, which carries the full path
     # including the `-documentation` folder.
@@ -163,7 +169,7 @@ SOURCES = [
     # a name declared in exactly 1 of the 11 KWG ontologies. That makes
     # the content check answer *did we get THIS dataset's ontology* rather
     # than *did a payload arrive*. The first version guessed `Region` for
-    # all twelve and `wildfire-nifc` does not declare it.
+    # all eleven and `wildfire-nifc` does not declare it.
     ("wildfire-nifc", "http://stko-kwg.geog.ucsb.edu/lod/ontology/",
      "https://raw.githubusercontent.com/KnowWhereGraph/kwg-ontologies/main/wildfire-nifc-documentation/ontology.ttl",
      ["gacc"]),
@@ -321,7 +327,8 @@ PROBE = {
     "schema": "https://schema.org/GovernmentOrganization",
     "sioc": "http://rdfs.org/sioc/ns#Community",
     # F1's lesson: probe for a DEFINED term, not a 200.
-    # All twelve KWG files share ONE namespace, so they share one
+    # All eleven KWG ontologies plus `void.ttl` share ONE namespace, so
+    # they share one
     # probe. `Region` is declared in 6 of the 11 ontologies, which is
     # itself the row-spanning problem: the probe asks whether the
     # NAMESPACE defines it, and the namespace is one host for all of
@@ -350,26 +357,27 @@ def dereferences(ns, key):
     # vocabulary, and it makes the disposition BORROWED permanently.
     host = ns.split("//")[-1].split("/")[0]
     if "." not in host:
-        return "no", "**structural** — host `%s` has no TLD, cannot resolve for anyone, ever" % host
+        return "no", "structural", "host `%s` has no TLD — cannot resolve for anyone, ever" % host
     probe = PROBE.get(key)
     if not probe:
-        return "untested", "no probe term declared"
+        return "untested", "no-probe", "no probe term declared"
     status, final, ctype, body = fetch(ns)
     if status != "200" or not body:
         # Three unrelated causes were all printing a bare `no`, and they
         # DECAY DIFFERENTLY: a missing TLD is permanent, a 403 is access
         # and could change from another network, a 000 is one observation.
         # A column where one value covers three causes is C11's shape.
-        kind = {"403": "**access** — 403; a re-probe from another network "
-                       "could change this",
-                "404": "**access** — 404 at this path",
-                "000": "**single observation** — no response; one probe, not "
-                       "a property"}.get(status, "**HTTP %s**" % status)
-        return "no", kind
+        code, kind = {
+            "403": ("access", "403 — a re-probe from another network could change this"),
+            "404": ("access", "404 at this path"),
+            "301": ("access", "301, and the redirect target did not serve a graph"),
+            "000": ("single-observation", "no response — one probe, not a property"),
+        }.get(status, ("access", "HTTP %s" % status))
+        return "no", code, kind
     try:
         from rdflib import Graph, RDF, URIRef
     except ImportError:
-        return "untested", "rdflib unavailable"
+        return "untested", "no-parser", "rdflib unavailable"
     g = Graph()
     for fmt in ("turtle", "xml"):
         try:
@@ -378,7 +386,7 @@ def dereferences(ns, key):
         except Exception:
             g = Graph()
     else:
-        return "no", "200 %s, unparseable" % ctype.split(";")[0]
+        return "no", "content", "200 %s, unparseable" % ctype.split(";")[0]
     ct = ctype.split(";")[0]
     # Does this namespace mint ANY term of its own? A document that
     # returns a graph while declaring nothing under its own namespace is
@@ -388,11 +396,12 @@ def dereferences(ns, key):
            if str(s).startswith(ns) and str(s) != ns}
     if list(g.objects(URIRef(probe), RDF.type)):
         if not own:
-            return ("document", "200 %s, %d triples, mints **no term of its "
+            return ("document", "mints-nothing", "200 %s, %d triples, mints **no term of its "
                     "own** — `%s` is defined here but minted elsewhere"
                     % (ct, len(g), probe.rsplit("/", 1)[-1]))
-        return "yes", "200 %s, `%s` defined" % (ct, probe.rsplit("/", 1)[-1].rsplit("#", 1)[-1])
-    return "no", "200 %s, %d triples, `%s` NOT defined" % (ct, len(g), probe)
+        return "yes", "resolves", "200 %s, `%s` defined" % (ct, probe.rsplit("/", 1)[-1].rsplit("#", 1)[-1])
+    return "no", "content", ("200 %s, %d triples, but `%s` is NOT defined "
+                             "in what the namespace serves" % (ct, len(g), probe))
 
 
 def terms_found(body, terms):
@@ -455,6 +464,7 @@ def sync_register():
         d = _y.safe_load(side.read_text())
         rows.append((g.stem, d.get("namespace", "-"),
                      d.get("dereferences", "?"), d.get("disposition", "?"),
+                     d.get("dereference_reason") or "**unlabelled**",
                      d.get("detail", "")))
 
     out = ["# External vocabulary register", "",
@@ -467,21 +477,32 @@ def sync_register():
            "the cached file.** GeoSPARQL is why: `:Geometry` is defined in the",
            "cached graph and undefined in what the namespace serves. A",
            "vocabulary can be *bound* by name and *borrowed* in fact.", "",
-           "**`dereferences` carries its REASON, not a bare verdict.** Three",
-           "unrelated causes were all printing `no` and they decay",
-           "differently: **structural** (no TLD) can never change,",
-           "**access** (403/404) could change from another network,",
-           "**single observation** (000) is one probe rather than a",
-           "property, and **content** (200 but the term is undefined) is",
-           "the GeoSPARQL case. One value covering four causes is C11's",
-           "shape.", "",
+           "**`dereferences` carries its reason in a FIELD**,",
+           "`dereference_reason`, not only in free text. F14: the header",
+           "used to assert this while the cause lived in prose `detail`,",
+           "labelled on 4 of 19 `no` rows — access at 12 rows read as a",
+           "bare `HTTP 301` and content at 1, the one argued hardest for,",
+           "was the least visible. A generated file of record asserting a",
+           "capability it did not have is C23's shape, written by a tool.",
+           "A row showing **unlabelled** predates the field and has not",
+           "been re-probed.", "",
+           "**Four causes, and they decay differently** — F15: this",
+           "paragraph said *three* and enumerated four.", "",
+           "| Reason | Decays how |",
+           "|---|---|",
+           "| `structural` | never — a host with no TLD cannot resolve for anyone |",
+           "| `access` | 403/404/301/expired cert — could change from another network |",
+           "| `single-observation` | `000`, no response — one probe, not a property |",
+           "| `content` | 200, but the probe term is not defined in what is served |",
+           "| `mints-nothing` | 200 and a graph, but no term under its own namespace |",
+           "",
            "| Graph | Namespace | Dereferences | Why | Disposition |",
            "|---|---|---|---|---|"]
-    for k, ns, dr, disp, detail in rows:
-        out.append("| `%s` | <%s> | **%s** | %s | **%s** |"
-                   % (k, ns, dr, detail or "—", disp))
+    for k, ns, dr, disp, reason, detail in rows:
+        out.append("| `%s` | <%s> | **%s** | `%s` | %s | **%s** |"
+                   % (k, ns, dr, reason, detail or "—", disp))
     tally = {}
-    for _k, _n, _d, disp, _x in rows:
+    for _k, _n, _d, disp, _r, _x in rows:
         tally[disp] = tally.get(disp, 0) + 1
     out += ["", "*%d graphs with a sidecar; %s. %d fetch(es) produced no "
             "graph at all.*"
@@ -493,10 +514,17 @@ def sync_register():
                 "above:**", ""] + ["- `%s`" % g for g in gaps]
     out += ["", "## A term's declaration may span rows — two different reasons",
             "",
-            "The row-per-file shape breaks for the twelve KWG source",
+            "The row-per-file shape breaks for the eleven KWG source",
             "ontologies, and **it breaks in two ways that need different",
-            "remedies.** Measured across the eleven dataset ontologies: 444",
-            "distinct declared URIs, **46 in more than one file**.", "",
+            "remedies.**", "",
+            "**Measured across the eleven dataset ontologies, and the",
+            "definition matters** (F17): **444 URIs are the subject of some",
+            "`rdf:type`**, of which **195 are declared as a class, property",
+            "or datatype** — the rest are instances. *Declared* implies a",
+            "term declaration, so the stricter count is the one that word",
+            "fits; 444 is reported beside it because it is the number first",
+            "published and the row-spanning measurement was taken over it.",
+            "**Of the 444, 46 appear in more than one file.**", "",
             "**Ten are in KWG's own namespace, and their declaring file is",
             "arbitrary.** `AdministrativeRegion_2` and `S2Cell_Level13` are",
             "each declared in **10 of 11**; `Region`, `spatialRelation` and",
@@ -520,7 +548,7 @@ def sync_register():
             "`vocab-conventions.md`'s fifth failure mode — *a vocabulary may",
             "declare a term it does not own* — **at scale, and measured.**",
             "Conflating the two halves would make this register say a SOSA",
-            "term's declaration is arbitrary among twelve files, when it is",
+            "term's declaration is arbitrary among eleven files, when it is",
             "not arbitrary at all."]
     if failed:
         out += ["", "## Fetched, produced no graph", "",
@@ -603,8 +631,8 @@ def main():
         # description document mentioning every bound term and defining
         # none. So this asks whether resolving the NAMESPACE yields a
         # graph in which a probe term is defined — not whether it 200s.
-        deref, detail = (("skipped", "--check, no network") if args.check
-                         else dereferences(ns, key))
+        deref, reason, detail = (("skipped", "not-probed", "--check, no network")
+                                 if args.check else dereferences(ns, key))
         if deref == "no":
             problems.append("%s: namespace does not dereference to a graph "
                             "(%s) — bindable only as BORROWED" % (key, detail))
@@ -615,7 +643,7 @@ def main():
         rows.append((key, ns, status, len(body),
                      hashlib.sha256(body).hexdigest()[:12],
                      ctype.split(";")[0] or "-", verdict,
-                     "**%s** — %s" % (deref, detail)))
+                     "**%s** — %s" % (deref, detail), reason))
 
     # PROVENANCE SIDECARS. One per graph, carrying exactly the fields
     # README.md specifies. Written from the same measurement that fills
@@ -724,11 +752,13 @@ def main():
             "namespace:     %s\n"
             "dereferences:  %s\n"
             "detail:        %s\n"
+            "dereference_reason: %s\n"
             "disposition:   %s\n"
             % (json.dumps(src_of(key)), json.dumps(stamp),
                json.dumps(r[2]), json.dumps(r[5]), json.dumps(r[4]),
                json.dumps(ns), json.dumps(deref),
                json.dumps(r[7].split("—", 1)[-1].strip()),
+               json.dumps(r[8]),
                json.dumps(DISPOSITION.get(deref, "untested"))))
 
     out = ["# External vocabulary cache — manifest", "",
