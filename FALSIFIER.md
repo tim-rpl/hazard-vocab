@@ -1,8 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 15** — §0: the subject of review is the vocabulary.
-Tooling is in scope only where a defect in it produced a wrong artifact
-in the vocabulary.
+**Charter version: 16** — §0: cross-run properties of a produced
+artifact — determinism, idempotence, order-independence — are in scope.
+No single inspection can see them.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 16 | §0 covers cross-run properties of an in-scope artifact |
 | 15 | §0 subject scope — the vocabulary, not the apparatus |
 | 14 | §5.4 covers implement items that generate nothing |
 | 13 | §1 Falsifier writes follow the disposed-field rule |
@@ -44,7 +45,23 @@ generators, their fixtures, their mutation matrices and their sweeps.
 
 **The exception, and it is the whole of it: a defect in the apparatus is
 in scope when it produced a wrong artifact in the vocabulary, or would
-admit one.** A guard that lets a jurisdiction-specific term into
+admit one.**
+
+**And so is a defect whose only symptom is a relation across runs.**
+Determinism, idempotence and order-independence cannot be seen by
+inspecting one output — the artifact is correct on every single reading
+of it and wrong only in how two readings compare. Measured: `make gen`
+produces six different hashes over six runs while emitting the same 341
+triples, the same constraints and the same validation verdict every
+time. Nothing about the artifact's content is wrong, and two ADRs rest
+their verification on the property that fails.
+
+An earlier reading of this section said the apparatus is in scope for
+**what it produces** and out of scope for **how it is built**. That is
+the right default and it misses exactly this class, because a cross-run
+property is a fact about the building. So: **in scope for what it
+produces, and for any property of the produced artifact that only two or
+more runs can reveal.** A guard that lets a jurisdiction-specific term into
 `vocab/core/` is in scope — the artifact is wrong. A guard whose fixture
 does not cover one of its clauses is not, unless something got through.
 The test is not *is this instrument sound*; it is **did something wrong
