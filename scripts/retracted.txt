@@ -29,6 +29,18 @@
 # asserts both the trailing newline and that no comment line carries a
 # tab, which is the signature of a swallowed entry.
 #
+# THE SWEEP CANNOT SEE A PHRASE SPLIT ACROSS A LINE WRAP. `git grep -F`
+# is line-based, and every prose document here is hard-wrapped at ~72
+# columns. Measured: `first multi-file` was live in FALSIFIER.md, split
+# across a wrap, while `make lint` reported 6 phrases clean.
+#
+# So a retraction in a hard-wrapped document is unguarded by this
+# instrument unless the phrase happens to fall inside one line. That is
+# not a defect it can fix without becoming a paragraph matcher, and the
+# line number it reports is what makes it usable. Stated rather than
+# worked around: SHORT PHRASES SURVIVE WRAPPING MORE OFTEN, which is a
+# second reason to enter the shortest distinctive substring.
+#
 # ENTERING THE PHRASE IS PART OF RETRACTING, NOT A FOLLOW-UP. A
 # retraction made without an entry here is checked once, at the moment it
 # is made, and nothing catches the site the sweep would have found. That

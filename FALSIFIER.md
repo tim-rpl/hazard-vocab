@@ -401,11 +401,23 @@ So at an implement gate:
    published range is a class emits `sh:datatype xsd:string` at exit 0
    (claims.md C17, axis 2).
 4. **Watch for the recorded prediction.** `scripts/drift-lint.py`
-   parses raw YAML and does not resolve `imports:`. The moment
-   `vocab/core/` becomes multi-file, `is-a-depth` computes depth per
-   file and three other rules degrade against inherited content —
-   **false negatives**, the silent direction. The trigger is the first
-   multi-file `vocab/core/`.
+   parses raw YAML and does not resolve `imports:`. **Tested and
+   confirmed 2026-08-07**, and both halves of the earlier wording here
+   were wrong.
+
+   It is not a file count: `vocab/core/` has held three files with
+   nothing degraded, because the mechanism needs a term **resolved
+   across** a boundary. And `is-a-depth` does not compute a shallower
+   depth — `if cur not in parents: break` skips the `while/else`, so the
+   depth test **never executes** and a class inheriting across a boundary
+   is **exempt at any depth**. Measured: a five-class chain gives two
+   failures in one file and one when the last link crosses a boundary,
+   with the depth-4 class unreported. The break also fires on any
+   unresolved parent, so a typo'd parent name exempts a class too.
+
+   Still **false negatives**, still the silent direction. The trigger is
+   an `is_a`/`mixins` naming an imported class, or a `slots:` list naming
+   an imported slot.
 5. **The eight lint rules have never inspected a schema nobody built to
    make them fire.** 39 fixture pairs, zero real files. A clean
    `make lint` over the first authored content is the first evidence
