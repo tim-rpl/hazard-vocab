@@ -3772,12 +3772,45 @@ its cheapest test and its idempotence test.
   what ADR-005 states and what the test performs.
 
   **2026-08-07, second measurement — the byte variation is NOT confined
-  to that construct, and the paragraph this replaces said it was.** Of
-  the 170 lines by which two consecutive runs differ, **0 contain
-  `sh:closed` and 2 contain `sh:ignoredProperties`**; 34 contain
-  `sh:path` and 28 contain `sh:order`. The `sh:property` blank-node
-  blocks are serialised in a different order every run — invisible to
-  isomorphism, because the property shapes are an unordered set.
+  to that construct, and the paragraph this replaces said it was.** The
+  `sh:property` blank-node blocks are serialised in a different order
+  every run — invisible to isomorphism, because the property shapes are
+  an unordered set, and it is nearly all of the byte difference.
+
+  **2026-08-07, third measurement — the per-predicate census in the
+  paragraph above is retracted, and it was retracted by the instrument
+  this project already mandates.** That census read *"170 differing
+  lines, 0 containing `sh:closed`, 2 containing `sh:ignoredProperties`,
+  34 `sh:path`, 28 `sh:order`"*, and it was offered as though the first
+  two figures were constants. **They are not.** Twelve `gen-shacl` runs,
+  twelve distinct hashes, all 66 pairs censused by `diff`:
+
+  | grepped over `diff` output | observed range | pairs off the reported value |
+  |---|---|---|
+  | `sh:closed` | **0, 2, 4** | 8 of 66 |
+  | `sh:ignoredProperties` | **2, 4** | 2 of 66 |
+  | `sh:path` | 32–52 | — |
+  | `sh:order` | 26–46 | — |
+  | total differing lines | 146–262 | — |
+
+  **Parsed instead of grepped, the answer is different and stronger.**
+  Per run: 9 `sh:closed` lines, 9 `sh:ignoredProperties`, 41 `sh:path`,
+  40 `sh:order`. As multisets over the twelve runs, `sh:closed` and
+  `sh:order` are **one signature each — invariant**; `sh:ignoredProperties`
+  varies (the 9-member list on `ohim:Entity`) and `sh:path` varies only
+  in its `,`/`;` terminator, which is not a triple-level difference.
+
+  So `gen-shacl` never emits a differing `sh:closed` line. The 0/2/4 is
+  an artifact of the measuring instrument: a line `diff` assigns
+  byte-identical lines to a moved hunk, so the grep counts **hunk
+  membership, not differing content**. ADR-007's own Obligation already
+  forbids this instrument — *"`sh:path` counts must parse, not grep …
+  this decision makes that mandatory rather than advisable"* — and the
+  census it rests on is a grep.
+
+  The conclusion is unaffected and is strengthened: removing closure
+  cannot make the pipeline byte-deterministic, because the closure
+  triples are the one part of the serialisation that does not vary.
 
   Measured after the full deletion, by two independent stage
   implementations so the result does not rest on a serialiser choice:
@@ -3796,7 +3829,10 @@ its cheapest test and its idempotence test.
   is the opposite of the one recorded: not that it goes green for the
   wrong reason, but that it cannot go green at all without a change to
   `gen-shacl`'s serialisation, which no post-process deletion makes.
-- **Updated:** 2026-08-07 (evidence corrected; status unchanged)
+- **Updated:** 2026-08-07 (evidence corrected twice; status unchanged.
+  The second correction retracts a census this entry carried as
+  constants and extends the run count from six to twelve. The
+  isomorphism table also re-ran at twelve: 341 no, 323 no, 289 **yes**.)
 - **Promotion note:** minted by O under FALSIFIER §6 at the ADR-007
   implement gate, 2026-08-07. Not proposed by H; the statement, the
   Falsifier and the test are O's, which §1 permits for an entry O mints

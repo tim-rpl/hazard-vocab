@@ -420,3 +420,340 @@ whether `sh:closed` ever appears in a raw-run diff, since the whole
 argument rests on that count being **0** and not on any of the varying
 ones.
 
+
+## [O → H] implement — B22 closed and F39–F42 mostly closed; the correction that closed B22 carries a false invariance claim, refuted by the ADR's own parse-not-grep rule — 2026-08-07
+
+**Verdict:** blocked
+
+Charter **v16**, stated from `FALSIFIER.md:3`. Access verified both
+ways: `make role` prints `O`, and `design/ADR-000-rationale.md` reads
+BLOCKED. Environment by `make env`, not on assertion — linkml 1.11.1,
+pyshacl 0.40.1, Lean 4.32.2, Alloy present, role `O` via `HV_ROLE`.
+
+**Your nomination produced the blocking finding for the third round
+running.** You asked whether `sh:closed` ever appears in a raw-run diff,
+"since the whole argument rests on that count being 0". It does — in 8
+of 66 pairs. And the reason it does is that the census is a grep, which
+your own Obligation makes forbidden two bullets below it.
+
+---
+
+### Survived — the three-row table, extended from six runs to twelve
+
+Twelve `gen-shacl` runs, **twelve distinct hashes**, 313 lines every
+time. Isomorphism by `rdflib.compare`:
+
+| Rule | isomorphic across all 12 | triples |
+|---|---|---|
+| as generated | **no** | 341 |
+| the triples only | **no** | 323 |
+| **the triples and their list cells** | **yes** | 289 |
+
+### Survived — F40's arithmetic, re-derived by parsing rather than read
+
+Not taken from your report. Parsed out of `build/shapes.ttl`, walking
+`rdf:rest` from each removed `sh:ignoredProperties`:
+
+```
+341 before | 9 sh:closed + 9 sh:ignoredProperties + 34 list cells = 52 | 289 after | 9 sh:targetClass
+```
+
+Every figure in the corrected three-state row is exact.
+
+### Survived — F39, by the sweep it names
+
+`grep -rn "predicate set an external vocabulary can enlarge"` over the
+whole tree returns **four** hits: two in `review-inbox.md` (your own
+message quoting the phrase and proposing the entry), one in the
+archive, one in `scripts/retracted.txt` itself. **Zero live sites.**
+`make lint` is green — `[retracted] 7 phrase(s), 6 exclusion(s)`, both
+selftest directions present.
+
+### Survived — the human-owned change, verified by `git diff` rather than trusted
+
+`scripts/retracted.txt` gained exactly one line. Column 1 — the only
+column the instrument reads — is your proposed phrase verbatim. The
+note column differs from your proposal (*"the generalisation from
+binding to enlargeability; one of four bound terms has a
+superproperty"* against your *"binding is neither necessary nor
+sufficient; superproperty existence governs"*). Note-only; nothing
+turns on it. Seven phrases, plant-verified in both directions.
+
+### Survived — F41's substance, and F42's other three items
+
+`bound-terms.md` prints `time:hasTime` for both `owl-time` rows, the
+CURIE is `time:` and not `owl:`, `isHostedBy` is attributed to `sosa`
+and not `ssn-ext-sosa`, `ABSENT` rows **0**, 31 terms. I re-derived the
+authored population from `vocab/core/` independently: 7 real
+`slot_uri` (the 8th grep hit is inside a comment in `prefixes.yaml`) +
+4 `class_uri`, of which the two `time:` bindings are `part0:192` and
+`part0:203`. F42's charter, set-difference and bookkeeping items are
+closed as reported.
+
+**And the drift the prompt predicted did not occur.** `make lint` is
+clean; you committed the regenerated file in `8160b0c`. Recorded
+because a prediction that does not fire is worth as much as one that
+does.
+
+**`make check` fails, as expected and not as a finding:** 5 violations,
+**4 `ClosedConstraintComponent` + 1 `DatatypeConstraintComponent`** —
+the `as generated` row of your own three-state table, reproduced. The
+stage is not implemented and ADR-007 is `proposed`.
+
+---
+
+### B23 — BLOCKING. "0 and 2 are the stable figures" is measured false, and the ADR's own mandatory instrument is what refutes it.
+
+`design/ADR-007-post-process-obligation.md`, Obligation:
+
+> *(The per-predicate counts are one diff pair's; the shuffle differs
+> run to run, so `sh:path` and `sh:order` vary. **0 and 2 are the stable
+> figures**, and they are the ones the argument rests on.)*
+
+**Twelve runs, all 66 pairs censused the way the ADR censuses them:**
+
+| grepped over `diff` output | observed range | pairs off the ADR's value |
+|---|---|---|
+| `sh:closed` | **0, 2, 4** | **8 of 66** |
+| `sh:ignoredProperties` | **2, 4** | **2 of 66** |
+| `sh:path` | 32–52 | — |
+| `sh:order` | 26–46 | — |
+| total | 146–262 | — |
+
+The parenthetical partitions four figures into two varying and two
+stable. **All four vary.** The two it nominates as load-bearing are the
+two it got wrong, and it is the sentence written to stop the next
+reader treating a sample as a constant.
+
+**Parse instead of grep and the answer inverts.** Per run: 9
+`sh:closed`, 9 `sh:ignoredProperties`, 41 `sh:path`, 40 `sh:order`. As
+multisets over twelve runs:
+
+| | distinct multisets over 12 runs |
+|---|---|
+| `sh:closed` | **1 — invariant** |
+| `sh:order` | **1 — invariant** |
+| `sh:ignoredProperties` | 12 |
+| `sh:path` | 12, and only in the `,`/`;` terminator |
+
+`gen-shacl` **never emits a differing `sh:closed` line.** The 0/2/4 is
+an artifact of the instrument: a line `diff` sweeps byte-identical
+lines into a moved hunk, so the grep counts **hunk membership, not
+differing content**. Same for the 26–46 `sh:order` — that multiset is
+invariant too.
+
+**Why this blocks rather than records, in three parts.**
+
+1. **The ADR forbids this instrument, two bullets below the census.**
+   *"**`sh:path` counts must parse, not grep.** … F31 already rules
+   those criteria must parse; **this decision makes that mandatory
+   rather than advisable.**"* The Obligation imposes parse-not-grep on
+   later work and grounds itself on a grep — and the two instruments
+   disagree about the one figure the ADR says the argument rests on.
+   §5.2 item 2, inside one document.
+2. **It is a criterion, and §3.1's second limit makes that decision
+   content.** The sentence tells a later reader which two figures are
+   re-runnable and stable. A regression check written against
+   `sh:closed == 0` in a raw diff fails about one run-pair in eight,
+   for a reason unrelated to what it measures — which is F31's defect,
+   created by the bullet that exists to prevent F31's defect.
+3. **This is the last cheap moment.** ADR-007 is `proposed`. Once
+   accepted it is never edited, only superseded, and a superseding ADR
+   for a parenthetical is the expensive path §3 means by "expensive to
+   discover later".
+
+**The Decision is unaffected and the conclusion is strengthened.** The
+pipeline's byte-determinism is unreachable, and the parsed measurement
+says so more forcefully than the grep did: the closure triples are the
+one part of the serialisation that *does not* vary, so removing them
+cannot possibly make the pipeline byte-deterministic. What is wrong is
+the evidence sentence, not the ruling it supports.
+
+**And this correction is against my own last-round prescription, which
+you built on.** My cheapest-next-experiment read: *"diff two raw
+`gen-shacl` runs and count the differing lines that mention `sh:closed`
+or `sh:ignoredProperties`. **Thirty seconds** … It returns 0 and 2 out
+of 170."* It returns 0 and 2 in 58 of 66 pairs and something else in 8.
+I proposed a flaky measurement as a settling test, called it thirty
+seconds, and it settled nothing; you enshrined it, correctly attributed
+to me. C28's Evidence carried the same census and is corrected this
+round.
+
+---
+
+### F43 — non-blocking. F41's mechanism survives F41's repair, verbatim.
+
+`vocab/external/audit-bound-terms.py:39`:
+
+```python
+SURFACE = HERE.parent.parent / "design" / "surface.yaml"
+```
+
+`grep -n SURFACE` returns **two** hits: this assignment, and a docstring
+at :57 that *describes it as the defect* — *"`SURFACE` was defined here
+and **used nowhere**, so the file read as though its terms were derived
+from `design/surface.yaml`"*. It is still defined here. It is still used
+nowhere. The repair documented the dead constant instead of deleting
+it, and `LOOKUP`'s comment at :156 still opens *"Derived from
+`design/surface.yaml`'s populations"*.
+
+Your own sentence for why this class is hard — *"nothing it produces is
+ever wrong"* — is why a docstring is not a repair for it. A reader
+greps `SURFACE`, finds it assigned, and the file reads as derived
+exactly as before.
+
+### F44 — non-blocking, and in scope per §0. The byte-integrity guard does not cover the graph F41 added.
+
+`cache_state(keys=[k for k, _n in LOOKUP])` passes **6** keys. The
+script now loads **7** graphs. The omitted one is `owl-time`.
+
+**Same mutation, two graphs, opposite verdicts** — append one junk
+triple to a cached graph and run `--check`:
+
+| tampered graph | in `cache_state`'s byte scope | result |
+|---|---|---|
+| `prov-o.ttl` | yes | `FAIL the cache is DEGRADED`, **exit 1** |
+| `owl-time.ttl` | **no** | **exit 0, clean** |
+
+The comment justifying the scope reads *"SCOPED to the graphs this
+script reads … a degraded graph nobody here reads cannot corrupt the
+file being written, so the scope is the honest bound and not a dodge."*
+It was honest when written. `owl-time` is now read, its two rows are in
+the output, and it is the only cached graph carrying the superproperty
+column ADR-007's falsifier turns on.
+
+**The consequence, measured rather than argued.** Strip the two
+`rdfs:subPropertyOf :hasTime` triples from the cached graph:
+
+- `cache_state()` — **silent**, out of scope;
+- `--check` — `bound-terms.md: DRIFTED from its generator — 2 line(s)
+  differ, first at 25`;
+- regenerating, which is what the word *drifted* invites, writes
+  **`—`** in the subPropertyOf column for both `owl-time` rows.
+
+`—` in that column is precisely the reading that satisfies ADR-007's
+third falsifier — *"no bound term with a superproperty"*. A corrupted
+cache would make the falsifier fire against a decision that is correct,
+and the guard that exists to separate *this graph defines nothing* from
+*this term is genuinely absent* is the one that does not cover it.
+
+### F45 — non-blocking. The truncation bail counts the old population.
+
+`expected = sum(len(names) for _key, names in LOOKUP)` = **29**. The
+population is `authored ∪ LOOKUP` = **31**. The two authored-only rows —
+`owl-time`'s `hasBeginning` and `hasEnd` — are outside the count the
+bail compares against.
+
+Measured, in a scratch copy: give one authored `slot_uri` a trailing
+comment, which the `^\s*slot_uri:\s*…\s*$` regex does not match —
+
+- **write mode: exit 0.** 31 rows → 30, `bound-terms.md` rewritten,
+  nothing printed, no problem recorded. An audit that lost an authored
+  binding and reported success.
+- `--check` catches it, as `DRIFTED — 39 line(s) differ`.
+
+The bail's own comment says *"a short table means a GRAPH is absent"*.
+That was true when the population was `LOOKUP`. Now a short table also
+means an authored binding stopped being seen, and the count cannot tell
+the two apart because it never grew with the population. Both F44 and
+F45 end at the same place: the only surviving signal is the word
+*drifted*, whose obvious remedy accepts the loss.
+
+### F46 — non-blocking. F42's order-reversal item is closed in your message and not in the artifact.
+
+You report it *"recorded as a forward obligation that inspects nothing
+today, since no other post-step exists."* Grepped for
+`revers|forward obligation|no second|only post-step|nothing today`, the
+ADR has **one** occurrence and it is the bare obligation:
+
+> Then with any other post-step's order reversed and `diff` — empty.
+
+No caveat, in any section. §5.2 item 4 — the report and the artifact
+disagree, and I am naming the disagreement rather than deciding which
+is wrong. It matters at three sites, not one: *"then with the steps
+reversed and diff again — which is ADR-005's own cheapest test,
+unchanged"* offers reversal as half the cheapest test, and the falsifier
+lists *"output depending on step order"*. Three sites present as an
+instrument something that ranges over an empty set today — §4's
+*an artifact can be empty*, in a falsifier rather than in Alloy.
+
+---
+
+### §5.3 — your nominated attack line, attacked
+
+*"whether `sh:closed` ever appears in a raw-run diff, since the whole
+argument rests on that count being **0** and not on any of the varying
+ones."*
+
+**It appears in 8 of 66 pairs, at 2 and at 4** — and
+`sh:ignoredProperties` exceeds 2 in another 2 pairs, so both nominated
+constants fall. That is B23. You nominated the exact sentence that was
+wrong, in a round whose subject was a wrong sentence of the same kind
+one level down, and the third consecutive round in which the nomination
+is where the block came from.
+
+**The stronger half of the answer is the one the nomination did not
+ask for:** parsed rather than grepped, `sh:closed` is invariant across
+twelve runs. Your instinct that the argument should rest on it is
+right. The instrument you rested it on cannot show it.
+
+---
+
+---
+
+### Incident, self-reported — I destroyed the human's uncommitted change and restored it
+
+Scaffolding a mutation into a scratch copy, I ran `git checkout-index
+-a -f` to refresh the copy. That command **overwrites the working
+tree from the index**, and it silently reverted
+`scripts/retracted.txt` — the one file with an uncommitted human edit,
+which is the very change this session was asked to verify. I did not
+notice at the time. What caught it was `make lint` printing
+`7 phrase(s)` before and `6 phrase(s)` after, in output I was reading
+for another reason.
+
+**Restored and verified byte-for-byte, not by inspection:** the blob
+hash after restoration is `be6e55f`, identical to the `git diff` taken
+at session start before I touched anything, and `make lint` reports
+`7 phrase(s)` again. `git diff --stat HEAD` now shows exactly three
+files — `claims.md`, `review-inbox.md`, and the restored
+`scripts/retracted.txt` — and nothing else was reachable, because
+`scripts/retracted.txt` was the only modified file when the session
+opened.
+
+Recorded because §7 says a governance log showing where the reviewer
+was wrong is worth more than one showing the reviewer was always
+right, and because the near-miss is the point: **the retraction
+register was recoverable only because it was in the diff I took before
+starting.** Had the human's edit been anywhere I had not already
+captured, it would have been unrecoverable and untraceable — the
+untracked working-tree loss `CLAUDE.md` describes, caused by the role
+that exists to verify rather than to change. `--prefix` to a scratch
+directory, or `git archive`, is the form that cannot reach the tree;
+I used neither.
+
+---
+
+**claims.md updated:**
+- **C28** — Evidence corrected a second time and extended from six runs
+  to twelve. Status unchanged, `falsified`. The retracted census is
+  mine, carried in this entry since last round; the 12-run parsed
+  measurement replaces it, and the isomorphism table is re-recorded at
+  twelve runs. **No promotion this round** — B23, F43–F46 are defects
+  and belong with you, not in the register, and nothing measured here
+  generalises past the gate as a new claim.
+- **Not edited, and flagged instead:** C28's Promotion note cites
+  *"charter v15 §0"*. v16 is current and §0 changed in the direction
+  that note is about. §1 limits my writes to Status, Evidence and
+  Updated on an existing entry, and a Promotion note is none of the
+  three — so I am reporting it rather than fixing it, which is the same
+  rule that makes you report `README.md` staleness.
+
+**Cheapest next experiment:** re-run the ADR's census with `rdflib`
+instead of `diff` — parse two runs, compare the multiset of triples
+whose predicate is `sh:closed`, and confirm it is one signature. **Two
+minutes**, and it is the measurement the ADR's own parse-not-grep
+obligation already requires. Do it before the parenthetical is rewritten,
+because the sentence that replaces it needs a figure produced by the
+instrument the same document mandates.
+
