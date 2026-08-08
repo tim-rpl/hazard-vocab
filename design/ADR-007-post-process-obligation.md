@@ -151,7 +151,12 @@ the graphs this project caches:
 | `time:hasBeginning` | `time:hasTime` |
 
 **One of four.** Under RDFS what governs is **superproperty existence**,
-not binding, and `bound-terms.md` prints that column already. This is
+not binding, and `bound-terms.md` prints that column already — **as of this round.**
+It did not when the sentence was first written: the audit's population was
+a hardcoded list of six namespaces with no OWL-Time entry, so
+`bound-terms.md` had **zero** rows mentioning `time` and could not print
+the one value the falsifier turns on. F41. The population is now read from
+`vocab/core/`, and the two `time:` bindings are audited. This is
 ADR-003's pattern a second time: the stated ground fails and the decision
 holds on a stronger one.
 
@@ -274,6 +279,12 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   > **Determinism.** Run the stage twice over the **same**
   > `build/shapes.ttl` and `diff` — empty. Then with any other post-step's
   > order reversed and `diff` — empty.
+
+  **The order-reversal half inspects nothing today**, because no other
+  post-step exists. It is a forward obligation and not present evidence,
+  and ADR-005 property 2 is what it carries forward. Stated here because a
+  criterion that cannot fail reads as a criterion that passed — and this
+  ADR's own falsifier ships that distinction.
   >
   > **Idempotence.** Run the stage over its own output: the **graph** is
   > unchanged. Not the bytes.
@@ -291,36 +302,54 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   **A pipeline-level byte test was tried and cannot serve — and an earlier
   draft of the Decision asserted it anyway.** `make gen` is not
   byte-deterministic and does not become so when the rule lands.
-  Censused over two consecutive raw runs:
 
-  | differing lines mentioning | count |
+  **Censused by PARSING, over six runs, asking whether each predicate's
+  object multiset is invariant:**
+
+  | predicate | distinct multisets over 6 runs | objects |
+  |---|---|---|
+  | `sh:closed` | **1** | 9 |
+  | **`sh:ignoredProperties`** | **6** | 9 |
+  | `sh:path` | **1** | 40 |
+  | `sh:order` | **1** | 40 |
+
+  **Exactly one predicate varies, and it is the one this rule deletes.**
+  The graph difference is the member order of the nine-element
+  `sh:ignoredProperties` list on the `ohim:Entity` shape; the other eight
+  lists are `( rdf:type )`, one member, no order to vary.
+
+  **The byte difference is a different quantity and it survives the
+  deletion.** The `sh:property` blank-node blocks are *serialised* in a
+  different order every run — invisible to isomorphism, because property
+  shapes are an unordered set — so the pipeline stays byte-nondeterministic
+  after the rule. Reproduced with a pure `grep -v` text stage as well as an
+  rdflib one: **three runs, three hashes.** A pipeline byte obligation
+  fails now and keeps failing.
+
+  **An earlier draft censused this by GREP and the figures were wrong in
+  both directions.** It reported `sh:closed` 0 and `sh:ignoredProperties`
+  2 as *stable* and `sh:path`/`sh:order` as varying. Over all fifteen pairs
+  of six runs:
+
+  | predicate | grepped counts observed |
   |---|---|
-  | `sh:closed` | **0** |
-  | `sh:ignoredProperties` | **2** |
-  | `sh:path` | 48 |
-  | `sh:order` | 36 |
+  | `sh:closed` | **0 or 2** — it varies |
+  | `sh:ignoredProperties` | 2 |
+  | `sh:path` | 40 … 52 |
+  | `sh:order` | 32 … 40 |
 
-  **228 differing lines, and 2 of them are the thing this rule removes.**
-  The `sh:property` blank-node blocks are serialised in a different order
-  every run — invisible to isomorphism, because property shapes are an
-  unordered set, and it is nearly all of the byte difference. Reproduced
-  with a pure `grep -v` text stage as well as an rdflib one, so it is not
-  a serialiser artefact: **three runs, three hashes.**
+  **So the stable/varying partition was false, and the quantity was
+  wrong.** A grep over a unified diff counts **lines inside changed
+  hunks**, not differing content: a `sh:closed` line is identical in both
+  runs and appears in the census only because a neighbouring line moved.
+  **`sh:closed` is invariant when parsed and appears to vary when
+  grepped**, which is the reverse of what the draft claimed.
 
-  *(The per-predicate counts are one diff pair's; the shuffle differs run
-  to run, so `sh:path` and `sh:order` vary. **0 and 2 are the stable
-  figures**, and they are the ones the argument rests on.)*
-
-  So a pipeline byte obligation fails now and keeps failing.
-
-  **Why the wrong subject got in, recorded because the sentence that
-  caused it was right.** An earlier draft justified stating property 1
-  over the pipeline with: *an obligation that says less than its own test
-  is how a criterion drifts from what it verifies.* True — and this was
-  the inverse. **The obligation said MORE than its test, over a wider
-  subject**, while the test below opens *"The test isolates the stage."*
-  Same drift, opposite direction, and the Decision then contradicted its
-  own Obligation twenty paragraphs later.
+  This is a string count standing in for a parse **two bullets above the
+  Obligation that forbids exactly that** — and the figure was a count of
+  diff-hunk membership while the sentence read as a count of differences.
+  **Say what a figure counts, or a reader will assume it counts the thing
+  under discussion.**
 
   **And the pipeline's determinism is not this stage's to assert.** It is
   `gen-shacl`'s, it is filed at C28 as `falsified`, and a stage obligation

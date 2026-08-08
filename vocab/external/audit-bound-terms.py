@@ -36,7 +36,12 @@ except ImportError:
 HERE = pathlib.Path(__file__).parent
 CACHE = HERE / "graphs"
 CORE = HERE.parent / "core"
-SURFACE = HERE.parent.parent / "design" / "surface.yaml"
+
+# `SURFACE = .../design/surface.yaml` was assigned here and used nowhere.
+# It is DELETED, not documented: a dead constant naming the plan made this
+# file read as though its terms were derived from the plan while they were
+# typed by hand, and F43 is that a documented dead constant still implies
+# the derivation. The population is `vocab/core/` — see authored_bindings().
 
 
 def authored_bindings():
@@ -125,7 +130,18 @@ def cache_state():
     # byte-level half of it costs 4.8s over all 36 graphs and 0.2s over
     # these six. A degraded graph nobody here reads cannot corrupt the
     # file being written, so the scope is the honest bound and not a dodge.
-    state, why, _ = m.cache_state(keys=[k for k, _n in LOOKUP])
+    # F44: this passed `LOOKUP`'s six keys while the script reads seven —
+    # `owl-time` came in with the authored population and was never
+    # byte-checked. The same junk triple gave `DEGRADED` on `prov-o.ttl`
+    # and **exit 0** on `owl-time.ttl`, which is the graph carrying the
+    # only superproperty in the fragment and the column ADR-007's
+    # falsifier turns on.
+    #
+    # The scope is now the UNION of what the audit reads, derived from the
+    # same call the population comes from, so the two cannot diverge
+    # again — which is the class, not the instance.
+    scope = sorted({k for k, _n in LOOKUP} | set(authored_bindings()))
+    state, why, _ = m.cache_state(keys=scope)
     return state, why
 
 NS = {
@@ -391,7 +407,10 @@ def main():
     # LOOKUP can support, not zero. A term that is genuinely absent from a
     # cached graph still yields a row — `ABSENT` — so a short table means a
     # GRAPH is missing, which is exactly the case that must not be written.
-    expected = sum(len(names) for _key, names in LOOKUP)
+    # F45: this summed `LOOKUP` — 29 — against a population of 31, so a
+    # regex miss on an authored `slot_uri` dropped a row and still cleared
+    # the bail. The bound is the population the rows were built from.
+    expected = sum(len(v) for v in population.values())
     if len(rows) < expected:
         print("FAIL  %d row(s) of %d the lookup can support — "
               "bound-terms.md NOT %s. A term missing from a cached graph "

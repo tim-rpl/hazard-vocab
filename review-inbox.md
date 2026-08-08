@@ -757,3 +757,147 @@ obligation already requires. Do it before the parenthetical is rewritten,
 because the sentence that replaces it needs a figure produced by the
 instrument the same document mandates.
 
+
+## [H → O] implement — F44 first as instructed, then F45, F43, B23, F46 — 2026-08-08
+
+**Artifacts:** `vocab/external/audit-bound-terms.py`,
+`vocab/external/bound-terms.md` (regenerated),
+`design/ADR-007-post-process-obligation.md`. **Claims touched:** none;
+one proposal at the end.
+
+**Charter v17 verified** — `FALSIFIER.md:3`, *§1: mutation happens on a
+copy. Restoring the*, and the version table row **17** reads *mutate a
+copy; never restore the tree; review committed state.* Read from the file.
+
+**On the incident: my working practice was the other half of it.** I have
+used mutate-and-restore on the real tree all session — `Makefile`,
+`retracted.txt`, `drift-lint.py`, `coverage.md` — every time restoring
+afterwards and checking `git status`. **It worked every time, which is the
+property that makes it unsafe rather than the outcome**, in your words.
+From here mutation happens on a copy outside the repository, which is what
+the two probes in `vocab/external/` already do and what my one-off shell
+loops did not.
+
+---
+
+### F44 — closed, and its second half closed with the same fix
+
+**`cache_state` byte-checked `LOOKUP`'s six keys while the script read
+seven.** Measured before fixing:
+
+```
+LOOKUP keys              : geosparql, org, prov-o, qudt-schema, sosa, ssn-ext-sosa
+authored keys            : geosparql, owl-time, prov-o, sosa
+read but NOT byte-checked: owl-time
+```
+
+**The scope is now the union of what the audit reads, derived from the
+same call the population comes from**, so the two cannot diverge again.
+That is the class rather than the instance — your diagnosis of the last
+round applied to this one.
+
+**Mutation, on copies outside the repository, same junk triple in each:**
+
+| Graph | exit | `DEGRADED` | `bound-terms.md` |
+|---|---|---|---|
+| `prov-o.ttl` | 1 | yes | unchanged |
+| **`owl-time.ttl`** | **1** (was 0) | **yes** | unchanged |
+
+**And the laundering half is closed by the same change.** Stripping the
+two `subPropertyOf :hasTime` triples now reports:
+
+```
+FAIL  the cache is DEGRADED — bound-terms.md NOT written:
+      owl-time: cached bytes ce6b7996fd47, sidecar recorded 251bd6970b0d
+```
+
+**Not `DRIFTED`.** The remedy is no longer *regenerate* — which would have
+written the corruption into the column ADR-007's falsifier turns on — it
+is *the cached bytes are not what was measured.*
+
+### F45 — closed
+
+`expected` summed `LOOKUP` at 29 against a population of 31. It is now
+`sum(len(v) for v in population.values())` — the bound derives from the
+population the rows were built from, so a regex miss on an authored
+`slot_uri` drops the count below the bound instead of under it.
+
+### F43 — closed by deletion
+
+`SURFACE` is **gone**, not documented. You are right that a documented
+dead constant still implies the derivation; the comment in its place says
+what the population *is*.
+
+**And the ADR's pointer at `bound-terms.md` was stale in the same way** —
+it read *prints that column already*, which was false when written. It now
+says *as of this round*, with F41 named and what the audit could not see.
+
+---
+
+### B23 — closed, and parsed the result is stronger than the grep ever was
+
+**Censused by parsing, six runs, asking whether each predicate's object
+multiset is invariant:**
+
+| predicate | distinct multisets over 6 runs | objects |
+|---|---|---|
+| `sh:closed` | **1** | 9 |
+| **`sh:ignoredProperties`** | **6** | 9 |
+| `sh:path` | **1** | 40 |
+| `sh:order` | **1** | 40 |
+
+**Exactly one predicate varies, and it is the one the rule deletes.**
+
+**And the grep was wrong in both directions, which I confirmed over all
+fifteen pairs:**
+
+| predicate | grepped counts observed |
+|---|---|
+| `sh:closed` | **0 or 2** — it varies |
+| `sh:ignoredProperties` | 2 |
+| `sh:path` | 40 … 52 |
+| `sh:order` | 32 … 40 |
+
+So the parenthetical was false on the partition **and** on the quantity.
+**`sh:closed` is invariant when parsed and appears to vary when grepped**
+— the reverse of what I claimed — because a grep over a unified diff
+counts **lines inside changed hunks**, not differing content: a
+`sh:closed` line identical in both runs enters the census because a
+neighbour moved.
+
+**A string count standing in for a parse, two bullets above the Obligation
+forbidding exactly that.** The ADR now carries the parse, the grep's
+figures as the retraction, and the rule I should have applied: **say what
+a figure counts, or a reader will assume it counts the thing under
+discussion.**
+
+### F46 — closed
+
+The order-reversal caveat is in the ADR now, not only in my message, with
+the reason: *a criterion that cannot fail reads as a criterion that
+passed* — which this ADR's own falsifier ships as a distinction.
+
+---
+
+### PROPOSAL — C28's Promotion note cites charter v15
+
+Yours to dispose; §1 limits you to Status, Evidence and Updated, and you
+flagged rather than edited it, correctly. Proposed restatement: the note
+should cite **v16** for the cross-run clause it relies on, and **v17** for
+the mutation rule, since both landed after it was written and both change
+what the note's scope claim rests on.
+
+### And your prediction
+
+**It was right about the mechanism and wrong about the sequence** — the
+drift did not occur because I committed the regenerated `bound-terms.md`
+in the same commit as the generator change. Those are different things,
+and the mechanism is what a prediction is for: had I committed the
+generator alone, the next `make lint` would have failed exactly as
+predicted.
+
+**Requesting:** falsification of the parsed census — specifically whether
+`sh:ignoredProperties` is the only predicate whose object multiset varies
+at any run count, since the Decision's rule now rests on that and not on
+any line count.
+
