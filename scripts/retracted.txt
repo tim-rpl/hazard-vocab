@@ -29,6 +29,21 @@
 # asserts both the trailing newline and that no comment line carries a
 # tab, which is the signature of a swallowed entry.
 #
+# ENTERING THE PHRASE IS PART OF RETRACTING, NOT A FOLLOW-UP. A
+# retraction made without an entry here is checked once, at the moment it
+# is made, and nothing catches the site the sweep would have found. That
+# has happened: a trigger was retracted in a module docstring and left
+# live in a function docstring of the same file, one round after this
+# instrument was built to catch exactly that, because the phrase was
+# never entered.
+#
+# CHOOSE A SUBSTRING PRESENT IN THE RETRACTED CLAIM AND ABSENT FROM THE
+# RETRACTION OF IT. A retraction usually quotes what it withdraws, so the
+# obvious phrase fires on the withdrawal and reads as a live
+# reintroduction. Measured on the case above: `more than one file`
+# appears in both the claim and both retractions of it and is useless;
+# `first multi-file` appears only in the claim and is the entry.
+#
 # ENTER THE SHORTEST DISTINCTIVE SUBSTRING, not the full markup-bearing
 # string. The same claim in two typographic forms is two byte sequences —
 # `` `CLAUDE.md`'s ADMS line `` and CLAUDE.md's ADMS line differ — and a
@@ -72,15 +87,4 @@
 # written into an excluded path is invisible to this instrument, and no
 # match-direction fixture can show that. See
 # scripts/sweep-fixtures/README.md.
-
-# ---------------------------------------------------------------------
-# The ADMS round, 2026-08-07. Four phrasings of one claim, withdrawn in
-# three passes plus a deletion. Entered as SHORTEST DISTINCTIVE
-# SUBSTRING: the same claim in two typographic forms is two byte
-# sequences, and the full markup-bearing string silently misses a
-# reintroduction typed without the backticks.
-# ---------------------------------------------------------------------
-ADMS line needs no disambiguation	2026-08-07	[H → O] B8/B9 block response — the referent never existed; CLAUDE.md has no ADMS line in any revision
-ADMS line has to say which one is meant	2026-08-07	[H → O] B8/B9 block response — DIGEST_PEER's consequence clause, routing a reader to repair a sentence they will not find
-they are ONE document	2026-08-07	[H → O] amendment — cmp-identical bytes licenses "agree today", not identity
-one document by construction today	2026-08-07	[H → O] second amendment — a 307 is the origin declining to serve, not the absence of a document
+first multi-file	2026-08-07	the imports-prediction trigger, restated to the mechanism

@@ -436,7 +436,11 @@ def rule_declared_prefix(path, doc):
     KNOWN LIMITATION, same as the rest of this file: raw YAML does not
     resolve `imports:`, so a prefix declared in an imported schema reads
     as undeclared here. Recorded rather than worked around — the trigger
-    is the first multi-file `vocab/core/`, which is P6a.
+    is a term RESOLVED ACROSS a file boundary — an `is_a`/`mixins` naming
+    an imported class, or a `slots:` list naming an imported slot. Not
+    "more than one file", which was this note's earlier wording and is
+    already met without any degradation. See the module docstring; the
+    trigger is stated there once and nowhere else.
     """
     bad = []
     declared = set(doc.get("prefixes") or {})
