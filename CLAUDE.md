@@ -209,6 +209,33 @@ reader.
 `drift-lint.py` inspects a real authored file for the first time. The
 rule is unchanged; its illustration was the thing that expired.*
 
+**A claims sweep runs before any new part is authored.** H may not begin
+authoring a part until a sweep has run since the last part landed. This
+is a precondition, not a cadence — a rounds-based rule needs someone
+counting, which is the same failure it exists to fix.
+
+**Why it is a precondition.** The sweep had two triggers, both
+content-based: *when `vocab/` first has content*, and *when a claim's
+artifact moves*. Both fired. Neither prompted anything, because a trigger
+nobody checks is a note. The gate has an owner and a mechanism — H posts,
+O reviews, work blocks until it clears. The sweep had none, and for
+twenty-plus rounds it did not run.
+
+That is the same structure as an item that blocks nothing: P15 ran only
+once it was made an explicit precondition, and P4 still has not. **An
+instrument nobody is blocked by is an instrument nobody runs** — the same
+sentence as *every generator runs in `make lint`*, applied to a duty
+instead of a script.
+
+**And the timing is right on its own merits.** A part landing is when the
+register has most drifted: claims that were untestable become testable,
+and claims describing artifacts now describe different ones. Two
+outstanding examples at the time this was written — five claims became
+testable when `vocab/core/` got content and none was tested, and
+criterion 4 (*does a claim contradict the artifact it describes*) has
+never run as a sweep at all, only at gates, on whichever claims a gate
+happened to touch.
+
 **Mutate a copy, never the working tree.** This applies to every role.
 `cp` the file or the tree to a scratch path outside the repository,
 mutate there, measure, discard. Do not edit a tracked file and restore
