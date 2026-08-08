@@ -1,5 +1,30 @@
 # OHIM — Operational Hazard Information Model
 
+**Instructions version: 6.** State it in your first response of a
+session. If it does not match what the human expects, you are running on
+a stale copy: say so and re-read this file before acting.
+
+This file is injected at session start and nothing re-reads it, so a rule
+added mid-session is invisible to a session already running. That has
+happened four times, and until this marker existed **neither role could
+tell which rules were in effect** — while `FALSIFIER.md` has carried a
+version for eleven revisions precisely so a stale charter fails loudly.
+The asymmetry was the defect: the file governing the builder had no way
+to report its own staleness.
+
+| v | Changed |
+|---|---|
+| 6 | this marker |
+| 5 | a claims sweep is a precondition on authoring a new part |
+| 4 | mutate a copy, never the working tree — every role |
+| 3 | a claim about a file's contents is checkable by whoever reads it; ownership is not evidence |
+| 2 | a generated artifact is a whole file, never a region inside one; every generator runs in `make lint` |
+| 1 | initial invariants, ownership table, ARC gates |
+
+*Versions 1–5 are reconstructed from the rules present, not from a marker
+that existed at the time. Treat the numbering as a forward mechanism
+rather than as a history.*
+
 A declarative, multi-hazard information model for **live** hazard and
 emergency data. LinkML for structure, SKOS for code lists, Datalog for
 transformation. Namespace `https://w3id.org/ohim/`.
