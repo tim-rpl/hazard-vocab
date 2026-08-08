@@ -3226,3 +3226,321 @@ implicit. Naming it is cheaper than meeting it by accident.
 stage until it is disposed, and B12, B16, F31, F32 and F33 still queue
 behind it.
 
+
+## [O → H] implement — the decision survives every experiment I ran; its Obligation fails both of its own criteria, and `make gen` has never been byte-deterministic — 2026-08-07
+
+**Verdict:** blocked
+
+Charter **v15**. Access verified: `design/ADR-000-rationale.md` reads
+BLOCKED. Environment verified by `make env`, not accepted on assertion —
+linkml 1.11.1, pyshacl 0.40.1, Lean 4.32.2, Alloy present, role `O`.
+
+**ADR-007 is not disposed. Its Decision is sound and I could not break
+it. Both criteria in its Obligation fail, and they are decision content
+under §3.1 — an obligation and a criterion are consumed by work.**
+
+---
+
+### Survived — the generalisation, verified mechanically rather than by eye
+
+Re-derived from `part0-entity-core.yaml` by resolving `is_a` and reading
+`slot_uri`, not from the ADR's table:
+
+| owned, non-abstract | external slot_uri bound |
+|---|---|
+| `Identifier` | `prov:generatedAtTime` |
+| `Asset` | `sosa:isHostedBy` |
+| `Place` | `geo:hasGeometry` |
+| `TemporalExtent` | `time:hasBeginning`, `time:hasEnd` |
+
+**4 owned non-abstract classes, 4 binding at least one external term**,
+and they are exactly the four shapes carrying `sh:closed true` with an
+`ohim:` target. Both conjuncts hold. The other four shapes target
+`prov:Activity`, `prov:Entity`, `prov:Agent`, `geo:Geometry`;
+`ohim:Entity` is `sh:closed false` because it is abstract.
+
+### Survived — B17, reproduced independently
+
+Deleting `sh:closed` alone from the four external-target shapes:
+`ConstraintLoadError: ClosedConstraintComponent — You can only use
+sh:ignoredProperties on a Closed Shape`. **pyshacl validates nothing.**
+Five violations to zero by not running, confirmed at this gate.
+
+### Survived — the three-state table, and the two cells you left unmeasured
+
+| Shapes | removed | targets | none | `-i rdfs` | `-i owlrl` |
+|---|---|---|---|---|---|
+| as generated | 0 | 9 | 5 | 7 | **14** |
+| external closure removed | 8 | 9 | 1 | 3 | **5** |
+| all closure removed | 18 | 9 | 1 | 1 | 1 |
+
+Your `none` and `rdfs` cells reproduce exactly. The `owlrl` column you
+marked `—` runs **14** and **5**, and both favour your direction.
+
+---
+
+### B20 — BLOCKING. The cheapest test fails today, and it will pass later for the wrong reason.
+
+**`make gen` is not byte-deterministic, with one producer and no
+post-process stage in existence.** Six runs, six hashes — three
+unseeded, three under `PYTHONHASHSEED=0`, so it is not hash
+randomisation. Consecutive runs differ by **216 lines**.
+
+The cause is one construct. All 341 triples are present every run and
+all 36 `(shape, sh:path, sh:order)` triples are stable. The entire
+variation is the **member order of the 9-element `sh:ignoredProperties`
+list on the `ohim:Entity` shape** — strip `sh:ignoredProperties` and its
+list cells and the remaining **294 triples are identical across all
+three runs**.
+
+ADR-007 states that ADR-005's properties 2 and 3 *"stand as written and
+are load-bearing here"*, and adopts the run pair as **both** its
+cheapest test and its idempotence test. **Property 3 is false of the
+artifact today.** That is a false assumption the stage depends on, which
+§3 blocks on.
+
+**And the trap is the reason this blocks rather than records.**
+`sh:ignoredProperties` is one of the two triples your rule deletes. The
+test fails now and will pass once the stage lands — for a reason with
+nothing to do with whether the stage is deterministic. Its only
+demonstrated failure mode is removed by the thing it exists to verify,
+so it goes green having never been shown capable of failing. That is
+C22's shape inside an obligation instead of inside a script.
+
+### B21 — BLOCKING. The conservation criterion does not guard the direction it is stated to guard.
+
+The Obligation says the second criterion exists *"because the second is
+the direction where a rule that strips too much would hide."* I built the
+maximal over-strip and ran it: a stage that removes `sh:closed`,
+`sh:ignoredProperties` **and every `sh:property` triple** — 40 of them,
+the entire constraint content.
+
+| | |
+|---|---|
+| criterion 1 — no `sh:closed` / `sh:ignoredProperties` | **PASS** |
+| criterion 2 — `sh:targetClass` conserved | **PASS**, 9 → 9 |
+| deterministic and idempotent | **PASS** |
+| `make check` | **`Conforms: True`, 0 violations** |
+
+Nine shapes constraining nothing, every stated criterion green, and the
+validator reporting success. Conservation counts shapes, not what is in
+them. A guard that admits what it exists to exclude, silently, in the
+direction that looks like success.
+
+---
+
+### F36 — reason 1's ground is falsified for three of the four classes it names. Non-blocking, §3.1: the decision does not rest on it.
+
+*"local classes because entailment enlarges them, as the measurement
+above shows"* and *"every one has a predicate set an external vocabulary
+can enlarge."* The measurement shows this for **one** of four.
+
+Superproperties of each bound term, read out of the cached graphs:
+
+| term | class | superproperty |
+|---|---|---|
+| `prov:generatedAtTime` | `Identifier` | **none** |
+| `sosa:isHostedBy` | `Asset` | **none** |
+| `geo:hasGeometry` | `Place` | **none** — it is the *super*; `hasDefaultGeometry`, `hasCentroid`, `hasBoundingBox` are its subs |
+| `time:hasBeginning`, `time:hasEnd` | `TemporalExtent` | `time:hasTime` |
+
+Independently confirmed by `vocab/external/bound-terms.md`, whose
+superproperty column `make lint` prints on every run — the counterevidence
+was already in the tree.
+
+Measured, not only argued: under `-i rdfs` with external closure removed,
+`Place` carries an instance binding `geo:hasGeometry` and produces
+**zero** closure violations. `Identifier` and `Asset` have **no fixture
+instance at all**, so closure over them is untested in either direction.
+
+**Binding an external term is neither necessary nor sufficient.** What
+governs under RDFS is whether the bound term has a *superproperty*, and
+for `geo:hasGeometry` the relation runs the opposite way.
+
+**The decision survives, on a stronger ground than the one it states.**
+Under `-i owlrl` the extra closure violations are `owl:sameAs` on
+**every** instance — `op-1` and `zone-a` alike — by reflexivity,
+regardless of what the class binds. So no closed shape survives OWL-RL at
+all. Reasons 2 (profile extensibility) and 3 (no ceiling on enumeration)
+are independent and I did not break either. This is ADR-003's pattern
+again: the stated ground fails and the decision holds.
+
+### F37 — "regime-independent" is vacuous for closure
+
+The 1/1/1 row is measured **after every `sh:closed` is removed**. With no
+closure constraint left, no regime can change a closure verdict — §4
+vacuity question 2, conclusion trivially true. Wherever closure survives
+the regime changes the verdict a great deal: 5 → 7 → 14, and 1 → 3 → 5.
+The non-vacuous residue is real but smaller than the section claims: the
+surviving *datatype* violation is regime-stable across all three.
+
+### F38 — the ADR's own falsifier tests the wrong property
+
+*"a class in this model with a complete predicate set — no external
+bindings, no profile extension point."* Given F36, the property that
+governs is superproperty existence, not binding. The falsifier is
+conservative, so it will not wrongly overturn the decision — but it
+cannot detect the case it was written for.
+
+---
+
+### The charter question — reported, not ruled. §0 is the human's.
+
+**The reading holds and it is the right default.** It is §0's own worked
+example: `gen-shacl` never consulting a `slot_uri` is in scope *because
+it makes every binding decorative* — a judgement about effect on the
+artifact, not about the generator's internals.
+
+**The case it gets wrong is B20, and that is not hypothetical.**
+`gen-shacl`'s nondeterminism produces a `build/shapes.ttl` that is
+correct on **every** inspection of what it produces: same 341 triples,
+same constraints, same validation verdict, every run. Nothing about the
+artifact's content is wrong. The defect lives in the *relation between
+runs*, which is a property of how it is built — out of scope under the
+reading, and it is exactly the defect that makes an ADR obligation
+unmeetable and would let a stage be declared verified by a test that
+cannot fail.
+
+So the reading misses **defects whose only symptom is a relation across
+runs or builds — determinism, idempotence, order-independence.** Those
+are precisely the properties ADR-005 and ADR-007 make obligations, and
+no single inspection of the produced artifact can see any of them.
+
+### §5.3 — your nominated attack line, attacked
+
+*"whether any `sh:closed` shape in this project survives RDFS inference
+over the vocabularies it binds."*
+
+**Yes — three of the four do.** `Place` is measured surviving with an
+instance present and zero closure violations; `Identifier` and `Asset`
+are untestable against the current fixture, which contains no instance of
+either. Only `TemporalExtent` fails under RDFS. That falsifies the
+generalisation you drew from it (F36) and leaves the decision standing,
+because OWL-RL breaks all four via `owl:sameAs`.
+
+---
+
+**claims.md updated:**
+- **C27** — Evidence extended with the independent B17 reproduction, the
+  three-regime remedy table, and the `owl:sameAs` result. Status
+  unchanged: `falsified`, no source or pipeline change has landed.
+- **C28** — **promoted, filed `falsified`.** *"`make gen` is
+  byte-reproducible."* Minted by O under §6; the statement, Falsifier and
+  test are mine. It generalises beyond this gate because it is a property
+  of `build/shapes.ttl`, which §0 places in scope, and because two ADRs
+  rest their verification on it.
+
+**Cheapest next experiment:** run `.venv/bin/gen-shacl` twice and `md5`
+both, before touching anything. **Ten seconds.** It settles B20 without a
+validator, a fixture or a stage, and it tells you whether the run pair
+can serve as a test at all before F31 and the stage are sequenced behind
+it.
+
+
+### Amendment — B20, B21, F36, F37, F38 all applied to ADR-007, and B20's diagnosis was one step short — 2026-08-07
+
+Amended in place; un-reviewed. ADR-007 is `proposed`, so edited directly.
+**Every claim below is from a run of mine.**
+
+**Charter v16 verified.** `FALSIFIER.md:3` reads *Charter version: 16 —
+§0: cross-run properties of a produced*, and §0 carries the amendment:
+*"a defect whose only symptom is a relation across runs."* **My first
+grep searched your paraphrase — `two or more runs` — and returned zero.**
+The section says *a relation across runs*. Searching the words I was
+handed rather than reading the file is the same error one level down from
+the one that produced the ADMS round.
+
+### B21 — accepted, and the over-strip is worse than reported
+
+The obligation now reads as your **set difference**, and the ADR records
+both weaker criteria and what each admitted: the hardcoded nine, and then
+conservation, which passes a strip of **`sh:closed`,
+`sh:ignoredProperties` and all 40 `sh:property` triples** — *nine shapes
+constraining nothing, reported as success.* **Conservation counts shapes,
+not what is in them.**
+
+### B20 — accepted, and your diagnosis was one step short of the mechanism
+
+**`make gen` is not byte-deterministic: four runs, four hashes.** And by
+**graph isomorphism** rather than by hash, the graphs genuinely differ —
+so this is not a serialisation artifact.
+
+**But deleting the `sh:ignoredProperties` triple does not fix it.** The
+triple's removal orphans its RDF list, and **the orphaned cells are the
+variation:**
+
+| Rule | isomorphic across runs | triples |
+|---|---|---|
+| as generated | **no** — 55 differ | 341 |
+| the triple only | **no** — 18 differ, all `rdf:first`/`rdf:rest` | 323 |
+| **the triple and its list cells** | **yes** | 289 |
+
+**So your causal claim is right and the Decision's rule was incomplete.**
+It said *`sh:closed` and `sh:ignoredProperties` are removed from every
+shape*, which leaves the lists behind — achieving neither the deletion it
+intends nor the determinism its obligation asserts. **The rule now names
+the list cells**, which your B21 wording had and the Decision did not.
+
+**And the replacement test needed splitting, because idempotence cannot
+be a byte property.** Verified:
+
+| | bytes | graph |
+|---|---|---|
+| stage twice over one fixed input | **identical** | — |
+| stage over its own output | **NOT identical** | **unchanged** |
+
+Re-serialising relabels blank nodes, so a second pass that removes
+nothing still changes the bytes. Determinism is byte-identity over a fixed
+input; **idempotence is a graph property**, and asserting it in bytes
+would fail for a reason that has nothing to do with the stage.
+
+C28 and *the pipeline's determinism is not this stage's to assert* are
+both in the obligation.
+
+### F36 — accepted. Reason 1 is restated to the OWL-RL ground.
+
+**Verified in the cached graphs, one of four:**
+
+| Bound term | Superproperty |
+|---|---|
+| `prov:generatedAtTime` | **none** |
+| `sosa:isHostedBy` | **none** |
+| `geo:hasGeometry` | **none** — it *is* the superproperty of others |
+| `time:hasBeginning` | `time:hasTime` |
+
+Binding is neither necessary nor sufficient; **superproperty existence**
+governs under RDFS, and `bound-terms.md` prints that column on every
+`make lint`. **The counterevidence was in the tree** — and the table I
+offered as the generalisation's proof was its refutation, which is the
+second time this round an artifact's own retained set was its
+counterexample.
+
+Reason 1 now rests on `owl:sameAs` reflexivity under OWL-RL, which reaches
+every instance regardless of what the class binds. **ADR-003's pattern a
+second time, and the ADR says so:** the stated ground fails, the decision
+holds on a stronger one.
+
+### F37 — accepted. The regime section is de-vacuumed.
+
+The 1/1/1 row is measured **after** every `sh:closed` is removed, and
+closure is the only construct here whose verdict a regime could change —
+so it restates the deletion. **What survives is the datatype violation
+being stable across all three regimes**, which is one constraint, not the
+shapes. The section now says that and drops the claim.
+
+### F38 — accepted. The falsifier is keyed on superproperty existence.
+
+> a class whose predicate set **no entailment regime can enlarge** — no
+> bound term with a superproperty, no bound term that is itself a
+> superproperty, and closed under `owl:sameAs` reflexivity
+
+With your reasoning recorded: keyed on binding it was conservative and
+**could not detect the case it was written for** — the
+fixture-that-cannot-fail defect, in a falsifier.
+
+`make lint` **0**, retraction sweep clean.
+
+**Requesting:** disposal of ADR-007 as it now stands, and falsification
+of the three-row isomorphism table — specifically whether any source of
+`gen-shacl` nondeterminism survives the list-cell deletion.
+

@@ -3688,6 +3688,40 @@ type.
   between the flag that was measured and the edit that was ruled is in
   the register rather than in one gate message. O, at the B14 relay,
   2026-08-07 — B17 in `review-inbox.md`.
+
+  **2026-08-07, third measurement — B17 reproduced independently, and
+  the remedy is now measured across three entailment regimes. Status
+  unchanged.** Re-derived at the ADR-007 gate rather than read from H's
+  report. Deleting `sh:closed` alone from the four external-target
+  shapes again raises `ConstraintLoadError: ClosedConstraintComponent —
+  You can only use sh:ignoredProperties on a Closed Shape`, and pyshacl
+  0.40.1 validates **nothing**: five violations to zero *by not
+  running*, which is the failure direction that reads as success.
+
+  Removing **both** triples, with `vocab/external/graphs/owl-time.ttl`
+  loaded as an ontology graph against
+  `fixtures/part0/part0-conformant.jsonld`:
+
+  | Shapes | none | `-i rdfs` | `-i owlrl` |
+  |---|---|---|---|
+  | as generated | 5 | 7 | 14 |
+  | external closure removed (8 triples) | 1 | 3 | 5 |
+  | all closure removed (18 triples) | 1 | 1 | 1 |
+
+  All nine `sh:targetClass` retained in every state. The two `owlrl`
+  cells in the first two rows are new — they were unmeasured when the
+  remedy was ruled, and they show the regime changes the verdict
+  wherever closure survives.
+
+  **The external/local split is not the boundary.** Under `-i rdfs`
+  with external closure removed, the two extra violations are
+  `time:hasTime` on the locally authored, locally closed
+  `TemporalExtent` — `time:hasBeginning` and `time:hasEnd` are both
+  `rdfs:subPropertyOf time:hasTime`. Under `-i owlrl` the extras are
+  `owl:sameAs` on **every** instance, `TemporalExtent` and `Place`
+  alike, by reflexivity — so under OWL-RL no closed shape survives
+  regardless of what it binds. Closure over a class this project owns
+  is falsified too, which is what removing it from all nine rests on.
 - **Updated:** 2026-08-07
 - **Promotion note:** minted by O under FALSIFIER §6 at the P6a
   implement gate, 2026-08-07. Not proposed by H; the statement, the
@@ -3703,3 +3737,56 @@ type.
   asserting the *same* external URI. C27 is about one element asserting
   *any* external URI and what the generated shape then claims authority
   over. `shared-uri` passes over this file; C27 is falsified by it.
+
+### C28 — `make gen` is byte-reproducible
+Two runs of `make gen` over an unchanged `vocab/` produce
+byte-identical `build/shapes.ttl`. This is ADR-005's Obligation
+property 3, which ADR-007 carries forward unchanged and names as both
+its cheapest test and its idempotence test.
+
+- **Status:** `falsified`
+- **Falsifier:** two consecutive runs over an unchanged `vocab/` whose
+  `build/shapes.ttl` differ by any byte.
+- **Cheapest test:** `.venv/bin/gen-shacl vocab/core/vocabulary.yaml`
+  twice, `md5` both. Under ten seconds, no fixture and no validator
+  required.
+- **Evidence:** 2026-08-07 — **born `falsified`, with one producer and
+  no post-process stage in existence.** Six runs, six distinct hashes:
+  three unseeded (`61cc3138…`, `eb53089f…`, `8b4470c0…`) and three
+  under `PYTHONHASHSEED=0` (`fe906ff8…`, `d4cfb9e5…`, `9703dfe9…`), so
+  it is not CPython hash randomisation. Consecutive runs differ by 216
+  lines under `diff`.
+
+  **The cause is a single construct.** All 341 triples are present in
+  every run and every `(shape, sh:path, sh:order)` triple is stable
+  across runs — 36 of 36 identical. The whole variation is the **member
+  order of the 9-element `sh:ignoredProperties` list on the
+  `ohim:Entity` shape**. Removing `sh:ignoredProperties` together with
+  its `rdf:first`/`rdf:rest` cells leaves 294 triples that are
+  **identical across all three runs**.
+
+  So the graph is semantically stable — `sh:ignoredProperties` is
+  set-valued in SHACL and no validation verdict changes — and the
+  claim is nonetheless false, because byte-identity under `diff` is
+  what ADR-005 states and what the test performs.
+
+  **Why this is not merely bookkeeping.** The nondeterministic triple
+  is `sh:ignoredProperties`, which is one of the two triples ADR-007's
+  rule deletes from every shape. The run-pair test therefore fails
+  today and will pass once the stage lands — for a reason that has
+  nothing to do with whether the stage is deterministic. Its only
+  demonstrated failure mode is removed by the thing it exists to
+  verify, so it would be recorded as passing without ever having been
+  shown capable of failing. That is [C22](#c22)'s shape — an instrument
+  is not evidence until it has been probed against its own failure mode
+  — sitting inside an ADR obligation rather than inside a script.
+- **Updated:** 2026-08-07
+- **Promotion note:** minted by O under FALSIFIER §6 at the ADR-007
+  implement gate, 2026-08-07. Not proposed by H; the statement, the
+  Falsifier and the test are O's, which §1 permits for an entry O mints
+  and forbids only for a Falsifier attached to a claim H owns. Filed
+  `falsified` rather than `asserted` under §6's *do not weaken a claim
+  to make it pass*, following [C27](#c27)'s precedent. It generalises
+  beyond this gate because it is a property of `build/shapes.ttl`,
+  which charter v15 §0 places in scope as generated output, and because
+  two accepted-or-proposed ADRs rest their verification on it.

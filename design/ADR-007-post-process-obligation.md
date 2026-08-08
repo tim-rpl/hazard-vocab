@@ -104,14 +104,49 @@ Those are exactly the four the authorship rule would have kept closed.
 
 **And the rule this licenses, unconditional:**
 
-> **`sh:closed` and `sh:ignoredProperties` are removed from every shape.**
+> **`sh:closed` and `sh:ignoredProperties` are removed from every shape,
+> together with the RDF list cells reachable from each removed
+> `sh:ignoredProperties`.**
+
+**The list cells are not a detail.** Removing the `sh:ignoredProperties`
+triple alone orphans its list, and the orphaned cells are the entire
+source of `gen-shacl`'s nondeterminism. Measured over three runs, by
+graph isomorphism rather than by hash:
+
+| Rule | graphs isomorphic across runs | triples |
+|---|---|---|
+| as generated | **no** — 55 differ | 341 |
+| the triple only | **no** — 18 differ, all `rdf:first`/`rdf:rest` | 323 |
+| **the triple and its list cells** | **yes** | 289 |
+
+So a rule naming only the triple achieves neither the deletion it
+intends nor the determinism its obligation asserts.
 
 ## Why no shape is closed, in order of weight
 
 **1. No class in this model has a complete predicate set.** External
-classes because we do not own them; local classes because entailment
-enlarges them, as the measurement above shows. There is no third
-category in the fragment.
+classes because we do not own them. Local classes because **`owl:sameAs`
+reflexivity under OWL-RL adds a predicate to every instance**, whatever
+the class binds — so no closed shape survives OWL-RL at all, and the
+conclusion needs no property of the class.
+
+**The ground this replaces was falsified, and it was falsified by
+evidence already printed on every `make lint`.** An earlier draft argued
+that every local class *binds an external term*, so every predicate set
+is enlargeable. Binding is neither necessary nor sufficient. Measured, in
+the graphs this project caches:
+
+| Bound term | Superproperty |
+|---|---|
+| `prov:generatedAtTime` | **none** |
+| `sosa:isHostedBy` | **none** |
+| `geo:hasGeometry` | **none** — it *is* the superproperty of others |
+| `time:hasBeginning` | `time:hasTime` |
+
+**One of four.** Under RDFS what governs is **superproperty existence**,
+not binding, and `bound-terms.md` prints that column already. This is
+ADR-003's pattern a second time: the stated ground fails and the decision
+holds on a stronger one.
 
 **2. Closure contradicts the profile mechanism.** A profile adding a slot
 is what T2 exists for. Under closure, a profile-added predicate is a
@@ -189,14 +224,21 @@ worded around.
 
 ## The entailment-regime question, answered
 
-**OHIM's shapes are regime-independent for closure.** The measurement
-above gives one violation under no inference, RDFS and OWL-RL alike, so
-no regime declaration is needed for this constraint and no ADR is needed
-to make one.
+**The 1/1/1 row is vacuous as evidence of regime-independence, and
+saying otherwise was a tautology.** It is measured *after* every
+`sh:closed` is removed — and closure is the only construct in these
+shapes whose verdict a regime could change. So no regime can alter a
+closure verdict once closure is gone; the row restates the deletion
+rather than testing anything about regimes.
 
-That does not settle every entailment question — a future constraint
-might depend on a regime — but it removes the only place a regime
-currently changes the verdict.
+**What survives is smaller and is not vacuous:** the one remaining
+violation, `geo:asWKT`'s datatype, is **stable across all three
+regimes** — no inference, RDFS, OWL-RL. That is a real measurement about
+one constraint, and it is the whole of the claim.
+
+**So no regime declaration is needed for closure**, because closure is
+gone. Whether a future constraint needs one is open, and this decision
+does not answer it.
 
 ## What this forecloses
 
@@ -213,11 +255,38 @@ unchanged, and the reason properties 2 and 3 are not superseded.
 
 ## Obligation
 
-- **The cheapest test is ADR-005's and is not weakened:** `make gen`
-  twice and `diff`; then with the post-step order reversed and `diff`
-  again. Both empty. **That run pair is the idempotence test as well as
-  the determinism test** — it is `gen-shacl`-then-stage twice, which is
-  exactly what the property now asserts.
+- **The test isolates the stage, and its two halves are measured
+  differently for a reason.**
+
+  > **Determinism.** Run the stage twice over the **same**
+  > `build/shapes.ttl` and `diff` — empty. Then with any other post-step's
+  > order reversed and `diff` — empty.
+  >
+  > **Idempotence.** Run the stage over its own output: the **graph** is
+  > unchanged. Not the bytes.
+
+  **Determinism is a byte property over a fixed input** — verified,
+  byte-identical over two runs on one input, because the stage is a pure
+  deletion.
+
+  **Idempotence cannot be a byte property.** Re-serialising relabels blank
+  nodes, so a second pass that removes nothing still changes the bytes.
+  Measured: byte-identical **False**, graph unchanged **True**. Asserting
+  it in bytes would fail for a reason that has nothing to do with the
+  stage.
+
+  **A pipeline-level byte test was tried and cannot serve.** `make gen` is
+  not byte-deterministic today — four runs, four hashes, and by
+  isomorphism the graphs genuinely differ. Its only source of variation is
+  the `sh:ignoredProperties` list, **which this rule deletes**, so a
+  pipeline test would fail now, pass after the stage lands, and have its
+  single demonstrated failure mode removed by the thing it exists to
+  verify. C22's shape inside an obligation.
+
+  **And the pipeline's determinism is not this stage's to assert.** It is
+  `gen-shacl`'s, it is filed at C28 as `falsified`, and a stage obligation
+  ranging over it holds this project responsible for a dependency's
+  behaviour.
 
 - **`sh:path` counts must parse, not grep.** If the post-process
   reserialises through `rdflib`, predicate order and prefix form change,
@@ -231,23 +300,31 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   rather than discovered — this ADR creates a dependency on a fix that has
   not shipped, and naming it is cheaper than meeting it by accident.
 
-- **The rule is asserted against the generated file, not the generator.**
-  Invariant 4, and both halves, because the second is the direction where
-  a rule that strips too much would hide:
+- **The rule is asserted against the generated file, not the generator**
+  (invariant 4), as a **set difference**:
 
-  1. after the stage runs, **no shape carries `sh:closed` or
-     `sh:ignoredProperties`**;
-  2. **the count of `sh:targetClass` after the stage equals the count
-     before it.**
+  > The graph after the stage differs from the graph before it **only** by
+  > triples whose predicate is `sh:closed` or `sh:ignoredProperties`,
+  > together with the RDF list cells reachable from the latter. **Any
+  > other triple present before and absent after is a failure.**
 
-  **The second is a conservation property and not a number, deliberately.**
-  An earlier draft asserted *all nine `sh:targetClass` remain*. Nine is
-  the class count on the day it was written: P6b adds `candidateMatch`,
-  Part 1 adds classes, and the assertion goes false while the property it
-  protects still holds — the hardcoded-figure defect this project has
-  recorded four times, here inside an obligation that outlives the gate
-  that wrote it. Conservation guards the same direction and cannot go
-  stale.
+  **Two weaker criteria were tried and both admitted a broken build.**
+
+  The first asserted *all nine `sh:targetClass` remain*. Nine was the
+  class count that day; P6b and Part 1 make it false while the property it
+  protects still holds — the hardcoded figure, and the first instance
+  inside an obligation that outlives its gate.
+
+  The second replaced it with **conservation** of that count, and it is
+  worse. A maximal over-strip — `sh:closed`, `sh:ignoredProperties` **and
+  all 40 `sh:property` triples** — passes it: 9 targets before, 9 after,
+  deterministic, `Conforms: True`, **zero violations. Nine shapes
+  constraining nothing, reported as success.** Conservation counts shapes,
+  not what is in them; a stale number was replaced by a criterion guarding
+  the wrong noun.
+
+  The difference assertion catches that over-strip on its first run and
+  carries no number at all.
 
 ## Consequences
 
@@ -259,8 +336,21 @@ scope as generated output. **That boundary is untested and this is the
 first artifact to sit on it.** A question for the charter, not for this
 ADR.
 
-**The falsifier.** A pipeline run whose output differs between two
-invocations; one whose effect depends on step order; a removal the
-generator's stated rule does not produce; or **a class in this model with
-a complete predicate set** — no external bindings, no profile extension
-point — for which closure would be sound and is now forbidden.
+**The falsifier.** Any of:
+
+- **the stage** producing different output from two runs over one input,
+  or output depending on step order;
+- a removal the generator's stated rule does not produce, or any triple
+  removed that the difference assertion does not license;
+- **a class in this model whose predicate set no entailment regime can
+  enlarge** — no bound term with a superproperty, no bound term that is
+  itself a superproperty, and closed under `owl:sameAs` reflexivity — for
+  which closure would be sound and is now forbidden.
+
+**The third is stated over superproperty existence, not over binding.** An
+earlier version asked whether a class *binds an external term*, which is
+the ground F36 falsified: three of four bound terms have no superproperty.
+A falsifier keyed on binding is conservative — it will not wrongly
+overturn the decision — but **it cannot detect the case it was written
+for**, which is this project's fixture-that-cannot-fail defect in a
+falsifier.
