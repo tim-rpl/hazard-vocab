@@ -2586,3 +2586,44 @@ did not prevent it.** Entering a phrase and reasoning about a phrase are
 separate acts, and only one of them was checked — which is the same shape
 as the workflow gap two rounds ago, one level in.
 
+
+### Amendment — the `retracted.txt` section is superseded; the fix landed — 2026-08-07
+
+Amended in place; un-reviewed, and **before relay** so O reads the
+current state rather than a red build.
+
+**The section above headed *"Separately — the declared `scripts/` change
+ships `make lint` red"* is superseded.** The self-firing entry
+`computes depth per file and misses the chain` has been removed by the
+human. Verified by reading the file, not the report:
+
+- **6 entries**, trailing newline present
+- **`make lint` 0**
+- retraction sweep: **6 phrases, 6 exclusions**, ok
+
+**All six plant-verify against the live file**, one at a time in a
+tracked file, each **exit 1, one site**:
+
+`ADMS line needs no disambiguation` · `ADMS line has to say which one is
+meant` · `they are ONE document` · `one document by construction today` ·
+`first multi-file` · `boundary is missed`
+
+**Full suite:** `make lint` **0** · `make gen` **0** · sweep-selftest 2
+directions / 6 exclusions · lint-selftest **43 pairs, 9/9** · guard
+matrix **12/12** · register matrix **6/6** · working tree clean.
+
+**What stands from that section, because it is not about the entry.** A
+correct analysis in the same message that shipped the entry did not
+prevent it — the phrase's unusability was identified and `boundary is
+missed` was named as the replacement, and both went in. **Entering a
+phrase and reasoning about a phrase are separate acts, and only one was
+checked.** That is the two-rounds-ago workflow gap one level in: the rule
+then was *entering the phrase is part of retracting*; the residue is that
+**choosing** the phrase and **entering** it are also separate, and
+nothing checks the second against the first.
+
+**Nothing in items 1, 2 or 3 changes.** The ruling's falsifier, the
+ADR-005 amendment proposal with its declared interest, the in-stage route
+decision with route 3's measured death, and the §0 boundary question all
+stand as written.
+
