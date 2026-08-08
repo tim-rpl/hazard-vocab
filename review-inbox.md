@@ -2305,3 +2305,72 @@ validating than against a schema that rejects PROV-O.
 `sh:nodeKind sh:Literal` from OWL-Time's `owl:ObjectProperty` without
 loading the external graph.
 
+
+### Amendment — B14's ruling is right and LinkML cannot express its scope — 2026-08-07
+
+Amended in place; un-reviewed. **No source change made.**
+
+**Your falsifier passes, and I ran it.** `gen-shacl --non-closed` over
+the same schema, same fixture:
+
+| | closed (shipped) | `--non-closed` |
+|---|---|---|
+| `sh:targetClass` retained | 9 | **9** |
+| `sh:targetClass prov:Entity` | 1 | **1** |
+| PROV-O `ClosedConstraintComponent` violations | **4** | **0** |
+| remaining violations | 5 | **1** — B12's datatype only |
+
+**So the diagnosis is confirmed by measurement**: `class_uri` was the
+right construct and `sh:closed` was the wrong claim. The binding survives
+— a consumer still reads that `ohim:Statement` is a `prov:Entity` — and
+the assertion of authority over a borrowed namespace is what goes.
+
+### But the scope you ruled cannot be stated in LinkML
+
+Your *"one thing to watch"* is the whole of it. From
+`linkml/generators/shaclgen.py`:
+
+```python
+if self.closed:
+    if c.mixin or c.abstract:
+        shape_pv(SH.closed, Literal(False))
+    else:
+        shape_pv(SH.closed, Literal(True))
+else:
+    shape_pv(SH.closed, Literal(False))
+```
+
+**Closure is `--closed` AND not (`mixin` or `abstract`). There is no
+per-class control.** `--non-closed` is global, and the only per-class
+lever is a class's **modelling status**.
+
+So *"`sh:closed` comes off the four shapes that bind an external class"*
+has no expression:
+
+| Route | Cost |
+|---|---|
+| **global `--non-closed`** | verified to work; **opens all nine**, including the five local classes that arguably should be closed |
+| mark the four `abstract` or `mixin` | a **false modelling claim** to obtain a publication effect — `Statement`, `Agent`, `Activity` and `Geometry` all have instances |
+| split the fragment into two schemas, generate each with a different flag | structural, and it is the first thing that would resolve a term **across a file boundary** — the `imports:` prediction's actual trigger |
+
+**This is invariant 4 again, and it is the sharpest instance yet.** The
+constraint you ruled for is *SHACL-expressible* — `sh:closed` is per
+shape, and hand-written SHACL would carry it on five shapes and not on
+four. **It is not LinkML-generable per class.** Invariant 4 says
+expressibility is necessary and not sufficient and that the test is what
+appears in `build/shapes.ttl`; here the test passes and the *source
+language* is what cannot say it.
+
+`gen` is invoked from the `Makefile`, which is yours, so the global route
+is a change I cannot make. **I am not choosing between the three.**
+
+**Requesting:** which route, and whether the third is worth its
+structural cost — it would close B14 at the right scope and fire a
+prediction that has been on record since before P6a, which is either two
+birds or two risks in one change.
+
+**Standing, unchanged:** B12 remains the only violation under either
+flag, so its datatype fix is independent of this ruling and I can take it
+as soon as B14's route is chosen. B13 stays unreachable by fixture with
+P10 named.
+
