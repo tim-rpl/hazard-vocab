@@ -1787,3 +1787,84 @@ files in `vocab/core/`, all eight rules report `3 file(s)` and pass.
 nothing has yet been resolved across a boundary. The first cross-file
 `is_a` or `slots:` reference is the test.
 
+
+### Amendment — the sweep's first live retraction, and what appending taught it — 2026-08-07
+
+Amended in place; this gate is un-reviewed. **All five entries
+re-verified; ready to relay.**
+
+**Tooling declared — two changes to `scripts/`, both retraction
+bookkeeping inside the existing assertion set. No new instrument; the
+freeze holds.** I did not make either and verified both.
+
+**`drift-lint.py`'s partial restatement is closed.** Both sites now
+state the trigger once: the module docstring carries the mechanism, and
+`rule_declared_prefix` refers to it rather than restating it. Verified by
+grep — the retracted wording survives only inside the two retractions
+that name it.
+
+**`retracted.txt` carries five entries and every one plant-verifies:**
+
+| Phrase | Planted in a tracked file |
+|---|---|
+| `ADMS line needs no disambiguation` | **exit 1**, 1 site |
+| `ADMS line has to say which one is meant` | **exit 1**, 1 site |
+| `they are ONE document` | **exit 1**, 1 site |
+| `one document by construction today` | **exit 1**, 1 site |
+| `first multi-file` | **exit 1**, 1 site |
+
+**This is the sweep's first use on a live retraction, and it would have
+caught the defect had the phrase been entered when the retraction was
+made.** The instrument existed one round earlier; what was missing was
+the workflow step. **A retraction made without an entry is checked once,
+at the moment it is made** — which is exactly how the second site went
+unfound.
+
+### Three properties of an entry, and the third was learned here
+
+**A retraction quotes what it withdraws, so the obvious phrase is the
+wrong entry.** Measured on this case: `more than one file` occurs
+**twice**, in both retractions, so entering it would fire on the
+withdrawal and read as a live reintroduction. `first multi-file` occurs
+**zero** times outside the claim and is the entry.
+
+**And the boundary, which is what makes the two ADMS-line entries valid
+rather than defective.** Both appear verbatim in the message that
+withdrew them — because `gate-messages.md` **requires** a withdrawal to
+index its sites by quoted opening phrase. They pass only because
+`review-inbox.md` is excluded. So the entry-form rule and exclusion 1
+interact: *present in the retracted claim, absent from the retraction of
+it — **unless the retraction lives in an excluded path**.*
+
+### Two defects the appending produced, both now asserted
+
+**A duplicate entry was silently accepted.** The block was appended to a
+file that already carried it; five phrases became nine with **no
+coverage added**. The workflow is `>>` and a whole-file replacement
+re-appends what is already there. Verified: the check names the line —
+`retracted.txt:104 repeats a phrase already entered above`.
+
+**And deduplication left an orphaned comment block**, making the file's
+last line a comment — the exact shape S1 exists for. Removed, so the file
+now ends with an **entry**, which means a future newline loss merges onto
+an entry and trips the four-tab check as well as the newline assertion.
+**Two assertions where there was one.**
+
+### The trailing newline, stated as what it is
+
+**Third loss, and S3 caught all three.** The transfer keeps stripping it
+and the guard keeps reporting it by name, at `make lint` exit 2, before
+any entry could be swallowed. **That is the assertion earning its place,
+not a recurring failure** — the failure it prevents is the silent one,
+and it has never occurred.
+
+### Verification
+
+`make lint` **0** · `make gen` **0**, 9 `sh:NodeShape` · retraction sweep
+**5 phrases, 6 exclusions** · sweep-selftest 2 directions · lint-selftest
+**43 pairs, 9/9** · guard matrix **12/12** · register matrix **6/6**.
+
+**Nothing in the P6a gate above changes.** The nine classes, the twenty
+slots, the `declared-prefix` catch on `sosa:`, and the six-convention
+report stand as written.
+
