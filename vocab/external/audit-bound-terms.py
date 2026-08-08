@@ -35,7 +35,68 @@ except ImportError:
 
 HERE = pathlib.Path(__file__).parent
 CACHE = HERE / "graphs"
+CORE = HERE.parent / "core"
 SURFACE = HERE.parent.parent / "design" / "surface.yaml"
+
+
+def authored_bindings():
+    """Every external CURIE the AUTHORED vocabulary binds, per cache key.
+
+    F41: this audit's population was a hardcoded `LOOKUP` of six
+    namespaces, and `bound-terms.md` therefore had **zero** rows mentioning
+    `time` — while `vocab/core/part0-entity-core.yaml` carries seven
+    `slot_uri` bindings of which **two are `time:`**. Those two are the
+    only ones in the fragment with a superproperty, which is the property
+    ADR-007's falsifier now turns on. **A falsifier's standing instrument
+    was blind to the only case that would fire it.**
+
+    Reading the plan rather than the artifact was sound while nothing was
+    authored. It stopped being sound at P6a.
+
+    And the constant naming the plan was WORSE than a stale population:
+    `SURFACE` was defined here and **used nowhere**, so the file read as
+    though its terms were derived from `design/surface.yaml` when they were
+    typed in by hand. A dead constant implying a derivation is harder to
+    catch than a wrong one, because nothing it produces is ever wrong.
+    """
+    import re
+    # MANY keys share one namespace — `sosa` and `ssn-ext-sosa` both map to
+    # `http://www.w3.org/ns/sosa/` — so a plain reverse dict silently keeps
+    # whichever came last, and `isHostedBy` was attributed to the wrong
+    # cached graph. Collect every candidate and let `load()` decide by
+    # whether the term is actually declared there.
+    ns_to_keys = {}
+    for k, v in NS.items():
+        ns_to_keys.setdefault(v, []).append(k)
+    found = {}
+    for f in sorted(CORE.glob("*.yaml")):
+        text = f.read_text()
+        prefixes = dict(re.findall(r"^  ([A-Za-z][\w-]*): (https?://\S+)$",
+                                   text, re.M))
+        for field in ("slot_uri", "class_uri", "meaning"):
+            for curie in re.findall(r"^\s*%s:\s*([A-Za-z][\w-]*):(\S+)\s*$"
+                                    % field, text, re.M):
+                pre, local = curie
+                base = prefixes.get(pre)
+                if not base:
+                    continue
+                cands = ns_to_keys.get(base, [])
+                # A term is attributed to the ONE candidate graph that
+                # declares it. Adding it to every candidate produced a
+                # false ABSENT: `isHostedBy` is minted in SOSA's namespace
+                # and `ssn-ext`'s graph does not declare it, so the
+                # duplicate row reported a term missing that is present.
+                pick = None
+                for k in cands:
+                    g = load(k)
+                    if g is not None and list(
+                            g.objects(URIRef(base + local), RDF.type)):
+                        pick = k
+                        break
+                found.setdefault(pick or (cands[0] if cands else None),
+                                 set()).add(local)
+    found.pop(None, None)
+    return {k: sorted(v) for k, v in found.items()}
 
 
 def cache_state():
@@ -76,6 +137,20 @@ NS = {
     "qudt-schema": "http://qudt.org/schema/qudt/",
     # same graph as `ssn-ext`, but the terms are minted in SOSA's namespace
     "ssn-ext-sosa": "http://www.w3.org/ns/sosa/",
+    # F41's own repair was blind to the case F41 is about: this map had no
+    # OWL-Time entry, so the two `time:` bindings still resolved to no
+    # cache key and were still dropped. Caught on the repair's first run.
+    "owl-time": "http://www.w3.org/2006/time#",
+}
+
+# Cache key -> the CURIE prefix its namespace is known by. Separate from
+# the key because a key is a filename and a prefix is an identity, and
+# deriving one from the other printed `owl:hasTime` for a term in the
+# OWL-Time namespace.
+PREFIX = {
+    "sosa": "sosa", "ssn-ext": "sosa", "ssn-ext-sosa": "sosa",
+    "prov-o": "prov", "org": "org", "geosparql": "geo",
+    "qudt-schema": "qudt", "owl-time": "time",
 }
 
 # Which cached graph to look a bound local name up in. Derived from
@@ -141,7 +216,11 @@ def short(u, g=None):
     s = str(u)
     for k, v in NS.items():
         if s.startswith(v):
-            return "%s:%s" % (k.split("-")[0], s[len(v):])
+            # The prefix is looked up, NOT derived from the cache key.
+            # `k.split("-")[0]` turned `owl-time` into `owl:`, printing
+            # `owl:hasTime` — a CURIE that expands to a term nobody
+            # declares. A key name is a filename; a prefix is an identity.
+            return "%s:%s" % (PREFIX.get(k, k), s[len(v):])
     for pre, v in (("rdfs", str(RDFS)), ("owl", str(OWL)),
                    ("xsd", "http://www.w3.org/2001/XMLSchema#"),
                    ("time", "http://www.w3.org/2006/time#"),
@@ -199,8 +278,34 @@ def main():
             print("        %s" % w, file=sys.stderr)
         return 1
 
+    # F41: the population is the AUTHORED vocabulary, with `LOOKUP`
+    # retained as a declared cross-check rather than as the source. A term
+    # in `LOOKUP` and not in `vocab/core/` is a binding the plan expects
+    # and nothing authored; the reverse is a binding this audit could not
+    # see, which is the direction that hid the `time:` terms.
     rows, problems = [], []
+    authored = authored_bindings()
+    population = {k: sorted(set(v)) for k, v in authored.items()}
     for key, names in LOOKUP:
+        population.setdefault(key, [])
+        population[key] = sorted(set(population[key]) | set(names))
+    # The cross-check runs in the direction that can go green: a term the
+    # PLAN expects and nothing authored. The reverse — authored and not in
+    # `LOOKUP` — is `LOOKUP` going stale as authoring proceeds, which is
+    # expected and is printed as a note. Reported as a problem it could
+    # never be cleared, and a guard nobody can satisfy gets deleted.
+    for key, names in LOOKUP:
+        pending = sorted(set(names) - set(authored.get(key, [])))
+        if pending:
+            print("  note: %s — %d term(s) in LOOKUP with no authored "
+                  "binding yet: %s" % (key, len(pending), ", ".join(pending)))
+    for key in sorted(authored):
+        extra = sorted(set(authored[key]) - set(dict(LOOKUP).get(key, [])))
+        if extra:
+            print("  note: %s — authored and not in LOOKUP: %s (audited via "
+                  "the authored-vocabulary population)"
+                  % (key, ", ".join(extra)))
+    for key, names in sorted(population.items()):
         g = load(key)
         if g is None:
             problems.append("%s: cached graph missing or unparseable" % key)

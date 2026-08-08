@@ -18,44 +18,46 @@ file.
 
 | Cached graph | Term | Kind | rdfs:domain | rdfs:range | subPropertyOf |
 |---|---|---|---|---|---|
-| `sosa` | `observedProperty` | object property | — | — | — |
+| `geosparql` | `Geometry` | class | — | — | — |
+| `geosparql` | `asWKT` | datatype property | geo:Geometry | geo:wktLiteral | geo:hasSerialization |
+| `geosparql` | `hasGeometry` | object property | geo:Feature | geo:Geometry | — |
+| `org` | `Organization` | class | — | — | — |
+| `owl-time` | `hasBeginning` | object property | time:TemporalEntity | time:Instant | time:hasTime |
+| `owl-time` | `hasEnd` | object property | time:TemporalEntity | time:Instant | time:hasTime |
+| `prov-o` | `Activity` | class | — | — | — |
+| `prov-o` | `Agent` | class | — | — | — |
+| `prov-o` | `Entity` | class | — | — | — |
+| `prov-o` | `generatedAtTime` | datatype property | prov:Entity | xsd:dateTime | — |
+| `prov-o` | `wasAttributedTo` | object property | prov:Entity | prov:Agent | prov:wasInfluencedBy |
+| `qudt-schema` | `QuantityValue` | class | — | — | — |
+| `qudt-schema` | `hasUnit` | object property | — | qudt:Unit | — |
+| `qudt-schema` | `numericValue` | owl:AnnotationProperty | — | — | — |
+| `sosa` | `FeatureOfInterest` | class | — | — | — |
+| `sosa` | `ObservableProperty` | class | — | — | — |
+| `sosa` | `Observation` | class | — | — | — |
+| `sosa` | `Platform` | class | — | — | — |
+| `sosa` | `Procedure` | class | — | — | — |
+| `sosa` | `Sensor` | class | — | — | — |
 | `sosa` | `hasFeatureOfInterest` | object property | — | — | — |
 | `sosa` | `hasResult` | object property | — | — | — |
 | `sosa` | `hasSimpleResult` | datatype property | — | — | — |
-| `sosa` | `resultTime` | datatype property | — | xsd:dateTime | — |
-| `sosa` | `phenomenonTime` | object property | — | — | — |
-| `sosa` | `madeBySensor` | object property | — | — | — |
-| `sosa` | `usedProcedure` | object property | — | — | — |
 | `sosa` | `isHostedBy` | object property | — | — | — |
-| `sosa` | `Observation` | class | — | — | — |
-| `sosa` | `Sensor` | class | — | — | — |
-| `sosa` | `Platform` | class | — | — | — |
-| `sosa` | `FeatureOfInterest` | class | — | — | — |
-| `sosa` | `Procedure` | class | — | — | — |
-| `sosa` | `ObservableProperty` | class | — | — | — |
-| `ssn-ext-sosa` | `hasMember` | object property | sosa:ObservationCollection | union of sosa:Observation, sosa:ObservationCollection | rdfs:member |
+| `sosa` | `madeBySensor` | object property | — | — | — |
+| `sosa` | `observedProperty` | object property | — | — | — |
+| `sosa` | `phenomenonTime` | object property | — | — | — |
+| `sosa` | `resultTime` | datatype property | — | xsd:dateTime | — |
+| `sosa` | `usedProcedure` | object property | — | — | — |
 | `ssn-ext-sosa` | `ObservationCollection` | class | — | — | — |
-| `prov-o` | `wasAttributedTo` | object property | prov:Entity | prov:Agent | prov:wasInfluencedBy |
-| `prov-o` | `generatedAtTime` | datatype property | prov:Entity | xsd:dateTime | — |
-| `prov-o` | `Agent` | class | — | — | — |
-| `prov-o` | `Activity` | class | — | — | — |
-| `prov-o` | `Entity` | class | — | — | — |
-| `org` | `Organization` | class | — | — | — |
-| `geosparql` | `hasGeometry` | object property | geosparql:Feature | geosparql:Geometry | — |
-| `geosparql` | `asWKT` | datatype property | geosparql:Geometry | geosparql:wktLiteral | geosparql:hasSerialization |
-| `geosparql` | `Geometry` | class | — | — | — |
-| `qudt-schema` | `hasUnit` | object property | — | qudt:Unit | — |
-| `qudt-schema` | `numericValue` | owl:AnnotationProperty | — | — | — |
-| `qudt-schema` | `QuantityValue` | class | — | — | — |
+| `ssn-ext-sosa` | `hasMember` | object property | sosa:ObservationCollection | union of sosa:Observation, sosa:ObservationCollection | rdfs:member |
 
-**11 object properties of 29 terms audited.**
+**13 object properties of 31 terms audited.**
 
 **Neither domain nor range — constrains nothing in generated SHACL** (`vocab-conventions.md` check 4):
 
-- `sosa:observedProperty`
 - `sosa:hasFeatureOfInterest`
 - `sosa:hasResult`
-- `sosa:phenomenonTime`
-- `sosa:madeBySensor`
-- `sosa:usedProcedure`
 - `sosa:isHostedBy`
+- `sosa:madeBySensor`
+- `sosa:observedProperty`
+- `sosa:phenomenonTime`
+- `sosa:usedProcedure`

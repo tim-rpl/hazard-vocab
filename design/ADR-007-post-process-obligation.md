@@ -68,34 +68,41 @@ binds by slot**.
 **`sh:closed` is a claim about a predicate set, and entailment enlarges
 predicate sets.** Authorship was never the boundary.
 
-**And it generalises past the one class.** Every locally authored,
-non-abstract class in the fragment binds at least one external term, so
-every one has a predicate set an external vocabulary can enlarge:
+**And it generalises past the one class** — though **not** by the route
+this section first gave, which is withdrawn here and not only in *Why no
+shape is closed* below. It argued that every local class binds an external
+term, and that binding therefore made every predicate set enlargeable.
+**Binding is neither necessary nor sufficient**; see reason 1, where the
+ground is `owl:sameAs` reflexivity under OWL-RL, which needs no property
+of the class at all.
 
-| Class | External term it binds |
-|---|---|
-| `Identifier` | `prov:generatedAtTime` |
-| `Asset` | `sosa:isHostedBy` |
-| `Place` | `geo:hasGeometry` |
-| `TemporalExtent` | `time:hasBeginning`, `time:hasEnd` |
+What the four have in common is a fact, not a mechanism:
 
-Those are exactly the four the authorship rule would have kept closed.
+| Class | External term it binds | Superproperty? |
+|---|---|---|
+| `Identifier` | `prov:generatedAtTime` | none |
+| `Asset` | `sosa:isHostedBy` | none |
+| `Place` | `geo:hasGeometry` | none — it *is* the super, of 4 |
+| `TemporalExtent` | `time:hasBeginning`, `time:hasEnd` | **`time:hasTime`** |
+
+Those are exactly the four the authorship rule would have kept closed —
+**and only one of them is enlargeable by RDFS.** The table refutes the
+generalisation it was offered as evidence for.
 
 ## Decision
 
 **Property 1 is replaced by:**
 
-> **1. Deterministic and idempotent.** The generator's output is a
-> function of `vocab/`. **The whole pipeline is idempotent: `gen-shacl`
-> followed by the stage, run twice over unchanged sources, produces
-> byte-identical `build/shapes.ttl`.** No step's result depends on the
-> order in which steps ran.
+> **1. Deterministic and idempotent.** **The stage's** output is a
+> function of its input. Run twice over one fixed `build/shapes.ttl`:
+> byte-identical. Run over its own output: the **graph** is unchanged —
+> **isomorphic, not byte-identical**, because reserialising relabels blank
+> nodes. No step's result depends on the order in which steps ran.
 >
-> Stated over the pipeline rather than over the stage, because *running
-> the stage over its own output changes nothing* is trivially true of any
-> deletion and asserts almost nothing. The pipeline is what the cheapest
-> test below measures, and an obligation that says less than its own test
-> is how a criterion drifts from what it verifies.
+> **The pipeline's byte-determinism is not asserted and is not
+> reachable.** `gen-shacl` orders the `sh:property` blank-node blocks
+> differently on every run; that is `claims.md` C28, `falsified`, and it
+> is not this stage's to fix.
 >
 > The generator may add, remove or rewrite any triple, subject to that
 > property alone. What is forbidden is a step whose effect a second run
@@ -189,8 +196,14 @@ Same fixture, `owl-time.ttl` loaded as an ontology graph:
 | **all closure removed** | **1** | **1** | **1** |
 
 The remaining violation is `geo:asWKT`'s datatype in every case, which is
-a separate defect and has nothing to do with closure. **18 triples
-removed, 9 `sh:targetClass` retained** — every binding survives.
+a separate defect and has nothing to do with closure.
+
+**The row measures the superseded two-triple rule and removed 18
+triples.** The rule now in the Decision removes **52** — 9 `sh:closed`,
+9 `sh:ignoredProperties` and 34 list-cell triples — and the remedy was
+re-measured under it: **1 violation under none, RDFS and OWL-RL alike.**
+All 9 `sh:targetClass` survive either way. One document must not carry two
+counts for one rule, and 18 is the figure this table exists to correct.
 
 **The literal one-triple edit does not work and its failure looks like
 success.** Deleting `sh:closed` while leaving `sh:ignoredProperties`
@@ -275,13 +288,39 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   it in bytes would fail for a reason that has nothing to do with the
   stage.
 
-  **A pipeline-level byte test was tried and cannot serve.** `make gen` is
-  not byte-deterministic today — four runs, four hashes, and by
-  isomorphism the graphs genuinely differ. Its only source of variation is
-  the `sh:ignoredProperties` list, **which this rule deletes**, so a
-  pipeline test would fail now, pass after the stage lands, and have its
-  single demonstrated failure mode removed by the thing it exists to
-  verify. C22's shape inside an obligation.
+  **A pipeline-level byte test was tried and cannot serve — and an earlier
+  draft of the Decision asserted it anyway.** `make gen` is not
+  byte-deterministic and does not become so when the rule lands.
+  Censused over two consecutive raw runs:
+
+  | differing lines mentioning | count |
+  |---|---|
+  | `sh:closed` | **0** |
+  | `sh:ignoredProperties` | **2** |
+  | `sh:path` | 48 |
+  | `sh:order` | 36 |
+
+  **228 differing lines, and 2 of them are the thing this rule removes.**
+  The `sh:property` blank-node blocks are serialised in a different order
+  every run — invisible to isomorphism, because property shapes are an
+  unordered set, and it is nearly all of the byte difference. Reproduced
+  with a pure `grep -v` text stage as well as an rdflib one, so it is not
+  a serialiser artefact: **three runs, three hashes.**
+
+  *(The per-predicate counts are one diff pair's; the shuffle differs run
+  to run, so `sh:path` and `sh:order` vary. **0 and 2 are the stable
+  figures**, and they are the ones the argument rests on.)*
+
+  So a pipeline byte obligation fails now and keeps failing.
+
+  **Why the wrong subject got in, recorded because the sentence that
+  caused it was right.** An earlier draft justified stating property 1
+  over the pipeline with: *an obligation that says less than its own test
+  is how a criterion drifts from what it verifies.* True — and this was
+  the inverse. **The obligation said MORE than its test, over a wider
+  subject**, while the test below opens *"The test isolates the stage."*
+  Same drift, opposite direction, and the Decision then contradicted its
+  own Obligation twenty paragraphs later.
 
   **And the pipeline's determinism is not this stage's to assert.** It is
   `gen-shacl`'s, it is filed at C28 as `falsified`, and a stage obligation
@@ -306,7 +345,8 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   > The graph after the stage differs from the graph before it **only** by
   > triples whose predicate is `sh:closed` or `sh:ignoredProperties`,
   > together with the RDF list cells reachable from the latter. **Any
-  > other triple present before and absent after is a failure.**
+  > other difference in either direction is a failure** — a triple present
+  > before and absent after, or absent before and present after.
 
   **Two weaker criteria were tried and both admitted a broken build.**
 
@@ -330,11 +370,19 @@ unchanged, and the reason properties 2 and 3 are not superseded.
 
 **This does not license the stage's existence** — ADR-005 Decision B
 already did — and it does not decide whether such a stage is in scope for
-review under charter v15 §0. The stage lives in `scripts/`, which §0
-places out of scope, and writes `build/shapes.ttl`, which §0 lists in
-scope as generated output. **That boundary is untested and this is the
-first artifact to sit on it.** A question for the charter, not for this
-ADR.
+review under §0.
+
+**Charter v16 answers it, and the answer came from this ADR's own first
+case.** §0 now reads *in scope for what it produces, and for any property
+of the produced artifact that only two or more runs can reveal* —
+determinism, idempotence, order-independence. The stage lives in
+`scripts/`, which §0 places out of scope, and writes `build/shapes.ttl`,
+which §0 lists in scope as generated output; **a cross-run property is in
+scope by the amendment.**
+
+An earlier draft of this paragraph cited **v15** and called the boundary
+untested. It was tested — by B20 — and v16 landed before this paragraph
+was last edited.
 
 **The falsifier.** Any of:
 
