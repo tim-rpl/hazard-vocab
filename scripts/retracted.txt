@@ -101,3 +101,5 @@ ADMS line has to say which one is meant	2026-08-07	the ADMS conclusion; CLAUDE.m
 they are ONE document	2026-08-07	ADMS identity, pass 1 — cmp-identical bytes licenses agree today
 one document by construction today	2026-08-07	ADMS identity, pass 2 — a 307 is declining to serve, not absence
 first multi-file	2026-08-07	the imports-prediction trigger, restated to the mechanism
+computes depth per file and misses the chain	2026-08-07	the is-a-depth prediction, tested — it exempts rather than under-counts
+boundary is missed	2026-08-07	the imports prediction, tested 2026-08-07 and confirmed as exemption, not under-counting

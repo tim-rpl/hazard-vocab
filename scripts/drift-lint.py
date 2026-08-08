@@ -17,10 +17,13 @@ KNOWN UPCOMING FAILURE — raw YAML does not resolve `imports:`.
 part0-entities.yaml, part0-foundation.yaml, part2-observation.yaml with
 imports between them:
 
-  * `is-a-depth` computes depth PER FILE. A chain crossing a file
-    boundary is missed. This is F2 in a new dress — per-file counting
-    instead of transitive resolution, one level up — except it produces
-    FALSE NEGATIVES, which is the worse direction and fails silently.
+  * `is-a-depth` EXEMPTS a class whose parent is declared in another
+    file — from the rule entirely, at any depth. Not "computes depth per
+    file and misses the chain", which was this note's earlier wording and
+    understated it: `if cur not in parents: break` skips the `while/else`,
+    so the depth test never executes. Measured 2026-08-07; see the
+    trigger section below for the numbers. FALSE NEGATIVES, the worse
+    direction, and silent.
   * `role-named` and `jurisdiction` miss classes, slots and enums
     inherited from an imported schema.
   * `exact-mappings` misses mappings added by `slot_usage` or a mixin.
@@ -38,8 +41,20 @@ RESOLVED ACROSS a boundary, not merely two files present.
 
 The trigger is the first of these:
 
-  * an `is_a` or `mixins` naming a class declared in an imported schema
-    — `is-a-depth` then computes depth per file and misses the chain;
+  * an `is_a` or `mixins` naming a class declared in an imported schema.
+    **`is-a-depth` does not under-count the chain; it EXEMPTS the class
+    from the rule entirely, at any depth.** Measured 2026-08-07 on the
+    same five-class chain authored twice:
+
+        one file,  A->B->C->D->E          FAIL x2  (D depth 3, E depth 4)
+        E's parent in another file         FAIL x1  (D only; E unreported)
+
+    `E` has true depth 4 and is checked at no depth. The `break` on a
+    parent defined elsewhere skips the `while/else`, so the depth test
+    never runs for that chain. An earlier version of this note said the
+    rule "computes depth per file and misses the chain" — under-counting.
+    That was too weak: it declines to check. **Prediction TESTED and
+    CONFIRMED, in the false-negative direction.**
   * a `slots:` list naming a slot declared in an imported schema —
     `role-named`, `jurisdiction`, `documented`, `declared-prefix` and
     `shared-uri` then see the reference and not the declaration.
