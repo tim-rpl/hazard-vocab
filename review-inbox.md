@@ -1518,3 +1518,87 @@ separately.
 28**, count corrected twenty-five → **twenty-eight**, coverage-gap list
 extended to rows 17, 19, 24, 25, 26, 27 and 28. Status stays `asserted`.
 No other entry changed status. Nothing promoted.
+
+## [H → O] implement — P6a, first finding before a line is authored — 2026-08-07
+
+**Charter v15 acknowledged.** §0 read; the subject is the vocabulary.
+**F30 closed and B11's case half closed** — `-i` on the sweep's
+`git grep`, verified by planting `adms line NEEDS NO disambiguation`
+in a tracked file: **exit 1**, one site. `make lint` **0**, sweep
+selftest 2 directions / 6 exclusions, and the four ADMS phrases still
+plant-verify. **Tooling frozen from here.**
+
+F30's repair is worth one line because of what falsified it: the comment
+cited `grep -niE 'adms|semic' CLAUDE.md` as matching nothing, and it now
+matches **`CLAUDE.md:221` — the *ownership is not evidence* rule that
+this very withdrawal caused to be written.** A citation of a grep result
+is a measurement with a timestamp, and this one was falsified **by its
+own consequence.** The claim now rests on `git log --all -S adms`, which
+is what a claim about all history needed from the start.
+
+---
+
+### P6a — startable, and the class count in the instruction does not match the ADRs
+
+Preconditions verified rather than assumed: **P17 `MET 2026-08-02`**
+(ADR-004, the blocks-start edge BV12 requires), **P16 `MET before it was
+filed` (BV13)**. `vocab/core/` holds `prefixes.yaml` and nothing else.
+
+**I was told to author six classes and thirteen slots. The repository
+says eight classes and thirteen slots, and the eight are enumerated:**
+
+> *Part 0 fragment (8 classes):* `Entity` (abstract), `Identifier`,
+> `Asset`, `Place`, `Agent`, `Activity`, `TemporalExtent`, `Geometry`.
+> — `measure-01`, and again at its sequencing paragraph: *"Part 0
+> fragment (8 classes, 13 slots)"*
+
+**The slot count agrees; the class count does not, and the two lists are
+not the same six.** ADR-002 Decision A names five *entities* — `Agent`,
+`Asset`, `Place`, `Activity`, `Document` — with `Statement` the sixth
+per ADR-004 Decision B. That is a **six-entity** list. The fragment's
+eight are a different population: they include `Entity` (abstract),
+`Identifier`, `TemporalExtent` and `Geometry`, and they **exclude**
+`Document` and `Statement`.
+
+So *six* and *eight* are both correct about different things, and
+ADR-004 Decision B already flags exactly this trap:
+
+> *"A number describing the fragment is not a number describing Part 0."*
+> — and it records the fragment moving **8 → 9 classes** with
+> `Statement`, while **`Document` is deferred by A8.**
+
+**Three populations, three counts:**
+
+| Population | Count | Source |
+|---|---|---|
+| Part 0 **entities** | 6 | ADR-002 A + ADR-004 B |
+| this unit's Part 0 **fragment** | **9** | 8 enumerated in `measure-01`, +1 for `Statement` (ADR-004 B) |
+| Part 0 itself | larger, uncounted | ADR-004 B, explicitly |
+
+**I am authoring the fragment — nine classes — because that is what
+P6a's `done_when` tests.** Its criterion names `sh:path` entries for
+`sourceVerificationTier` (carrier `Statement`) and for `operatingMode`,
+`modelVersion`, `profileConformance` (also `Statement`), so a six-entity
+reading that omits the fragment's four structural classes cannot satisfy
+it, and a fragment reading that omits `Statement` cannot either.
+
+**And one thing I could not settle from the ADRs, reported rather than
+decided.** ADR-001 settles the alias decomposition as
+`alias(IdentifiedObject, Name, NameType, NamingAuthority, AliasKind,
+AssertedTime)` and then rules **`NameType` is a SKOS concept scheme, not
+a class (A38)**. The fragment's enumeration carries `Identifier` and no
+`Name`/`NamingAuthority`, while `design/surface.yaml`'s local slots carry
+`identifierValue`, `identifierScheme`, `issuingAuthority` — **the alias
+tuple as three slots on one class.** Those are two different renderings
+of one decision and the repository contains both.
+
+**This is the convention-versus-material test firing on the first
+artifact**, and `CLAUDE.md` says to report it rather than work around it:
+I can author either, they generate different SHACL, and **nothing in
+P6a's criterion discriminates them.**
+
+**Requesting:** a ruling on the alias rendering — three slots on
+`Identifier`, or `Name` + `NamingAuthority` as classes — before I author
+it. Everything else in the fragment I can author from the ADRs as they
+stand.
+
