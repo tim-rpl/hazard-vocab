@@ -162,10 +162,22 @@ SOURCES = [
     # **The conclusion this comment used to draw is DELETED, not
     # repaired.** It read that `CLAUDE.md`'s ADMS line needs no
     # disambiguation while the redirect stands. **`CLAUDE.md` has never
-    # named ADMS** — `grep -niE 'adms|semic'` matches nothing and
-    # `git log --all -S adms -- CLAUDE.md` finds no commit. Its bound list
+    # named ADMS as a bound vocabulary** — established by
+    # `git log --all -S adms -- CLAUDE.md`, which finds no commit in any
+    # revision. Its bound list
     # is SOSA, PROV-O, QUDT and CF, and the paragraph explicitly declines
-    # to make per-namespace claims at all. Three passes were spent
+    # to make per-namespace claims at all.
+    #
+    # F30: this cited `grep -niE 'adms|semic' CLAUDE.md` as matching
+    # nothing. It matches now — at `CLAUDE.md:221`, inside the
+    # *ownership is not evidence* rule that this very withdrawal caused
+    # to be written. **A citation of a grep result is a measurement with
+    # a timestamp**, and this one was falsified by its own consequence.
+    # The pickaxe over every revision is the durable evidence and is what
+    # the claim rests on now; the live grep was never the establishing
+    # run for a claim about all history.
+    #
+    # Three passes were spent
     # sharpening a sentence about a referent that does not exist.
     #
     # What the peer check is for, stated without it: if the redirect is

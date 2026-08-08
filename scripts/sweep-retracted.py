@@ -143,7 +143,11 @@ def sweep(pats: list[str], root: pathlib.Path,
         fh.write("\n".join(pats) + "\n")
         pf = fh.name
     try:
-        cmd = ["git", "grep", "-n", "-F", "-f", pf, "--"] + \
+        # `-i`: a retracted phrase reintroduced with different casing is
+        # the same claim. Case-sensitive matching was B11's half that
+        # could admit something; the wrap half is a matcher change and is
+        # out of scope under charter v15 §0 until something is missed.
+        cmd = ["git", "grep", "-n", "-i", "-F", "-f", pf, "--"] + \
               [f":!{e}" for e in exclude]
         r = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
         return [l for l in r.stdout.split("\n") if l.strip()]

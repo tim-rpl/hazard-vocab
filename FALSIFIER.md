@@ -1,7 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 14** — §5.4: not every implement item produces a
-schema. When one produces none, verify against its own `done_when`.
+**Charter version: 15** — §0: the subject of review is the vocabulary.
+Tooling is in scope only where a defect in it produced a wrong artifact
+in the vocabulary.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -10,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 15 | §0 subject scope — the vocabulary, not the apparatus |
 | 14 | §5.4 covers implement items that generate nothing |
 | 13 | §1 Falsifier writes follow the disposed-field rule |
 | 12 | §1 disposed-field writes; §5 implement verifies generated output |
@@ -24,6 +26,60 @@ reused session, because nothing re-reads this file mid-session.
 | 3 | §4 "an artifact can be empty"; the three vacuity questions |
 | 2 | §5 stage dispatch, §6 standing claims duty, §7 contest path |
 | 1 | Initial charter |
+
+---
+
+## §0 — What you are reviewing
+
+**The subject is the vocabulary.** In scope:
+
+- `vocab/`, `codelists/`, `transform/`, `fixtures/`
+- `build/`, as generated output — invariant 4's test is what appears
+  there
+- the ADRs that govern those directories, and `claims.md`
+- `docs/coverage.md`, because every row is an assertion H is making
+
+**Out of scope: the apparatus.** `scripts/`, `Makefile`, `.claude/`, the
+generators, their fixtures, their mutation matrices and their sweeps.
+
+**The exception, and it is the whole of it: a defect in the apparatus is
+in scope when it produced a wrong artifact in the vocabulary, or would
+admit one.** A guard that lets a jurisdiction-specific term into
+`vocab/core/` is in scope — the artifact is wrong. A guard whose fixture
+does not cover one of its clauses is not, unless something got through.
+The test is not *is this instrument sound*; it is **did something wrong
+reach the vocabulary, or can it.**
+
+External tooling is judged the same way and usually passes it: that
+`gen-shacl` never consults the term a `slot_uri` names is in scope,
+because it makes every binding in `vocab/` decorative.
+
+### Why this section exists, with the measurement
+
+This charter had no subject scope for fourteen versions. The result,
+measured: **roughly fifteen findings of the first hundred were about
+hazard data or the model; the rest were about the apparatus, and the last
+twelve rounds were entirely apparatus.** A guard needed fixtures, the
+fixtures needed a mutation matrix, the matrix needed a message assertion,
+a sweep needed exclusions, the exclusions needed asserting, and the
+assertion needed a fixture aimed at the exclusion direction. Every step
+was a real defect. **None was about hazard data.**
+
+The loop had no fixed point because each guard is an artifact, so each
+guard can have defects, so each guard needs a guard — and the object of
+review grew with the review. Meanwhile `vocab/core/` held one file of
+nine lines.
+
+**This is a narrowing of your subject, not of your rigour.** Inside the
+scope above, §2's evidence standard, §3's proportionality, §4's vacuity
+questions and §5's dispatch all apply unchanged. The instruments that
+already exist are adequate; what stops is reviewing them for their own
+sake.
+
+**If you judge that a tooling defect reaches the vocabulary and this
+section would exclude it, say so and file it.** The exception is the
+substance of the rule, not a loophole in it, and an under-scoped review
+that lets a wrong binding through is worse than an over-scoped one.
 
 ---
 

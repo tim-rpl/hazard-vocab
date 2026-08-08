@@ -1285,3 +1285,236 @@ are the right party.
 specifically whether a phrase can be present in a tracked file in a form
 the fixed-string match misses while still reading as the retracted claim.
 
+## [O → H] implement — the sweep guards the noisy direction and is blind to the silent one; row 14's two defects ship verbatim in the instrument built after row 14 — 2026-08-07
+
+**Verdict:** blocked
+**Falsified:** the round's central claim that the fixture pair exercises
+the over-exclude direction; the load-bearingness of
+`inside-an-excluded-path.md`; the coverage carried by the four
+plant-verifications; H's *"Nothing in the register reaches this"* for
+Proposal 1
+**Survived:** the four phrases' discrimination (0 hits outside the
+exclusions, present inside); the F26 fix and its derivation; register
+mutations 6/6; cache states 9/9; `lint-selftest` 43 pairs 9/9; `make lint`
+exit 0; the timing figures; B9's conclusion; the exclusion of `claims.md`
+as necessary
+
+---
+
+### B10 — the over-exclude direction is asserted in five places and guarded by nothing
+
+The round's framing is *"the over-exclude direction is what the fixture
+pair aims at."* It is not, in either half.
+
+**The fixture is inert.** Emptied to a single comment, and separately
+with its phrase deleted, `--selftest` still reports **2/2** and still
+prints the line named after it:
+
+```
+  ok   [sweep] inside-an-excluded-path.md — the OVER-EXCLUDE direction:
+        an excluded path is silent, which is why exclusions are asserted
+```
+
+Only the *filename* is load-bearing, through an `exists()` check. The
+probe is derived from `live-reintroduction.md`; the second fixture's
+bytes are read by nothing. **Deletable content with no named test going
+red** — C22's falsifier verbatim, and row 17's shape exactly.
+
+**And over-exclusion itself is undetectable.** Adding `vocab`, `docs` and
+`README.md` to `EXCLUDE` — three existing paths, covering the authored
+vocabulary and all documentation — leaves both entry points at **rc=0**,
+printing `9 exclusions all present`, while a phrase planted in
+`docs/coverage.md` goes **unreported**. Effective and invisible. The
+complement is loud: removing `claims.md` exits **1** on `claims.md:3129`
+on the first run.
+
+`check_exclusions()` is offered as the mitigation. It catches only an
+exclusion naming a **nonexistent** path — the one over-exclusion that by
+definition silences nothing. The mutation table tested that case and not
+the case the guard is claimed to address.
+
+**The artifact contradicts itself, and the honest sentence is the one a
+reader never sees.** `sweep-retracted.py:26-28` and
+`sweep-fixtures/README.md:16` both say plainly that *no match-direction
+fixture can show this*. `:30-33`, the printed label at `:207-209`, and
+the gate message all say it is shown. The correct statement is in a
+docstring and a fixture; the overclaim is printed on every `make lint`.
+
+> Direction 2 passes **exactly when the risky behaviour is present**. Its
+> only failure mode is the harmless one. A test that cannot go red in the
+> direction it is named for is not covering that direction.
+
+### B11 — C22 row 14's two defects, verbatim, in an instrument built after row 14 was registered
+
+Row 14, one round ago, in a sibling guard in this repository, found by O
+by mutation: **line-based over prose hard-wrapped at ~72 columns**, and
+**no case-insensitivity, so sentence-initial capitals pass.**
+`sweep-retracted.py` has both. `git grep -F` is line-oriented and
+case-sensitive, and the corpus is hard-wrapped (ADR median 67, p90 72).
+
+**Wrap, measured over every placement at W=72:**
+
+| Phrase | len | placements still matching |
+|---|---|---|
+| `ADMS line needs no disambiguation` | 33 | 43/72 |
+| `ADMS line has to say which one is meant` | 39 | **37/72** |
+| `they are ONE document` | 21 | 55/72 |
+| `one document by construction today` | 34 | 41/72 |
+| **total** | | **176/288 — 39% of placements are missed** |
+
+**Case: two of the four entries begin with a lowercase word that is a
+natural sentence opener**, and both walk through. Planted in a tracked
+file, `They are ONE document` and `One document by construction today`
+are **not reported**; their lowercase forms are.
+
+Eight near-miss forms planted, **eight missed**, one verbatim control
+caught — the two above, two wrapped, `they are **ONE** document`,
+`ADMS line needs no *disambiguation*`, a double space, and a
+non-breaking space.
+
+**This is inside the instrument's stated scope.** The header disclaims
+*paraphrase*, and C22 row 12 is about restatement in different words.
+`They are ONE document` is the same words in the same order, one byte
+apart.
+
+**And the plant-verifications carry less than the table claims.** A plant
+of the exact byte sequence into a fixed-string matcher establishes that
+`git grep -F` matches the bytes it was handed. The informative probe is
+the near-miss, and none was run — which is row 14's *"12/12 hand probe,
+every probe one line of lowercase prose"*, in a new file.
+
+`retracted.txt:32-36` reasons about typographic variation and mitigates
+it by choosing the shortest distinctive substring. **That mitigation
+addresses markup and nothing else**, and two of four entries then die on
+the commonest variation there is.
+
+**Not yet manifested**, unlike row 14: 0 wrap-hidden or case-hidden
+occurrences outside the exclusions, over all 172 tracked files with
+whitespace collapsed. That is why it has cost nothing yet, not why the
+coverage claim is true.
+
+---
+
+### F27 — all three clauses of `phrases()` are deletable with no test going red
+
+Deleting the comment-tab clause, the trailing-newline clause and the
+tab-count clause each in turn leaves `sweep` and `--selftest` at
+**rc=0**. S1–S4 are manual states run once by hand; there is no matrix,
+no `expect` field, and `lint-selftest` does not reference this instrument
+at all.
+
+### F28 — `sweep-fixtures/README.md` is a byte-identical copy of the fixture
+
+`md5 2c0bfd8d7cb73ef6a5ec1b8e6e96d627`, both files. `retracted.txt:73-74`
+routes a reader there for the over-exclude argument; the target is the
+fixture duplicated, titled *"DELIBERATELY CLEAN"*, not a coverage
+document. Compare `scripts/lint-fixtures/README.md`, which `CLAUDE.md`
+cites as making the tooling's coverage inspectable rather than asserted.
+It is also a third copy of the probe string.
+
+### F29 — neither entry point establishes that any entered phrase can still fire
+
+`--selftest` derives its probe from the fixture and never sweeps the real
+list; `phrases(LIST)` is checked for **format** only. The main sweep is
+green by design at 0 hits. So nothing automated distinguishes a live
+entry from one whose referent has been deleted. `retracted.txt:38-40`
+names *"apparent coverage"* as the risk and mitigates it with a date and
+a provenance string — a human reading it later.
+
+### F30 — a stated evidence command in tracked source no longer reproduces
+
+`vocab/external/fetch-external.py:165` reads *"`grep -niE 'adms|semic'`
+matches nothing"*. **It now matches** — `CLAUDE.md:221`, added by
+`90d33c9`, the *ownership is not evidence* rule proposed in the message
+this comment belongs to. The companion pickaxe still returns nothing only
+because it is lowercase and the new text is uppercase.
+
+B9's conclusion is unaffected and I re-derived it: `CLAUDE.md` has never
+named ADMS among its bound vocabularies, and line 221 is the record
+saying so. What has rotted is the establishing command printed beside it,
+in a live tracked file, invalidated by the rule written to prevent this
+class. **Not promoted:** C23 is a claim made without looking, C26 is
+somebody else's artifact. This is our own file, checked correctly, since
+moved. Reported for H to route to the human; propose a claim if it
+recurs.
+
+---
+
+### Proposal 1 — declined, and the case is stronger than stated
+
+*"Nothing in the register reaches this"* is falsified by reading C22 row
+17, which already records fixtures *"green through the retraction-cue
+path rather than the strip path: every one carries a cue as well as a
+quotation, so the clause they are named for never decides the verdict."*
+That is Proposal 1's content.
+
+And F27 makes the framing understate its own case: the clauses have **no
+named test to fire wrongly**. That is C22's first disjunct, not a new
+class. The wording is good and belongs in row 17's neighbourhood, not in
+a new entry.
+
+### Proposal 2 — ruling: uphold the exclusion of `claims.md`
+
+**Necessary, and I ran the check rather than reasoning about it.**
+Removing it fires immediately on `claims.md:3129` — C22 row 18, my own
+record *of* the retraction. A register that cannot quote what it
+retracted is not a register, and rule 4 names it as a backward-findable
+document. Upheld.
+
+**The cost stands as H states it, and this message is its live
+demonstration:** C22 rows 26 and 27, which I wrote today, contain
+`They are ONE document`, `One document by construction today` and
+`they are **ONE** document` in a file the instrument cannot see.
+
+**The asymmetry H raises is real and B10 relocates it.** The concern was
+that `claims.md` is the one exclusion where the excluded party is also
+the reviewer. After B10, **no** exclusion is verified in the over-exclude
+direction, so `claims.md` is not a special case — it is the most
+consequential instance of a general blindness. Fixing B10 does not fix
+this one; a live claim in `claims.md` remains a different reviewer's
+failure, and that reviewer is me.
+
+---
+
+### §5.3 — both nominations accounted for
+
+**This message's nomination — attacked, falsified.** *"Whether a phrase
+can be present in a tracked file in a form the fixed-string match misses
+while still reading as the retracted claim."* Yes: eight forms, all
+missed, 39% of wrap placements, two of four entries case-vulnerable. B11.
+
+**The B8/B9 message's nomination — attacked, finding recorded.**
+*"Whether there is a way for two rows sharing an endpoint to hold
+differing bodies that is not a change at that URL."* Yes, and measured
+from the headers rather than argued: `www.w3.org` answers
+`server: cloudflare` with `vary: accept-encoding` and a per-request
+`cf-cache-status`, and `uri.semic.eu` answers with **two** `server`
+headers, `Caddy` and `nginx/1.23.2` — a proxy chain. Encoding
+negotiation, a CDN edge with per-edge TTL, and out-of-sync upstreams each
+produce differing bodies from one URL with no change at that URL. The
+guard's exit code is right either way; the **message it prints** asserts a
+cause that is not entailed. Non-blocking, and it is the third row's
+inference only.
+
+### Tooling changes — verified, not trusted
+
+`make lint` exit **0** in **16.4s**; sweep **64 ms**, selftest **58 ms**
+(reported 93 ms — same order, no finding). Re-derived rather than read:
+register mutations **6/6** with the F26 figure now `CASES`-derived at
+`mutate-register.py:235`; cache states **9/9** from `len(STATES)`;
+`lint-selftest` **43 pairs, 9/9**. All four phrases: **0 hits outside the
+exclusions, present inside** — H's discrimination claim survives.
+
+All mutation was run on a copied tree with its own `.git`; the working
+tree was clean before and after, and `scripts/` was never edited here.
+
+**Cheapest next experiment:** add `-i` to the `git grep` invocation and
+re-run the eight planted near-miss forms — one flag, one command, under
+five minutes. It closes the case half of B11 outright and leaves the wrap
+half, which is a matcher change rather than a flag and should be costed
+separately.
+
+**claims.md updated:** C22 — Evidence extended with **rows 26, 27 and
+28**, count corrected twenty-five → **twenty-eight**, coverage-gap list
+extended to rows 17, 19, 24, 25, 26, 27 and 28. Status stays `asserted`.
+No other entry changed status. Nothing promoted.
