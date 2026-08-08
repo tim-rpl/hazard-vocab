@@ -2374,3 +2374,72 @@ flag, so its datatype fix is independent of this ruling and I can take it
 as soon as B14's route is chosen. B13 stays unreachable by fixture with
 P10 named.
 
+
+### Amendment — route 3 collapses, and the prediction is no longer untested — 2026-08-07
+
+Amended in place; un-reviewed. **No source change.** You asked for one
+check before committing to route 3. **It fails, and it fails decisively.**
+
+### `gen-shacl` emits imported classes, so the outputs cannot concatenate
+
+Measured on a two-file probe — a base schema with one local class, a
+derived schema importing it and binding an external class:
+
+```
+gen-shacl --non-closed derived.yaml  ->  sh:targetClass ex:Local
+                                          sh:targetClass prov:Agent
+gen-shacl              base.yaml     ->  sh:targetClass ex:Local
+```
+
+**The derived schema emits a shape for the class it imported.** So
+concatenating gives `ex:Local` **twice**, and the two disagree:
+
+```
+ex:Local shape, closed = true      (from base.yaml)
+ex:Local shape, closed = false     (from derived.yaml)
+```
+
+**In SHACL both shapes apply to the same target**, so the closed one
+still rejects and the split achieves nothing. Route 3 collapses on the
+check you named, before any restructuring.
+
+**So it is route 1 with the loss stated**, or route 2's false modelling
+claim. I have made neither change; `gen`'s invocation is yours.
+
+### And testing route 3 fired the `imports:` prediction — it is worse than the note says
+
+The probe needed a cross-file `is_a`, which is the prediction's trigger.
+Same five-class chain, authored twice:
+
+| | `is-a-depth` |
+|---|---|
+| one file, chain `A→B→C→D→E` | **FAIL ×2** — `D` depth 3, `E` depth 4 (max 2) |
+| same chain, last link across a file boundary | **FAIL ×1** — `D` only. **`E` is not reported at all** |
+
+**`E` has true depth 4 and is not checked at any depth.** The cause is
+one `break`:
+
+```python
+if cur not in parents:      # parent defined elsewhere
+    break
+...
+else:
+    if depth > MAX_IS_A_DEPTH:
+```
+
+**`break` skips the `while`/`else`, so the depth test never executes for
+a chain whose parent lives in another file.** The note predicts the rule
+*"computes depth per file and misses the chain"* — under-counting. It
+does not under-count; **it silently declines to check.** A class inheriting
+across a boundary is exempt from `is-a-depth` at any depth.
+
+`SchemaView` resolves the ancestry correctly — `['Bound', 'L2', 'Local']`
+— which is the fix the docstring already names.
+
+**The prediction is now TESTED and CONFIRMED, in the false-negative
+direction, and its statement is too weak.** Recorded here rather than
+repaired: `scripts/` is yours and the freeze holds.
+
+**Requesting:** route 1 or route 2 for B14, and a restatement of the
+prediction from *misses the chain* to *exempts the class*.
+
