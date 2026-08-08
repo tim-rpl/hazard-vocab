@@ -1715,3 +1715,75 @@ URIs change.
 particular whether any of the five I marked *guided* merely permitted
 rather than guided — and a ruling on the three string-count criteria.
 
+
+### Amendment to the P6a gate — three additions and one finding on the declared change — 2026-08-07
+
+Amended in place; this gate is un-reviewed.
+
+**1. The `alias-kind` ruling, with its falsifier so it is checkable.**
+The scheme is **core**, not profile content, and the ground is C1's own
+test — *does the core retarget to flood or earthquake without edits?*
+`designation` versus `authoritativeIdentifier` is the same distinction
+for a stream gauge identifier, a USGS event identifier and an IRWIN
+incident number. **`NameType` is the profile half, not `AliasKind`:**
+which schemes exist and what precedence they take is jurisdictional and
+belongs in `vocab/profiles/`; whether a given alias is a label or an
+authoritative identifier does not.
+
+Verified in the artifact rather than argued: two `skos:Concept`s under
+`https://w3id.org/ohim/`, both `skos:inScheme ohim:alias-kind`, and
+**no agency string anywhere in the file.**
+
+> **Falsifier:** a hazard domain that needs a third kind, or needs the
+> line between the two drawn differently. If one appears, the scheme
+> moves to `vocab/profiles/` and every `meaning:` URI changes.
+
+Recorded so the decision is falsifiable rather than merely reasoned.
+
+**2. The documentation loss is a finding, not something I absorb.**
+
+`id`'s description no longer names the LinkML construct that would
+express a pattern constraint, because `make lint`'s C4 rule greps
+`vocab/core/` for that construct's name and cannot tell a mention from a
+use. **The description explaining the construct's ABSENCE failed the rule
+forbidding its PRESENCE.** What a reader loses is the name of the thing
+that was considered and rejected, which is the part of a decision worth
+recording.
+
+**A guard that costs a reader an explanation is a real cost**, and this
+is the first time a convention has fought rather than guided in this
+project. Filed as such rather than written off as a rewording.
+
+**3. Tooling change declared — and the restatement is partial.**
+
+`scripts/drift-lint.py`'s `imports:` prediction was restated: the trigger
+is no longer *"more than one file"* but **a term resolved ACROSS a
+boundary** — an `is_a`/`mixins` naming an imported class, or a `slots:`
+list naming an imported slot. That is right, and it converts a prediction
+that read as falsified into one that is **untested**, which is what it is.
+
+**I verified it and found the old trigger still standing.**
+`grep -n "multi-file\|more than one file\|which is P6a"` returns two
+sites:
+
+| Site | State |
+|---|---|
+| the module docstring, line 34 | **restated** — *"THE TRIGGER IS NOT 'more than one file'"*, with the mechanism |
+| **`rule_declared_prefix`'s docstring, line 439** | **LIVE, and unchanged** — *"the trigger is the first multi-file `vocab/core/`, which is P6a"* |
+
+**The module says the trigger is not what the function says it is**, and
+a reader who opens the rule rather than the module gets the retracted
+version. This is the partial-retraction class, in the file that documents
+the prediction, and it is a **live assertion in a tracked file** rather
+than history in the channel.
+
+`scripts/` is the human's and I have not touched it. **Reported for
+repair**, with the second site named by quoted phrase.
+
+**The prediction's status, stated so it is not read as either:** at three
+files in `vocab/core/`, all eight rules report `3 file(s)` and pass.
+**Untested, not falsified** — `is_a` points only within
+`part0-entity-core.yaml` and `vocabulary.yaml` declares nothing, so
+nothing has yet been resolved across a boundary. The first cross-file
+`is_a` or `slots:` reference is the test.
+
