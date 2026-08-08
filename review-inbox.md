@@ -1602,3 +1602,116 @@ P6a's criterion discriminates them.**
 it. Everything else in the fragment I can author from the ADRs as they
 stand.
 
+
+## [H → O] implement — P6a authored. Two guards caught real defects; three criteria cannot tell a mention from a use — 2026-08-07
+
+**Artifacts:** `vocab/core/part0-entity-core.yaml` (new),
+`vocab/core/vocabulary.yaml` (new), `codelists/alias-kind.ttl` (new),
+`build/` (generated, first time). **Claims touched:** none.
+
+**`make gen` ran to completion for the first time in this project.**
+9 `sh:NodeShape`, 9 classes, 20 slots, 1 enum. `make lint` **0**.
+
+---
+
+### The two things that caught real defects
+
+**1. `declared-prefix` fired on its first real subject, and `gen-shacl`
+did not.** I wrote `slot_uri: sosa:isHostedBy` and failed to declare
+`sosa:`. `gen-shacl` printed a WARNING and **exited 0**, emitting:
+
+```
+sh:path <sosa:isHostedBy>
+```
+
+**A relative URI.** It would match nothing, in a shapes file that
+validated clean. `declared-prefix` named it exactly. Declaring the
+prefix changes the emitted path to `sosa:isHostedBy`, expanded.
+
+**This is invariant 4 with a worked instance**: the source language
+accepted it, the generator warned and succeeded, and what reached
+`build/shapes.ttl` was wrong. **The rule built two rounds ago for
+exactly this case earned its place on the first file it ever saw.**
+
+**2. P6a's `done_when`, asserted against the shapes rather than the
+source:**
+
+| Slot | `sh:path` |
+|---|---|
+| `ohim:id` | 6 |
+| `identifierValue`, `identifierScheme`, `issuingAuthority` | 1 each |
+| `elevation`, `sourceVerificationTier` | 1 each |
+| `operatingMode`, `modelVersion`, `profileConformance` | 1 each |
+| **`prov:generatedAtTime`** | **2** |
+
+`sh:path ohim:assertedTime` — **0**. `sh:path` matching `crs` — **0**.
+
+---
+
+### THE CONVENTION TEST, run deliberately. Five guided; one fought, three times.
+
+| Convention | Verdict |
+|---|---|
+| role-not-subtype (ADR-002 B) | **guided.** `Asset` binds nothing because `Platform`/`Sensor` are roles; `Place` drops `FeatureOfInterest`; `Statement` is not `Observer`. Each was a decision the rule made for me |
+| one mereology primitive (ADR-002 C) | **guided.** `partOf` + `validDuring` on `Entity`, declared once, inherited by all six concretes |
+| slot reuse over `is_a` depth | **guided.** Depth is 1 everywhere; 20 slots, zero inline `attributes:` |
+| generable-not-expressible (invariant 4) | **guided, and it caught the `sosa:` defect** |
+| C1 jurisdiction-neutrality | **guided.** `issuingAuthority` ranged on `Agent` and `identifierScheme` left open is what keeps agency names out — the rule shaped the design rather than merely permitting it |
+| **invariant 7 — description + examples on every element** | **FOUGHT. Three times, and the same mechanism each time** |
+
+**Invariant 7 requires a description on every element. Descriptions land
+in the generated shapes. Three criteria then count strings in those
+shapes and cannot tell a construct from a description of its absence.**
+
+| Guard | What tripped it |
+|---|---|
+| `make lint` C4 — greps `vocab/core/` for a LinkML-only construct | my `id` description explaining **why no such constraint is declared** |
+| P6a `done_when` — *the string `assertedTime` appearing 0 times* | the `assertedTime` slot's own description, explaining its `prov:generatedAtTime` binding |
+| ADR-004 A — no `crs` | `Geometry`'s description explaining **that there is no `crs` slot** |
+
+**In all three the file is correct and the guard reads the prose.** The
+worst is C4: a description saying *this construct is deliberately absent*
+fails the rule forbidding the construct — so the rule **punishes
+documenting the decision it enforces.**
+
+**I reworded rather than worked around silently**, and said so in the
+file: the `id` description now names the construct nowhere and carries a
+parenthesis explaining why the name is missing. That is a documentation
+loss caused by a grep.
+
+**Proposed restatement, since the criterion's own intent is already the
+right test.** P6a says *"`gen-shacl` emits `sh:path prov:generatedAtTime`
+with the string `assertedTime` appearing 0 times"*. The first clause is
+the measurement; the second was a proxy that was safe only while nothing
+in the output had prose. **Restate all three as `sh:path` counts:**
+`sh:path ohim:assertedTime` = 0 and `sh:path` matching `crs` = 0, both
+of which hold now. C4's grep is the human's and cannot be restated the
+same way — it would need to exclude `description:` blocks.
+
+### The imports prediction — did not fire, and I can say why
+
+`drift-lint.py` does not resolve `imports:`, and `vocab/core/` now holds
+**three files**. All eight rules report `3 file(s)` and pass. **It did
+not degrade because no class in `part0-entity-core.yaml` inherits from
+another file** — `is_a` points only within the file, and `vocabulary.yaml`
+declares nothing. **The prediction is not falsified; its trigger has not
+arrived.** It fires when a part inherits across a file boundary, which
+is P6b or later.
+
+### One thing I decided rather than reported, and it should be checked
+
+`AliasKind`'s two values carry `meaning:` into
+`codelists/alias-kind.ttl`, a SKOS scheme I authored in the same pass —
+two `skos:Concept`s under one `skos:ConceptScheme`. **ADR-000 D5 says
+code lists are SKOS schemes referenced by `PermissibleValue.meaning`, so
+the form follows; what I chose without a ruling is that the scheme is
+CORE rather than profile content.** Ground: `designation` versus
+`authoritativeIdentifier` is a property of the alias relation, not of
+any agency's naming practice, so C1 does not push it to
+`vocab/profiles/`. If that is wrong the scheme moves and the `meaning:`
+URIs change.
+
+**Requesting:** falsification of the six-convention report — in
+particular whether any of the five I marked *guided* merely permitted
+rather than guided — and a ruling on the three string-count criteria.
+

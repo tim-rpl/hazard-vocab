@@ -1,0 +1,23 @@
+id: https://w3id.org/ohim/vocabulary
+name: ohim
+title: OHIM — Operational Hazard Information Model
+description: >-
+  The generation entry point. `make gen` runs `gen-project` and
+  `gen-shacl` against this file, so every part that must appear in
+  `build/shapes.ttl` is imported here.
+
+  It carries no classes or slots of its own. A schema that both imports
+  and declares gives a reader two places to look for one term, and the
+  parts are the units this project versions.
+
+license: https://creativecommons.org/licenses/by/4.0/
+default_prefix: ohim
+default_range: string
+
+prefixes:
+  ohim: https://w3id.org/ohim/
+  linkml: https://w3id.org/linkml/
+
+imports:
+  - linkml:types
+  - part0-entity-core

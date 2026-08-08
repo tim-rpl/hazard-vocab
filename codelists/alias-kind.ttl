@@ -1,0 +1,55 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ohim: <https://w3id.org/ohim/> .
+
+# AliasKind — the label/identifier distinction, translated onto the
+# alias relation.
+#
+# ADR-001 finding 2: CIM's profile splits `Name.IdentifiedObject` (the
+# object a name DESIGNATES) from `Name.UniqueIdentifiedObject` (the
+# object an alternative identifier UNIQUELY designates). Two association
+# ends, same range, different semantics — which
+# `.claude/rules/vocab-conventions.md` names as a UML artifact:
+#
+#   "UML cannot say 'this relation has a kind,' so it splits into two
+#    named ends. Declaratively that is one relation with the kind as a
+#    slot."
+#
+# So the distinction is a value on `aliasKind`, not two slots and not
+# two classes.
+#
+# A SKOS concept scheme rather than a bare LinkML enum, per ADR-000 D5:
+# code lists are versioned independently of the schema and referenced
+# from the schema by `PermissibleValue.meaning`. This scheme is
+# jurisdiction-neutral — `designation` and `authoritativeIdentifier` are
+# properties of the relation, not of any agency's naming practice, so it
+# belongs in `codelists/` and not in a profile.
+
+ohim:alias-kind
+    a skos:ConceptScheme ;
+    dcterms:title "OHIM alias kinds"@en ;
+    dcterms:description """Whether an alias merely designates its entity or
+uniquely identifies it under an authority's scheme. Translated from CIM's
+IdentifiedObject/UniqueIdentifiedObject association-end split, which is a
+UML artifact rather than a modelling distinction."""@en ;
+    dcterms:issued "2026-08-07"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    skos:hasTopConcept ohim:designation , ohim:authoritativeIdentifier .
+
+ohim:designation
+    a skos:Concept ;
+    skos:inScheme ohim:alias-kind ;
+    skos:prefLabel "designation"@en ;
+    skos:definition """A name that designates the entity without establishing
+identity. Two entities may carry the same designation, and a designation may
+change without the entity changing. CIM's `Name.IdentifiedObject`."""@en ;
+    skos:example "A fire called \"Bear Creek\" in a situation report."@en .
+
+ohim:authoritativeIdentifier
+    a skos:Concept ;
+    skos:inScheme ohim:alias-kind ;
+    skos:prefLabel "authoritative identifier"@en ;
+    skos:definition """An identifier that uniquely designates the entity within
+the scheme that issued it. Identity may be established from it, under the
+precedence order a profile declares — ADR-001 question 2, option B. CIM's
+`Name.UniqueIdentifiedObject`."""@en ;
+    skos:example "An IRWIN incident identifier carried by a perimeter."@en .

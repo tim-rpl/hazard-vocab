@@ -1,0 +1,513 @@
+id: https://w3id.org/ohim/part0-entity-core
+name: ohim-part0-entity-core
+title: OHIM Part 0 — the entity and alias core
+description: >-
+  Part 0's entity core and the reified alias relation, as settled by
+  ADR-002 Decision A (five abstract entities), ADR-004 Decision B
+  (`Statement` as the sixth), ADR-001 question 1 (the four-class
+  decomposition rendered as relations), and ADR-006 Decisions A and B
+  (which role-class bindings come off).
+
+  SCOPE: this is the Part 0 FRAGMENT this unit depends on, not Part 0.
+  ADR-004 Decision B is explicit that a number describing the fragment
+  is not a number describing Part 0, and `measure-01` enumerates the
+  fragment as eight classes — `Entity`, `Identifier`, `Asset`, `Place`,
+  `Agent`, `Activity`, `TemporalExtent`, `Geometry` — which ADR-004
+  Decision B moves to nine with `Statement`. `Document` is a Part 0
+  entity and is deferred by A8.
+
+  JURISDICTION NEUTRALITY: no agency name, no national identifier
+  scheme, no national code list appears here. `issuingAuthority` is
+  ranged on `Agent` precisely so that naming authorities are instances
+  at profile level rather than classes here. CLAUDE.md invariant 2.
+
+license: https://creativecommons.org/licenses/by/4.0/
+default_prefix: ohim
+default_range: string
+
+prefixes:
+  ohim: https://w3id.org/ohim/
+  linkml: https://w3id.org/linkml/
+  prov: http://www.w3.org/ns/prov#
+  org: http://www.w3.org/ns/org#
+  geo: http://www.opengis.net/ont/geosparql#
+  sosa: http://www.w3.org/ns/sosa/
+  time: http://www.w3.org/2006/time#
+  foaf: http://xmlns.com/foaf/0.1/
+  skos: http://www.w3.org/2004/02/skos/core#
+  xsd: http://www.w3.org/2001/XMLSchema#
+
+imports:
+  - linkml:types
+
+# ---------------------------------------------------------------------
+# SLOTS — declared once at the top level and referenced by name.
+#
+# `.claude/rules/vocab-conventions.md`: never use `attributes:` inline.
+# A slot defined once and used by four classes is correct; four
+# near-identical slots inlined on four classes is drift even when the
+# generated SHACL is identical.
+# ---------------------------------------------------------------------
+slots:
+
+  id:
+    description: >-
+      The entity's own identifier, minted by this model rather than
+      borrowed from an external scheme. CIM's `mRID` translated —
+      ADR-001's A31 records `mRID` → `id` as zero new slots.
+
+      The MINTING RULE IS OPEN (A10). This slot asserts that an entity
+      has one identifier of its own; it does not yet say what generates
+      it, and this slot declares no pattern constraint, because none has
+      been decided and a pattern asserted early is a constraint nobody
+      measured.
+
+      (The LinkML construct that would express one is deliberately not
+      named here. `make lint`'s C4 rule is a grep over this directory and
+      cannot tell a mention from a use, so a description explaining the
+      construct's ABSENCE fails the rule that forbids its presence. See
+      the gate message — reported rather than worked around silently.)
+    identifier: true
+    range: uriorcurie
+    required: true
+    examples:
+      - value: https://w3id.org/ohim/entity/0f2a9c31-6b7e-4a1d-9c22-2f6b0f9a77c1
+        description: a minted entity identifier
+
+  alias:
+    description: >-
+      The aliases this entity is known by. **Multivalued, and the
+      direction is load-bearing**: an entity has many aliases and an
+      alias has one entity. A31 counts this position as *`alias` on
+      `Entity`*, and rendering it the other way round would permit one
+      alias per entity, which defeats the decomposition ADR-001 adopted.
+    range: Identifier
+    multivalued: true
+    inlined_as_list: true
+    examples:
+      - value: the IRWIN identifier and the state portal's local name for one fire
+        description: two aliases on one entity, issued by different authorities
+
+  identifierValue:
+    description: >-
+      The alias's literal text — a name used as a name, or as an
+      alternative identifier. CIM's `Name.name`. Free text, because a
+      scheme constrains its own values and this class must carry every
+      scheme.
+    range: string
+    required: true
+    examples:
+      - value: "2024-CA-BDF-001234"
+        description: an incident identifier as issued
+
+  identifierScheme:
+    description: >-
+      The scheme the alias is drawn from — CIM's `NameType`, which
+      ADR-001 rules is a SKOS concept scheme and not a class (A38). The
+      range is left open here because the schemes themselves are
+      national and belong in `vocab/profiles/`; declaring them in the
+      core would violate CLAUDE.md invariant 2.
+    range: uriorcurie
+    examples:
+      - value: https://w3id.org/ohim/profiles/us/scheme/irwin
+        description: a scheme identifier, minted at profile level
+
+  issuingAuthority:
+    description: >-
+      The agent that issued this alias. Ranged on `Agent` rather than a
+      `NamingAuthority` class — A37 measures that translation as zero
+      new classes.
+
+      **Separate from the scheme's own authority, and that separation is
+      why the structure was borrowed.** ADR-001 finding 1: a name and
+      its scheme each associate to an authority and *they need not be
+      the same one*. Multi-agency republication — a perimeter carrying
+      an upstream identifier, republished by a different portal — has
+      nowhere to go without it.
+    range: Agent
+    examples:
+      - value: the state portal that republished the perimeter
+        description: an issuing authority distinct from the scheme's owner
+
+  aliasKind:
+    description: >-
+      Whether this alias merely designates its entity or uniquely
+      identifies it under the issuing authority's scheme.
+
+      CIM splits this into two association ends with the same range —
+      `Name.IdentifiedObject` and `Name.UniqueIdentifiedObject` — which
+      is a UML artifact: UML cannot say *this relation has a kind*, so
+      it splits. Declaratively it is one relation with the kind as a
+      slot.
+    range: AliasKind
+    required: true
+    examples:
+      - value: authoritativeIdentifier
+        description: an IRWIN identifier, from which identity may be established
+
+  assertedTime:
+    description: >-
+      When the alias was asserted. Bound to `prov:generatedAtTime` per
+      ADR-004 Decision C — the slot is asserted by its URI, not by its
+      local name, and `gen-shacl` emits `sh:path prov:generatedAtTime`
+      with the string `assertedTime` absent from the output.
+    slot_uri: prov:generatedAtTime
+    range: datetime
+    examples:
+      - value: '2026-08-07T05:44:37Z'
+        description: the instant the alias was recorded
+
+  partOf:
+    description: >-
+      The whole this entity is part of, over an interval. **One
+      mereology primitive for the whole model** — ADR-002 Decision C,
+      used by crews composed of personnel, incident complexes absorbing
+      fires, and derived samples.
+
+      The interval is non-negotiable: crews reconstitute, complexes
+      absorb and split, samples derive, and `partOf` without temporal
+      validity is wrong in every one of those cases. `validDuring`
+      carries it.
+    range: Entity
+    multivalued: true
+    examples:
+      - value: the crew a responder belonged to during a shift
+        description: membership that is true only over an interval
+
+  validDuring:
+    description: >-
+      The interval over which the assertion carrying this slot holds.
+      Ranged on `TemporalExtent` so that `partOf` and any later relation
+      needing temporal validity share one carrier rather than each
+      declaring its own.
+    range: TemporalExtent
+    examples:
+      - value: the operational period a resource was assigned for
+        description: an interval bounding a relation's validity
+
+  hasBeginning:
+    description: >-
+      The instant an interval starts. Bound to OWL-Time, which mints the
+      term; this schema declares no interval algebra of its own.
+    slot_uri: time:hasBeginning
+    range: datetime
+    examples:
+      - value: '2026-08-07T06:00:00Z'
+        description: the start of an operational period
+
+  hasEnd:
+    description: >-
+      The instant an interval ends. Optional, because an open interval
+      is the normal case for anything in progress — a fire burning, a
+      resource still assigned.
+    slot_uri: time:hasEnd
+    range: datetime
+    examples:
+      - value: '2026-08-07T18:00:00Z'
+        description: the end of an operational period
+
+  hasGeometry:
+    description: >-
+      The geometry locating a place. Bound to GeoSPARQL, whose namespace
+      does not currently dereference to a graph defining the term — the
+      binding is by URI and the vocabulary is BORROWED in fact. See
+      `vocab/external/register.md`.
+    slot_uri: geo:hasGeometry
+    range: Geometry
+    examples:
+      - value: the polygon of a fire perimeter
+        description: a place's geometry
+
+  asWKT:
+    description: >-
+      The geometry's Well-Known Text serialisation. **There is no `crs`
+      slot** — ADR-004 Decision A: GeoSPARQL carries the CRS inside the
+      `wktLiteral` itself, so a separate slot would be a second place
+      for one fact.
+    slot_uri: geo:asWKT
+    range: string
+    examples:
+      - value: '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON((-120.1 39.2, -120.0 39.2, -120.0 39.3, -120.1 39.2))'
+        description: a perimeter with its CRS carried in the literal
+
+  elevation:
+    description: >-
+      Height above a vertical datum, in metres. Local because no
+      external term was found tight enough (A26): the candidates either
+      leave the datum unstated or bind a measurement class this core
+      does not carry.
+
+      **The datum is not asserted here** and a profile must state it. A
+      number without a datum is not an elevation, and this slot records
+      that gap rather than concealing it.
+    range: float
+    unit:
+      ucum_code: m
+    examples:
+      - value: 1847.0
+        description: a sensor's height above the datum a profile declares
+
+  isHostedBy:
+    description: >-
+      The asset hosting this asset. Bound to SOSA, which mints the term
+      for the sensor/platform relation; here it carries the general
+      case, since `Platform` and `Sensor` are ROLE classes and ADR-002
+      Decision B forbids binding an entity to one.
+    slot_uri: sosa:isHostedBy
+    range: Asset
+    examples:
+      - value: the aircraft an imaging sensor is mounted on
+        description: hosting, without typing either asset by its role
+
+  wasAttributedTo:
+    description: >-
+      The agent a statement is attributed to. Bound to PROV-O.
+    slot_uri: prov:wasAttributedTo
+    range: Agent
+    examples:
+      - value: the agency that published the observation
+        description: attribution of an assertion
+
+  sourceVerificationTier:
+    description: >-
+      How far the source of this statement was verified. Carried by
+      `Statement` and not by `Activity` — ADR-004 Decision B: a
+      verification tier is a property of *what we were told*, not of the
+      telling, and putting it on the act would type an assertion as its
+      own production.
+
+      Range is left open pending the tier vocabulary, which is profile
+      content.
+    range: uriorcurie
+    examples:
+      - value: https://w3id.org/ohim/profiles/us/tier/authoritative
+        description: a tier drawn from a profile's scheme
+
+  operatingMode:
+    description: >-
+      The mode the producing system was in when this statement was made
+      — ADR-004 Decision B / PG5. On `Statement` because it qualifies
+      the assertion rather than the act.
+    range: uriorcurie
+    examples:
+      - value: https://w3id.org/ohim/profiles/us/mode/degraded
+        description: a producing system reporting in a degraded mode
+
+  modelVersion:
+    description: >-
+      The version of the model or pipeline that produced this statement.
+      A property of the assertion, not of the process that emitted it.
+    range: string
+    examples:
+      - value: hysplit-2024.3
+        description: the model build behind a forecast
+
+  profileConformance:
+    description: >-
+      The profile this statement claims conformance to. Lets a consumer
+      tell which constraint set the producer believed it was meeting.
+    range: uriorcurie
+    multivalued: true
+    examples:
+      - value: https://w3id.org/ohim/profiles/us
+        description: a national profile a statement conforms to
+
+# ---------------------------------------------------------------------
+# ENUMS
+# ---------------------------------------------------------------------
+enums:
+
+  AliasKind:
+    description: >-
+      Whether an alias designates its entity or uniquely identifies it.
+      Values carry `meaning` into the SKOS scheme at
+      `codelists/alias-kind.ttl`, per ADR-000 D5 — the scheme is
+      versioned independently of this schema.
+    permissible_values:
+      designation:
+        description: >-
+          A name that designates the entity without establishing
+          identity. Two entities may share one; it may change without
+          the entity changing.
+        meaning: ohim:designation
+      authoritativeIdentifier:
+        description: >-
+          An identifier that uniquely designates the entity within the
+          scheme that issued it. Identity may be established from it
+          under a profile's declared precedence — ADR-001 question 2,
+          option B.
+        meaning: ohim:authoritativeIdentifier
+
+# ---------------------------------------------------------------------
+# CLASSES — the fragment's nine.
+#
+# ROLE, NOT SUBTYPE (ADR-002 Decision B): no class here is named for a
+# role something plays. There is no `Observer`, no `Resource`, no
+# `ExposedElement`. An `Asset` that appears in an exposure relation and
+# in an assignment relation is one `Asset`.
+# ---------------------------------------------------------------------
+classes:
+
+  Entity:
+    description: >-
+      Anything this model identifies and can say something about. The
+      abstract root: it carries identity and aliasing and nothing else,
+      so that every concrete entity inherits exactly one identifier slot
+      and one alias relation.
+
+      `is_a` depth stops at one throughout this fragment — mixins and
+      slot reuse are preferred, and depth beyond two is drift (C4, C6).
+    abstract: true
+    slots:
+      - id
+      - alias
+      - partOf
+      - validDuring
+    examples:
+      - value: any identified thing — an aircraft, a zone, a crew, an assertion
+        description: the root every concrete entity specialises
+
+  Identifier:
+    description: >-
+      **The reified alias relation**, carrying all six positions ADR-001
+      settles: the entity (via `Entity.alias`), the value, the scheme,
+      the issuing authority, the kind, and the time asserted.
+
+      A31 measures this translation as ONE class — the same class count
+      A1 filed for `Identifier`, plus two slots — because `NameType`
+      becomes a SKOS scheme (A38) and `NamingAuthority` becomes `Agent`
+      (A37). It is not a subtype of `Entity`: an alias is a statement
+      about an entity, not another entity.
+    slots:
+      - identifierValue
+      - identifierScheme
+      - issuingAuthority
+      - aliasKind
+      - assertedTime
+    examples:
+      - value: an IRWIN identifier issued by one agency and republished by another
+        description: the case three flat slots cannot express
+
+  Agent:
+    description: >-
+      Something that can act, or be responsible. Covers persons,
+      organizations, crews and automated systems — ADR-002 Decision A.
+
+      **No required identifying attributes** (ADR-002 Decision D). Named
+      individuals pull in PII, and a profile must be able to constrain
+      an agent to pseudonymous or role-only. The core stays usable with
+      a person reduced to *an agent that filled a position*.
+    class_uri: prov:Agent
+    is_a: Entity
+    exact_mappings:
+      - prov:Agent
+    examples:
+      - value: a dispatch centre, an incident commander, an automated feed publisher
+        description: agents of three different kinds, one class
+
+  Asset:
+    description: >-
+      A physical thing that is deployed, assigned, exposed or damaged.
+      Equipment, vehicles, aircraft, sensors, facilities, infrastructure.
+
+      **Binds no external class.** ADR-002's row left this contested and
+      ADR-006 removed the SOSA candidates: `Platform` and `Sensor` are
+      role classes, and binding an entity to a role class is the error
+      ADR-002 Decision B forbids. The role is carried by the relation
+      the asset appears in.
+    is_a: Entity
+    slots:
+      - isHostedBy
+    examples:
+      - value: an air tanker, a stream gauge, a substation
+        description: assets that play different roles in different relations
+
+  Place:
+    description: >-
+      A location or extent something is at, or that an authority governs.
+      Zones, jurisdictions, facilities, sampling locations.
+
+      **Does not bind `sosa:FeatureOfInterest`** — ADR-006 Decision B.
+      That is a role class: a place is the feature of interest of an
+      observation only while participating in one, and typing it so
+      makes the role permanent.
+    is_a: Entity
+    slots:
+      - hasGeometry
+      - elevation
+    examples:
+      - value: a fire perimeter, an evacuation zone, a gauge location
+        description: places, some governed and some merely located
+
+  Activity:
+    description: >-
+      An act performed in producing data or decisions — an observation
+      act, an assignment, a warning issuance.
+
+      **Does not carry hazard events** (ADR-006 Decision A). A wildfire
+      is a well-formed `prov:Activity` and PROV-DM does not exclude it;
+      the ground is that this class's members are acts performed in
+      producing data, and a hazard event is a SUBJECT those acts are
+      about. What carries a hazard is Part 1 and is not decided here.
+    class_uri: prov:Activity
+    is_a: Entity
+    exact_mappings:
+      - prov:Activity
+    examples:
+      - value: the retrieval that produced a perimeter, the issuance of a warning
+        description: acts, not the situations they concern
+
+  Statement:
+    description: >-
+      A reified assertion, with the provenance that qualifies it.
+      ADR-004 Decision B: four slots had no carrier among the fragment's
+      classes, and `prov:Entity` is the thing PRODUCED rather than the
+      act producing it — an assertion is a thing produced.
+
+      **Not a role.** It is not `Observer` or `Reporter`; it is a
+      distinct kind of thing that participates in relations, which is
+      what a Part 0 entity is. The role-not-subtype rule applied, not an
+      exception to it.
+    class_uri: prov:Entity
+    is_a: Entity
+    slots:
+      - wasAttributedTo
+      - sourceVerificationTier
+      - operatingMode
+      - modelVersion
+      - profileConformance
+    exact_mappings:
+      - prov:Entity
+    examples:
+      - value: a published perimeter, with its source tier and the model that made it
+        description: what was asserted, distinct from the act of asserting
+
+  TemporalExtent:
+    description: >-
+      An interval, with an optional end. The carrier for every relation
+      in this model that is only true over a period — `partOf` first,
+      and whatever Part 1 and Part 5 add.
+
+      Bound to OWL-Time by slot rather than by class: `time:Interval`
+      would be an equivalence claim this fragment has not tested, and
+      one `exact_mappings` entry per class is the limit.
+    slots:
+      - hasBeginning
+      - hasEnd
+    examples:
+      - value: an operational period, open at the end while it is running
+        description: an interval whose end is genuinely unknown
+
+  Geometry:
+    description: >-
+      A spatial geometry. Binds GeoSPARQL's class and carries its WKT
+      serialisation; the CRS travels inside the literal, so this class
+      declares no datum slot of its own.
+    class_uri: geo:Geometry
+    slots:
+      - asWKT
+    exact_mappings:
+      - geo:Geometry
+    examples:
+      - value: a polygon serialised as WKT with a CRS84 prefix
+        description: geometry as GeoSPARQL mints it
