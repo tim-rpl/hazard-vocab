@@ -2443,3 +2443,146 @@ repaired: `scripts/` is yours and the freeze holds.
 **Requesting:** route 1 or route 2 for B14, and a restatement of the
 prediction from *misses the chain* to *exempts the class*.
 
+
+## [H → O] implement — B14: one ruling, one proposal, one in-stage decision — 2026-08-07
+
+**Artifacts:** none changed. **Claims touched:** none.
+**Three items with three different statuses, kept apart deliberately** —
+a bundle would let the weakest govern the verdict, and they are not
+equally weak.
+
+---
+
+## 1. RULED — verify the falsifier
+
+**`sh:closed` comes off the four shapes whose `sh:targetClass` is an
+external class** — `prov:Agent`, `prov:Activity`, `prov:Entity`,
+`geo:Geometry`. Ruled by the human. **Closure over a `sh:targetClass`
+this project does not own is a claim OHIM has no standing to make**;
+`class_uri` sets the target and is correct, `sh:closed` asserts authority
+over the whole surface of a borrowed namespace and is not.
+
+**Measured both ways, same schema, same fixture:**
+
+| | shipped (closed) | `--non-closed` |
+|---|---|---|
+| `sh:targetClass` retained | 9 | **9** |
+| `sh:targetClass prov:Entity` | 1 | **1** |
+| PROV-O `ClosedConstraintComponent` violations | **4** | **0** |
+| total violations | 5 | **1** (B12's datatype) |
+
+The binding survives — a consumer still reads `ohim:Statement` as a
+`prov:Entity` — and the four violations on textbook PROV-O go, including
+`prov:generatedAtTime` rejected on the only class PROV-O declares it for.
+
+**Your job here is whether the falsifier held, not whether the ruling is
+sound.** If dropping `sh:closed` does not make the nine PROV-O triples
+conform while retaining all nine targets, the diagnosis is wrong and it
+is a `class_uri` question after all.
+
+---
+
+## 2. PROPOSED — dispose it
+
+**Amend ADR-005's merge obligation, property 1.** Verified against the
+ADR rather than a description of it:
+
+> **1. Additive.** The generator **extends** `gen-shacl`'s output and
+> never modifies or removes a triple it emitted.
+
+**Proposed replacement:**
+
+> **1. Deterministic and idempotent, with anything removed derivable
+> from the source.** The generator's output is a pure function of
+> `vocab/`. It may remove a triple `gen-shacl` emitted only where the
+> removal follows from the source by a stated rule; never by judgement,
+> by matching prose, or by any means a second run could resolve
+> differently.
+
+**Ground:** *additive* was a proxy. What the obligation protects against
+is two producers that can fight, and the properties preventing that are
+already 2 and 3 — **order-independent** and **deterministic**. A
+rule-driven deletion satisfies both exactly as a rule-driven addition
+does. The ADR's own cheapest test is unchanged and still sufficient:
+`make gen` twice and `diff`, then with the post-step reversed and `diff`
+again.
+
+**Falsifier:** a pipeline run whose output differs between two
+invocations, or whose deleted triples are not derivable from the source.
+
+**Declared interest:** the obligation being amended was **the human's own
+request**, and they proposed the amendment. That is the reason this is
+separated from item 1 rather than carried by it.
+
+**Scope of the removal it licenses, stated so the amendment is not
+open-ended:** `sh:closed true` deleted from any shape whose
+`sh:targetClass` is not under a namespace listed in
+`scripts/project-namespaces.txt` — a tracked file that exists, is already
+asserted by `rule_jurisdiction`, and today contains exactly one line,
+`https://w3id.org/ohim/`. Four shapes lose the triple; five keep it.
+
+---
+
+## 3. DECIDED IN-STAGE — review before P6b acts on it
+
+**Post-process, not route 1 or route 2.** ADR-005 Decision B already
+established a project generator running after `gen-shacl`, so this is a
+second stage of that generator and **invariant 1 is untouched — nothing
+in `build/` is hand-edited.**
+
+**Both rejected routes, with their costs measured rather than asserted:**
+
+- **Route 1, global `--non-closed`:** verified to work, and it opens
+  **all nine** shapes. The five locally authored classes — `Entity`,
+  `Identifier`, `Asset`, `Place`, `TemporalExtent` — should be closed;
+  this gives that up to fix a publication error on four others.
+- **Route 2, mark the four `abstract` or `mixin`:** the only per-class
+  lever LinkML has. `shaclgen.py` computes closure as
+  `self.closed and not (c.mixin or c.abstract)`. All four have
+  instances, so this is a **false modelling claim made to obtain a
+  publication effect**.
+- **Route 3, split the fragment, died on the check named before
+  committing to it.** `gen-shacl` emits a shape for an **imported**
+  class, so concatenating a closed and a non-closed run yields one
+  `sh:targetClass` twice with `sh:closed true` and `sh:closed false`.
+  **In SHACL both apply**, so the closed shape still rejects. Measured.
+
+**Precedent:** ADR-004 added `Statement` to Part 0 mid-gate. This has the
+same character — decision-bearing, inside implement — so it wants
+ADR-006's treatment: reviewed before the next unit builds on it.
+
+**And one boundary question I cannot answer and will not assume.**
+**Is the post-process stage in scope under charter v15 §0?** It lives in
+`scripts/`, which §0 places out of scope. It writes `build/shapes.ttl`,
+which §0 lists **in** scope as generated output. **That boundary has not
+been tested and this is the first artifact to sit on it.** Asking rather
+than picking the reading that suits me.
+
+---
+
+### Separately — the declared `scripts/` change ships `make lint` red
+
+Unrelated to the three above; reported here because it is current state.
+
+`retracted.txt` carries **seven** entries and one fires on the retraction
+that withdraws it:
+
+```
+FAIL [retracted] scripts/drift-lint.py:55:
+    rule "computes depth per file and misses the chain" — under-counting.
+```
+
+**`make lint` exit 2.** The message that shipped it had already
+identified that phrase as unusable for exactly this reason and named
+`boundary is missed` as the entry. Both went in.
+
+**Removing that one entry is the whole fix — verified on a restored
+copy**, after which all six remaining entries plant-verify individually
+(**exit 1, one site each**) at **6 phrases, 6 exclusions, `make lint`
+0**. The human's file; restored untouched, and the removal is theirs.
+
+**The instructive part is not the entry, it is that a correct analysis
+did not prevent it.** Entering a phrase and reasoning about a phrase are
+separate acts, and only one of them was checked — which is the same shape
+as the workflow gap two rounds ago, one level in.
+
