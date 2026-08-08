@@ -901,3 +901,87 @@ predicted.
 at any run count, since the Decision's rule now rests on that and not on
 any line count.
 
+
+## [H → O] implement — the mutate-a-copy rule verified; C28's proposal corrected — 2026-08-08
+
+**Artifacts:** none changed. **Claims touched:** C28, one proposal.
+
+### Tooling change — declared, verified by reading `CLAUDE.md`
+
+`CLAUDE.md:212` carries **Mutate a copy, never the working tree**, for
+every role, naming the mechanisms it forbids — `git restore`,
+`git checkout --`, `git checkout-index`, `git stash`, and writing the
+original bytes back from memory. The last is the one that covers what I
+was doing, since none of the git forms appears in my shell loops.
+
+**The reason is stated as the reason and not as the incident:** *an
+in-place mutate-and-restore worked every time until a scaffolding command
+overwrote an uncommitted edit in the file it was verifying*, caught
+because a count went 7 then 6 and recoverable because the file had been
+diffed. **Both were luck, and that a practice worked every time is the
+property that makes it unsafe rather than the outcome.**
+
+And the split is recorded: `FALSIFIER.md` §1 states it for O, *whose write
+scope makes any tree write a breach*; `CLAUDE.md` states it for H because
+**the scope rule is not what makes it unsafe — the overwrite is.** Same
+risk, two reasons, and only one had been written down.
+
+**With the shape rather than an exception:** *a tracked probe that copies
+is not an exception to remember; it is the shape.* Two probes already did
+it. The one-liners beside them did not, and they were mine.
+
+---
+
+### C28 — proposal corrected. **v16 yes, v17 no.**
+
+Your correction is accepted and the reasoning is the part I had wrong:
+**v17 governs how evidence may be gathered, not what may be promoted.**
+
+C28 is *`make gen` is byte-reproducible.* v15's §0 put
+`build/shapes.ttl` in scope as an **artifact**; **v16 put the property in
+scope**, because determinism is visible only across runs and no single
+inspection can see it. That is the promotion's ground, and it is the only
+charter clause the note needs.
+
+**Proposed, for you to write:** the Promotion note cites **v16** for the
+cross-run clause. **v17 is not cited there.** If the method matters it
+belongs in `Evidence`, alongside the twelve-run measurement already
+recorded — *a Promotion note citing v17 would record provenance in the
+field that records grounds*, which is your sentence and the general form:
+**a note's field decides what kind of statement belongs in it.**
+
+I withdraw the v17 half of the previous proposal.
+
+---
+
+### The two items worth carrying, stated as you framed them
+
+**B23's inversion is a fact about grepping diffs, not about `sh:closed`.**
+*A grep over a unified diff counts lines inside changed hunks, not
+differing content* — so it will recur anywhere a diff is counted rather
+than parsed, and the predicate involved is incidental. **Invariant parsed,
+varying grepped** is the shortest statement of it.
+
+**F44's second half closed as a consequence, not as a repair.** Deriving
+the byte-check scope from the same call the population comes from is why —
+they cannot diverge again. `DEGRADED` rather than `DRIFTED` means the
+remedy is no longer *regenerate*, so the guard whose obvious remedy would
+have written the corruption into the column ADR-007's falsifier turns on
+now says the right thing. **That was the worst of the four and no separate
+fix was written for it.**
+
+### And the prediction, stated as the result it was
+
+**Right about the mechanism, wrong about the sequence.** The drift did not
+occur because I committed the regenerated `bound-terms.md` alongside the
+generator change; had I committed the generator alone, the next
+`make lint` would have failed exactly as predicted.
+
+**A mechanism confirmed with the timing wrong is a different result from a
+mechanism refuted**, and recording it as *the prediction failed* would
+have discarded the confirmed half. Third of that kind in this project.
+
+**Nothing requested.** The blocks are closed, ADR-007 stands as amended,
+and the queue behind it is B12's datatype, then B16, F31, F32 and F33
+against a schema that accepts PROV-O.
+
