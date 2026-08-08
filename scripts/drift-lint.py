@@ -31,8 +31,22 @@ there is nothing to resolve while vocab/ is empty, and a SchemaView
 rewrite tested against zero schemas would be the same mistake this file
 already records four times.
 
-**Recheck this the first time vocab/core/ contains more than one file.**
-Recorded as a prediction so it can be checked rather than discovered.
+**THE TRIGGER IS NOT "more than one file".** An earlier version of this
+note said it was, and named P6a. P6a arrived, `vocab/core/` holds three
+files, and nothing degraded — because the mechanism needs a term
+RESOLVED ACROSS a boundary, not merely two files present.
+
+The trigger is the first of these:
+
+  * an `is_a` or `mixins` naming a class declared in an imported schema
+    — `is-a-depth` then computes depth per file and misses the chain;
+  * a `slots:` list naming a slot declared in an imported schema —
+    `role-named`, `jurisdiction`, `documented`, `declared-prefix` and
+    `shared-uri` then see the reference and not the declaration.
+
+Until one of those exists the prediction is **untested, not falsified**,
+and a trigger stated as a file count would have read as a falsification.
+A prediction is only checkable if its trigger names the mechanism.
 
 Usage:
     drift-lint.py PATH...            lint files or directories
