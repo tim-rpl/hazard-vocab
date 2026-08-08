@@ -3757,30 +3757,46 @@ its cheapest test and its idempotence test.
   it is not CPython hash randomisation. Consecutive runs differ by 216
   lines under `diff`.
 
-  **The cause is a single construct.** All 341 triples are present in
-  every run and every `(shape, sh:path, sh:order)` triple is stable
-  across runs — 36 of 36 identical. The whole variation is the **member
-  order of the 9-element `sh:ignoredProperties` list on the
-  `ohim:Entity` shape**. Removing `sh:ignoredProperties` together with
-  its `rdf:first`/`rdf:rest` cells leaves 294 triples that are
-  **identical across all three runs**.
+  **The cause of the *graph* variation is a single construct.** All 341
+  triples are present in every run and every `(shape, sh:path,
+  sh:order)` triple is stable across runs — 36 of 36 identical. The
+  whole graph-level variation is the **member order of the 9-element
+  `sh:ignoredProperties` list on the `ohim:Entity` shape**. Removing
+  `sh:closed`, `sh:ignoredProperties` and the `rdf:first`/`rdf:rest`
+  cells reachable from the latter — 52 triples — leaves 289 that are
+  **isomorphic across all six runs**.
 
   So the graph is semantically stable — `sh:ignoredProperties` is
   set-valued in SHACL and no validation verdict changes — and the
   claim is nonetheless false, because byte-identity under `diff` is
   what ADR-005 states and what the test performs.
 
-  **Why this is not merely bookkeeping.** The nondeterministic triple
-  is `sh:ignoredProperties`, which is one of the two triples ADR-007's
-  rule deletes from every shape. The run-pair test therefore fails
-  today and will pass once the stage lands — for a reason that has
-  nothing to do with whether the stage is deterministic. Its only
-  demonstrated failure mode is removed by the thing it exists to
-  verify, so it would be recorded as passing without ever having been
-  shown capable of failing. That is [C22](#c22)'s shape — an instrument
-  is not evidence until it has been probed against its own failure mode
-  — sitting inside an ADR obligation rather than inside a script.
-- **Updated:** 2026-08-07
+  **2026-08-07, second measurement — the byte variation is NOT confined
+  to that construct, and the paragraph this replaces said it was.** Of
+  the 170 lines by which two consecutive runs differ, **0 contain
+  `sh:closed` and 2 contain `sh:ignoredProperties`**; 34 contain
+  `sh:path` and 28 contain `sh:order`. The `sh:property` blank-node
+  blocks are serialised in a different order every run — invisible to
+  isomorphism, because the property shapes are an unordered set.
+
+  Measured after the full deletion, by two independent stage
+  implementations so the result does not rest on a serialiser choice:
+  `gen-shacl` → rdflib stage gives **six distinct hashes over six
+  runs** (164 differing lines, worst pair), and `gen-shacl` → a plain
+  `grep -v` line deletion gives **six** as well (168 lines).
+
+  **What this retracts.** The earlier evidence said the run-pair test
+  *"fails today and will pass once the stage lands"*, and drew
+  [C22](#c22)'s shape from it — an instrument whose only demonstrated
+  failure mode is removed by the thing it exists to verify. **That is
+  false.** The test fails today and keeps failing after the stage
+  lands, because the deletion removes the graph variation and not the
+  byte variation. The claim's status is unaffected — it was and remains
+  `falsified` — but the reason a pipeline-level byte test cannot serve
+  is the opposite of the one recorded: not that it goes green for the
+  wrong reason, but that it cannot go green at all without a change to
+  `gen-shacl`'s serialisation, which no post-process deletion makes.
+- **Updated:** 2026-08-07 (evidence corrected; status unchanged)
 - **Promotion note:** minted by O under FALSIFIER §6 at the ADR-007
   implement gate, 2026-08-07. Not proposed by H; the statement, the
   Falsifier and the test are O's, which §1 permits for an entry O mints
