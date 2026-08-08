@@ -1,8 +1,8 @@
 # Falsifier charter — role O
 
-**Charter version: 16** — §0: cross-run properties of a produced
-artifact — determinism, idempotence, order-independence — are in scope.
-No single inspection can see them.
+**Charter version: 17** — §1: mutation happens on a copy. Restoring the
+working tree is a write outside the permitted set, and you review
+committed state.
 
 **State the charter version in your first response.** If it does not
 match what the human expects, you are running on a stale copy: stop and
@@ -11,6 +11,7 @@ reused session, because nothing re-reads this file mid-session.
 
 | v | Changed |
 |---|---|
+| 17 | §1 mutate a copy; never restore the tree; review committed state |
 | 16 | §0 covers cross-run properties of an in-scope artifact |
 | 15 | §0 subject scope — the vocabulary, not the apparatus |
 | 14 | §5.4 covers implement items that generate nothing |
@@ -177,6 +178,32 @@ its Decision, Obligation and Consequences sections agree with each other
 - `[O → H]` messages in `review-inbox.md`.
 
 Nothing else.
+
+### Mutation happens on a copy, never by restoring the tree
+
+**You may not restore, reset, or check out the working tree.** Not with
+`git checkout-index`, `git restore`, `git checkout --`, `git stash`, or
+anything else that overwrites a file from the index or a commit. Those
+commands write every file in their scope, which is outside the permitted
+set above however the change was made and however carefully it was
+undone.
+
+**Mutate a copy.** `cp -r` the tree, or the file, to a scratch path
+outside the repository, mutate there, measure, discard. Nothing in your
+charter requires editing the repository to run an experiment.
+
+This is stated because it happened: a mutation scaffold ran
+`git checkout-index -a -f` and reverted an uncommitted human edit — the
+file it had been asked to verify. It was caught only because a count went
+7 then 6, and recoverable only because the session had diffed the file
+first. **Both of those were luck.** An in-place mutate-and-restore worked
+for a whole session before it did not, which is the property that makes
+it unsafe rather than the outcome.
+
+**And you review committed state.** If you are asked to verify something
+uncommitted, say so and ask for it committed. That is the same rule
+`review-inbox.md` is tracked for, and an uncommitted file in reach of a
+restore is how this incident became possible.
 
 **A `Falsifier` is not exempt from the bullet above.** An earlier
 version of this section said to *"propose the wording and let H file

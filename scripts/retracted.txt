@@ -114,3 +114,4 @@ they are ONE document	2026-08-07	ADMS identity, pass 1 — cmp-identical bytes l
 one document by construction today	2026-08-07	ADMS identity, pass 2 — a 307 is declining to serve, not absence
 first multi-file	2026-08-07	the imports-prediction trigger, restated to the mechanism
 boundary is missed	2026-08-07	the imports prediction, tested 2026-08-07 and confirmed as exemption, not under-counting
+predicate set an external vocabulary can enlarge	2026-08-07	ADR-007 F39 — the generalisation from binding to enlargeability; one of four bound terms has a superproperty
