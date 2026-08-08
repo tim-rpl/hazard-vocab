@@ -44,6 +44,15 @@
 # appears in both the claim and both retractions of it and is useless;
 # `first multi-file` appears only in the claim and is the entry.
 #
+# THE THIRD PROPERTY HAS ONE EXCEPTION, AND TWO ENTRIES BELOW RELY ON IT.
+# If the retraction lives in an EXCLUDED path, the quoting does not
+# matter and the obvious phrase is a valid entry. Both ADMS-line entries
+# appear verbatim in the message that withdrew them — the protocol
+# requires a withdrawal to index its sites by quoted opening phrase — and
+# they pass only because `review-inbox.md` is excluded. That is the
+# interaction between this rule and exclusion 1, not a defect in either
+# entry, and it is the reason both survive.
+#
 # ENTER THE SHORTEST DISTINCTIVE SUBSTRING, not the full markup-bearing
 # string. The same claim in two typographic forms is two byte sequences —
 # `` `CLAUDE.md`'s ADMS line `` and CLAUDE.md's ADMS line differ — and a
@@ -87,4 +96,8 @@
 # written into an excluded path is invisible to this instrument, and no
 # match-direction fixture can show that. See
 # scripts/sweep-fixtures/README.md.
+ADMS line needs no disambiguation	2026-08-07	the ADMS conclusion; CLAUDE.md has never named ADMS (B9)
+ADMS line has to say which one is meant	2026-08-07	the ADMS conclusion; CLAUDE.md has never named ADMS (B9)
+they are ONE document	2026-08-07	ADMS identity, pass 1 — cmp-identical bytes licenses agree today
+one document by construction today	2026-08-07	ADMS identity, pass 2 — a 307 is declining to serve, not absence
 first multi-file	2026-08-07	the imports-prediction trigger, restated to the mechanism

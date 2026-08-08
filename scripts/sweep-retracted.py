@@ -130,7 +130,16 @@ def phrases(path: pathlib.Path) -> tuple[list[str], list[str]]:
                    "missing, and an entry that cannot be dated cannot be "
                    "audited when it stops firing."))
             continue
-        out.append(line.split("\t")[0].strip())
+        phrase = line.split("\t")[0].strip()
+        if phrase in out:
+            problems.append(
+                f"{path.name}:{n} repeats a phrase already entered above. "
+                f"The workflow is `>>` and a whole-file replacement can "
+                f"re-append a block that is already present — measured, "
+                f"and it inflates the phrase count without adding "
+                f"coverage")
+            continue
+        out.append(phrase)
     return out, problems
 
 
@@ -143,11 +152,7 @@ def sweep(pats: list[str], root: pathlib.Path,
         fh.write("\n".join(pats) + "\n")
         pf = fh.name
     try:
-        # `-i`: a retracted phrase reintroduced with different casing is
-        # the same claim. Case-sensitive matching was B11's half that
-        # could admit something; the wrap half is a matcher change and is
-        # out of scope under charter v15 §0 until something is missed.
-        cmd = ["git", "grep", "-n", "-i", "-F", "-f", pf, "--"] + \
+        cmd = ["git", "grep", "-n", "-F", "-f", pf, "--"] + \
               [f":!{e}" for e in exclude]
         r = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
         return [l for l in r.stdout.split("\n") if l.strip()]
