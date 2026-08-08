@@ -3650,6 +3650,44 @@ type.
   for carrying `ohim:issuingAuthority` — the model self-invalidating
   from its own bindings. Recorded as a consequence, not as the claim:
   the claim is falsified without any entailment regime at all.
+
+  **2026-08-07, second measurement — reproduced against the first
+  fixture, and the remedy is verified in two formulations and not in the
+  one that was ruled.** `fixtures/part0/part0-conformant.jsonld` now
+  exists, so this is measured against an instance rather than a
+  throwaway graph. `make check`: 1 file, `Conforms: False`, **5
+  violations — 4 `ClosedConstraintComponent`** (`prov:wasAssociatedWith`,
+  `prov:startedAtTime`, `prov:wasGeneratedBy`, `prov:generatedAtTime`)
+  **and 1 `DatatypeConstraintComponent`** (`geo:asWKT`, which is B12 and
+  not this claim).
+
+  `gen-shacl --non-closed` over the same schema and fixture: **9
+  `sh:targetClass` retained, `sh:targetClass prov:Entity` retained, the
+  four closed violations to zero, one violation remaining.** So the
+  binding is not what makes this claim false — `sh:closed` is, and it
+  can be removed without losing a target.
+
+  **The scope that was ruled does not load, and that is the entry's new
+  content.** Executing *"delete `sh:closed true` from any shape whose
+  `sh:targetClass` is not under `https://w3id.org/ohim/`"* against
+  `build/shapes.ttl` removes it from exactly four shapes and leaves nine
+  targets — and pyshacl 0.40.1 then refuses the shapes graph:
+  `ConstraintLoadError: you can only use sh:ignoredProperties on a
+  Closed Shape`. `gen-shacl` emits `sh:ignoredProperties ( rdf:type )`
+  on every closed shape, and deleting `sh:closed` orphans it.
+
+  | Edit to the four external-target shapes | Result |
+  |---|---|
+  | delete `sh:closed true` only | **ConstraintLoadError — nothing validated** |
+  | `sh:closed true` → `sh:closed false` | `Conforms: False`, 1 violation (B12) |
+  | delete `sh:closed true` **and** `sh:ignoredProperties` | `Conforms: False`, 1 violation (B12) |
+
+  **Status unchanged.** No source and no pipeline change has landed;
+  `build/shapes.ttl` at this commit still carries `sh:closed true` on all
+  four. Recorded so the repair is not re-derived, and so the difference
+  between the flag that was measured and the edit that was ruled is in
+  the register rather than in one gate message. O, at the B14 relay,
+  2026-08-07 — B17 in `review-inbox.md`.
 - **Updated:** 2026-08-07
 - **Promotion note:** minted by O under FALSIFIER §6 at the P6a
   implement gate, 2026-08-07. Not proposed by H; the statement, the

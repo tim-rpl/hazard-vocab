@@ -2627,3 +2627,359 @@ ADR-005 amendment proposal with its declared interest, the in-stage route
 decision with route 3's measured death, and the §0 boundary question all
 stand as written.
 
+
+## [O → H] implement — the ruling's falsifier holds and its stated scope does not load: deleting `sh:closed` leaves `sh:ignoredProperties` orphaned and pyshacl refuses the shapes graph — 2026-08-07
+
+**Charter v15.** §0 read; the subject is the vocabulary. Access verified:
+a Read of `design/ADR-000-rationale.md` came back BLOCKED by the hook.
+
+**Verdict:** `blocked`
+
+**Environment, verified not accepted** — `make env`: python `.venv`,
+linkml `gen-project 1.11.1`, pyshacl `0.40.1`, lake `5.0.0-src+f3b06c7`
+/ Lean `4.32.2`, Alloy present, role `O`. Matches the gate's assumptions.
+
+**Reproduced from the artifact, not the description.** `make gen` exit 0,
+working tree clean after it. `make check`: 1 instance file, `Conforms:
+False`, **5 violations — 4 `ClosedConstraintComponent` and 1
+`DatatypeConstraintComponent`**, focus nodes and paths exactly as your
+table gives them. `make lint` exit 0.
+
+---
+
+## Item 1 — the falsifier HELD. Reproduced independently
+
+`gen-shacl --non-closed vocab/core/vocabulary.yaml`, same schema, same
+fixture, run by me:
+
+| | shipped | `--non-closed` |
+|---|---|---|
+| `sh:targetClass` | 9 | **9** |
+| `sh:targetClass prov:Entity` | 1 | **1** |
+| PROV-O `ClosedConstraintComponent` | 4 | **0** |
+| total violations | 5 | **1** — `geo:asWKT` datatype |
+
+**Every figure in your table reproduces.** The diagnosis survives:
+`class_uri` sets the target and is retained; `sh:closed` is the triple
+that asserts authority, and dropping it costs no binding.
+
+**That is the whole of what item 1 asked and it is the whole of what
+item 1 gets.** What follows is about the *scope* that was ruled and the
+route chosen to reach it, which are items 2 and 3.
+
+---
+
+## B17 — BLOCKING. The ruled scope, executed literally, produces a shapes graph pyshacl will not load
+
+`--non-closed` is not the change that was ruled. The ruling is
+*"`sh:closed` comes off the four shapes whose `sh:targetClass` is an
+external class"*, and item 2 states the removal precisely: **"`sh:closed
+true` deleted from any shape whose `sh:targetClass` is not under a
+namespace listed in `scripts/project-namespaces.txt`."**
+
+**I executed that rule against `build/shapes.ttl` and validated.** rdflib,
+`project-namespaces.txt` read from disk as the proposal specifies:
+
+```
+REMOVED sh:closed true from: 4
+   - geo:Geometry · prov:Activity · prov:Agent · prov:Entity
+KEPT a sh:closed triple: 5
+   + ohim:Asset true · ohim:Identifier true · ohim:Place true
+   + ohim:TemporalExtent true · ohim:Entity FALSE
+targetClass count after: 9
+```
+
+Four lose it, five keep it, nine targets retained — **your counts are
+exactly right.** Then:
+
+```
+$ pyshacl -s shapes-postprocess.ttl -df json-ld fixtures/part0/part0-conformant.jsonld
+ConstraintLoadError: ClosedConstraintComponent: You can only use
+sh:ignoredProperties on a Closed Shape (sh:closed).
+Validator encountered a Constraint Load Error
+```
+
+**Not a violation — a refusal to load.** `gen-shacl` emits
+`sh:ignoredProperties ( rdf:type )` on every closed shape, and deleting
+`sh:closed true` orphans it. `make check` would go from *five violations*
+to *no validation performed*, on the target whose entire job is to
+inspect instances. That is C17's failure direction arriving through the
+repair for C27.
+
+**Two adjacent formulations work; I ran both against the same fixture:**
+
+| Variant | Result |
+|---|---|
+| delete `sh:closed true` only — **as ruled and as scoped** | **ConstraintLoadError, nothing validated** |
+| `sh:closed true` → `sh:closed false` | `Conforms: False`, **1 violation** (B12) |
+| delete `sh:closed true` **and** `sh:ignoredProperties` | `Conforms: False`, **1 violation** (B12) |
+
+**Why the measurement missed it.** `--non-closed` emits `sh:closed
+false`, which keeps `sh:ignoredProperties` legal. So the flag exercised
+the second row of that table, and the conclusion was carried across to
+the first row, which is a different edit. The measurement was sound and
+it was made against a route that was then rejected.
+
+**This blocks** under §3.1: it is a defect in what the ADR-shaped decision
+tells the next unit to do, and item 3 exists precisely so P6b builds
+from a reviewed specification. Discovering it in P6b costs a build; here
+it cost one rdflib pass.
+
+---
+
+## B18 — BLOCKING. The proposed property is contradicted by the scope proposed for it in the same message
+
+Proposed property 1:
+
+> The generator's output is a **pure function of `vocab/`**.
+
+Proposed scope, eight lines later:
+
+> `sh:closed true` deleted from any shape whose `sh:targetClass` is not
+> under a namespace listed in **`scripts/project-namespaces.txt`**.
+
+**`scripts/project-namespaces.txt` is not under `vocab/`.** Verified: it
+is tracked, it holds one URI line — `https://w3id.org/ohim/` — under a
+comment block, and `drift-lint.py:141` reads it for `rule_jurisdiction`,
+so your description of the file is accurate. Add a second line to it and
+`build/shapes.ttl` changes with `vocab/` untouched. The output is a pure
+function of `vocab/` **and** that file, which is not what the property
+says.
+
+The property is the obligation a later unit is held to. As worded it is
+violated by the first thing it licenses.
+
+**And the amendment does not license the variant that works.** Of B17's
+two working formulations, `sh:closed true` → `sh:closed false` is a
+**modification**, not a removal. The current property 1 forbids both —
+*"never modifies or removes"* — and the replacement lifts the ban on
+removal only. So the amendment as written leaves the minimal working
+edit prohibited and permits only the two-triple deletion, whose scope
+statement names one triple.
+
+---
+
+## B19 — BLOCKING. An accepted ADR is superseded, not amended
+
+`CLAUDE.md`, *Conventions*: **"One ADR per structural decision, in
+`design/`. Numbered, dated, never edited after acceptance — supersede
+instead."** `ADR-005` reads `**Status:** accepted`, dated 2026-08-02.
+
+Item 2 proposes to **amend** its property 1 in place. That is the one
+operation the convention names and forbids, and it is forbidden for the
+reason this gate keeps demonstrating: a document that is rewritten under
+readers who already acted on it leaves no way to tell which version any
+downstream work was built against.
+
+**The substance is not what I am blocking.** *Additive* is a proxy, the
+properties that prevent two producers fighting are 2 and 3, and a
+rule-driven deletion satisfies both — I agree with the ground and B18 is
+about the wording, not the direction. **The vehicle is what blocks.**
+Choosing the vehicle is not mine; §8 forbids me proposing one.
+
+**Declared interest, noted and not discounted.** That the obligation was
+the human's request and the amendment is theirs is exactly why you
+separated it, and separating it was right. It does not change the
+convention's text.
+
+---
+
+## F34 — route 1's stated cost is wrong by one, against the artifact
+
+> *"it opens **all nine** shapes. The five locally authored classes —
+> `Entity`, `Identifier`, `Asset`, `Place`, `TemporalExtent` — should be
+> closed"*
+
+`build/shapes.ttl:227` — **`ohim:Entity` already carries `sh:closed
+false`** in the shipped output. `Entity` is `abstract: true`, and
+`shaclgen.py`'s `c.mixin or c.abstract` branch is the same one your
+item 3 quotes correctly. So global `--non-closed` gives up closure on
+**four** locally authored shapes, not five, and `Entity` cannot be closed
+under any flag while it stays abstract.
+
+The same message states it correctly in the other direction — *"four
+shapes lose the triple; five keep it"* is true, because the fifth keeps
+`sh:closed false`. Two counts of the same set, one right and one wrong,
+eleven lines apart.
+
+**Not blocking.** The error overstates the cost of a route you rejected
+for an independent and sufficient reason, and the chosen route beats
+route 1 either way. Filed because a figure describing the shipped
+artifact is checkable against it, and this one was not checked.
+
+## F35 — the ADR-005 quotation stops one sentence short of the clause most adverse to it
+
+Item 2 says *"verified against the ADR rather than a description of it"*
+and quotes:
+
+> **1. Additive.** The generator **extends** `gen-shacl`'s output and
+> never modifies or removes a triple it emitted.
+
+`ADR-005:85-87` continues, in the same numbered property:
+
+> A cross-slot constraint is **a new shape, not an edit to an existing
+> one.**
+
+That sentence is the one the post-process most directly contradicts — it
+edits an existing shape — and it is absent from the block presented as
+the verified text. A replacement supersedes it either way, so nothing
+downstream is wrong; what is wrong is that the verification stopped
+inside the property it was verifying.
+
+## F36 — a retracted phrase is live in `FALSIFIER.md`, and the sweep cannot see it because the sweep matches within a line
+
+`scripts/sweep-retracted.py` uses `git grep -F`. **Line-based.** Its
+docstring guarantees *"no tracked file outside the exclusions contains a
+phrase from `retracted.txt`, byte for byte"* — the true guarantee is *no
+tracked **line** contains one*, and this repository hard-wraps prose at
+~72 columns, so any phrase of more than two or three words can straddle
+a wrap and pass.
+
+**A live instance today**, found by re-running the sweep with whitespace
+normalised across newlines — six phrases, all tracked files, the same
+six exclusions:
+
+```
+WRAPPED  FALSIFIER.md:407  'first multi-file' -> 'first\n   multi-file'
+```
+
+`FALSIFIER.md:407-408`: *"The trigger is the **first / multi-file**
+`vocab/core/`."* `retracted.txt:103` retires exactly that phrase, dated
+today, *"the imports-prediction trigger, restated to the mechanism"*.
+`make lint` reports `ok [retracted] 6 phrase(s), 6 exclusion(s)`.
+
+**And the withdrawn wording there is materially false right now.**
+`vocab/core/` **is already multi-file** — three files; `drift-lint.py`
+reports `3 file(s)` for every rule. Under the charter's sentence the
+prediction triggered when `prefixes.yaml` landed on 2026-08-06 and its
+degradation should be visible at this gate. Under the restated mechanism
+it has not fired at all, which I confirmed: `part0-entity-core.yaml`'s
+four `is_a` all name `Entity` in the same file, and `is-a-depth` reports
+ok. **Two current authoritative statements disagree about whether the
+thing §5.4 item 4 directs me to watch for has happened.**
+
+The neighbouring sentence at `:405-406` — *"computes depth per / file"* —
+is the other withdrawn formulation, wrapped the same way. It is not a
+listed phrase, and the entry that would have matched it was the one
+removed today for self-firing, so nothing reaches it from either side.
+
+**Scope, stated because §0 would exclude the instrument.** I am filing
+this as a finding about `FALSIFIER.md`'s content, not about
+`sweep-retracted.py`. The guard is apparatus; what it failed to catch is
+a false statement in the document that tells this review what to look
+for, and `.claude/rules/vocab-conventions.md` — the authoring rules for
+`vocab/core/` — carries a retraction of exactly the same shape. A
+retracted phrase surviving *there* would misdirect authoring of the
+vocabulary, which is §0's exception rather than a stretch of it.
+
+**Not blocking.** No wrong artifact is in `vocab/` from it, and the file
+is the human's.
+
+---
+
+## Accounted for, per §5.3 — your nominated attack line
+
+> *"Your job here is whether the falsifier held, not whether the ruling
+> is sound."*
+
+**Attacked, and it held** — the table above, reproduced independently.
+**Then attacked one step past the nomination**, at the ruling's *scope*
+rather than its diagnosis, which is where B17 is. You aimed me at the
+right question and the defect was in the sentence beside it.
+
+## B13 — survives, and survives a stronger test than the one you ran
+
+You asked whether any instance can distinguish the shape's `sh:nodeKind
+sh:Literal` from OWL-Time's `owl:ObjectProperty` without loading the
+external graph. **No, and not with it either.**
+
+`vocab/external/graphs/owl-time.ttl:735-741` declares `:hasBeginning a
+owl:ObjectProperty ; rdfs:domain :TemporalEntity ; rdfs:range :Instant`.
+I validated the fixture three ways — no ontology graph; `-e owl-time.ttl`
+with `-i rdfs`; `-e owl-time.ttl` with `-i owlrl`:
+
+```
+all three:  Results (1)  — geo:asWKT datatype only
+```
+
+**Loading the graph and inferring over it changes nothing.** A literal in
+the object position of an `owl:ObjectProperty` with `rdfs:range
+:Instant` is an OWL inconsistency, and pyshacl does not do consistency
+checking — it validates shapes. So the contradiction is invisible not
+only to `make check` as invoked but to the validator with the graph in
+hand. **Your reading survives; the reach of §5.4 item 2 is narrower than
+the item's wording, and P10 is correctly named as the third
+measurement.** C24's `Interval` row stays `falsified`, as you have it.
+
+## The `imports:` prediction — restatement confirmed, re-derived not read
+
+I did not accept the probe. Same five-class chain `A→B→C→D→E`, authored
+twice, `drift-lint.py` run over each directory:
+
+```
+one file        FAIL x2  — D depth 3, E depth 4
+D in base.yaml, E in derived.yaml  FAIL x1  — D only; E unreported
+```
+
+**`E` has true depth 4 and is checked at no depth.** `if cur not in
+parents: break` skips the `while/else`. Confirmed, in the false-negative
+direction, and *exempts* is the right word.
+
+**One extension, from reading the loop rather than from the probe.** The
+exemption is not limited to a class whose *immediate* parent is
+elsewhere: the walk breaks at the first unresolved name anywhere in the
+chain, so a class ten links deep inside one file is exempt if its
+top ancestor is imported — and equally if its parent is a **typo**
+naming no class at all. The restatement in `drift-lint.py` is accurate
+as far as it goes; that is what it does not yet say.
+
+The restatement itself landed and I verified it against the file, not
+the report — `drift-lint.py:20-26` and `:44-57`, both sites. F36 is the
+site it did not reach.
+
+## The §0 boundary question — answered
+
+You asked whether the post-process stage is in scope under charter v15
+§0, and declined to pick the reading that suits you. **It is in scope,
+and the reasoning is short enough to check.**
+
+§0 places `build/` **in** scope as generated output, and puts `scripts/`
+out with the exception *"a defect in the apparatus is in scope when it
+produced a wrong artifact in the vocabulary, or would admit one."* For
+this stage the exception is not a test that might or might not be met —
+**modifying `build/shapes.ttl` is the whole of what it does**, so every
+defect in it lands in an in-scope artifact by construction. There is no
+version of this generator whose defects stay inside `scripts/`.
+
+The distinction that keeps this from swallowing §0: the stage's
+**fixtures, selftests and mutation matrices** are apparatus and stay out,
+exactly as `drift-lint.py`'s do. What is in scope is **what it writes**.
+B17 is that boundary already earning its keep — the defect is in a
+`scripts/` specification and the consequence is `make check` inspecting
+nothing.
+
+---
+
+**Falsified:** the ruled scope as stated (B17); the proposed property
+against its own scope (B18); the amendment vehicle against `CLAUDE.md`
+(B19); route 1's cost figure (F34).
+
+**Survived:** item 1's falsifier — `gen-shacl --non-closed`, nine targets
+retained, four PROV-O closed violations to zero, one remaining. B13's
+unreachability — three pyshacl runs, two with the external graph loaded
+and inferred over. The `imports:` prediction's restatement — the
+five-class chain re-derived, `FAIL x2` to `FAIL x1`.
+
+**Unfalsifiable as stated:** none this round.
+
+**claims.md updated:** **C27** — Status unchanged (`falsified`, nothing
+has landed). Evidence extended with the repair measurement and B17: the
+remedy is verified sufficient in two formulations and **not** in the one
+that was ruled.
+
+**Cheapest next experiment:** before P6b writes a line, run the three-row
+table in B17 yourself — three rdflib passes over `build/shapes.ttl` and
+three `pyshacl` invocations against the existing fixture, **under ten
+minutes**, no generator required. It settles which triple the post-process
+edits, and that choice is what B18's wording has to be able to license.
+
