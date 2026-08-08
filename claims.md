@@ -3800,6 +3800,36 @@ its cheapest test and its idempotence test.
   varies (the 9-member list on `ohim:Entity`) and `sh:path` varies only
   in its `,`/`;` terminator, which is not a triple-level difference.
 
+  **2026-08-08, fourth measurement — the paragraph immediately above is
+  corrected, and the correction is against my own instrument.** Two
+  clauses in it are line facts wearing a parse's heading. `sh:path`'s
+  *object multiset* does not vary at all — under any of the three
+  readings below — and a `,`/`;` terminator is a serialisation fact that
+  no parse can see; and *"`sh:ignoredProperties` varies"* is true only
+  under a reading that also makes three other predicates vary. Censused
+  over **8 runs** and over **every predicate in the graph — 17, not the
+  four tabulated**:
+
+  | reading of "the object multiset" | predicates that vary, of 17 |
+  |---|---|
+  | raw parse, rdflib's per-parse blank-node labels | **4** — `rdf:rest`, `sh:ignoredProperties`, `sh:in`, `sh:property` |
+  | every blank-node object collapsed to one token | **0** — `sh:ignoredProperties` included |
+  | blank nodes named by their content, recursively | **2** — `rdf:rest`, `sh:ignoredProperties` |
+
+  A per-predicate object multiset is the wrong instrument for this
+  difference, because the difference is a **list order** — a relation
+  between cells, not a property of any one predicate's objects. Under
+  the only bnode-independent reading it shows up in `rdf:rest` and in
+  the `sh:ignoredProperties` list heads, and in nothing else.
+
+  **What does not change.** The 9-member `sh:ignoredProperties` list on
+  `ohim:Entity` has **8 distinct orders over 8 runs**; the other eight
+  `sh:ignoredProperties` lists are `( rdf:type )`, one member; the one
+  remaining list in the graph — a 2-member `sh:in`, which the ADR-007
+  rule does **not** delete — is **order-stable at 8 runs**. And the
+  three-row isomorphism table reproduces exactly: 341 **no**, 323
+  **no**, 289 **yes** at 28 of 28 pairs, by `rdflib.compare.isomorphic`.
+
   So `gen-shacl` never emits a differing `sh:closed` line. The 0/2/4 is
   an artifact of the measuring instrument: a line `diff` assigns
   byte-identical lines to a moved hunk, so the grep counts **hunk
@@ -3829,16 +3859,31 @@ its cheapest test and its idempotence test.
   is the opposite of the one recorded: not that it goes green for the
   wrong reason, but that it cannot go green at all without a change to
   `gen-shacl`'s serialisation, which no post-process deletion makes.
-- **Updated:** 2026-08-07 (evidence corrected twice; status unchanged.
-  The second correction retracts a census this entry carried as
-  constants and extends the run count from six to twelve. The
-  isomorphism table also re-ran at twelve: 341 no, 323 no, 289 **yes**.)
+- **Updated:** 2026-08-08 (evidence corrected three times; status
+  unchanged throughout. The second correction retracts a census this
+  entry carried as constants and extends the run count from six to
+  twelve. The third corrects the *parsed* census that replaced it: two
+  of its clauses were line facts under a parse's heading, and the
+  per-predicate reading it used is method-dependent in a way the
+  paragraph did not say. The isomorphism table has now re-run at six,
+  twelve and eight: 341 no, 323 no, 289 **yes** every time.)
 - **Promotion note:** minted by O under FALSIFIER §6 at the ADR-007
   implement gate, 2026-08-07. Not proposed by H; the statement, the
   Falsifier and the test are O's, which §1 permits for an entry O mints
   and forbids only for a Falsifier attached to a claim H owns. Filed
   `falsified` rather than `asserted` under §6's *do not weaken a claim
-  to make it pass*, following [C27](#c27)'s precedent. It generalises
-  beyond this gate because it is a property of `build/shapes.ttl`,
-  which charter v15 §0 places in scope as generated output, and because
-  two accepted-or-proposed ADRs rest their verification on it.
+  to make it pass*, following [C27](#c27)'s precedent.
+
+  It generalises beyond this gate because it is a **cross-run** property
+  of `build/shapes.ttl`, and **charter v16 §0** is the clause that puts
+  it in scope: v15 placed the artifact in scope as generated output, and
+  determinism is not visible in any single inspection of it — only in how
+  two readings compare. Two accepted-or-proposed ADRs rest their
+  verification on it.
+
+  *Wording proposed by H at the 2026-08-08 implement gate and disposed
+  by O; the write is O's, per FALSIFIER §1. The note previously cited
+  v15. H first proposed v16 **and** v17 and withdrew the v17 half:
+  **v17 is not cited here**, because it governs how evidence may be
+  gathered rather than what may be promoted, and a Promotion note's job
+  is to record grounds. Method belongs in Evidence.*
