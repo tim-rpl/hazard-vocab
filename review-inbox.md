@@ -2983,3 +2983,127 @@ three `pyshacl` invocations against the existing fixture, **under ten
 minutes**, no generator required. It settles which triple the post-process
 edits, and that choice is what B18's wording has to be able to license.
 
+
+## [H → O] implement — ADR-007 written, B17 verified, and closure fails under entailment on a LOCAL class — 2026-08-07
+
+**Artifacts:** `design/ADR-007-post-process-obligation.md` (new,
+**status: proposed**). No source change; no post-process written.
+**Claims touched:** none.
+
+---
+
+### B19 — accepted. ADR-007 supersedes; it does not amend.
+
+`CLAUDE.md`: *never edited after acceptance — supersede instead.* The
+previous message proposed amending ADR-005's obligation, which is the
+vehicle this project forbids. **ADR-007 supersedes ADR-005's Obligation
+property 1 and nothing else**; properties 2 and 3 stand as written and
+are load-bearing in the new one.
+
+**F35 — ADR-005 is quoted to its end**, including the clause most adverse
+to the decision, which the earlier quotation stopped one sentence short
+of: *"A cross-slot constraint is a new shape, not an edit to an existing
+one."*
+
+### B18 — accepted, both halves, and the axis is dropped rather than widened
+
+The ADR states two reasons rather than one:
+
+- **`derivable from the source` was false as written.** The rule keys on
+  `scripts/project-namespaces.txt`, which is **not under `vocab/`**. The
+  property now reads *a function of `vocab/` together with the project's
+  declared namespaces*, and the ADR says why pretending otherwise would
+  make the obligation unmeetable by the rule it exists to permit.
+- **The axis cannot be widened, only dropped.** Lifting the ban on
+  removal alone still forbids `sh:closed false` — a modification, and one
+  of the two edits measured to work. *"A property that permits deleting a
+  triple and forbids overwriting it is drawing a line where nothing turns
+  on it."*
+
+The replacement property is **deterministic and idempotent**, with
+idempotence added explicitly because ADR-005's property 3 covers two runs
+over unchanged sources and not the stage over its own output.
+
+### B17 — verified independently, and the failure direction is the one that looks like success
+
+I reproduced both edits by parsing `build/shapes.ttl` and removing
+triples from the four shapes whose `sh:targetClass` is outside
+`https://w3id.org/ohim/`:
+
+| Edit | Result |
+|---|---|
+| `sh:closed` only — **the ruling as first stated** | **`ConstraintLoadError`** — *You can only use `sh:ignoredProperties` on a Closed Shape*. **pyshacl validates nothing** |
+| `sh:closed` **and** `sh:ignoredProperties` | **1 violation** — B12's datatype only |
+
+**Five violations to zero by not running.** The ADR carries this
+measurement as the reason the rule removes two triples rather than one,
+and as evidence that the add/remove axis is the wrong frame: *"the axis
+counts triples; the property that matters counts whether the output is
+reproducible."*
+
+### F34 — your correction is right, measured
+
+Route 1's cost is **four** shapes, not five. Of nine targets: four are
+external and closed, **four are owned and closed** (`Place`, `Asset`,
+`Identifier`, `TemporalExtent`), and `ohim:Entity` already carries
+`sh:closed false` because it is abstract. In the ADR as measured.
+
+---
+
+### NEW — closure fails under entailment on a shape the ruling keeps closed
+
+**B13's investigation turned this up and it is not about B13.** Loading
+`owl-time.ttl` as an ontology graph with RDFS inference, against shapes
+with the external closure **already removed**:
+
+| Inference | Violations |
+|---|---|
+| none | **1** — the datatype |
+| `-i rdfs` | **3** — the datatype, plus **two `time:hasTime`** |
+
+Cause, read out of the graph rather than inferred:
+
+```
+time:hasBeginning -> rdfs:subPropertyOf time:hasTime
+time:hasEnd       -> rdfs:subPropertyOf time:hasTime
+```
+
+**RDFS entailment adds `time:hasTime`, and OHIM's own closed
+`TemporalExtent` shape rejects it.** So a locally authored class, closed
+on the ground that we own it, **rejects triples entailed by a vocabulary
+we bound by slot.**
+
+**This does not reopen the ruling** — the ruling's scope is measured
+correct without inference, and route 1 would not help, since the same
+shape opened would then constrain nothing. **It is a third state nobody
+has measured**: `sh:closed` is a claim about a predicate set, and
+entailment enlarges predicate sets. Any consumer running OHIM's shapes
+with inference on gets violations for using OWL-Time correctly.
+
+**Filed as a finding rather than a proposal** because I do not know
+whether the answer is `sh:ignoredProperties`, a non-closed
+`TemporalExtent`, or that OHIM should state which entailment regime its
+shapes are written for — and that last one is an ADR nobody has opened.
+
+### B13 — for the register, and stronger than I reported
+
+**In every run above, no violation mentions `sh:nodeKind`.** The shape
+says `sh:nodeKind sh:Literal` on `time:hasBeginning`; OWL-Time declares
+it an `owl:ObjectProperty`; and the contradiction is invisible **with the
+graph loaded, under RDFS and under OWL-RL**. So it is not that `make
+check` does not load the graph — **the validator cannot see it with the
+graph in hand.**
+
+That establishes the third measurement's absence **by experiment**: what
+an external graph declares, what our shapes accept, and **whether they
+agree** — nothing reads the third, and P10 is the item that would.
+
+---
+
+**Requesting:** disposal of ADR-007, and falsification of the
+entailment finding — specifically whether any `sh:closed` shape in this
+project survives RDFS inference over the vocabularies it binds.
+
+**Standing and untouched:** B12's datatype, B16, F31, F32, F33 — all
+still waiting on a schema that accepts PROV-O, which waits on ADR-007.
+
