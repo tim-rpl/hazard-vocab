@@ -303,20 +303,41 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   draft of the Decision asserted it anyway.** `make gen` is not
   byte-deterministic and does not become so when the rule lands.
 
-  **Censused by PARSING, over six runs, asking whether each predicate's
-  object multiset is invariant:**
+  **Censused over LIST MEMBER ORDER, not over predicate objects, because a
+  count over blank nodes is undefined until you say how they are named.**
 
-  | predicate | distinct multisets over 6 runs | objects |
+  Which predicates even admit a label census is a property of the schema
+  and is measurable:
+
+  | predicate | object kind | comparable across parses |
   |---|---|---|
-  | `sh:closed` | **1** | 9 |
-  | **`sh:ignoredProperties`** | **6** | 9 |
-  | `sh:path` | **1** | 40 |
-  | `sh:order` | **1** | 40 |
+  | `sh:closed` | Literal | yes |
+  | `sh:path` | URIRef | yes |
+  | `sh:order` | Literal | yes |
+  | `sh:ignoredProperties` | **BNode** | **no** |
+  | `sh:property` | **BNode** | **no** |
+  | `sh:in` | **BNode** | **no** |
 
-  **Exactly one predicate varies, and it is the one this rule deletes.**
-  The graph difference is the member order of the nine-element
-  `sh:ignoredProperties` list on the `ohim:Entity` shape; the other eight
-  lists are `( rdf:type )`, one member, no order to vary.
+  **So an earlier draft's *"exactly one predicate varies"* was an artifact
+  of the reading.** It compared object multisets; rdflib relabels blank
+  nodes on every parse, so the three predicates that read as invariant are
+  the three pointing at labelled things, and the one that read as varying
+  was reporting its list head's label. Four vary or none do depending on
+  how bnodes are identified — it was never a fact about the graph.
+
+  **The census that is a fact about the graph, over eight runs:**
+
+  | list | members | distinct member orders |
+  |---|---|---|
+  | `ohim:Entity` `sh:ignoredProperties` | 9 | **8** |
+  | the other eight `sh:ignoredProperties` | 1 | 1 each |
+  | **`sh:in`** — the `AliasKind` enum, **not deleted by this rule** | 2 | **1** |
+
+  **`sh:in` is the control and it could have gone the other way.** It is a
+  blank-node list this rule leaves in place. Without it the census supports
+  *blank-node lists vary*, which is a claim about rdflib; with it the claim
+  is **one nine-member list is emitted in an arbitrary order**, which is a
+  claim about `gen-shacl` and is what this decision needs.
 
   **The byte difference is a different quantity and it survives the
   deletion.** The `sh:property` blank-node blocks are *serialised* in a
@@ -327,29 +348,18 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   fails now and keeps failing.
 
   **An earlier draft censused this by GREP and the figures were wrong in
-  both directions.** It reported `sh:closed` 0 and `sh:ignoredProperties`
-  2 as *stable* and `sh:path`/`sh:order` as varying. Over all fifteen pairs
-  of six runs:
+  both directions**, reporting `sh:closed` 0 and `sh:ignoredProperties` 2 as
+  stable. Over all fifteen pairs of six runs, `sh:closed` gives **0 or 2**
+  and `sh:ignoredProperties` gives 2. **A grep over a unified diff counts
+  lines inside changed hunks, not differing content** — a `sh:closed` line
+  identical in both runs enters the census because a neighbour moved. That
+  is a fact about grepping diffs and not about any predicate, and it will
+  recur anywhere a diff is counted rather than parsed.
 
-  | predicate | grepped counts observed |
-  |---|---|
-  | `sh:closed` | **0 or 2** — it varies |
-  | `sh:ignoredProperties` | 2 |
-  | `sh:path` | 40 … 52 |
-  | `sh:order` | 32 … 40 |
-
-  **So the stable/varying partition was false, and the quantity was
-  wrong.** A grep over a unified diff counts **lines inside changed
-  hunks**, not differing content: a `sh:closed` line is identical in both
-  runs and appears in the census only because a neighbouring line moved.
-  **`sh:closed` is invariant when parsed and appears to vary when
-  grepped**, which is the reverse of what the draft claimed.
-
-  This is a string count standing in for a parse **two bullets above the
-  Obligation that forbids exactly that** — and the figure was a count of
-  diff-hunk membership while the sentence read as a count of differences.
-  **Say what a figure counts, or a reader will assume it counts the thing
-  under discussion.**
+  Two readings were wrong before the list census was right, and the rule
+  from both is one sentence: **say what a figure counts — and if it counts
+  blank nodes, say how they are named, or the figure is reporting the
+  parser.**
 
   **And the pipeline's determinism is not this stage's to assert.** It is
   `gen-shacl`'s, it is filed at C28 as `falsified`, and a stage obligation

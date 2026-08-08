@@ -1259,3 +1259,161 @@ ADR-004's counts. **Ten minutes.** A bound derived from the thing it
 bounds is the general form of both this round's blocks: B24 measured the
 instrument, B25 measured itself.
 
+
+## [H → O] implement — B24 and B25 closed; the sweep is a precondition and it blocks P7 — 2026-08-08
+
+**Instructions version 6**, stated at the top of my first response this
+round. I was stale on four rules including the sweep precondition, and
+nothing could have detected that before the marker existed.
+
+**Artifacts:** `vocab/external/audit-bound-terms.py`,
+`design/ADR-007-post-process-obligation.md`. **Claims touched:** none
+directly; two proposals.
+
+**All mutation in this round ran on copies outside the repository**, per
+`CLAUDE.md`'s rule 1. No `git restore`, no byte-restore from memory.
+
+---
+
+### B24 — closed on a list census, with the control named
+
+**The census is over list member order, and the ADR now says why a
+predicate census could not work.** Which predicates admit a label census
+is a property of the schema and is measurable:
+
+| predicate | object kind | comparable across parses |
+|---|---|---|
+| `sh:closed`, `sh:path`, `sh:order` | Literal / URIRef | yes |
+| `sh:ignoredProperties`, `sh:property`, `sh:in` | **BNode** | **no** |
+
+**So *"exactly one predicate varies"* was an artifact of the reading.**
+The three that read as invariant are the three pointing at labelled
+things; the one that read as varying was reporting its list head's label.
+**Four vary or none do depending on how bnodes are identified** — never a
+fact about the graph.
+
+**The census that is a fact about the graph, eight runs:**
+
+| list | members | distinct member orders |
+|---|---|---|
+| `ohim:Entity` `sh:ignoredProperties` | 9 | **8** |
+| the other eight | 1 | 1 each |
+| **`sh:in`** — the `AliasKind` enum, **not deleted by this rule** | 2 | **1** |
+
+**`sh:in` is the control in the strict sense and it is in the ADR as one.**
+A blank-node list the rule leaves in place, order-stable over eight runs.
+Without it the census supports *blank-node lists vary* — a claim about
+rdflib. With it, **one nine-member list is emitted in an arbitrary
+order**, which is a claim about `gen-shacl` and is what the Decision
+needs.
+
+**Two readings were wrong before the third was right**, and the ADR
+carries the rule from both: *say what a figure counts — and if it counts
+blank nodes, say how they are named, or the figure is reporting the
+parser.*
+
+### B25 — closed, with a bound from outside the parse
+
+`expected` derived from the same `authored_bindings()` parse the rows are
+built from, so `len(rows) < expected` could hold only when a graph failed
+to load — **and F44's fix now catches that earlier.** The repair removed
+the only condition its own bail could reach.
+
+**Two conditions now, and only the first is independent:**
+
+1. **every externally-prefixed binding field in `vocab/core/**` must have
+   produced a row.** The bound is a coarse line count sharing **no regex,
+   no prefix map and no graph load** with the parse it checks.
+2. truncation over the whole population — retained, with its condition
+   recorded as largely preempted rather than left as apparent coverage.
+
+**Mutation, on a copy, using your realistic trigger** — quoting an
+authored `slot_uri`, which is valid LinkML and leaves `gen-shacl` and
+`drift-lint` green:
+
+```
+FAIL  11 externally-prefixed binding field(s) in core and only 10
+      audited — a binding was declared and produced no row.
+```
+
+**exit 1.** Previously: 29 rows, zero `owl-time` rows, exit 0.
+
+---
+
+### Three rounds, three guards that could not discriminate
+
+| | Why it could not fire |
+|---|---|
+| **B21** — conservation of `sh:targetClass` | counted shapes, not their content |
+| **B20** — the pipeline byte test | its only failure mode was deleted by the fix it verified |
+| **B25** — the truncation bail | its condition is preempted by an earlier guard |
+
+**C22's prospective test, unapplied three times running** — *ask what
+result would look different if the thing were false.* All three fail it
+immediately. **Two of the three were criteria the human proposed and I
+implemented without asking the question**, which is the part that makes it
+a pattern rather than three mistakes: the test exists, it is written down,
+and neither of us ran it on a criterion we were pleased with.
+
+---
+
+### P7 is blocked, and I stopped before being told
+
+`CLAUDE.md` rule: *a claims sweep runs before any new part is authored.*
+Part 0 has landed, so **P7 does not start until a sweep has run.** I had
+it queued behind ADR-007's disposal; it is now behind the sweep.
+
+**One reading added to the sweep's subject, from B24:** **does any claim
+in the register rest on a count over blank nodes?** `bound-terms.md`,
+`register.md` and every generated table that counts objects has the same
+exposure — **if a column counts something whose identity is per-parse, the
+column is reporting the serialiser.** C28's evidence has been corrected
+four times on adjacent grounds and this reading settles whether a fifth is
+coming.
+
+### PROPOSAL 1 — `claims.md`'s structure, measurement first
+
+**Re-measured; the figures you carried were stale in the direction you
+predicted.**
+
+| | your figure | measured now |
+|---|---|---|
+| C18 | 387 | **444** (14.0%) |
+| C21 | 350 | **350** (11.1%) |
+| C22 | "28+ rows, growing" | **319** (10.1%), third not second |
+| median entry | 48 | **78** |
+| top two | 26% | **25.1%** |
+
+27 entries, 3,162 lines in entries, **3,890 in the file**.
+**Compressing the median entry saves nothing** — it holds.
+
+**Proposed:**
+
+- **C22 becomes its own tracked file**, keeping the statement, the
+  falsifier and a pointer in `claims.md`. It is a catalogue by
+  construction — the claim is *instruments fail in these ways*, and this
+  project keeps finding instruments.
+- **A current-state line as the first evidence item** on each large entry,
+  history untouched beneath. A reader asking *does the lint work today*
+  reads 444 lines and the answer is not at the top.
+- **No pruning and no summarising into prose.** Deleting failures destroys
+  what the register is for, and a summary of twelve counterexamples is a
+  claim about twelve counterexamples made without them.
+
+**The citation risk is measured clean** — six hits, all in
+`review-inbox-archive/`, plus one self-reference. **No ADR, plan document
+or live gate message cites the register by line, so a restructure is not a
+retraction pass.**
+
+### PROPOSAL 2 — cite by claim identifier, never by line
+
+`claims.md:2922` cites `claims.md:3129` inside its own evidence. Correct
+when measured and **stale on the next append above C22**. Proposed:
+**`C22 row 18`, never a line number.** The archive keeps its line
+citations because archives are never rewritten.
+
+**Requesting:** disposal of both proposals, and falsification of the list
+census — specifically whether any list this rule does **not** delete varies
+in member order, since `sh:in` being the only control is what makes the
+claim about `gen-shacl` rather than about rdflib.
+

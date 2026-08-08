@@ -44,6 +44,26 @@ CORE = HERE.parent / "core"
 # the derivation. The population is `vocab/core/` — see authored_bindings().
 
 
+def external_binding_fields():
+    """Count binding fields in `vocab/core/**` whose value is a non-local
+    CURIE — coarsely, and deliberately not by the mapping logic above.
+
+    B25's independent source. It shares no regex, no prefix map and no
+    graph load with `authored_bindings()`, so a defect in that path shows
+    up here as a count the rows cannot reach. `['\"]?` is the whole point:
+    a quoted value is valid LinkML, is counted here, and is missed there.
+    """
+    import re
+    n = 0
+    for f in sorted(CORE.glob("*.yaml")):
+        for line in f.read_text().splitlines():
+            m = re.match(r"""\s*(slot_uri|class_uri|meaning):\s*['"]?"""
+                         r"""([A-Za-z][\w-]*):""", line)
+            if m and m.group(2) not in ("ohim", "linkml"):
+                n += 1
+    return n
+
+
 def authored_bindings():
     """Every external CURIE the AUTHORED vocabulary binds, per cache key.
 
@@ -407,9 +427,42 @@ def main():
     # LOOKUP can support, not zero. A term that is genuinely absent from a
     # cached graph still yields a row — `ABSENT` — so a short table means a
     # GRAPH is missing, which is exactly the case that must not be written.
-    # F45: this summed `LOOKUP` — 29 — against a population of 31, so a
-    # regex miss on an authored `slot_uri` dropped a row and still cleared
-    # the bail. The bound is the population the rows were built from.
+    # B25: the bound must come from OUTSIDE the parse it validates.
+    #
+    # F45 made it `sum(len(v) for v in population.values())` — derived from
+    # the same `authored_bindings()` parse the rows are built from — so
+    # `len(rows) < expected` could hold only when a graph failed to load,
+    # and F44's fix now catches that earlier as PARTIAL or DEGRADED. **The
+    # repair removed the only condition its own bail could reach.**
+    #
+    # The realistic trigger walked straight through: quoting a `slot_uri`
+    # value is valid LinkML, `gen-shacl` exits 0 and `drift-lint` is green,
+    # and the strict CURIE regex in `authored_bindings()` misses it — so
+    # the audit wrote its rows with the `owl-time` bindings absent and the
+    # count still cleared.
+    #
+    # The independent source is the authored FILES: a coarse line count of
+    # externally-prefixed binding fields, which does not share the mapping
+    # logic it is checking. A quoted value is counted here and missed
+    # there, which is exactly the shortfall.
+    # TWO conditions, and only the first is independent.
+    #
+    # 1. Every externally-prefixed binding field in `vocab/core/**` must
+    #    have produced a row. The bound comes from a coarse line count that
+    #    shares no regex, no prefix map and no graph load with the parse it
+    #    checks, so a miss in that parse shows as a shortfall here.
+    declared = external_binding_fields()
+    got = sum(len(v) for v in authored.values())
+    if got < declared:
+        print("FAIL  %d externally-prefixed binding field(s) in %s and only "
+              "%d audited — a binding was declared and produced no row. "
+              "bound-terms.md NOT %s."
+              % (declared, CORE.name, got,
+                 "checked" if args.check else "written"), file=sys.stderr)
+        return 1
+    # 2. Truncation over the whole population. Retained, and its condition
+    #    is now largely preempted by `cache_state`'s PARTIAL/DEGRADED —
+    #    stated rather than left as apparent coverage.
     expected = sum(len(v) for v in population.values())
     if len(rows) < expected:
         print("FAIL  %d row(s) of %d the lookup can support — "
