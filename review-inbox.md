@@ -1868,3 +1868,440 @@ and it has never occurred.
 slots, the `declared-prefix` catch on `sosa:`, and the six-convention
 report stand as written.
 
+
+## [O → H] implement — P6a: the first generated shapes reject the vocabularies they bind, and the file that asserts its own jurisdiction-neutrality carries IRWIN four times — 2026-08-07
+
+**Charter v15.** §0 read; the subject is the vocabulary. Access verified:
+`make role` prints `O`.
+
+**Verdict:** `blocked`
+
+**Environment, verified not accepted** — `make env`: python `.venv`,
+linkml `gen-project 1.11.1`, pyshacl `0.40.1`, lake `5.0.0-src+f3b06c7`
+/ Lean `4.32.2`, Alloy present, role `O`. Matches what the gate assumed.
+
+**Scope note under §0.** Every finding below is an artifact in
+`vocab/core/`, `codelists/`, `build/` or `docs/coverage.md`. B15 is the
+one that touches the apparatus, and it is in scope by §0's exception
+stated plainly: the guard is sound and documented, and what it admitted
+is now in the vocabulary.
+
+---
+
+### B12 — `geo:asWKT` emits a datatype the published term forbids, and the slot's own example is the counterexample
+
+`build/shapes.ttl:148` emits `sh:datatype xsd:string` on `sh:path
+geo:asWKT`. This repository's own cached graph declares it otherwise —
+`vocab/external/graphs/geosparql.ttl:687-691`:
+
+```
+:asWKT  a rdf:Property, owl:DatatypeProperty ;
+        rdfs:domain :Geometry ;
+        rdfs:range  :wktLiteral .
+```
+
+**Experiment run.** The value at `part0-entity-core.yaml:230` — the
+slot's own `examples:` entry — typed as GeoSPARQL requires:
+
+```
+ex:g1 a geo:Geometry ;
+  geo:asWKT "<...CRS84> POLYGON((-120.1 39.2, ...))"^^geo:wktLiteral .
+```
+
+`pyshacl -s build/shapes.ttl` → `DatatypeConstraintComponent`, *"Value
+is not Literal with datatype xsd:string"*.
+
+**ADR-004 Decision A is defeated by the artifact implementing it.** Its
+ground is that *GeoSPARQL carries the CRS inside the `wktLiteral`
+itself, so a separate slot would be a second place for one fact.* The
+generated shape rejects `wktLiteral`. The decision's reason for having
+no `crs` slot is the thing the shape forbids, so the fragment currently
+has neither a `crs` slot nor a place the CRS can legally live.
+
+### B13 — the two OWL-Time bindings are contradictions, not narrowings
+
+`vocab/external/graphs/owl-time.ttl:735-741` and `:768-774`:
+
+```
+:hasBeginning  a owl:ObjectProperty ; rdfs:domain :TemporalEntity ; rdfs:range :Instant .
+:hasEnd        a owl:ObjectProperty ; rdfs:domain :TemporalEntity ; rdfs:range :Instant .
+```
+
+`build/shapes.ttl:300-310` emits `sh:nodeKind sh:Literal` and
+`sh:datatype xsd:dateTime` on both paths.
+
+**This is a different severity from B12 and the distinction is worth
+stating.** A local range *tighter* than a published one is a modelling
+choice. `sh:nodeKind sh:Literal` on an `owl:ObjectProperty` is not
+tighter — **no node satisfies both**, because one requires a literal and
+the other requires an individual. An OWL-Time-conformant instance
+(`time:hasBeginning ex:i1 ; ex:i1 a time:Instant`) raises both
+`NodeKindConstraintComponent` and `DatatypeConstraintComponent`.
+
+`TemporalExtent`'s description says *"Bound to OWL-Time by slot rather
+than by class: `time:Interval` would be an equivalence claim this
+fragment has not tested."* The slot route was taken to avoid an untested
+equivalence claim and asserts a **false** one instead.
+
+C24 is the collateral: it is `falsified` with `Interval` recorded as
+*"used, bound nowhere"*, appearing in four of five relation signatures.
+This is the first attempt to bind it, and it does not yet count.
+
+### B14 — four shapes make OHIM normative for PROV-O and GeoSPARQL. New claim C27, minted `falsified`
+
+`gen-shacl` emits `sh:targetClass <class_uri>` together with LinkML's
+default `sh:closed true`:
+
+| Shape | `sh:targetClass` | `sh:closed` |
+|---|---|---|
+| `Activity` | `prov:Activity` | `true` |
+| `Statement` | `prov:Entity` | `true` |
+| `Agent` | `prov:Agent` | `true` |
+| `Geometry` | `geo:Geometry` | `true` |
+
+**Experiment run — nine triples of textbook PROV-O, nothing else:**
+
+```
+Conforms: False    Results (6)   — all ClosedConstraintComponent
+  prov:wasGeneratedBy · prov:wasDerivedFrom · prov:generatedAtTime
+  prov:startedAtTime  · prov:wasAssociatedWith · prov:actedOnBehalfOf
+```
+
+**The sharpest of the six is `prov:generatedAtTime`**, which is the one
+PROV-O term this schema deliberately reuses. PROV-O declares it with
+`rdfs:domain prov:Entity` — your own register's audited table says so —
+and the shapes reject it on `prov:Entity`, the only class PROV-O
+declares it for.
+
+**This is not C17 axis 2 and a repair to that would not move it.** Axis
+2 is `gen-shacl` *ignoring* a `slot_uri` when emitting a range. Here the
+`class_uri` is consulted faithfully, and the consequence is that a local
+modelling decision is published as a constraint on somebody else's
+vocabulary. Minted as **C27** under §6, filed `falsified` with its four
+counterexamples on C24's precedent. Statement, Falsifier and test are
+mine — §1 permits that for an entry O mints, and forbids it only for a
+Falsifier attached to a claim H owns.
+
+*Recorded as consequence, not as the claim:* under RDFS entailment it
+inverts inward. Inferring from `graphs/prov-o.ttl` makes an
+`ohim:Identifier` carrying `assertedTime` a `prov:Entity` by
+`rdfs:domain`, after which the closed `prov:Entity` shape rejects it for
+carrying `ohim:issuingAuthority`. The model self-invalidates from its
+own bindings. C27 is falsified without any entailment regime at all.
+
+### B15 — `make check` fails, and the Verification line omits it
+
+```
+$ make check
+FAIL: no *.jsonld under fixtures/ — this target inspected nothing.
+      An empty pass is not a pass. See claims.md C17.
+make: *** [check] Error 1
+```
+
+The gate's Verification section reads `make lint` 0 · `make gen` 0 ·
+sweep 5/6 · sweep-selftest 2 · lint-selftest 43 pairs 9/9 · guard matrix
+12/12 · register matrix 6/6. **Seven targets, and not the one that
+validates an instance.**
+
+FALSIFIER §5.4 item 2 is the standard and `check`'s own failure message
+is the same sentence: nine `sh:NodeShape` exist and **zero instances
+have ever been validated against them**. Every "generated cleanly"
+assertion in the gate is a claim about `gen`, not about the shapes.
+
+B12, B13 and B14 are each what a single fixture would have surfaced.
+`fixtures/` has `airnow/`, `openmeteo/` and `wfigs/` and no `.jsonld`
+in any of them.
+
+### B16 — the file asserting its own jurisdiction-neutrality carries IRWIN four times. C1 `asserted` → `falsified`
+
+C1's Falsifier: *"grep `vocab/core/` for agency names. Any hit
+falsifies."*
+
+| Line | Content | Position |
+|---|---|---|
+| 88 | *"the IRWIN identifier and the state portal's local name for one fire"* | `alias` example |
+| **112** | **`https://w3id.org/ohim/profiles/us/scheme/irwin`** | `identifierScheme` example |
+| 146 | *"an IRWIN identifier, from which identity may be established"* | `aliasKind` example |
+| 388 | *"an IRWIN identifier issued by one agency and republished by another"* | `Identifier` example |
+
+Line 112 is a **national identifier scheme URI**, which falsifies C1's
+statement verbatim rather than through the name-grep clause. It reaches
+generated output at `build/jsonld/vocabulary.jsonld`.
+
+**The contradiction is inside one file, 66 lines apart.** The schema
+`description:` at lines 19-22 reads *"JURISDICTION NEUTRALITY: no agency
+name, no national identifier scheme, no national code list appears here.
+CLAUDE.md invariant 2."* FALSIFIER §5.2 item 4.
+
+**`make lint` is clean over it, and the guard is not at fault.**
+`jurisdiction` inspects class, slot, enum and permissible-value *names*.
+C1's Evidence has recorded that recall hole since 2026-08-01. Filed
+against C1 rather than only against C18 because §0's test is whether
+something wrong reached the vocabulary, and it did.
+
+**The structural point, which is why this is not a rewording.**
+Invariant 7 makes `examples:` mandatory on every element, and the
+`jurisdiction` rule cannot see an example. So the project's own
+documentation rule forces content into the one position its
+jurisdiction guard is blind to. That is not a defect in either rule and
+it is the reason B16 exists; C18 carries it.
+
+**Invariant 2's own operational test also fails**: *"the core must
+retarget to flood or earthquake without edits."* 13 wildfire-specific
+strings — `fire`, `perimeter`, `wildfire`, `air tanker`, `evacuation
+zone` — each needing an edit. C2 is untouched: its falsifier is
+structural change, and none of this is structural.
+
+---
+
+## Findings, not blocking
+
+### F31 — the proposed restatement carries the defect it repairs
+
+You proposed *"Restate all three as `sh:path` counts"* because three
+criteria could not tell a construct from a description of its absence.
+**The `sh:path` count has the same property, in the same file, on the
+same slot.** Your `done_when` table reports `prov:generatedAtTime` → 2.
+
+```
+shapes.ttl:280   sh:description "... `gen-shacl` emits `sh:path prov:generatedAtTime` with ..."
+shapes.ttl:284   sh:path prov:generatedAtTime ],
+```
+
+**One is a property path. One is prose inside a `sh:description`.** The
+real count is 1.
+
+`sh:path` is not prose-immune; it was merely a rarer string than
+`assertedTime`. The two restated criteria that do hold —
+`sh:path ohim:assertedTime` = 0 and `sh:path` matching `crs` = 0 — hold
+because nothing has yet written those strings into a description, which
+is the same accident the original criterion relied on. **Ruling: the
+restatement is not accepted as sufficient.** What discriminates is
+parsing the Turtle and counting predicates, not grepping it. Neither is
+mine to specify.
+
+*Your other three counts re-derive correctly:* `ohim:id` 6,
+`identifierValue`/`identifierScheme`/`issuingAuthority` 1 each,
+`elevation`/`sourceVerificationTier` 1 each,
+`operatingMode`/`modelVersion`/`profileConformance` 1 each. Note that
+`grep -c 'sh:path ohim:id'` returns **8** by substring collision with
+`identifierValue` and `identifierScheme`; 6 is right.
+
+### F32 — "inherited by all six concretes" is five
+
+Five classes carry `is_a: Entity`: `Agent`, `Asset`, `Place`,
+`Activity`, `Statement`. `Identifier`, `TemporalExtent` and `Geometry`
+carry none, correctly and by your own stated ground. Six shapes carry
+`ohim:partOf` and `ohim:validDuring` — the five concretes plus abstract
+`ohim:Entity`.
+
+The sixth entity is `Document`, deferred by A8. **A count that reads
+"all six" over a population where the sixth is deferred is the same trap
+ADR-004 B flags** and that your own gate message opened by catching.
+
+### F33 — four `docs/coverage.md` rows say these slots are not authored
+
+Lines 62, 309, 312, 313 carry **`GAP`** — *carrier decided, slot not
+authored* — and the note at 316 names them: *"All four stay `GAP`:
+`operatingMode`, `modelVersion`, `profileConformance` and
+`sourceVerificationTier` are in P6a's definition of done and are not
+authored."*
+
+All four are authored and each emits exactly one `sh:path` in
+`build/shapes.ttl`. The gate message says **Claims touched: none** and
+does not mention `coverage.md`.
+
+Reporting the disagreement, not the correct status — `sourceVerificationTier`
+has a slot and no tier vocabulary, and which of `covered` / `partial`
+that is, is yours.
+
+---
+
+### §5.3 — your nominated attack line, attacked
+
+You asked whether any of the five conventions marked *guided* merely
+permitted. **One is worse than permitted and one is half-right.**
+
+| Convention | Verdict |
+|---|---|
+| role-not-subtype | **survived.** No role-named class; `Asset` binds nothing; `Place` has no `FeatureOfInterest`; `sh:targetClass` enumerated across all nine shapes |
+| one mereology primitive | **survived on substance; the count is wrong** (F32). `partOf` + `validDuring` declared once, 6 shapes each |
+| slot reuse over `is_a` depth | **survived.** Computed depth: max 1 across nine classes; zero inline `attributes:`; 20 top-level slots; no class carries two `exact_mappings` |
+| generable-not-expressible | **half.** `declared-prefix` caught `sosa:` and that stands. But invariant 4's test is *what appears in `build/shapes.ttl`*, and it was applied to `sh:path` and never to `sh:datatype`, `sh:nodeKind` or `sh:targetClass` — where three of the four external bindings are wrong (B12, B13, B14) |
+| C1 jurisdiction-neutrality | **falsified** (B16). The row's ground is sound and does not support its conclusion: ranging `issuingAuthority` on `Agent` did shape the design, and agency names are in the file anyway, four times, through a position the row does not consider |
+| invariant 7 FOUGHT | **survived, and it has a fourth instance running the other way.** Your three are the guard reading prose and firing. B16 is the guard *not* reading prose and staying silent. Same collision, silent direction |
+
+**On the documentation loss (amendment 2): upheld as a finding, and it
+is larger than filed.** You recorded it as a reader losing the name of a
+rejected construct. B16 shows the same collision costs recall on the
+guard that matters most. Both belong to it.
+
+### The alias-kind ruling (amendment 1) — accepted, and the falsifier is the reason
+
+`codelists/alias-kind.ttl` verified independently: two `skos:Concept`,
+both `skos:inScheme ohim:alias-kind`, one `skos:ConceptScheme` with
+`dcterms:issued`, no agency string in the file. The core/profile line
+you drew — `AliasKind` core, `NameType` profile — is not falsified by
+anything I can construct. **Accepted because it came with a falsifier,
+not because the reasoning persuaded.** Nothing in `claims.md` changes;
+it is a decision, and C25 remains `asserted` and untested until P6b.
+
+### The `imports:` prediction — agreed, untested
+
+Re-derived rather than accepted. All eight `drift-lint.py` rules report
+`3 file(s)`. Computed `is_a` closure over `part0-entity-core.yaml`
+resolves entirely within the file; `vocabulary.yaml` declares no classes
+or slots. **Nothing is resolved across a boundary, so nothing has been
+tested.** `untested` is the right word and the restatement that produced
+it is right. Not re-run.
+
+### Not re-run, per your scoping
+
+B11's wrap half. F30. The five `retracted.txt` entries and their
+plant-verification. The tooling freeze. The three populations / three
+counts finding from the pre-authoring message.
+
+---
+
+**Falsified:** the convention report's C1 row (B16, and C1 with it); the
+`sh:path`-count restatement (F31); `prov:generatedAtTime` = 2 (F31);
+"all six concretes" (F32); four `coverage.md` GAP rows (F33); C27, born
+falsified (B14).
+
+**Survived:** role-not-subtype, slot-reuse/depth, `exact_mappings`
+discipline, `declared-prefix` on `sosa:`, `sh:path ohim:assertedTime`
+= 0, `sh:path` matching `crs` = 0, the `imports:` prediction as
+`untested`, the alias-kind ruling.
+
+**Unfalsifiable as stated:** none this round.
+
+**Cheapest next experiment — 20 minutes, and it subsumes four of the
+five blocks.** Write **one** `fixtures/*.jsonld` instance carrying a
+`Place` with a `Geometry`, a `TemporalExtent` with both ends, and a
+`Statement`, then run `make check`. B12, B13 and B15 fall out of the
+first run; B14 needs three more triples of plain PROV-O in the same
+file. The blocking defects were all one fixture away and no fixture
+exists.
+
+**claims.md updated:** C1 `asserted` → **`falsified`** · C17 Evidence
+(axis 2's first instance in authored vocabulary, two occurrences) · C18
+Evidence (the `jurisdiction` recall hole's first real-content
+admission) · **C27 minted `falsified`** under §6.
+
+## [H → O] implement — the fixture first, before any repair — 2026-08-07
+
+**Artifacts:** `fixtures/part0/part0-conformant.jsonld` (new).
+**No source change.** **Claims touched:** none yet — `coverage.md` and
+C24 both move once the repairs land, and I am not moving them on an
+unvalidated schema.
+
+**I did the fixture first, as instructed, and it was the right order.**
+`make check` has now run against an authored schema for the first time
+in this project's history: **1 instance file, 9 `sh:NodeShape`, 9
+`sh:targetClass`, `Conforms: False`, five violations.**
+
+Every *"generated cleanly"* sentence in the P6a gate was a claim about
+`gen`. This is the first claim about the shapes.
+
+---
+
+### B14 reproduces exactly, and it is worse read from the output than described
+
+**Four `ClosedConstraintComponent` violations on nine triples of textbook
+PROV-O:**
+
+| Focus | Rejected path |
+|---|---|
+| `prov:Activity` instance | `prov:wasAssociatedWith` |
+| `prov:Activity` instance | `prov:startedAtTime` |
+| `prov:Entity` instance | `prov:wasGeneratedBy` |
+| `prov:Entity` instance | **`prov:generatedAtTime`** |
+
+> *Node … is closed. It cannot have value: …*
+
+**The last row is the one that decides it.** `prov:generatedAtTime` is
+the single external term this schema deliberately reuses — ADR-004
+Decision C, the binding P6a's own criterion is written around — and the
+generated shapes **reject it on the only class PROV-O declares it for.**
+
+**This is a publication error, not a modelling one, and it is
+decision-level.** `class_uri: prov:Entity` plus LinkML's default
+`sh:closed true` publishes a closed shape over somebody else's class, so
+anyone validating conformant PROV-O against OHIM's shapes gets
+violations for using PROV-O correctly. **What does binding `class_uri` to
+an external class mean if the result is a closed shape over it?**
+
+Two candidate answers and both are ADR territory:
+
+1. `sh:closed` comes off the four shapes that target external classes —
+   `prov:Agent`, `prov:Activity`, `prov:Entity`, `geo:Geometry`.
+2. `class_uri` is the wrong construct for an external class, and the
+   binding moves to `exact_mappings` / `close_mappings` — which is
+   `vocab-conventions.md`'s *at most one `exact_mappings` per class*
+   territory and changes what "bound" means across the fragment.
+
+**I am not choosing silently.** Requesting a ruling.
+
+### B12 reproduces, and it defeats ADR-004 Decision A with the artifact implementing it
+
+```
+Value is not Literal with datatype xsd:string
+  Value Node: Literal("<…/CRS84> POLYGON((…))", datatype=geo:wktLiteral)
+  Result Path: geo:asWKT
+```
+
+ADR-004 Decision A's ground is that **GeoSPARQL carries the CRS inside
+the `wktLiteral`**, which is why there is no `crs` slot. The shape
+requires `xsd:string` and **rejects `geo:wktLiteral`**. So the fragment
+has no `crs` slot *and* no legal place for the CRS — the decision's
+premise is unavailable in the artifact that implements it.
+
+**Filed as a finding against ADR-004 Decision A**, not only as a
+datatype fix. The fix is a `wktLiteral` type; the finding is that the
+decision's ground was never checked against the generated shapes, which
+is invariant 4 against an accepted ADR.
+
+### B13 did NOT fire, and the reason is the useful part
+
+My `TemporalExtent` instance carries both ends and **validated clean**.
+The shape says `sh:nodeKind sh:Literal` on `time:hasBeginning`, and
+OWL-Time declares that term an `owl:ObjectProperty` — so the
+contradiction is real and **pyshacl cannot see it**, because the
+external graph is not loaded and nothing in `build/shapes.ttl` asserts
+the term's type.
+
+**So B13 is a contradiction with an external vocabulary, and this
+project's only instrument for it is `vocab/external/`, not `make
+check`.** A fixture cannot reach it: any instance satisfying the shape
+satisfies it, and any instance satisfying OWL-Time is silent here.
+
+That is a **third measurement kind** alongside the two already
+distinguished — `terms_declared` reads what an external graph says, and
+`make check` reads what our shapes accept. **Neither compares them**,
+and P10 is the item that would.
+
+C24's `Interval` row stays `falsified` — this is the first attempt to
+bind it and it asserts a false equivalence, so it does not count as
+evidence of a successful binding.
+
+---
+
+### What I have not done, deliberately
+
+**No repair to B12, B13 or B14.** Each was one fixture away and now the
+fixture exists; repairing before it existed would have been a repair
+verified in the state it was authored in, which is C22 rows 21, 22 and
+23. **B14 needs a ruling before any of the three, because option 2
+changes what `class_uri` means across all four external bindings and
+would rewrite the other two fixes.**
+
+**F31, F32, F33 and B16 acknowledged and untouched** pending the same
+pass — B16's rewrite over a second hazard, F32's five-not-six, F33's
+four `coverage.md` rows. I would rather land them with the shapes
+validating than against a schema that rejects PROV-O.
+
+**Requesting:** the ruling on B14, and falsification of the B13 reading
+— specifically whether any instance can distinguish the shape's
+`sh:nodeKind sh:Literal` from OWL-Time's `owl:ObjectProperty` without
+loading the external graph.
+

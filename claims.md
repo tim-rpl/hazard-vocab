@@ -730,7 +730,7 @@ it is — is fixed independently of ADR-001 and ADR-003. Their local
 Parts 0–7 contain no agency-specific identifier, code list, or
 authority. All such content is confined to `vocab/profiles/`.
 
-- **Status:** `asserted`
+- **Status:** `falsified`
 - **Falsifier:** grep `vocab/core/` for agency names. Any hit falsifies.
 - **Cheapest test:** a CI lint rule. Write it early.
 - **Evidence:** 2026-08-01 — the cheapest test exists and does not work
@@ -790,7 +790,43 @@ authority. All such content is confined to `vocab/profiles/`.
   namespace that does not exist. Status stays `asserted`: the delivered
   file's 24 namespaces are correct, checked by hand against the sidecar
   `namespace:` fields, but nothing in the build would have said so.
-- **Updated:** 2026-08-06
+
+  **2026-08-07 — FALSIFIED on the first authored schema, by the claim's
+  own stated falsifier.** *"grep `vocab/core/` for agency names. Any hit
+  falsifies."* Four hits in `vocab/core/part0-entity-core.yaml`:
+
+  | Line | Content | Position |
+  |---|---|---|
+  | 88 | *"the IRWIN identifier and the state portal's local name for one fire"* | `alias` example |
+  | 112 | `https://w3id.org/ohim/profiles/us/scheme/irwin` | `identifierScheme` example |
+  | 146 | *"an IRWIN identifier, from which identity may be established"* | `aliasKind` example |
+  | 388 | *"an IRWIN identifier issued by one agency and republished by another"* | `Identifier` example |
+
+  Line 112 is an **agency-specific identifier scheme URI**, which is the
+  claim's statement falsified verbatim rather than by the name-grep
+  clause. It reaches generated output at
+  `build/jsonld/vocabulary.jsonld`.
+
+  **The same file asserts the opposite about itself, 66 lines above the
+  first hit** — the schema `description:` carries *"JURISDICTION
+  NEUTRALITY: no agency name, no national identifier scheme, no national
+  code list appears here. CLAUDE.md invariant 2."* Claim and artifact
+  are one file apart (FALSIFIER §5.2 item 4).
+
+  **`make lint` is clean over it, and that is the documented recall hole
+  rather than a new one.** `jurisdiction` inspects class, slot, enum and
+  permissible-value **names**; `examples:` and `description:` blocks are
+  not names. The hole recorded above on 2026-08-01 has now admitted real
+  content into `vocab/core/`, which is why this is filed against C1 and
+  not only against C18: the guard behaved as documented and the
+  vocabulary is wrong anyway.
+
+  **Invariant 2's own operational test also fails.** *"the core must
+  retarget to flood or earthquake without edits"* — 13 wildfire-specific
+  strings across the file's examples and descriptions (`fire`,
+  `perimeter`, `wildfire`, `air tanker`, `evacuation zone`), every one
+  requiring an edit to retarget.
+- **Updated:** 2026-08-07
 
 ### C2 — Parts are hazard-neutral
 A second hazard type can be added by writing a Part 1 profile and
@@ -1894,7 +1930,36 @@ does not declare.
   axes 1, 3 and 4 is not C17.
   *(H proposed 2026-08-05; O disposed and wrote it 2026-08-05. The
   wording is H's.)*
-- **Updated:** 2026-08-05
+
+  **2026-08-07 — axis 2's first instance in authored vocabulary rather
+  than on a probe schema, two occurrences, both confirmed by running
+  pyshacl 0.40.1 against `build/shapes.ttl`.** Until now axis 2 was
+  measured on scratch files built to make it fire. P6a bound four
+  external terms and two of the bindings contradict the published term,
+  checked against this repository's own cached graphs rather than
+  against documentation:
+
+  | Slot | `slot_uri` | Published declaration | Emitted shape |
+  |---|---|---|---|
+  | `asWKT` | `geo:asWKT` | `owl:DatatypeProperty`, `rdfs:range geo:wktLiteral` — `graphs/geosparql.ttl:687-691` | `sh:datatype xsd:string` — `shapes.ttl:148` |
+  | `hasBeginning` | `time:hasBeginning` | **`owl:ObjectProperty`**, `rdfs:range time:Instant` — `graphs/owl-time.ttl:735-741` | `sh:nodeKind sh:Literal`, `sh:datatype xsd:dateTime` — `shapes.ttl:306-310` |
+  | `hasEnd` | `time:hasEnd` | **`owl:ObjectProperty`**, `rdfs:range time:Instant` — `graphs/owl-time.ttl:768-774` | `sh:nodeKind sh:Literal`, `sh:datatype xsd:dateTime` — `shapes.ttl:300-304` |
+
+  **The `asWKT` case is falsified by the slot's own example.** Validating
+  the value at `part0-entity-core.yaml:230`, typed as GeoSPARQL requires,
+  raises `DatatypeConstraintComponent`: *"Value is not Literal with
+  datatype xsd:string"*. ADR-004 Decision A's stated ground — *the CRS
+  travels inside the `wktLiteral`* — is the thing the generated shape
+  forbids.
+
+  **The OWL-Time cases are a contradiction rather than a narrowing**, and
+  that is a distinction axis 2 had not yet exhibited. A local range can
+  legitimately be tighter than a published one. `sh:nodeKind sh:Literal`
+  on an `owl:ObjectProperty` is not tighter — the shape *requires*
+  exactly what the published term *forbids*, so no instance can satisfy
+  both. A `time:Instant`-valued instance raises both
+  `NodeKindConstraintComponent` and `DatatypeConstraintComponent`.
+- **Updated:** 2026-08-07
 - **Consequence:** `make check` fails toward "pass". If a source appends
   a column, validation succeeds and the drift is invisible. Wrong
   failure direction for a falsification-driven project.
@@ -2282,6 +2347,22 @@ rule, and does not fire on content that complies.
   prior `[O → H]` messages — is true of a `make lint` run and false of any
   claim about what inspected the file. Not a finding against this round's
   work; recorded so the number stops propagating.
+
+  **2026-08-07 — the `jurisdiction` recall hole has now admitted real
+  content, which is the first time any hole in this register cost the
+  vocabulary rather than a fixture.** `IRWIN` appears three times and a
+  national scheme URI once in `vocab/core/part0-entity-core.yaml`, all
+  four inside `examples:` blocks, and `make lint` exits **0**. The rule
+  inspects class, slot, enum and permissible-value **names**; an example
+  value is not a name. See C1, now `falsified`.
+
+  **The rule behaved exactly as documented and the failure is still
+  C18's.** The 2026-08-01 entry above records this hole in advance, so
+  nothing about the instrument changed. What changed is that
+  `vocab/core/` acquired the `examples:` blocks that invariant 7 makes
+  mandatory — so the position C1 content is now least likely to be
+  caught in is the position the project's own documentation rule forces
+  every element to carry.
 - **Updated:** 2026-08-07
 - **Cheapest test — superseded 2026-08-02.** *"Two throwaway files per
   rule — one violating, one compliant — run `make lint`, confirm it
@@ -3513,3 +3594,74 @@ claim that cites one carries the date it was made.
   round's instance, where `DIGEST_PEER` was offered as what keeps the
   ADMS sentence true and is green by construction while the redirect
   stands.
+### C27 — A class bound to an external URI does not make this model's shapes normative for that vocabulary
+No shape generated from `vocab/` constrains an instance that is not
+this model's to constrain. Where a class carries a `class_uri` naming
+an external term, the generated shape's target is the model's own
+population — not every node in a consumer's graph bearing that external
+type.
+
+- **Status:** `falsified`
+- **Falsifier:** a graph containing only correct, unmodified use of an
+  external vocabulary this model binds, which `pyshacl -s
+  build/shapes.ttl` reports as non-conformant. Any violation falsifies.
+- **Cheapest test:** write four triples of textbook PROV-O — an entity
+  with `prov:wasGeneratedBy`, an activity with `prov:startedAtTime`, an
+  agent with `prov:actedOnBehalfOf` — and validate. Under five minutes,
+  no fixtures required.
+- **Evidence:** 2026-08-07 — **born `falsified`, on the first schema
+  this project generated.** `gen-shacl` emits `sh:targetClass <the
+  class_uri>` together with LinkML's default `sh:closed true`, so
+  binding an external class URI silently makes the shape normative for
+  every instance of that class anywhere. Four of nine shapes in
+  `build/shapes.ttl` do this:
+
+  | Shape | `sh:targetClass` | `sh:closed` | Line |
+  |---|---|---|---|
+  | `Activity` | `prov:Activity` | `true` | 11-40 |
+  | `Statement` | `prov:Entity` | `true` | 42-98 |
+  | `Agent` | `prov:Agent` | `true` | 193-222 |
+  | `Geometry` | `geo:Geometry` | `true` | 144-154 |
+
+  A nine-triple PROV-O graph using nothing but PROV-O's own terms
+  correctly returns `Conforms: False`, **six violations**, all
+  `ClosedConstraintComponent`: `prov:wasGeneratedBy`,
+  `prov:wasDerivedFrom`, `prov:generatedAtTime`, `prov:startedAtTime`,
+  `prov:wasAssociatedWith`, `prov:actedOnBehalfOf`. pyshacl 0.40.1
+  against `build/shapes.ttl` at commit `ef00998`.
+
+  **`prov:generatedAtTime` is the sharpest of the six.** The schema
+  binds it on `Identifier.assertedTime`, and PROV-O declares it with
+  `rdfs:domain prov:Entity` (`vocab/external/register.md`, audited term
+  table). So the one PROV-O term this model deliberately reuses is
+  rejected on the one class PROV-O declares it for.
+
+  **This is not C17.** C17 axis 2 is `gen-shacl` ignoring a `slot_uri`
+  when emitting a **range**. This is the target side: the `class_uri` is
+  consulted, faithfully, and the consequence is that a local modelling
+  decision is published as a constraint on somebody else's vocabulary.
+  A repair to axis 2 would not move it.
+
+  **Scope of the measurement.** Run with no entailment regime, which is
+  what `make check` uses. Under RDFS entailment it is worse rather than
+  better: loading `graphs/prov-o.ttl` as an ontology and inferring makes
+  an `ohim:Identifier` carrying `assertedTime` a `prov:Entity` by
+  `rdfs:domain`, after which the closed `prov:Entity` shape rejects it
+  for carrying `ohim:issuingAuthority` — the model self-invalidating
+  from its own bindings. Recorded as a consequence, not as the claim:
+  the claim is falsified without any entailment regime at all.
+- **Updated:** 2026-08-07
+- **Promotion note:** minted by O under FALSIFIER §6 at the P6a
+  implement gate, 2026-08-07. Not proposed by H; the statement, the
+  Falsifier and the test are O's, which §1 permits for an entry O mints
+  and forbids only for a Falsifier attached to a claim H owns. Filed
+  `falsified` rather than `asserted` under §6's *do not weaken a claim
+  to make it pass*, following C24's precedent: it is false today, its
+  counterexamples are enumerable, and a claim born falsified with them
+  listed is the entry that justifies the repair. It generalises beyond
+  this gate because every Part that binds an external class reproduces
+  it — the four instances here are the four bindings that exist.
+- **Boundary against [C21](#c21):** C21 forbids two schema elements
+  asserting the *same* external URI. C27 is about one element asserting
+  *any* external URI and what the generated shape then claims authority
+  over. `shared-uri` passes over this file; C27 is falsified by it.
