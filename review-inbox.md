@@ -3107,3 +3107,63 @@ project survives RDFS inference over the vocabularies it binds.
 **Standing and untouched:** B12's datatype, B16, F31, F32, F33 — all
 still waiting on a schema that accepts PROV-O, which waits on ADR-007.
 
+
+### Amendment to the ADR-007 gate — the ruling was falsified and the ADR is rewritten — 2026-08-07
+
+Amended in place; un-reviewed, and **before relay**. ADR-007 is `proposed`
+and was rewritten wholesale rather than patched — it is not accepted, so
+supersession does not apply to it yet.
+
+**The authorship line is gone. `sh:closed` and `sh:ignoredProperties` are
+removed from ALL NINE shapes, one unconditional rule.**
+
+**The generalisation, verified rather than accepted:** every locally
+authored non-abstract class binds an external term, so every one has a
+predicate set an external vocabulary can enlarge —
+
+| Class | External term it binds |
+|---|---|
+| `Identifier` | `prov:generatedAtTime` |
+| `Asset` | `sosa:isHostedBy` |
+| `Place` | `geo:hasGeometry` |
+| `TemporalExtent` | `time:hasBeginning`, `time:hasEnd` |
+
+**Those are exactly the four the authorship rule would have kept closed.**
+So the four-versus-four split was never the boundary, and *closure is a
+claim about a predicate set, and entailment enlarges predicate sets* is
+what replaces it.
+
+**Measured, three states, same fixture, `owl-time.ttl` as ontology graph:**
+
+| Shapes | none | `-i rdfs` | `-i owlrl` |
+|---|---|---|---|
+| as generated | 5 | 7 | — |
+| external closure removed | 1 | **3** — extras are `time:hasTime` | — |
+| **all closure removed** | **1** | **1** | **1** |
+
+**Regime-independent**, which is the entailment question answered rather
+than deferred: no regime declaration is needed for closure, and no ADR is
+needed to make one. **18 triples removed, all 9 `sh:targetClass`
+retained.** The surviving violation is `geo:asWKT`'s datatype in every
+case — B12, unrelated to closure.
+
+**B18's first half is removed rather than reworded.** The unconditional
+rule has no namespace key, so `scripts/project-namespaces.txt` is not an
+input and the output is a function of `vocab/` alone. *"Derivable from the
+source"* is true as originally worded. **The defect went away with the
+scope**, and the ADR says so rather than carrying a repair for it.
+
+**The loss is recorded in the ADR, not absorbed.** An unexpected
+predicate on an instance is no longer a validation error — a typo'd slot
+name, a stray triple, uncaught. Why it is cheap is stated as measurement,
+not assertion: closure produced **four false violations on textbook
+PROV-O and zero true ones** across the only fixture that has ever run.
+And the remedy if it matters — a targeted `sh:closed` on a class with no
+external bindings and no profile extension point — is named together with
+the fact that **no such class exists**, with the table above as the check.
+
+**The falsifier now includes that class.** If one exists, closure would be
+sound for it and this decision forbids it.
+
+`make lint` **0**, retraction sweep clean.
+
