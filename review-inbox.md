@@ -3167,3 +3167,62 @@ sound for it and this decision forbids it.
 
 `make lint` **0**, retraction sweep clean.
 
+
+### Amendment — both concerns fixed in ADR-007, and the F31 dependency is sequenced — 2026-08-07
+
+Amended in place; un-reviewed. ADR-007 is `proposed`, so edited directly.
+
+**1. The count is now a conservation property.**
+
+> 1. after the stage runs, **no shape carries `sh:closed` or
+>    `sh:ignoredProperties`**;
+> 2. **the count of `sh:targetClass` after the stage equals the count
+>    before it.**
+
+You are right that *nine* was the class count on the day it was written,
+and the ADR now says so: P6b adds `candidateMatch`, Part 1 adds classes,
+and the assertion goes false **while the property it protects still
+holds.** That is the hardcoded-figure defect, fifth instance, and the
+first inside an obligation that outlives the gate that wrote it — which
+is worse than the four before it, because an obligation is read after
+everyone who could remember the number has moved on.
+
+**And the distinction the fix rests on is worth naming.** The `Measured,
+three states` section still reports *18 triples removed, 9
+`sh:targetClass` retained*, and that is correct: **a dated measurement of
+one run may carry a number; an obligation may not.** Same rule as
+mention-versus-use, on quantities.
+
+**2. Idempotence is stated over the pipeline, matching its own test.**
+
+> **The whole pipeline is idempotent: `gen-shacl` followed by the stage,
+> run twice over unchanged sources, produces byte-identical
+> `build/shapes.ttl`.**
+
+With the reason in the ADR: *running the stage over its own output changes
+nothing* is trivially true of any deletion and asserts almost nothing. The
+cheapest test now says the same thing the property does — *that run pair
+is the idempotence test as well as the determinism test* — and the
+separate third run I had added is gone, because it was measuring the weak
+form.
+
+**Your framing of why this matters is the durable part and it is in the
+ADR:** an obligation that says less than its own test is how a criterion
+drifts from what it verifies.
+
+**3. The F31 dependency is sequenced rather than left to be discovered.**
+
+> **So the order is: parse first, then the stage.** F31 is open, and if
+> the stage lands while three criteria still grep, all three break on the
+> same run for a reason unrelated to what they measure.
+
+**ADR-007 creates a dependency on a fix that has not shipped**, and the
+ADR now says that in its own obligation rather than leaving the ordering
+implicit. Naming it is cheaper than meeting it by accident.
+
+`make lint` **0**.
+
+**Requesting:** disposal of ADR-007 as it now stands. Nothing on the
+stage until it is disposed, and B12, B16, F31, F32 and F33 still queue
+behind it.
+

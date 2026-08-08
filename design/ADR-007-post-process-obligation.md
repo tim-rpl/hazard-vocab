@@ -86,10 +86,16 @@ Those are exactly the four the authorship rule would have kept closed.
 **Property 1 is replaced by:**
 
 > **1. Deterministic and idempotent.** The generator's output is a
-> function of `vocab/`. Two runs over unchanged sources produce
-> byte-identical `build/shapes.ttl`, and running the generator over its
-> own output changes nothing. **No step's result depends on the order in
-> which steps ran.**
+> function of `vocab/`. **The whole pipeline is idempotent: `gen-shacl`
+> followed by the stage, run twice over unchanged sources, produces
+> byte-identical `build/shapes.ttl`.** No step's result depends on the
+> order in which steps ran.
+>
+> Stated over the pipeline rather than over the stage, because *running
+> the stage over its own output changes nothing* is trivially true of any
+> deletion and asserts almost nothing. The pipeline is what the cheapest
+> test below measures, and an obligation that says less than its own test
+> is how a criterion drifts from what it verifies.
 >
 > The generator may add, remove or rewrite any triple, subject to that
 > property alone. What is forbidden is a step whose effect a second run
@@ -209,8 +215,9 @@ unchanged, and the reason properties 2 and 3 are not superseded.
 
 - **The cheapest test is ADR-005's and is not weakened:** `make gen`
   twice and `diff`; then with the post-step order reversed and `diff`
-  again. Both empty. Idempotence adds one run: the post-step over its own
-  output, `diff` empty.
+  again. Both empty. **That run pair is the idempotence test as well as
+  the determinism test** — it is `gen-shacl`-then-stage twice, which is
+  exactly what the property now asserts.
 
 - **`sh:path` counts must parse, not grep.** If the post-process
   reserialises through `rdflib`, predicate order and prefix form change,
@@ -218,11 +225,29 @@ unchanged, and the reason properties 2 and 3 are not superseded.
   F31 already rules those criteria must parse; **this decision makes that
   mandatory rather than advisable.**
 
+  **So the order is: parse first, then the stage.** F31 is open, and if
+  the stage lands while three criteria still grep, all three break on the
+  same run for a reason unrelated to what they measure. Sequenced here
+  rather than discovered — this ADR creates a dependency on a fix that has
+  not shipped, and naming it is cheaper than meeting it by accident.
+
 - **The rule is asserted against the generated file, not the generator.**
-  Invariant 4: after the stage runs, **no shape carries `sh:closed` or
-  `sh:ignoredProperties`, and all nine `sh:targetClass` remain.** Both
-  halves — the second is the direction where a rule that strips too much
-  would hide.
+  Invariant 4, and both halves, because the second is the direction where
+  a rule that strips too much would hide:
+
+  1. after the stage runs, **no shape carries `sh:closed` or
+     `sh:ignoredProperties`**;
+  2. **the count of `sh:targetClass` after the stage equals the count
+     before it.**
+
+  **The second is a conservation property and not a number, deliberately.**
+  An earlier draft asserted *all nine `sh:targetClass` remain*. Nine is
+  the class count on the day it was written: P6b adds `candidateMatch`,
+  Part 1 adds classes, and the assertion goes false while the property it
+  protects still holds — the hardcoded-figure defect this project has
+  recorded four times, here inside an obligation that outlives the gate
+  that wrote it. Conservation guards the same direction and cannot go
+  stale.
 
 ## Consequences
 
