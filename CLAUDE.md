@@ -209,6 +209,27 @@ reader.
 `drift-lint.py` inspects a real authored file for the first time. The
 rule is unchanged; its illustration was the thing that expired.*
 
+**Mutate a copy, never the working tree.** This applies to every role.
+`cp` the file or the tree to a scratch path outside the repository,
+mutate there, measure, discard. Do not edit a tracked file and restore
+it — not with `git restore`, `git checkout --`, `git checkout-index`,
+`git stash`, or by writing the original bytes back from memory.
+
+**Why, stated because both roles did it for a whole session.** An
+in-place mutate-and-restore worked every time until a scaffolding command
+overwrote an uncommitted edit in the file it was verifying. It was caught
+because a count went 7 then 6, and recoverable because the file had been
+diffed beforehand. **Both were luck, and that a practice worked every
+time is the property that makes it unsafe rather than the outcome.**
+
+`FALSIFIER.md` §1 states this for O, whose write scope makes any tree
+write a breach. It is here because the risk is the same for H and the
+scope rule is not what makes it unsafe — the overwrite is.
+
+A tracked probe that copies is not an exception to remember; it is the
+shape. Two of this project's probes already do it, and the shell
+one-liners beside them did not.
+
 **A claim about a file's contents is checkable by whoever reads it, and
 the writer's ownership of that file is not evidence for it.** Ownership
 decides who may change a file. It says nothing about what is in one.
